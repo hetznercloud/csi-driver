@@ -1,0 +1,53 @@
+kind: StatefulSet
+apiVersion: apps/v1beta1
+metadata:
+  name: csi-attacher
+spec:
+  serviceName: "csi-attacher"
+  replicas: 1
+  template:
+    metadata:
+      labels:
+        app: csi-attacher
+    spec:
+      serviceAccount: csi-attacher
+      containers:
+        - name: csi-attacher
+          image: quay.io/k8scsi/csi-attacher:v1.0.1
+          args:
+            - --csi-address=$(CSI_ADDRESS)
+            - --v=5
+          env:
+            - name: CSI_ADDRESS
+              value: /var/lib/csi/sockets/pluginproxy/csi.sock
+          imagePullPolicy: Always
+          volumeMounts:
+            - name: socket-dir
+              mountPath: /var/lib/csi/sockets/pluginproxy/
+          securityContext:
+            privileged: true
+            capabilities:
+              add: ["SYS_ADMIN"]
+            allowPrivilegeEscalation: true
+        - name: hcloud-driver
+          image: hetznercloud/hcloud-csi-driver:0.1.0
+          env:
+            - name: CSI_ENDPOINT
+              value: unix:///var/lib/csi/sockets/pluginproxy/csi.sock
+            - name: HCLOUD_TOKEN
+              valueFrom:
+                secretKeyRef:
+                  name: hcloud-csi-secret
+                  key: token
+          imagePullPolicy: Always
+          volumeMounts:
+            - name: socket-dir
+              mountPath: /var/lib/csi/sockets/pluginproxy/
+          securityContext:
+            privileged: true
+            capabilities:
+              add: ["SYS_ADMIN"]
+            allowPrivilegeEscalation: true
+      volumes:
+        - name: socket-dir
+          emptyDir: {}
