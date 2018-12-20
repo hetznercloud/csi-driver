@@ -2,6 +2,8 @@
 
 **IMPORTANT: This project is still in development and not ready production yet!**
 
+This is a CSI driver for Kubernetes 1.13 and greater.
+
 ## Getting Started
 
 1. Create service accounts, cluster roles, and bindings:
