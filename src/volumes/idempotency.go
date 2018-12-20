@@ -115,23 +115,19 @@ func (s *IdempotentService) Delete(ctx context.Context, volume *csi.Volume) erro
 }
 
 func (s *IdempotentService) Attach(ctx context.Context, volume *csi.Volume, server *csi.Server) error {
-	switch err := s.volumeService.Attach(ctx, volume, server); err {
-	case ErrAlreadyAttached:
-		// Volume is already attached. Check if it is attached to the server
-		// we are about to attach it to.
-		vol, err := s.volumeService.GetByID(ctx, volume.ID)
-		if err != nil {
-			return err
-		}
-		if vol.Server != nil && vol.Server.ID == server.ID {
-			return nil
-		}
-		return ErrAlreadyAttached
-	case nil:
+	attachErr := s.volumeService.Attach(ctx, volume, server)
+	if attachErr == nil {
 		return nil
-	default:
+	}
+
+	vol, err := s.volumeService.GetByID(ctx, volume.ID)
+	if err != nil {
 		return err
 	}
+	if vol.Server != nil && vol.Server.ID == server.ID {
+		return nil
+	}
+	return attachErr
 }
 
 func (s *IdempotentService) Detach(ctx context.Context, volume *csi.Volume, server *csi.Server) error {
