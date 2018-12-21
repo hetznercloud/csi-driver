@@ -6,68 +6,61 @@ This is a CSI driver for Kubernetes 1.13 and greater.
 
 ## Getting Started
 
-1. Create service accounts, cluster roles, and bindings:
+1. Create an API token in the [Hetzner Cloud Console](https://console.hetzner.cloud/).
 
-       kubectl create -f deploy/kubernetes/attacher-rbac.yml
-       kubectl create -f deploy/kubernetes/node-rbac.yml
-       kubectl create -f deploy/kubernetes/provisioner-rbac.yml
+2. Create a secret containing the token:
 
-2. Add your API token to `secret.yml` and create it:
+   ```
+   apiVersion: v1
+   kind: Secret
+   metadata:
+     name: hcloud-csi
+     namespace: kube-system
+   stringData:
+     token: YOURTOKEN
+   ```
 
-       kubectl create -f deploy/kubernetes/secret.yml
+3. Deploy the CSI driver and wait until everything is up and running:
 
-3. Create the attacher, provisioner, and node registrar:
+   ```
+   kubectl apply -f https://raw.githubusercontent.com/hetznercloud/csi-driver/master/deploy/kubernetes/hcloud-csi.yml
+   ```
 
-       kubectl create -f deploy/kubernetes/attacher.yml
-       kubectl create -f deploy/kubernetes/node.yml
-       kubectl create -f deploy/kubernetes/provisioner.yml
+4. To verify everything is working, create a persistent volume claim and a pod
+   which uses that volume:
 
-4. Create the storage class:
+   ```
+   apiVersion: v1
+   kind: PersistentVolumeClaim
+   metadata:
+     name: csi-pvc
+   spec:
+     accessModes:
+     - ReadWriteOnce
+     resources:
+       requests:
+         storage: 10Gi
+     storageClassName: hcloud-volumes
+   ---
+   kind: Pod
+   apiVersion: v1
+   metadata:
+     name: my-csi-app
+   spec:
+     containers:
+       - name: my-frontend
+         image: busybox
+         volumeMounts:
+         - mountPath: "/data"
+           name: my-csi-volume
+         command: [ "sleep", "1000000" ]
+     volumes:
+       - name: my-csi-volume
+         persistentVolumeClaim:
+           claimName: csi-pvc
+   ```
 
-       kubectl create -f deploy/kubernetes/storageclass.yml
-
-5. Make sure all pods are running and ready:
-
-       kubectl get pods
-
-6. To test everything is working, create a persistent volume claim:
-
-       kubectl create -f - <<EOF
-       apiVersion: v1
-       kind: PersistentVolumeClaim
-       metadata:
-         name: csi-pvc
-       spec:
-         accessModes:
-         - ReadWriteOnce
-         resources:
-           requests:
-             storage: 10Gi
-         storageClassName: hcloud-volumes
-       EOF
-
-7. Create a pod which uses that volume:
-
-       kubectl create -f - <<EOF
-       kind: Pod
-       apiVersion: v1
-       metadata:
-         name: my-csi-app
-       spec:
-         containers:
-           - name: my-frontend
-             image: busybox
-             volumeMounts:
-             - mountPath: "/data"
-               name: my-csi-volume
-             command: [ "sleep", "1000000" ]
-         volumes:
-           - name: my-csi-volume
-             persistentVolumeClaim:
-               claimName: csi-pvc
-       EOF
-
-8. Once the pod is ready, exec a shell and check your volume is mounted at `/data`.
+   Once the pod is ready, exec a shell and check that your volume is mounted at `/data`.
 
 ## License
 
