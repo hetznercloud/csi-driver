@@ -166,7 +166,7 @@ func (s *sanityVolumeService) Attach(ctx context.Context, volume *csi.Volume, se
 	return nil
 }
 
-func (s *sanityVolumeService) Detach(ctx context.Context, volume *csi.Volume, server *csi.Server) error {
+func (s *sanityVolumeService) Detach(ctx context.Context, volume *csi.Volume) error {
 	return nil
 }
 

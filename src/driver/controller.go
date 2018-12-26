@@ -76,7 +76,7 @@ func (s *ControllerService) CreateVolume(ctx context.Context, req *proto.CreateV
 		Location: s.location,
 	})
 	if err != nil {
-		level.Error(s.logger).Log(
+		_ = level.Error(s.logger).Log(
 			"msg", "failed to create volume",
 			"err", err,
 		)
@@ -87,7 +87,7 @@ func (s *ControllerService) CreateVolume(ctx context.Context, req *proto.CreateV
 		}
 		return nil, status.Error(code, fmt.Sprintf("failed to create volume: %s", err))
 	}
-	level.Info(s.logger).Log(
+	_ = level.Info(s.logger).Log(
 		"msg", "created volume",
 		"volume-id", volume.ID,
 		"volume-name", volume.Name,
@@ -169,6 +169,8 @@ func (s *ControllerService) ControllerPublishVolume(ctx context.Context, req *pr
 			code = codes.FailedPrecondition
 		case volumes.ErrAttachLimitReached:
 			code = codes.ResourceExhausted
+		case volumes.ErrLockedServer:
+			code = codes.Aborted
 		}
 		return nil, status.Error(code, fmt.Sprintf("failed to publish volume: %s", err))
 	}
@@ -191,19 +193,15 @@ func (s *ControllerService) ControllerUnpublishVolume(ctx context.Context, req *
 	}
 	volume := &csi.Volume{ID: volumeID}
 
-	serverID, err := parseNodeID(req.NodeId)
-	if err != nil {
-		return nil, status.Error(codes.NotFound, "node not found")
-	}
-	server := &csi.Server{ID: serverID}
-
-	if err := s.volumeService.Detach(ctx, volume, server); err != nil {
+	if err := s.volumeService.Detach(ctx, volume); err != nil {
 		code := codes.Internal
 		switch err {
 		case volumes.ErrVolumeNotFound:
 			code = codes.NotFound
 		case volumes.ErrServerNotFound:
 			code = codes.NotFound
+		case volumes.ErrLockedServer:
+			code = codes.Aborted
 		}
 		return nil, status.Error(code, fmt.Sprintf("failed to unpublish volume: %s", err))
 	}

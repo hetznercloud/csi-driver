@@ -556,13 +556,13 @@ func TestControllerServicePublishVolumeAttachErrors(t *testing.T) {
 func TestControllerServiceUnpublishVolume(t *testing.T) {
 	env := newControllerServiceTestEnv()
 
-	env.volumeService.DetachFunc = func(ctx context.Context, volume *csi.Volume, server *csi.Server) error {
+	env.volumeService.DetachFunc = func(ctx context.Context, volume *csi.Volume) error {
 		if volume.ID != 1 {
 			t.Errorf("unexpected volume id passed to volume service: %d", volume.ID)
 		}
-		if server.ID != 2 {
-			t.Errorf("unexpected server id passed to volume service: %d", server.ID)
-		}
+		//if server.ID != 2 {
+		//	t.Errorf("unexpected server id passed to volume service: %d", server.ID)
+		//}
 		return nil
 	}
 
@@ -579,7 +579,7 @@ func TestControllerServiceUnpublishVolume(t *testing.T) {
 func TestControllerServiceUnpublishVolumeInputErrors(t *testing.T) {
 	env := newControllerServiceTestEnv()
 
-	env.volumeService.DetachFunc = func(ctx context.Context, volume *csi.Volume, server *csi.Server) error {
+	env.volumeService.DetachFunc = func(ctx context.Context, volume *csi.Volume) error {
 		return nil
 	}
 
@@ -612,14 +612,14 @@ func TestControllerServiceUnpublishVolumeInputErrors(t *testing.T) {
 			},
 			Code: codes.NotFound,
 		},
-		{
-			Name: "invalid node id",
-			Req: &proto.ControllerUnpublishVolumeRequest{
-				VolumeId: "1",
-				NodeId:   "abc",
-			},
-			Code: codes.NotFound,
-		},
+		//{
+		//	Name: "invalid node id",
+		//	Req: &proto.ControllerUnpublishVolumeRequest{
+		//		VolumeId: "1",
+		//		NodeId:   "abc",
+		//	},
+		//	Code: codes.NotFound,
+		//},
 	}
 
 	for _, testCase := range testCases {
@@ -654,7 +654,7 @@ func TestControllerServiceUnpublishVolumeDetachErrors(t *testing.T) {
 
 	for _, testCase := range testCases {
 		t.Run(testCase.Name, func(t *testing.T) {
-			env.volumeService.DetachFunc = func(ctx context.Context, volume *csi.Volume, server *csi.Server) error {
+			env.volumeService.DetachFunc = func(ctx context.Context, volume *csi.Volume) error {
 				return testCase.DetachError
 			}
 			_, err := env.service.ControllerUnpublishVolume(env.ctx, &proto.ControllerUnpublishVolumeRequest{
