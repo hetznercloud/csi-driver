@@ -104,6 +104,7 @@ func (s *IdempotentService) GetByName(ctx context.Context, name string) (*csi.Vo
 }
 
 func (s *IdempotentService) Delete(ctx context.Context, volume *csi.Volume) error {
+	_ = s.volumeService.Detach(ctx, volume)
 	switch err := s.volumeService.Delete(ctx, volume); err {
 	case ErrVolumeNotFound:
 		return nil
@@ -115,27 +116,40 @@ func (s *IdempotentService) Delete(ctx context.Context, volume *csi.Volume) erro
 }
 
 func (s *IdempotentService) Attach(ctx context.Context, volume *csi.Volume, server *csi.Server) error {
+	vol, err := s.volumeService.GetByID(ctx, volume.ID)
+	if err != nil {
+		return err
+	}
+
+	if vol.Server != nil && vol.Server.ID != server.ID {
+		level.Info(s.logger).Log("msg", "Detaching volume",
+			"volume-id", volume.ID,
+			"server-id", server.ID,
+		)
+		err := s.volumeService.Detach(ctx, volume)
+
+		level.Info(s.logger).Log("msg", "Detaching is done",
+			"volume-id", volume.ID,
+			"server-id", server.ID,
+			"err", err,
+		)
+	}
+
 	attachErr := s.volumeService.Attach(ctx, volume, server)
 	if attachErr == nil {
 		return nil
 	}
 
-	vol, err := s.volumeService.GetByID(ctx, volume.ID)
-	if err != nil {
-		return err
-	}
 	if vol.Server != nil && vol.Server.ID == server.ID {
 		return nil
 	}
+
 	return attachErr
 }
 
-func (s *IdempotentService) Detach(ctx context.Context, volume *csi.Volume, server *csi.Server) error {
-	switch err := s.volumeService.Detach(ctx, volume, server); err {
+func (s *IdempotentService) Detach(ctx context.Context, volume *csi.Volume) error {
+	switch err := s.volumeService.Detach(ctx, volume); err {
 	case ErrNotAttached:
-		return nil
-	case ErrAlreadyAttached:
-		// Volume is attached to another server
 		return nil
 	case nil:
 		return nil

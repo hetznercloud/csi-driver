@@ -14,6 +14,7 @@ var (
 	ErrAlreadyAttached     = errors.New("volume is already attached")
 	ErrNotAttached         = errors.New("volume is not attached")
 	ErrAttachLimitReached  = errors.New("max number of attachments per server reached")
+	ErrLockedServer        = errors.New("server is locked")
 )
 
 type Service interface {
@@ -22,7 +23,7 @@ type Service interface {
 	GetByName(ctx context.Context, name string) (*csi.Volume, error)
 	Delete(ctx context.Context, volume *csi.Volume) error
 	Attach(ctx context.Context, volume *csi.Volume, server *csi.Server) error
-	Detach(ctx context.Context, volume *csi.Volume, server *csi.Server) error
+	Detach(ctx context.Context, volume *csi.Volume) error
 }
 
 // CreateOpts specifies the options for creating a volume.
