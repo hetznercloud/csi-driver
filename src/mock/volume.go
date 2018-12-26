@@ -13,7 +13,7 @@ type VolumeService struct {
 	GetByNameFunc func(ctx context.Context, name string) (*csi.Volume, error)
 	DeleteFunc    func(ctx context.Context, volume *csi.Volume) error
 	AttachFunc    func(ctx context.Context, volume *csi.Volume, server *csi.Server) error
-	DetachFunc    func(ctx context.Context, volume *csi.Volume, server *csi.Server) error
+	DetachFunc    func(ctx context.Context, volume *csi.Volume) error
 }
 
 func (s *VolumeService) Create(ctx context.Context, opts volumes.CreateOpts) (*csi.Volume, error) {
@@ -51,11 +51,11 @@ func (s *VolumeService) Attach(ctx context.Context, volume *csi.Volume, server *
 	return s.AttachFunc(ctx, volume, server)
 }
 
-func (s *VolumeService) Detach(ctx context.Context, volume *csi.Volume, server *csi.Server) error {
+func (s *VolumeService) Detach(ctx context.Context, volume *csi.Volume) error {
 	if s.DetachFunc == nil {
 		panic("not implemented")
 	}
-	return s.DetachFunc(ctx, volume, server)
+	return s.DetachFunc(ctx, volume)
 }
 
 type VolumeMountService struct {

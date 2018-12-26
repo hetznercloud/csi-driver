@@ -170,6 +170,9 @@ func TestIdempotentServiceDelete(t *testing.T) {
 		DeleteFunc: func(ctx context.Context, volume *csi.Volume) error {
 			return nil
 		},
+		DetachFunc: func(ctx context.Context, volume *csi.Volume) error {
+			return nil
+		},
 	}
 
 	service := volumes.NewIdempotentService(log.NewNopLogger(), volumeService)
@@ -184,6 +187,9 @@ func TestIdempotentServiceDeleteVolumeNotFound(t *testing.T) {
 	volumeService := &mock.VolumeService{
 		DeleteFunc: func(ctx context.Context, volume *csi.Volume) error {
 			return volumes.ErrVolumeNotFound
+		},
+		DetachFunc: func(ctx context.Context, volume *csi.Volume) error {
+			return nil
 		},
 	}
 
@@ -200,6 +206,9 @@ func TestIdempotentServiceDeleteError(t *testing.T) {
 		DeleteFunc: func(ctx context.Context, volume *csi.Volume) error {
 			return io.EOF
 		},
+		DetachFunc: func(ctx context.Context, volume *csi.Volume) error {
+			return nil
+		},
 	}
 
 	service := volumes.NewIdempotentService(log.NewNopLogger(), volumeService)
@@ -214,6 +223,9 @@ func TestIdempotentServiceAttach(t *testing.T) {
 	volumeService := &mock.VolumeService{
 		AttachFunc: func(ctx context.Context, volume *csi.Volume, server *csi.Server) error {
 			return nil
+		},
+		GetByIDFunc: func(ctx context.Context, id uint64) (volume *csi.Volume, e error) {
+			return &csi.Volume{}, nil
 		},
 	}
 
@@ -253,6 +265,9 @@ func TestIdempotentServiceAttachAlreadyAttachedDifferentServer(t *testing.T) {
 		AttachFunc: func(ctx context.Context, volume *csi.Volume, server *csi.Server) error {
 			return volumes.ErrAlreadyAttached
 		},
+		DetachFunc: func(ctx context.Context, volume *csi.Volume) error {
+			return nil
+		},
 		GetByIDFunc: func(ctx context.Context, id uint64) (*csi.Volume, error) {
 			return &csi.Volume{
 				ID: id,
@@ -273,14 +288,14 @@ func TestIdempotentServiceAttachAlreadyAttachedDifferentServer(t *testing.T) {
 
 func TestIdempotentServiceDetach(t *testing.T) {
 	volumeService := &mock.VolumeService{
-		DetachFunc: func(ctx context.Context, volume *csi.Volume, server *csi.Server) error {
+		DetachFunc: func(ctx context.Context, volume *csi.Volume) error {
 			return nil
 		},
 	}
 
 	service := volumes.NewIdempotentService(log.NewNopLogger(), volumeService)
 
-	err := service.Detach(context.Background(), &csi.Volume{}, &csi.Server{})
+	err := service.Detach(context.Background(), &csi.Volume{})
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -288,29 +303,14 @@ func TestIdempotentServiceDetach(t *testing.T) {
 
 func TestIdempotentServiceDetachNotAttached(t *testing.T) {
 	volumeService := &mock.VolumeService{
-		DetachFunc: func(ctx context.Context, volume *csi.Volume, server *csi.Server) error {
+		DetachFunc: func(ctx context.Context, volume *csi.Volume) error {
 			return volumes.ErrNotAttached
 		},
 	}
 
 	service := volumes.NewIdempotentService(log.NewNopLogger(), volumeService)
 
-	err := service.Detach(context.Background(), &csi.Volume{}, &csi.Server{})
-	if err != nil {
-		t.Fatal(err)
-	}
-}
-
-func TestIdempotentServiceDetachAttachedToDifferentServer(t *testing.T) {
-	volumeService := &mock.VolumeService{
-		DetachFunc: func(ctx context.Context, volume *csi.Volume, server *csi.Server) error {
-			return volumes.ErrAlreadyAttached
-		},
-	}
-
-	service := volumes.NewIdempotentService(log.NewNopLogger(), volumeService)
-
-	err := service.Detach(context.Background(), &csi.Volume{}, &csi.Server{})
+	err := service.Detach(context.Background(), &csi.Volume{})
 	if err != nil {
 		t.Fatal(err)
 	}

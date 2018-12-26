@@ -114,7 +114,7 @@ func (s *VolumeService) Attach(ctx context.Context, volume *csi.Volume, server *
 	return nil
 }
 
-func (s *VolumeService) Detach(ctx context.Context, volume *csi.Volume, server *csi.Server) error {
+func (s *VolumeService) Detach(ctx context.Context, volume *csi.Volume) error {
 	hcloudVolume, _, err := s.client.Volume.GetByID(ctx, int(volume.ID))
 	if err != nil {
 		return err
@@ -123,19 +123,8 @@ func (s *VolumeService) Detach(ctx context.Context, volume *csi.Volume, server *
 		return volumes.ErrVolumeNotFound
 	}
 
-	hcloudServer, _, err := s.client.Server.GetByID(ctx, int(server.ID))
-	if err != nil {
-		return err
-	}
-	if hcloudServer == nil {
-		return volumes.ErrServerNotFound
-	}
-
 	if hcloudVolume.Server == nil {
 		return volumes.ErrNotAttached
-	}
-	if hcloudVolume.Server.ID != hcloudServer.ID {
-		return volumes.ErrAlreadyAttached
 	}
 
 	action, _, err := s.client.Volume.Detach(ctx, hcloudVolume)
