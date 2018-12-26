@@ -101,7 +101,7 @@ func (s *VolumeService) Attach(ctx context.Context, volume *csi.Volume, server *
 			return volumes.ErrAttachLimitReached
 		}
 		//TODO: update once hcloud upgraded to v1.12
-		if hcloud.IsError(err, "locked"){
+		if hcloud.IsError(err, "locked") {
 			return volumes.ErrLockedServer
 		}
 		return err
@@ -130,7 +130,7 @@ func (s *VolumeService) Detach(ctx context.Context, volume *csi.Volume) error {
 	action, _, err := s.client.Volume.Detach(ctx, hcloudVolume)
 	if err != nil {
 		//TODO: update once hcloud upgraded to v1.12
-		if hcloud.IsError(err, "locked"){
+		if hcloud.IsError(err, "locked") {
 			return volumes.ErrLockedServer
 		}
 		return err
