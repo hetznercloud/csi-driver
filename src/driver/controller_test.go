@@ -560,9 +560,6 @@ func TestControllerServiceUnpublishVolume(t *testing.T) {
 		if volume.ID != 1 {
 			t.Errorf("unexpected volume id passed to volume service: %d", volume.ID)
 		}
-		//if server.ID != 2 {
-		//	t.Errorf("unexpected server id passed to volume service: %d", server.ID)
-		//}
 		return nil
 	}
 
@@ -612,14 +609,6 @@ func TestControllerServiceUnpublishVolumeInputErrors(t *testing.T) {
 			},
 			Code: codes.NotFound,
 		},
-		//{
-		//	Name: "invalid node id",
-		//	Req: &proto.ControllerUnpublishVolumeRequest{
-		//		VolumeId: "1",
-		//		NodeId:   "abc",
-		//	},
-		//	Code: codes.NotFound,
-		//},
 	}
 
 	for _, testCase := range testCases {
