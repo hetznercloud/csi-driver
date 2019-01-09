@@ -14,6 +14,7 @@ var (
 	ErrAlreadyAttached     = errors.New("volume is already attached")
 	ErrNotAttached         = errors.New("volume is not attached")
 	ErrAttachLimitReached  = errors.New("max number of attachments per server reached")
+	ErrLockedServer        = errors.New("server is locked")
 )
 
 type Service interface {
