@@ -7,7 +7,7 @@ require (
 	github.com/go-logfmt/logfmt v0.4.0 // indirect
 	github.com/go-stack/stack v1.8.0 // indirect
 	github.com/golang/protobuf v1.2.0
-	github.com/hetznercloud/hcloud-go v1.11.0
+	github.com/hetznercloud/hcloud-go v1.12.0
 	github.com/kubernetes-csi/csi-test v1.1.0
 	github.com/onsi/ginkgo v1.7.0 // indirect
 	github.com/onsi/gomega v1.4.3 // indirect
