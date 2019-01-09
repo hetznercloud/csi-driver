@@ -6,5 +6,6 @@ env:
   - GO111MODULE=on
 before_script:
   - go get golang.org/x/tools/cmd/goimports
+  - rm -f src/go.sum # workaround for https://github.com/golang/go/issues/27925
 script:
   - script/checkall.bash
