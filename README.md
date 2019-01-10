@@ -1,6 +1,6 @@
 # Container Storage Interface driver for Hetzner Cloud
 
-[![Build Status](https://travis-ci.org/hetznercloud/csi-driver.svg?branch=master)](https://travis-ci.org/hetznercloud/csi-driver)
+[![Build Status](https://travis-ci.com/hetznercloud/csi-driver.svg?branch=master)](https://travis-ci.com/hetznercloud/csi-driver)
 
 This is a [Container Storage Interface](https://github.com/container-storage-interface/spec) driver for Hetzner Cloud
 enabling you to use Volumes within Kubernetes. Please note that this driver **requires Kubernetes 1.13 or newer**.
