@@ -62,6 +62,7 @@ func main() {
 
 	hcloudClient := hcloud.NewClient(
 		hcloud.WithToken(apiToken),
+		hcloud.WithApplication("csi-driver", driver.PluginVersion),
 	)
 
 	level.Debug(logger).Log("msg", "fetching server")
