@@ -54,3 +54,20 @@ func isCapabilitySupported(cap *proto.VolumeCapability) bool {
 		return false
 	}
 }
+
+func locationFromTopologyRequirement(tr *proto.TopologyRequirement) *string {
+	if tr == nil {
+		return nil
+	}
+	for _, top := range tr.Preferred {
+		if location, ok := top.Segments[TopologySegmentLocation]; ok {
+			return &location
+		}
+	}
+	for _, top := range tr.Requisite {
+		if location, ok := top.Segments[TopologySegmentLocation]; ok {
+			return &location
+		}
+	}
+	return nil
+}

@@ -99,6 +99,61 @@ func TestControllerServiceCreateVolume(t *testing.T) {
 	}
 }
 
+func TestControllerServiceCreateVolumeWithLocation(t *testing.T) {
+	env := newControllerServiceTestEnv()
+
+	env.volumeService.CreateFunc = func(ctx context.Context, opts volumes.CreateOpts) (*csi.Volume, error) {
+		if opts.Location != "explicit" {
+			t.Errorf("unexpected location passed to volume service: %s", opts.Location)
+		}
+		return &csi.Volume{
+			ID:       1,
+			Name:     opts.Name,
+			Size:     opts.MinSize,
+			Location: opts.Location,
+		}, nil
+	}
+
+	req := &proto.CreateVolumeRequest{
+		Name: "testvol",
+		CapacityRange: &proto.CapacityRange{
+			RequiredBytes: 5*GB + 100,
+			LimitBytes:    10 * GB,
+		},
+		VolumeCapabilities: []*proto.VolumeCapability{
+			&proto.VolumeCapability{
+				AccessType: &proto.VolumeCapability_Mount{
+					Mount: &proto.VolumeCapability_MountVolume{},
+				},
+				AccessMode: &proto.VolumeCapability_AccessMode{
+					Mode: proto.VolumeCapability_AccessMode_SINGLE_NODE_WRITER,
+				},
+			},
+		},
+		AccessibilityRequirements: &proto.TopologyRequirement{
+			Preferred: []*proto.Topology{
+				&proto.Topology{
+					Segments: map[string]string{
+						TopologySegmentLocation: "explicit",
+					},
+				},
+			},
+		},
+	}
+	resp, err := env.service.CreateVolume(env.ctx, req)
+	if err != nil {
+		t.Fatal(err)
+	}
+	if len(resp.Volume.AccessibleTopology) == 1 {
+		top := resp.Volume.AccessibleTopology[0]
+		if loc := top.Segments[TopologySegmentLocation]; loc != "explicit" {
+			t.Errorf("unexpected location segment in topology: %s", loc)
+		}
+	} else {
+		t.Errorf("unexpected number of topologies: %d", len(resp.Volume.AccessibleTopology))
+	}
+}
+
 func TestControllerServiceCreateVolumeInputErrors(t *testing.T) {
 	env := newControllerServiceTestEnv()
 
@@ -179,36 +234,6 @@ func TestControllerServiceCreateVolumeInputErrors(t *testing.T) {
 				},
 			},
 			Code: codes.InvalidArgument,
-		},
-		{
-			Name: "unsatisfiable accessibilty requirement",
-			Req: &proto.CreateVolumeRequest{
-				Name: "test",
-				CapacityRange: &proto.CapacityRange{
-					RequiredBytes: 5 * GB,
-					LimitBytes:    10 * GB,
-				},
-				VolumeCapabilities: []*proto.VolumeCapability{
-					&proto.VolumeCapability{
-						AccessType: &proto.VolumeCapability_Mount{
-							Mount: &proto.VolumeCapability_MountVolume{},
-						},
-						AccessMode: &proto.VolumeCapability_AccessMode{
-							Mode: proto.VolumeCapability_AccessMode_SINGLE_NODE_WRITER,
-						},
-					},
-				},
-				AccessibilityRequirements: &proto.TopologyRequirement{
-					Requisite: []*proto.Topology{
-						&proto.Topology{
-							Segments: map[string]string{
-								"location": "does-not-exist",
-							},
-						},
-					},
-				},
-			},
-			Code: codes.ResourceExhausted,
 		},
 	}
 
