@@ -15,8 +15,6 @@ import (
 	"hetzner.cloud/csi/volumes"
 )
 
-const TopologySegmentLocation = "location"
-
 type ControllerService struct {
 	logger        log.Logger
 	volumeService volumes.Service
@@ -55,17 +53,12 @@ func (s *ControllerService) CreateVolume(ctx context.Context, req *proto.CreateV
 		}
 	}
 
-	// Check if ALL requisite topologies can be provisioned.
-	if ar := req.AccessibilityRequirements; ar != nil {
-		for _, top := range ar.Requisite {
-			location, ok := top.Segments[TopologySegmentLocation]
-			if !ok {
-				continue
-			}
-			if location != s.location {
-				return nil, status.Error(codes.ResourceExhausted, fmt.Sprintf("can only create volumes in location %s", s.location))
-			}
-		}
+	// Take the location where to create the volume from the request's
+	// accessibility requirements, falling back to the location where the
+	// controller pod has been scheduled if no requirements have been provided.
+	var location = s.location
+	if loc := locationFromTopologyRequirement(req.AccessibilityRequirements); loc != nil {
+		location = *loc
 	}
 
 	// Create the volume. The service handles idempotency as required by the CSI spec.
@@ -73,7 +66,7 @@ func (s *ControllerService) CreateVolume(ctx context.Context, req *proto.CreateV
 		Name:     req.Name,
 		MinSize:  minSize,
 		MaxSize:  maxSize,
-		Location: s.location,
+		Location: location,
 	})
 	if err != nil {
 		level.Error(s.logger).Log(

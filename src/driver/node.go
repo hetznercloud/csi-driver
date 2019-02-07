@@ -218,7 +218,7 @@ func (s *NodeService) NodeGetInfo(context.Context, *proto.NodeGetInfoRequest) (*
 		MaxVolumesPerNode: MaxVolumesPerNode,
 		AccessibleTopology: &proto.Topology{
 			Segments: map[string]string{
-				"location": location,
+				TopologySegmentLocation: location,
 			},
 		},
 	}
