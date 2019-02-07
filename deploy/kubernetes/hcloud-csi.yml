@@ -7,6 +7,7 @@ metadata:
   annotations:
     storageclass.kubernetes.io/is-default-class: "true"
 provisioner: csi.hetzner.cloud
+volumeBindingMode: WaitForFirstConsumer
 ---
 apiVersion: v1
 kind: ServiceAccount
@@ -115,6 +116,7 @@ spec:
           args:
             - --provisioner=csi.hetzner.cloud
             - --csi-address=/var/lib/csi/sockets/pluginproxy/csi.sock
+            - --feature-gates=Topology=true
             - --v=5
           volumeMounts:
             - name: socket-dir
