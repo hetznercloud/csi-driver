@@ -176,9 +176,6 @@ func (s *ControllerService) ControllerUnpublishVolume(ctx context.Context, req *
 	if req.VolumeId == "" {
 		return nil, status.Error(codes.InvalidArgument, "invalid volume id")
 	}
-	if req.NodeId == "" {
-		return nil, status.Error(codes.InvalidArgument, "invalid node id")
-	}
 
 	volumeID, err := parseVolumeID(req.VolumeId)
 	if err != nil {
@@ -186,11 +183,14 @@ func (s *ControllerService) ControllerUnpublishVolume(ctx context.Context, req *
 	}
 	volume := &csi.Volume{ID: volumeID}
 
-	serverID, err := parseNodeID(req.NodeId)
-	if err != nil {
-		return nil, status.Error(codes.NotFound, "node not found")
+	var server *csi.Server
+	if req.NodeId != "" {
+		serverID, err := parseNodeID(req.NodeId)
+		if err != nil {
+			return nil, status.Error(codes.NotFound, "node not found")
+		}
+		server = &csi.Server{ID: serverID}
 	}
-	server := &csi.Server{ID: serverID}
 
 	if err := s.volumeService.Detach(ctx, volume, server); err != nil {
 		code := codes.Internal
