@@ -311,7 +311,7 @@ func TestIdempotentServiceDetachAttachedToDifferentServer(t *testing.T) {
 	service := volumes.NewIdempotentService(log.NewNopLogger(), volumeService)
 
 	err := service.Detach(context.Background(), &csi.Volume{}, &csi.Server{})
-	if err != nil {
+	if err == nil {
 		t.Fatal(err)
 	}
 }
