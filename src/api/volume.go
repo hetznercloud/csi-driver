@@ -121,23 +121,26 @@ func (s *VolumeService) Detach(ctx context.Context, volume *csi.Volume, server *
 	if hcloudVolume == nil {
 		return volumes.ErrVolumeNotFound
 	}
-
-	hcloudServer, _, err := s.client.Server.GetByID(ctx, int(server.ID))
-	if err != nil {
-		if hcloud.IsError(err, hcloud.ErrorCodeLocked) {
-			return volumes.ErrLockedServer
-		}
-		return err
-	}
-	if hcloudServer == nil {
-		return volumes.ErrServerNotFound
-	}
-
 	if hcloudVolume.Server == nil {
 		return volumes.ErrNotAttached
 	}
-	if hcloudVolume.Server.ID != hcloudServer.ID {
-		return volumes.ErrAlreadyAttached
+
+	// If a server is provided, only detach if the volume is actually attached
+	// to that server.
+	if server != nil {
+		hcloudServer, _, err := s.client.Server.GetByID(ctx, int(server.ID))
+		if err != nil {
+			if hcloud.IsError(err, hcloud.ErrorCodeLocked) {
+				return volumes.ErrLockedServer
+			}
+			return err
+		}
+		if hcloudServer == nil {
+			return volumes.ErrServerNotFound
+		}
+		if hcloudVolume.Server.ID != hcloudServer.ID {
+			return volumes.ErrAlreadyAttached
+		}
 	}
 
 	action, _, err := s.client.Volume.Detach(ctx, hcloudVolume)

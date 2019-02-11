@@ -606,6 +606,26 @@ func TestControllerServiceUnpublishVolume(t *testing.T) {
 	}
 }
 
+func TestControllerServiceUnpublishVolumeNoNode(t *testing.T) {
+	env := newControllerServiceTestEnv()
+
+	env.volumeService.DetachFunc = func(ctx context.Context, volume *csi.Volume, server *csi.Server) error {
+		if server != nil {
+			t.Errorf("unexpected server id passed to volume service: %d", server.ID)
+		}
+		return nil
+	}
+
+	req := &proto.ControllerUnpublishVolumeRequest{
+		VolumeId: "1",
+		NodeId:   "",
+	}
+	_, err := env.service.ControllerUnpublishVolume(env.ctx, req)
+	if err != nil {
+		t.Fatal(err)
+	}
+}
+
 func TestControllerServiceUnpublishVolumeInputErrors(t *testing.T) {
 	env := newControllerServiceTestEnv()
 
@@ -623,14 +643,6 @@ func TestControllerServiceUnpublishVolumeInputErrors(t *testing.T) {
 			Req: &proto.ControllerUnpublishVolumeRequest{
 				VolumeId: "",
 				NodeId:   "2",
-			},
-			Code: codes.InvalidArgument,
-		},
-		{
-			Name: "empty node id",
-			Req: &proto.ControllerUnpublishVolumeRequest{
-				VolumeId: "1",
-				NodeId:   "",
 			},
 			Code: codes.InvalidArgument,
 		},
