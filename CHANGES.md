@@ -2,7 +2,7 @@
 
 ## master
 
-* Fix error handling for detaching volumes in case server is locked
+* Fix error handling for attaching/detaching volumes in case server is locked
 
 ## v1.1.1
 
