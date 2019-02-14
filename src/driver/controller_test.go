@@ -555,11 +555,6 @@ func TestControllerServicePublishVolumeAttachErrors(t *testing.T) {
 			AttachError: volumes.ErrAttachLimitReached,
 			Code:        codes.ResourceExhausted,
 		},
-		{
-			Name:        "aborted",
-			AttachError: volumes.ErrLockedServer,
-			Code:        codes.Aborted,
-		},
 	}
 
 	for _, testCase := range testCases {
@@ -691,11 +686,6 @@ func TestControllerServiceUnpublishVolumeDetachErrors(t *testing.T) {
 			Name:        "server not found",
 			DetachError: volumes.ErrServerNotFound,
 			Code:        codes.NotFound,
-		},
-		{
-			Name:        "aborted",
-			DetachError: volumes.ErrLockedServer,
-			Code:        codes.Aborted,
 		},
 	}
 

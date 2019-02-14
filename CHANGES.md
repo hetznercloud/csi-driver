@@ -1,5 +1,9 @@
 # Changes
 
+## master
+
+* Fix error handling for detaching volumes in case server is locked
+
 ## v1.1.1
 
 * Improve logging
