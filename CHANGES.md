@@ -1,6 +1,6 @@
 # Changes
 
-## master
+## v1.1.2
 
 * Fix error handling for attaching/detaching volumes in case server is locked
 
