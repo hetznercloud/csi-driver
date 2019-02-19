@@ -110,9 +110,10 @@ func (s *ControllerService) DeleteVolume(ctx context.Context, req *proto.DeleteV
 	if volumeID, err := parseVolumeID(req.VolumeId); err == nil {
 		volume := &csi.Volume{ID: volumeID}
 		if err := s.volumeService.Delete(ctx, volume); err != nil {
-			if err != volumes.ErrVolumeNotFound {
-				return nil, status.Error(codes.Internal, err.Error())
+			if err == volumes.ErrAttached {
+				return nil, status.Error(codes.FailedPrecondition, err.Error())
 			}
+			return nil, status.Error(codes.Internal, err.Error())
 		}
 	}
 
@@ -158,7 +159,7 @@ func (s *ControllerService) ControllerPublishVolume(ctx context.Context, req *pr
 			code = codes.NotFound
 		case volumes.ErrServerNotFound:
 			code = codes.NotFound
-		case volumes.ErrAlreadyAttached:
+		case volumes.ErrAttached:
 			code = codes.FailedPrecondition
 		case volumes.ErrAttachLimitReached:
 			code = codes.ResourceExhausted

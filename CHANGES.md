@@ -1,5 +1,10 @@
 # Changes
 
+## master
+
+* Return proper error code when deleting a volume which is still
+  attached to a server
+
 ## v1.1.2
 
 * Fix error handling for attaching/detaching volumes in case server is locked

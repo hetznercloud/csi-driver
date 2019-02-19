@@ -228,7 +228,7 @@ func TestIdempotentServiceAttach(t *testing.T) {
 func TestIdempotentServiceAttachAlreadyAttachedSameServer(t *testing.T) {
 	volumeService := &mock.VolumeService{
 		AttachFunc: func(ctx context.Context, volume *csi.Volume, server *csi.Server) error {
-			return volumes.ErrAlreadyAttached
+			return volumes.ErrAttached
 		},
 		GetByIDFunc: func(ctx context.Context, id uint64) (*csi.Volume, error) {
 			return &csi.Volume{
@@ -251,7 +251,7 @@ func TestIdempotentServiceAttachAlreadyAttachedSameServer(t *testing.T) {
 func TestIdempotentServiceAttachAlreadyAttachedDifferentServer(t *testing.T) {
 	volumeService := &mock.VolumeService{
 		AttachFunc: func(ctx context.Context, volume *csi.Volume, server *csi.Server) error {
-			return volumes.ErrAlreadyAttached
+			return volumes.ErrAttached
 		},
 		GetByIDFunc: func(ctx context.Context, id uint64) (*csi.Volume, error) {
 			return &csi.Volume{
@@ -266,7 +266,7 @@ func TestIdempotentServiceAttachAlreadyAttachedDifferentServer(t *testing.T) {
 	service := volumes.NewIdempotentService(log.NewNopLogger(), volumeService)
 
 	err := service.Attach(context.Background(), &csi.Volume{}, &csi.Server{ID: 1})
-	if err != volumes.ErrAlreadyAttached {
+	if err != volumes.ErrAttached {
 		t.Fatal(err)
 	}
 }
@@ -304,7 +304,7 @@ func TestIdempotentServiceDetachNotAttached(t *testing.T) {
 func TestIdempotentServiceDetachAttachedToDifferentServer(t *testing.T) {
 	volumeService := &mock.VolumeService{
 		DetachFunc: func(ctx context.Context, volume *csi.Volume, server *csi.Server) error {
-			return volumes.ErrAlreadyAttached
+			return volumes.ErrAttached
 		},
 	}
 
