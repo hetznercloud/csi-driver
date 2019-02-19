@@ -11,7 +11,7 @@ var (
 	ErrVolumeNotFound      = errors.New("volume not found")
 	ErrVolumeAlreadyExists = errors.New("volume does already exist")
 	ErrServerNotFound      = errors.New("server not found")
-	ErrAlreadyAttached     = errors.New("volume is already attached")
+	ErrAttached            = errors.New("volume is attached")
 	ErrNotAttached         = errors.New("volume is not attached")
 	ErrAttachLimitReached  = errors.New("max number of attachments per server reached")
 )

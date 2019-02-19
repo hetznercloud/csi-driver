@@ -134,7 +134,7 @@ func (s *IdempotentService) Detach(ctx context.Context, volume *csi.Volume, serv
 	switch err := s.volumeService.Detach(ctx, volume, server); err {
 	case ErrNotAttached:
 		return nil
-	case ErrAlreadyAttached:
+	case ErrAttached:
 		// Volume is attached to another server
 		return nil
 	case nil:

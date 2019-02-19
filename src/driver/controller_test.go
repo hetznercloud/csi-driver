@@ -343,18 +343,18 @@ func TestControllerServiceDeleteVolumeInputErrors(t *testing.T) {
 	}
 }
 
-func TestControllerServiceDeleteVolumeNotFound(t *testing.T) {
+func TestControllerServiceDeleteVolumeAttached(t *testing.T) {
 	env := newControllerServiceTestEnv()
 
 	env.volumeService.DeleteFunc = func(ctx context.Context, volume *csi.Volume) error {
-		return volumes.ErrVolumeNotFound
+		return volumes.ErrAttached
 	}
 
 	_, err := env.service.DeleteVolume(env.ctx, &proto.DeleteVolumeRequest{
 		VolumeId: "1",
 	})
-	if err != nil {
-		t.Fatal(err)
+	if grpc.Code(err) != codes.FailedPrecondition {
+		t.Fatalf("unexpected error: %v", err)
 	}
 }
 
@@ -547,7 +547,7 @@ func TestControllerServicePublishVolumeAttachErrors(t *testing.T) {
 		},
 		{
 			Name:        "already attached",
-			AttachError: volumes.ErrAlreadyAttached,
+			AttachError: volumes.ErrAttached,
 			Code:        codes.FailedPrecondition,
 		},
 		{

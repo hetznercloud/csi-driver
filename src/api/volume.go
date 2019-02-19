@@ -108,9 +108,32 @@ func (s *VolumeService) Delete(ctx context.Context, volume *csi.Volume) error {
 		"volume-id", volume.ID,
 	)
 
-	hcloudVolume := &hcloud.Volume{ID: int(volume.ID)}
-	_, err := s.client.Volume.Delete(ctx, hcloudVolume)
+	hcloudVolume, _, err := s.client.Volume.GetByID(ctx, int(volume.ID))
 	if err != nil {
+		level.Info(s.logger).Log(
+			"msg", "failed to get volume",
+			"volume-id", volume.ID,
+			"err", err,
+		)
+		return err
+	}
+	if hcloudVolume == nil {
+		level.Info(s.logger).Log(
+			"msg", "volume to delete not found",
+			"volume-id", volume.ID,
+		)
+		return volumes.ErrVolumeNotFound
+	}
+	if hcloudVolume.Server != nil {
+		level.Info(s.logger).Log(
+			"msg", "volume is attached to a server",
+			"volume-id", volume.ID,
+			"server-id", hcloudVolume.Server.ID,
+		)
+		return volumes.ErrAttached
+	}
+
+	if _, err := s.client.Volume.Delete(ctx, hcloudVolume); err != nil {
 		level.Info(s.logger).Log(
 			"msg", "failed to delete volume",
 			"volume-id", volume.ID,
@@ -121,6 +144,7 @@ func (s *VolumeService) Delete(ctx context.Context, volume *csi.Volume) error {
 		}
 		return err
 	}
+
 	return nil
 }
 
@@ -242,7 +266,7 @@ func (s *VolumeService) Detach(ctx context.Context, volume *csi.Volume, server *
 			"detach-from-server-id", server.ID,
 			"attached-to-server-id", hcloudVolume.Server.ID,
 		)
-		return volumes.ErrAlreadyAttached
+		return volumes.ErrAttached
 	}
 
 	action, _, err := s.client.Volume.Detach(ctx, hcloudVolume)
