@@ -195,11 +195,18 @@ func (s *VolumeService) Attach(ctx context.Context, volume *csi.Volume, server *
 }
 
 func (s *VolumeService) Detach(ctx context.Context, volume *csi.Volume, server *csi.Server) error {
-	level.Info(s.logger).Log(
-		"msg", "detaching volume",
-		"volume-id", volume.ID,
-		"server-id", server.ID,
-	)
+	if server != nil {
+		level.Info(s.logger).Log(
+			"msg", "detaching volume from server",
+			"volume-id", volume.ID,
+			"server-id", server.ID,
+		)
+	} else {
+		level.Info(s.logger).Log(
+			"msg", "detaching volume from any server",
+			"volume-id", volume.ID,
+		)
+	}
 
 	hcloudVolume, _, err := s.client.Volume.GetByID(ctx, int(volume.ID))
 	if err != nil {
@@ -228,35 +235,14 @@ func (s *VolumeService) Detach(ctx context.Context, volume *csi.Volume, server *
 
 	// If a server is provided, only detach if the volume is actually attached
 	// to that server.
-	if server != nil {
-		hcloudServer, _, err := s.client.Server.GetByID(ctx, int(server.ID))
-		if err != nil {
-			level.Info(s.logger).Log(
-				"msg", "failed to get server to detach volume from",
-				"volume-id", volume.ID,
-				"server-id", server.ID,
-				"err", err,
-			)
-			return err
-		}
-		if hcloudServer == nil {
-			level.Info(s.logger).Log(
-				"msg", "server to detach volume from not found",
-				"volume-id", volume.ID,
-				"server-id", server.ID,
-				"err", err,
-			)
-			return volumes.ErrServerNotFound
-		}
-		if hcloudVolume.Server.ID != hcloudServer.ID {
-			level.Info(s.logger).Log(
-				"msg", "volume not attached to provided server",
-				"volume-id", volume.ID,
-				"server-id", server.ID,
-				"attached-to-server-id", hcloudVolume.Server.ID,
-			)
-			return volumes.ErrAlreadyAttached
-		}
+	if server != nil && hcloudVolume.Server.ID != int(server.ID) {
+		level.Info(s.logger).Log(
+			"msg", "volume not attached to provided server",
+			"volume-id", volume.ID,
+			"detach-from-server-id", server.ID,
+			"attached-to-server-id", hcloudVolume.Server.ID,
+		)
+		return volumes.ErrAlreadyAttached
 	}
 
 	action, _, err := s.client.Volume.Detach(ctx, hcloudVolume)
