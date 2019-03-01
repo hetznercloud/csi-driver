@@ -104,6 +104,13 @@ func (s *IdempotentService) GetByName(ctx context.Context, name string) (*csi.Vo
 }
 
 func (s *IdempotentService) Delete(ctx context.Context, volume *csi.Volume) error {
+	switch err := s.volumeService.Detach(ctx, volume, nil); err {
+	case ErrVolumeNotFound, ErrNotAttached, nil:
+		break
+	default:
+		return err
+	}
+
 	switch err := s.volumeService.Delete(ctx, volume); err {
 	case ErrVolumeNotFound:
 		return nil
