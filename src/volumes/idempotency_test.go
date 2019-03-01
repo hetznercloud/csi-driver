@@ -166,17 +166,67 @@ func TestIdempotentServiceCreateExistingNotFitting(t *testing.T) {
 }
 
 func TestIdempotentServiceDelete(t *testing.T) {
-	volumeService := &mock.VolumeService{
-		DeleteFunc: func(ctx context.Context, volume *csi.Volume) error {
-			return nil
+	volumeService := &mock.VolumeService{}
+	service := volumes.NewIdempotentService(log.NewNopLogger(), volumeService)
+
+	testCases := []struct {
+		Name       string
+		DetachErr  error
+		DeleteErr  error
+		ServiceErr error
+	}{
+		{
+			Name:       "no errors",
+			DetachErr:  nil,
+			DeleteErr:  nil,
+			ServiceErr: nil,
+		},
+		{
+			Name:       "server not found while detaching",
+			DetachErr:  volumes.ErrVolumeNotFound,
+			DeleteErr:  nil,
+			ServiceErr: nil,
+		},
+		{
+			Name:       "volume not attached",
+			DetachErr:  volumes.ErrNotAttached,
+			DeleteErr:  nil,
+			ServiceErr: nil,
+		},
+		{
+			Name:       "error while detaching",
+			DetachErr:  io.EOF,
+			DeleteErr:  nil,
+			ServiceErr: io.EOF,
+		},
+		{
+			Name:       "server not found while deleting",
+			DetachErr:  nil,
+			DeleteErr:  volumes.ErrVolumeNotFound,
+			ServiceErr: nil,
+		},
+		{
+			Name:       "error while deleting",
+			DetachErr:  nil,
+			DeleteErr:  io.EOF,
+			ServiceErr: io.EOF,
 		},
 	}
 
-	service := volumes.NewIdempotentService(log.NewNopLogger(), volumeService)
+	for _, testCase := range testCases {
+		t.Run(testCase.Name, func(t *testing.T) {
+			volumeService.DeleteFunc = func(ctx context.Context, volume *csi.Volume) error {
+				return testCase.DeleteErr
+			}
+			volumeService.DetachFunc = func(ctx context.Context, volume *csi.Volume, server *csi.Server) error {
+				return testCase.DetachErr
+			}
 
-	err := service.Delete(context.Background(), &csi.Volume{})
-	if err != nil {
-		t.Fatal(err)
+			err := service.Delete(context.Background(), &csi.Volume{})
+			if err != testCase.ServiceErr {
+				t.Fatalf("unexpected error: %v", err)
+			}
+		})
 	}
 }
 
@@ -184,6 +234,9 @@ func TestIdempotentServiceDeleteVolumeNotFound(t *testing.T) {
 	volumeService := &mock.VolumeService{
 		DeleteFunc: func(ctx context.Context, volume *csi.Volume) error {
 			return volumes.ErrVolumeNotFound
+		},
+		DetachFunc: func(ctx context.Context, volume *csi.Volume, server *csi.Server) error {
+			return nil
 		},
 	}
 
@@ -199,6 +252,9 @@ func TestIdempotentServiceDeleteError(t *testing.T) {
 	volumeService := &mock.VolumeService{
 		DeleteFunc: func(ctx context.Context, volume *csi.Volume) error {
 			return io.EOF
+		},
+		DetachFunc: func(ctx context.Context, volume *csi.Volume, server *csi.Server) error {
+			return nil
 		},
 	}
 
