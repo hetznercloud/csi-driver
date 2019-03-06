@@ -136,7 +136,7 @@ spec:
             - name: socket-dir
               mountPath: /var/lib/csi/sockets/pluginproxy/
         - name: hcloud-csi-driver
-          image: hetznercloud/hcloud-csi-driver:1.1.2
+          image: hetznercloud/hcloud-csi-driver:1.1.3
           imagePullPolicy: Always
           env:
             - name: CSI_ENDPOINT
@@ -197,7 +197,7 @@ spec:
           securityContext:
             privileged: true
         - name: hcloud-csi-driver
-          image: hetznercloud/hcloud-csi-driver:1.1.2
+          image: hetznercloud/hcloud-csi-driver:1.1.3
           imagePullPolicy: Always
           env:
             - name: CSI_ENDPOINT

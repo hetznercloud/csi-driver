@@ -1,9 +1,8 @@
 # Changes
 
-## master
+## v1.1.3
 
-* Return proper error code when deleting a volume which is still
-  attached to a server
+* Detach volumes before deleting them
 
 ## v1.1.2
 
