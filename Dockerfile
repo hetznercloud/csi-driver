@@ -1,8 +1,8 @@
-FROM golang:1.11 as builder
-WORKDIR /csi
-ADD . /csi
+FROM golang:1.12 as builder
 WORKDIR /csi/src
-RUN rm go.sum # workaround for https://github.com/golang/go/issues/27925
+ADD src/go.mod src/go.sum /csi/src/
+RUN go mod download
+ADD src /csi/src/
 RUN CGO_ENABLED=0 go build -o driver.bin hetzner.cloud/csi/cmd/driver
 
 FROM alpine:3.7
