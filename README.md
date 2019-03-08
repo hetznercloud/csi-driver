@@ -13,24 +13,8 @@ enabling you to use Volumes within Kubernetes. Please note that this driver **re
    --feature-gates=CSINodeInfo=true,CSIDriverRegistry=true
    ```
 
-   Also make sure that privileged pods are allowed in your cluster (kubelet and kube-apiserver):
-
-   ```
-   --allow-privileged=true
-   ```
-
-   See [Enabling features](https://kubernetes-csi.github.io/docs/Setup.html#enabling-features) and
-   [Enable privileged Pods](https://kubernetes-csi.github.io/docs/Setup.html#enable-privileged-pods)
-   in the Kubernetes CSI documentation.
-
-2. Create the `CSINodeInfo` resource:
-
-   ```
-   kubectl create -f https://raw.githubusercontent.com/kubernetes/csi-api/master/pkg/crd/manifests/csinodeinfo.yaml
-   ```
-
-   See [Enabling CSINodeInfo](https://kubernetes-csi.github.io/docs/Setup.html#enabling-csinodeinfo)
-   in the Kubernetes CSI documentation.
+2. Create the custom resources `CSINodeInfo` and `CSIDriver` as described in the
+   [CSI CRDs section in the Kubernetes CSI documentation](https://kubernetes-csi.github.io/docs/csi-crds.html).
 
 3. Create an API token in the [Hetzner Cloud Console](https://console.hetzner.cloud/).
 
