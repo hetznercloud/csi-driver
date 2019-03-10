@@ -14,7 +14,12 @@ enabling you to use Volumes within Kubernetes. Please note that this driver **re
    ```
 
 2. Create the custom resources `CSINodeInfo` and `CSIDriver` as described in the
-   [CSI CRDs section in the Kubernetes CSI documentation](https://kubernetes-csi.github.io/docs/csi-crds.html).
+   [CSI CRDs section in the Kubernetes CSI documentation](https://kubernetes-csi.github.io/docs/csi-crds.html) with commands:
+
+   ```
+	kubectl apply -f https://raw.githubusercontent.com/kubernetes/csi-api/release-1.13/pkg/crd/manifests/csidriver.yaml
+	kubectl apply -f https://raw.githubusercontent.com/kubernetes/csi-api/release-1.13/pkg/crd/manifests/csinodeinfo.yaml
+   ```
 
 3. Create an API token in the [Hetzner Cloud Console](https://console.hetzner.cloud/).
 
