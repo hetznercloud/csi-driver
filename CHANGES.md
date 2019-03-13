@@ -1,5 +1,9 @@
 # Changes
 
+## master
+
+* Respect minimum volume size of 10 GB
+
 ## v1.1.3
 
 * Detach volumes before deleting them
