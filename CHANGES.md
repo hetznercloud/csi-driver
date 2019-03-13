@@ -1,6 +1,6 @@
 # Changes
 
-## master
+## v1.1.4
 
 * Respect minimum volume size of 10 GB
 
