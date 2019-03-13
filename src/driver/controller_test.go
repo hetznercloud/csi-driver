@@ -45,10 +45,10 @@ func TestControllerServiceCreateVolume(t *testing.T) {
 		if opts.Name != "testvol" {
 			t.Errorf("unexpected name passed to volume service: %s", opts.Name)
 		}
-		if opts.MinSize != 6 {
+		if opts.MinSize != MinVolumeSize+1 {
 			t.Errorf("unexpected min size passed to volume service: %d", opts.MinSize)
 		}
-		if opts.MaxSize != 10 {
+		if opts.MaxSize != 2*MinVolumeSize {
 			t.Errorf("unexpected max size passed to volume service: %d", opts.MaxSize)
 		}
 		if opts.Location != "testloc" {
@@ -65,8 +65,8 @@ func TestControllerServiceCreateVolume(t *testing.T) {
 	req := &proto.CreateVolumeRequest{
 		Name: "testvol",
 		CapacityRange: &proto.CapacityRange{
-			RequiredBytes: 5*GB + 100,
-			LimitBytes:    10 * GB,
+			RequiredBytes: MinVolumeSize*GB + 100,
+			LimitBytes:    2 * MinVolumeSize * GB,
 		},
 		VolumeCapabilities: []*proto.VolumeCapability{
 			&proto.VolumeCapability{
@@ -86,7 +86,7 @@ func TestControllerServiceCreateVolume(t *testing.T) {
 	if resp.Volume.VolumeId != "1" {
 		t.Errorf("unexpected value for VolumeId: %s", resp.Volume.VolumeId)
 	}
-	if resp.Volume.CapacityBytes != 6*1024*1024*1024 {
+	if resp.Volume.CapacityBytes != (MinVolumeSize+1)*1024*1024*1024 {
 		t.Errorf("unexpected value for CapacityBytes: %d", resp.Volume.CapacityBytes)
 	}
 	if len(resp.Volume.AccessibleTopology) == 1 {

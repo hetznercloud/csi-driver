@@ -5,7 +5,8 @@ const (
 	PluginVersion = "1.1.3"
 
 	MaxVolumesPerNode = 16
-	DefaultVolumeSize = 10 // GB
+	MinVolumeSize     = 10 // GB
+	DefaultVolumeSize = MinVolumeSize
 
 	TopologySegmentLocation = PluginName + "/location"
 )

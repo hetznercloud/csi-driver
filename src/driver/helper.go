@@ -24,6 +24,9 @@ func volumeSizeFromRequest(req *proto.CreateVolumeRequest) (int, int, bool) {
 		return 0, 0, false
 	default:
 		minSize = int(math.Ceil(float64(cr.RequiredBytes) / 1024 / 1024 / 1024))
+		if minSize < MinVolumeSize {
+			minSize = MinVolumeSize
+		}
 	}
 
 	var maxSize int
@@ -36,7 +39,7 @@ func volumeSizeFromRequest(req *proto.CreateVolumeRequest) (int, int, bool) {
 		maxSize = int(math.Floor(float64(cr.LimitBytes) / 1024 / 1024 / 1024))
 	}
 
-	if minSize != 0 && maxSize != 0 && minSize > maxSize {
+	if maxSize != 0 && minSize > maxSize {
 		return 0, 0, false
 	}
 
