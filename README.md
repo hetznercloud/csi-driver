@@ -7,12 +7,14 @@ enabling you to use Volumes within Kubernetes. Please note that this driver **re
 
 ## Getting Started
 
-1. Make sure that the following [feature gates](https://kubernetes.io/docs/reference/command-line-tools-reference/feature-gates/) are enabled in your cluster (kubelet and kube-apiserver):
+1. Make sure that the following [feature gates](https://kubernetes.io/docs/reference/command-line-tools-reference/feature-gates/)
+   are enabled in your cluster (kubelet and kube-apiserver):
 
    ```
    --feature-gates=CSINodeInfo=true,CSIDriverRegistry=true
    ```
-   The above is the default for kubernetes 1.14 or later.
+
+   These feature gates are enabled by default in Kubernetes 1.14 and later.
 
 2. Create the custom resources `CSINodeInfo` and `CSIDriver` as described in the
    [CSI CRDs section in the Kubernetes CSI documentation](https://kubernetes-csi.github.io/docs/csi-crds.html):
