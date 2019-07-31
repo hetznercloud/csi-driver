@@ -7,7 +7,7 @@ enabling you to use Volumes within Kubernetes. Please note that this driver **re
 
 ## Getting Started
 
-1. If running kubernetes < 1.14:
+1. If running Kubernetes < 1.14:
 
    1. Make sure that the following [feature gates](https://kubernetes.io/docs/reference/command-line-tools-reference/feature-gates/)
       are enabled in your cluster (kubelet and kube-apiserver):
@@ -26,6 +26,7 @@ enabling you to use Volumes within Kubernetes. Please note that this driver **re
 2. Create an API token in the [Hetzner Cloud Console](https://console.hetzner.cloud/).
 
 3. Create a secret containing the token:
+
    ```
    apiVersion: v1
    kind: Secret
@@ -41,7 +42,9 @@ enabling you to use Volumes within Kubernetes. Please note that this driver **re
    ```
    kubectl apply -f https://raw.githubusercontent.com/hetznercloud/csi-driver/master/deploy/kubernetes/hcloud-csi.yml
    ```
-   Or, if using kubernetes < 1.14:
+
+   Or, if using Kubernetes < 1.14:
+
    ```
    kubectl apply -f https://raw.githubusercontent.com/hetznercloud/csi-driver/master/deploy/kubernetes/hcloud-csi-1.13.yml
    ```
