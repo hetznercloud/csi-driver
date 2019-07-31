@@ -1,12 +1,4 @@
 ---
-apiVersion: storage.k8s.io/v1beta1
-kind: CSIDriver
-metadata:
-  name: csi.hetzner.cloud
-spec:
-  attachRequired: true
-  podInfoOnMount: true
----
 kind: StorageClass
 apiVersion: storage.k8s.io/v1
 metadata:
@@ -35,8 +27,8 @@ rules:
   - apiGroups: [""]
     resources: ["nodes"]
     verbs: ["get", "list", "watch"]
-  - apiGroups: ["storage.k8s.io"]
-    resources: ["csinodes"]
+  - apiGroups: ["csi.storage.k8s.io"]
+    resources: ["csinodeinfos"]
     verbs: ["get", "list", "watch"]
   - apiGroups: ["storage.k8s.io"]
     resources: ["volumeattachments"]
@@ -63,6 +55,13 @@ rules:
   - apiGroups: ["snapshot.storage.k8s.io"]
     resources: ["volumesnapshotcontents"]
     verbs: ["get", "list"]
+  # cluster registrar
+  - apiGroups: ["apiextensions.k8s.io"]
+    resources: ["customresourcedefinitions"]
+    verbs: ["create", "list", "watch", "delete"]
+  - apiGroups: ["csi.storage.k8s.io"]
+    resources: ["csidrivers"]
+    verbs: ["create", "list", "watch", "delete"]
   # node
   - apiGroups: [""]
     resources: ["events"]
@@ -100,7 +99,7 @@ spec:
       serviceAccount: hcloud-csi
       containers:
         - name: csi-attacher
-          image: quay.io/k8scsi/csi-attacher:v1.1.1
+          image: quay.io/k8scsi/csi-attacher:v1.0.1
           args:
             - --csi-address=/var/lib/csi/sockets/pluginproxy/csi.sock
             - --v=5
@@ -113,7 +112,7 @@ spec:
               add: ["SYS_ADMIN"]
             allowPrivilegeEscalation: true
         - name: csi-provisioner
-          image: quay.io/k8scsi/csi-provisioner:v1.2.1
+          image: quay.io/k8scsi/csi-provisioner:v1.0.1
           args:
             - --provisioner=csi.hetzner.cloud
             - --csi-address=/var/lib/csi/sockets/pluginproxy/csi.sock
@@ -127,6 +126,15 @@ spec:
             capabilities:
               add: ["SYS_ADMIN"]
             allowPrivilegeEscalation: true
+        - name: csi-cluster-driver-registrar
+          image: quay.io/k8scsi/csi-cluster-driver-registrar:v1.0.1
+          args:
+            - --pod-info-mount-version="v1"
+            - --csi-address=/var/lib/csi/sockets/pluginproxy/csi.sock
+            - --v=5
+          volumeMounts:
+            - name: socket-dir
+              mountPath: /var/lib/csi/sockets/pluginproxy/
         - name: hcloud-csi-driver
           image: hetznercloud/hcloud-csi-driver:1.1.4
           imagePullPolicy: Always
@@ -170,7 +178,7 @@ spec:
       hostNetwork: true
       containers:
         - name: csi-node-driver-registrar
-          image: quay.io/k8scsi/csi-node-driver-registrar:v1.1.0
+          image: quay.io/k8scsi/csi-node-driver-registrar:v1.0.1
           args:
             - --v=5
             - --csi-address=/csi/csi.sock
