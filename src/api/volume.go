@@ -202,6 +202,9 @@ func (s *VolumeService) Attach(ctx context.Context, volume *csi.Volume, server *
 		if hcloud.IsError(err, hcloud.ErrorCode("limit_exceeded_error")) {
 			return volumes.ErrAttachLimitReached
 		}
+		if hcloud.IsError(err, hcloud.ErrorCodeLocked) {
+			return volumes.ErrLockedServer
+		}
 		return err
 	}
 
@@ -276,6 +279,9 @@ func (s *VolumeService) Detach(ctx context.Context, volume *csi.Volume, server *
 			"volume-id", volume.ID,
 			"err", err,
 		)
+		if hcloud.IsError(err, hcloud.ErrorCodeLocked) {
+			return volumes.ErrLockedServer
+		}
 		return err
 	}
 
