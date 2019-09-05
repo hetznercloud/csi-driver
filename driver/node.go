@@ -224,3 +224,7 @@ func (s *NodeService) NodeGetInfo(context.Context, *proto.NodeGetInfoRequest) (*
 	}
 	return resp, nil
 }
+
+func (s *NodeService) NodeExpandVolume(context.Context, *proto.NodeExpandVolumeRequest) (*proto.NodeExpandVolumeResponse, error) {
+	panic("implement me")
+}

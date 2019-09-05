@@ -112,7 +112,7 @@ func TestVolumeSizeFromRequest(t *testing.T) {
 	for _, testCase := range testCases {
 		t.Run(testCase.Name, func(t *testing.T) {
 			req := &proto.CreateVolumeRequest{CapacityRange: testCase.CR}
-			minSize, maxSize, ok := volumeSizeFromRequest(req)
+			minSize, maxSize, ok := volumeSizeFromRequest(req.GetCapacityRange())
 			if minSize != testCase.MinSize || maxSize != testCase.MaxSize || ok != testCase.OK {
 				t.Fatalf("min=%d max=%d ok=%v", minSize, maxSize, ok)
 			}

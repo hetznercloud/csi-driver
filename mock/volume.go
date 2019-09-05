@@ -14,6 +14,7 @@ type VolumeService struct {
 	DeleteFunc    func(ctx context.Context, volume *csi.Volume) error
 	AttachFunc    func(ctx context.Context, volume *csi.Volume, server *csi.Server) error
 	DetachFunc    func(ctx context.Context, volume *csi.Volume, server *csi.Server) error
+	ResizeFunc    func(ctx context.Context, volume *csi.Volume, size int) error
 }
 
 func (s *VolumeService) Create(ctx context.Context, opts volumes.CreateOpts) (*csi.Volume, error) {
@@ -56,6 +57,13 @@ func (s *VolumeService) Detach(ctx context.Context, volume *csi.Volume, server *
 		panic("not implemented")
 	}
 	return s.DetachFunc(ctx, volume, server)
+}
+
+func (s *VolumeService) Resize(ctx context.Context, volume *csi.Volume, size int) error {
+	if s.ResizeFunc == nil {
+		panic("not implemented")
+	}
+	return s.ResizeFunc(ctx, volume, size)
 }
 
 type VolumeMountService struct {

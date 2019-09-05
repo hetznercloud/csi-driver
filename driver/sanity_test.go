@@ -162,6 +162,21 @@ func (s *sanityVolumeService) Delete(ctx context.Context, volume *csi.Volume) er
 	return volumes.ErrVolumeNotFound
 }
 
+func (s *sanityVolumeService) Resize(ctx context.Context, volume *csi.Volume, size int) error {
+	s.mu.Lock()
+	defer s.mu.Unlock()
+
+	for e := s.volumes.Front(); e != nil; e = e.Next() {
+		v := e.Value.(*csi.Volume)
+		if v.ID == volume.ID {
+			v.Size = size
+			return nil
+		}
+	}
+
+	return volumes.ErrVolumeNotFound
+}
+
 func (s *sanityVolumeService) Attach(ctx context.Context, volume *csi.Volume, server *csi.Server) error {
 	return nil
 }

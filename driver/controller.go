@@ -41,7 +41,7 @@ func (s *ControllerService) CreateVolume(ctx context.Context, req *proto.CreateV
 		return nil, status.Error(codes.InvalidArgument, "missing volume capabilities")
 	}
 
-	minSize, maxSize, ok := volumeSizeFromRequest(req)
+	minSize, maxSize, ok := volumeSizeFromRequest(req.GetCapacityRange())
 	if !ok {
 		return nil, status.Error(codes.OutOfRange, "invalid capacity range")
 	}
@@ -288,4 +288,31 @@ func (s *ControllerService) DeleteSnapshot(context.Context, *proto.DeleteSnapsho
 
 func (s *ControllerService) ListSnapshots(context.Context, *proto.ListSnapshotsRequest) (*proto.ListSnapshotsResponse, error) {
 	return nil, status.Error(codes.Unimplemented, "listing snapshots is not supported")
+}
+
+func (s *ControllerService) ControllerExpandVolume(ctx context.Context, req *proto.ControllerExpandVolumeRequest) (*proto.ControllerExpandVolumeResponse, error) {
+	if req.VolumeId == "" {
+		return nil, status.Error(codes.InvalidArgument, "invalid volume id")
+	}
+
+	volumeID, err := parseVolumeID(req.VolumeId)
+	if err != nil {
+		return nil, status.Error(codes.NotFound, "volume not found")
+	}
+	volume := &csi.Volume{ID: volumeID}
+	minSize, _, ok := volumeSizeFromRequest(req.GetCapacityRange())
+	if !ok {
+		return nil, status.Error(codes.OutOfRange, "invalid capacity range")
+	}
+	if err := s.volumeService.Resize(ctx, volume, minSize); err != nil {
+		code := codes.Internal
+		switch err {
+		case volumes.ErrVolumeNotFound:
+			code = codes.NotFound
+		}
+		return nil, status.Error(code, fmt.Sprintf("failed to expand volume: %s", err))
+	}
+
+	resp := &proto.ControllerExpandVolumeResponse{}
+	return resp, nil
 }
