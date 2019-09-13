@@ -1,0 +1,15 @@
+name: Run tests
+on: [push]
+jobs:
+  test:
+    runs-on: ubuntu-latest
+    steps:
+    - uses: actions/setup-go@v1
+      with:
+        go-version: '1.13'
+    - uses: actions/checkout@master
+    - name: Run tests
+      run: |
+        cd src
+        go vet ./...
+        go test ./...
