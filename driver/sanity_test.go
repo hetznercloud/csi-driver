@@ -15,7 +15,7 @@ import (
 	"github.com/kubernetes-csi/csi-test/pkg/sanity"
 	"google.golang.org/grpc"
 
-	"hetzner.cloud/csi"
+	"hetzner.cloud/csi/csi"
 	"hetzner.cloud/csi/volumes"
 )
 

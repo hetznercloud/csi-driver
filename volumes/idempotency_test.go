@@ -7,7 +7,7 @@ import (
 
 	"github.com/go-kit/kit/log"
 
-	"hetzner.cloud/csi"
+	"hetzner.cloud/csi/csi"
 	"hetzner.cloud/csi/mock"
 	"hetzner.cloud/csi/volumes"
 )

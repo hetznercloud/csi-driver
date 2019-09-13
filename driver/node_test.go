@@ -11,7 +11,7 @@ import (
 	"google.golang.org/grpc"
 	"google.golang.org/grpc/codes"
 
-	"hetzner.cloud/csi"
+	"hetzner.cloud/csi/csi"
 	"hetzner.cloud/csi/mock"
 	"hetzner.cloud/csi/volumes"
 )

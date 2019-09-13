@@ -7,7 +7,7 @@ import (
 	"github.com/go-kit/kit/log/level"
 	"github.com/hetznercloud/hcloud-go/hcloud"
 
-	"hetzner.cloud/csi"
+	"hetzner.cloud/csi/csi"
 	"hetzner.cloud/csi/volumes"
 )
 
