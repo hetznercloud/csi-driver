@@ -8,7 +8,7 @@ import (
 	"github.com/go-kit/kit/log/level"
 	"k8s.io/kubernetes/pkg/util/mount"
 
-	"hetzner.cloud/csi"
+	"hetzner.cloud/csi/csi"
 )
 
 const DefaultFSType = "ext4"

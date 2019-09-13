@@ -4,7 +4,7 @@ import (
 	"context"
 	"errors"
 
-	"hetzner.cloud/csi"
+	"hetzner.cloud/csi/csi"
 )
 
 var (

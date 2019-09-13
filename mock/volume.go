@@ -3,7 +3,7 @@ package mock
 import (
 	"context"
 
-	"hetzner.cloud/csi"
+	"hetzner.cloud/csi/csi"
 	"hetzner.cloud/csi/volumes"
 )
 

@@ -1,11 +1,11 @@
 FROM golang:1.12 as builder
-WORKDIR /csi/src
-ADD src/go.mod src/go.sum /csi/src/
+WORKDIR /csi
+ADD go.mod go.sum /csi/
 RUN go mod download
-ADD src /csi/src/
+ADD . /csi/
 RUN CGO_ENABLED=0 go build -o driver.bin hetzner.cloud/csi/cmd/driver
 
 FROM alpine:3.7
 RUN apk add --no-cache ca-certificates e2fsprogs xfsprogs
-COPY --from=builder /csi/src/driver.bin /bin/hcloud-csi-driver
+COPY --from=builder /csi/driver.bin /bin/hcloud-csi-driver
 ENTRYPOINT ["/bin/hcloud-csi-driver"]

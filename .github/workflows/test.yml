@@ -10,6 +10,5 @@ jobs:
     - uses: actions/checkout@master
     - name: Run tests
       run: |
-        cd src
         go vet ./...
         go test ./...
