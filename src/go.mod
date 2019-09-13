@@ -1,5 +1,7 @@
 module hetzner.cloud/csi
 
+go 1.13
+
 require (
 	github.com/container-storage-interface/spec v1.0.0
 	github.com/davecgh/go-spew v1.1.1 // indirect
