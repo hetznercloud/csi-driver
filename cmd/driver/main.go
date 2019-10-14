@@ -12,11 +12,13 @@ import (
 	proto "github.com/container-storage-interface/spec/lib/go/csi"
 	"github.com/go-kit/kit/log"
 	"github.com/go-kit/kit/log/level"
+	grpc_middleware "github.com/grpc-ecosystem/go-grpc-middleware"
 	"github.com/hetznercloud/hcloud-go/hcloud"
 	"google.golang.org/grpc"
 
 	"hetzner.cloud/csi/api"
 	"hetzner.cloud/csi/driver"
+	"hetzner.cloud/csi/metrics"
 	"hetzner.cloud/csi/volumes"
 )
 
@@ -110,15 +112,34 @@ func main() {
 		os.Exit(1)
 	}
 
+	metricsEndpoint := os.Getenv("METRICS_ENDPOINT")
+	if metricsEndpoint == "" {
+		level.Error(logger).Log(
+			"msg", "you need to specify an endpoint for metrics via the METRICS_ENDPOINT env var",
+		)
+		os.Exit(2)
+	}
+
+	metrics := metrics.New(
+		log.With(logger, "component", "metrics-service"),
+		metricsEndpoint,
+	)
+
 	grpcServer := grpc.NewServer(
 		grpc.UnaryInterceptor(
-			requestLogger(log.With(logger, "component", "grpc-server")),
+			grpc_middleware.ChainUnaryServer(
+				requestLogger(log.With(logger, "component", "grpc-server")),
+				metrics.UnaryServerInterceptor(),
+			),
 		),
 	)
 
 	proto.RegisterControllerServer(grpcServer, controllerService)
 	proto.RegisterIdentityServer(grpcServer, identityService)
 	proto.RegisterNodeServer(grpcServer, nodeService)
+
+	metrics.InitializeMetrics(grpcServer)
+	metrics.Serve()
 
 	identityService.SetReady(true)
 

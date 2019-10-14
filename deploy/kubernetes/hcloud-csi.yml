@@ -133,6 +133,8 @@ spec:
           env:
             - name: CSI_ENDPOINT
               value: unix:///var/lib/csi/sockets/pluginproxy/csi.sock
+            - name: METRICS_ENDPOINT
+              value: 0.0.0.0:9092
             - name: HCLOUD_TOKEN
               valueFrom:
                 secretKeyRef:
@@ -146,6 +148,9 @@ spec:
             capabilities:
               add: ["SYS_ADMIN"]
             allowPrivilegeEscalation: true
+          ports:
+            - containerPort: 9092
+              name: metrics
       volumes:
         - name: socket-dir
           emptyDir: {}
@@ -194,6 +199,8 @@ spec:
           env:
             - name: CSI_ENDPOINT
               value: unix:///csi/csi.sock
+            - name: METRICS_ENDPOINT
+              value: 0.0.0.0:9092
             - name: HCLOUD_TOKEN
               valueFrom:
                 secretKeyRef:
@@ -209,6 +216,10 @@ spec:
               mountPath: /dev
           securityContext:
             privileged: true
+          ports:
+            - containerPort: 9092
+              name: metrics
+
       volumes:
         - name: kubelet-dir
           hostPath:
@@ -226,3 +237,30 @@ spec:
           hostPath:
             path: /dev
             type: Directory
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: hcloud-csi-controller-metrics
+  namespace: kube-system
+spec:
+  selector:
+    app: hcloud-csi-controller
+  ports:
+    - port: 9092
+      name: metrics
+      targetPort: metrics
+
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: hcloud-csi-node-metrics
+  namespace: kube-system
+spec:
+  selector:
+    app: hcloud-csi
+  ports:
+    - port: 9092
+      name: metrics
+      targetPort: metrics
