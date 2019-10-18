@@ -114,10 +114,8 @@ func main() {
 
 	metricsEndpoint := os.Getenv("METRICS_ENDPOINT")
 	if metricsEndpoint == "" {
-		level.Error(logger).Log(
-			"msg", "you need to specify an endpoint for metrics via the METRICS_ENDPOINT env var",
-		)
-		os.Exit(2)
+		// Use a default endpoint
+		metricsEndpoint = ":9092"
 	}
 
 	metrics := metrics.New(
