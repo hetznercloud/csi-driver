@@ -115,7 +115,7 @@ func main() {
 	metricsEndpoint := os.Getenv("METRICS_ENDPOINT")
 	if metricsEndpoint == "" {
 		// Use a default endpoint
-		metricsEndpoint = ":9092"
+		metricsEndpoint = ":9189"
 	}
 
 	metrics := metrics.New(
