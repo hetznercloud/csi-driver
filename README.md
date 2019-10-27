@@ -84,6 +84,10 @@ enabling you to use Volumes within Kubernetes. Please note that this driver **re
    ```
 
    Once the pod is ready, exec a shell and check that your volume is mounted at `/data`.
+   
+   ```
+   kubectl exec -it my-csi-app -- /bin/sh
+   ```
 
 ## License
 
