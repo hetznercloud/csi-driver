@@ -39,7 +39,8 @@ func TestSanity(t *testing.T) {
 		&sanityVolumeService{},
 	)
 	volumeMountService := &sanityMountService{}
-
+	volumeResizeService := &sanityResizeService{}
+	volumeStatsService := &sanityStatsService{}
 	controllerService := NewControllerService(
 		log.With(logger, "component", "driver-controller-service"),
 		volumeService,
@@ -60,6 +61,8 @@ func TestSanity(t *testing.T) {
 		},
 		volumeService,
 		volumeMountService,
+		volumeResizeService,
+		volumeStatsService,
 	)
 
 	grpcServer := grpc.NewServer()
@@ -201,4 +204,23 @@ func (s *sanityMountService) Publish(volume *csi.Volume, targetPath string, stag
 
 func (s *sanityMountService) Unpublish(volume *csi.Volume, targetPath string) error {
 	return nil
+}
+
+func (s *sanityMountService) PathExists(path string) (bool, error) {
+	return true, nil
+}
+
+type sanityResizeService struct{}
+
+func (s *sanityResizeService) Resize(volume *csi.Volume, volumePath string) error {
+	return nil
+}
+
+type sanityStatsService struct{}
+
+func (s *sanityStatsService) ByteFilesystemStats(volumePath string) (availableBytes int64, usedBytes int64, err error) {
+	return 1, 1, nil
+}
+func (s *sanityStatsService) INodeFilesystemStats(volumePath string) (total int64, used int64, free int64, err error) {
+	return 1, 1, 1, nil
 }

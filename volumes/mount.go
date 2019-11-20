@@ -32,6 +32,7 @@ type MountService interface {
 	Unstage(volume *csi.Volume, stagingTargetPath string) error
 	Publish(volume *csi.Volume, targetPath string, stagingTargetPath string, opts MountOpts) error
 	Unpublish(volume *csi.Volume, targetPath string) error
+	PathExists(path string) (bool, error)
 }
 
 // LinuxMountService mounts volumes on a Linux system.
@@ -122,4 +123,19 @@ func (s *LinuxMountService) Unpublish(volume *csi.Volume, targetPath string) err
 		"target-path", targetPath,
 	)
 	return s.mounter.Interface.Unmount(targetPath)
+}
+
+func (s *LinuxMountService) PathExists(path string) (bool, error) {
+	level.Debug(s.logger).Log(
+		"msg", "unpublishing volume",
+		"path", path,
+	)
+	_, err := os.Stat(path)
+	if err == nil {
+		return true, nil
+	} else if os.IsNotExist(err) {
+		return false, nil
+	} else {
+		return false, err
+	}
 }

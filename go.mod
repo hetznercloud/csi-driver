@@ -14,13 +14,22 @@ require (
 	github.com/kubernetes-csi/csi-test v1.1.0
 	github.com/modern-go/concurrent v0.0.0-20180306012644-bacd9c7ef1dd // indirect
 	github.com/modern-go/reflect2 v1.0.1 // indirect
+	github.com/golang/protobuf v1.2.0
+	github.com/google/uuid v1.1.1 // indirect
+	github.com/hetznercloud/hcloud-go v1.17.0
+	github.com/kubernetes-csi/csi-test v2.2.0+incompatible
 	github.com/onsi/ginkgo v1.7.0 // indirect
 	github.com/onsi/gomega v1.4.3 // indirect
 	github.com/prometheus/client_golang v1.1.0
 	github.com/spf13/afero v1.2.0 // indirect
 	google.golang.org/grpc v1.19.0
+	github.com/stretchr/testify v1.2.2 // indirect
+	golang.org/x/net v0.0.0-20181201002055-351d144fa1fc // indirect
+	golang.org/x/sys v0.0.0-20180909124046-d0be0721c37e
+	google.golang.org/grpc v1.16.0
+	gopkg.in/yaml.v2 v2.2.2 // indirect
 	k8s.io/apimachinery v0.0.0-20181215012845-4d029f033399 // indirect
-	k8s.io/klog v0.1.0 // indirect
-	k8s.io/kubernetes v1.13.1
-	k8s.io/utils v0.0.0-20181115163542-0d26856f57b3 // indirect
+	k8s.io/klog v0.1.0
+	k8s.io/kubernetes v1.14.0
+	k8s.io/utils v0.0.0-20190221042446-c2654d5206da // indirect
 )

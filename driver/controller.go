@@ -273,6 +273,13 @@ func (s *ControllerService) ControllerGetCapabilities(context.Context, *proto.Co
 					},
 				},
 			},
+			{
+				Type: &proto.ControllerServiceCapability_Rpc{
+					Rpc: &proto.ControllerServiceCapability_RPC{
+						Type: proto.ControllerServiceCapability_RPC_EXPAND_VOLUME,
+					},
+				},
+			},
 		},
 	}
 	return resp, nil
@@ -312,7 +319,18 @@ func (s *ControllerService) ControllerExpandVolume(ctx context.Context, req *pro
 		}
 		return nil, status.Error(code, fmt.Sprintf("failed to expand volume: %s", err))
 	}
-
-	resp := &proto.ControllerExpandVolumeResponse{}
+	if volume, err = s.volumeService.GetByID(ctx, volumeID); err != nil {
+		code := codes.Internal
+		switch err {
+		case volumes.ErrVolumeNotFound:
+			code = codes.NotFound
+		}
+		return nil, status.Error(code, fmt.Sprintf("failed to expand volume: %s", err))
+	}
+	resp := &proto.ControllerExpandVolumeResponse{
+		CapacityBytes:         volume.SizeBytes(),
+		NodeExpansionRequired: true,
+	}
 	return resp, nil
+
 }

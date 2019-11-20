@@ -46,7 +46,7 @@ func TestIdentityServiceGetPluginCapabilities(t *testing.T) {
 	if err != nil {
 		t.Fatal(err)
 	}
-	if c := len(resp.Capabilities); c != 2 {
+	if c := len(resp.Capabilities); c != 4 {
 		t.Fatalf("unexpected number of capabilities: %d", c)
 	}
 
@@ -64,6 +64,22 @@ func TestIdentityServiceGetPluginCapabilities(t *testing.T) {
 	}
 	if cap2service.Type != proto.PluginCapability_Service_VOLUME_ACCESSIBILITY_CONSTRAINTS {
 		t.Errorf("unexpected service type: %s", cap2service.Type)
+	}
+
+	cap3volume := resp.Capabilities[2].GetVolumeExpansion()
+	if cap3volume == nil {
+		t.Fatalf("unexpected capability at index 2: %v", resp.Capabilities[2])
+	}
+	if cap3volume.Type != proto.PluginCapability_VolumeExpansion_ONLINE {
+		t.Errorf("unexpected volume expansion type: %s", cap3volume.Type)
+	}
+
+	cap4volume := resp.Capabilities[3].GetVolumeExpansion()
+	if cap4volume == nil {
+		t.Fatalf("unexpected capability at index 3: %v", resp.Capabilities[3])
+	}
+	if cap4volume.Type != proto.PluginCapability_VolumeExpansion_OFFLINE {
+		t.Errorf("unexpected volume expansion type: %s", cap4volume.Type)
 	}
 }
 
