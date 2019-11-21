@@ -18,5 +18,5 @@ jobs:
         run: |
           docker version
           docker login -u "$DOCKER_USER" -p "$DOCKER_PASSWORD"
-          docker build -t hetznercloud/hcloud-csi-driver:latest-t .
-          docker push hetznercloud/hcloud-csi-driver:latest-t
+          docker build -t hetznercloud/hcloud-csi-driver:latest .
+          docker push hetznercloud/hcloud-csi-driver:latest
