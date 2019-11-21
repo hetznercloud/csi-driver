@@ -76,17 +76,17 @@ func TestSanity(t *testing.T) {
 	}()
 	defer func() {
 		// Clean up tmp dir
-		if err = os.RemoveAll(os.TempDir() + "hcloud-csi-sanity-staging"); err != nil {
-			t.Fatalf("Failed to clean up sanity temp working dir %s: %v", os.TempDir()+"hcloud-csi-sanity-staging", err)
+		if err = os.RemoveAll(os.TempDir() + "/hcloud-csi-sanity-staging"); err != nil {
+			t.Fatalf("Failed to clean up sanity temp working dir %s: %v", os.TempDir()+"/hcloud-csi-sanity-staging", err)
 		}
-		if err = os.RemoveAll(os.TempDir() + "hcloud-csi-sanity-target"); err != nil {
-			t.Fatalf("Failed to clean up sanity temp working dir %s: %v", os.TempDir()+"hcloud-csi-sanity-target", err)
+		if err = os.RemoveAll(os.TempDir() + "/hcloud-csi-sanity-target"); err != nil {
+			t.Fatalf("Failed to clean up sanity temp working dir %s: %v", os.TempDir()+"/hcloud-csi-sanity-target", err)
 		}
 	}()
 
 	sanity.Test(t, &sanity.Config{
-		StagingPath: os.TempDir() + "hcloud-csi-sanity-staging",
-		TargetPath:  os.TempDir() + "hcloud-csi-sanity-target",
+		StagingPath: os.TempDir() + "/hcloud-csi-sanity-staging",
+		TargetPath:  os.TempDir() + "/hcloud-csi-sanity-target",
 		Address:     endpoint,
 	})
 }

@@ -3,7 +3,6 @@ package driver
 import (
 	"context"
 	"fmt"
-	"github.com/go-kit/kit/log/level"
 	"strconv"
 
 	proto "github.com/container-storage-interface/spec/lib/go/csi"
@@ -88,11 +87,6 @@ func (s *NodeService) NodeStageVolume(ctx context.Context, req *proto.NodeStageV
 }
 
 func (s *NodeService) NodeUnstageVolume(ctx context.Context, req *proto.NodeUnstageVolumeRequest) (*proto.NodeUnstageVolumeResponse, error) {
-	level.Debug(s.logger).Log(
-		"msg", "unstage volume",
-		"volume-id", req.VolumeId,
-		"staging-target-path", req.StagingTargetPath,
-	)
 	if req.VolumeId == "" {
 		return nil, status.Error(codes.InvalidArgument, "missing volume id")
 	}
