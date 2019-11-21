@@ -30,7 +30,7 @@ func NewLinuxResizeService(logger log.Logger) *LinuxResizeService {
 }
 
 func (l *LinuxResizeService) Resize(volume *csi.Volume, volumePath string) error {
-	level.Info(l.logger).Log(
+	level.Debug(l.logger).Log(
 		"msg", "resizing volume",
 		"volume-name", volume.Name,
 		"volume-path", volumePath,
