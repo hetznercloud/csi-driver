@@ -74,9 +74,20 @@ func TestSanity(t *testing.T) {
 			t.Fatal(err)
 		}
 	}()
+	defer func() {
+		// Clean up tmp dir
+		if err = os.RemoveAll(os.TempDir() + "hcloud-csi-sanity-staging"); err != nil {
+			t.Fatalf("Failed to clean up sanity temp working dir %s: %v", os.TempDir()+"hcloud-csi-sanity-staging", err)
+		}
+		if err = os.RemoveAll(os.TempDir() + "hcloud-csi-sanity-target"); err != nil {
+			t.Fatalf("Failed to clean up sanity temp working dir %s: %v", os.TempDir()+"hcloud-csi-sanity-target", err)
+		}
+	}()
 
 	sanity.Test(t, &sanity.Config{
-		Address: endpoint,
+		StagingPath: os.TempDir() + "hcloud-csi-sanity-staging",
+		TargetPath:  os.TempDir() + "hcloud-csi-sanity-target",
+		Address:     endpoint,
 	})
 }
 
@@ -97,10 +108,11 @@ func (s *sanityVolumeService) Create(ctx context.Context, opts volumes.CreateOpt
 	}
 
 	volume := &csi.Volume{
-		ID:       uint64(s.volumes.Len() + 1),
-		Name:     opts.Name,
-		Size:     opts.MinSize,
-		Location: opts.Location,
+		ID:          uint64(s.volumes.Len() + 1),
+		Name:        opts.Name,
+		Size:        opts.MinSize,
+		Location:    opts.Location,
+		LinuxDevice: "/dev/disk/by-id/scsi-0HC_Volume_" + string(s.volumes.Len()+1),
 	}
 
 	s.volumes.PushBack(volume)
@@ -192,6 +204,9 @@ func (s *sanityMountService) Unpublish(volume *csi.Volume, targetPath string) er
 }
 
 func (s *sanityMountService) PathExists(path string) (bool, error) {
+	if path == "some/path" {
+		return false, nil
+	}
 	return true, nil
 }
 
