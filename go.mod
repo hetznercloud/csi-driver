@@ -31,7 +31,7 @@ require (
 	golang.org/x/sys v0.0.0-20190318195719-6c81ef8f67ca
 	google.golang.org/grpc v1.19.0
 	k8s.io/apimachinery v0.0.0-20181215012845-4d029f033399 // indirect
-	k8s.io/klog v0.1.0
+	k8s.io/klog v0.1.0 // indirect
 	k8s.io/kubernetes v1.14.0
 	k8s.io/utils v0.0.0-20190221042446-c2654d5206da // indirect
 )
