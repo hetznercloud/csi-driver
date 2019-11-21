@@ -1,0 +1,19 @@
+name: Push latest version
+on:
+  push:
+jobs:
+  test:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/setup-go@v1
+        with:
+          go-version: '1.12'
+      - name: Publish latest tag to registry
+        env:
+            DOCKER_USER: ${{ secrets.DOCKER_USER }}
+            DOCKER_PASSWORD: ${{ secrets.DOCKER_PASSWORD }}
+        run: |
+          docker version
+          docker login -u "$DOCKER_USER" -p "$DOCKER_PASSWORD"
+          docker build -t hetznercloud/hcloud-csi-driver:latest-t .
+          docker push hetznercloud/hcloud-csi-driver:latest-t
