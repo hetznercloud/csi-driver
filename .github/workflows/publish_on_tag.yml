@@ -12,6 +12,7 @@ jobs:
           go-version: '1.12'
       - name: Set env
         run: echo ::set-env name=RELEASE_VERSION::$(echo ${GITHUB_REF:10})
+      - uses: actions/checkout@master
       - name: Publish tag to registry
         env:
           DOCKER_USER: ${{ secrets.DOCKER_USER }}
