@@ -3,6 +3,7 @@ package driver
 import (
 	"container/list"
 	"context"
+	"io/ioutil"
 	"net"
 	"os"
 	"sync"
@@ -74,19 +75,15 @@ func TestSanity(t *testing.T) {
 			t.Fatal(err)
 		}
 	}()
-	defer func() {
-		// Clean up tmp dir
-		if err = os.RemoveAll(os.TempDir() + "/hcloud-csi-sanity-staging"); err != nil {
-			t.Fatalf("Failed to clean up sanity temp working dir %s: %v", os.TempDir()+"/hcloud-csi-sanity-staging", err)
-		}
-		if err = os.RemoveAll(os.TempDir() + "/hcloud-csi-sanity-target"); err != nil {
-			t.Fatalf("Failed to clean up sanity temp working dir %s: %v", os.TempDir()+"/hcloud-csi-sanity-target", err)
-		}
-	}()
+	tempDir, err := ioutil.TempDir("", "csi") // Clean up tmp dir
+	if err != nil {
+		t.Fatal(err)
+	}
+	defer os.RemoveAll(tempDir)
 
 	sanity.Test(t, &sanity.Config{
-		StagingPath: os.TempDir() + "/hcloud-csi-sanity-staging",
-		TargetPath:  os.TempDir() + "/hcloud-csi-sanity-target",
+		StagingPath: tempDir + "/hcloud-csi-sanity-staging",
+		TargetPath:  tempDir + "/hcloud-csi-sanity-target",
 		Address:     endpoint,
 	})
 }

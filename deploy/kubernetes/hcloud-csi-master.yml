@@ -211,7 +211,7 @@ spec:
           securityContext:
             privileged: true
         - name: hcloud-csi-driver
-          image: lkdevelopment/csi-driver:v1.2.0
+          image: hetznercloud/hcloud-csi-driver:latest
           imagePullPolicy: Always
           env:
             - name: CSI_ENDPOINT

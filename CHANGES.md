@@ -1,5 +1,10 @@
 # Changes
 
+## master
+
+- Implement volume resizing
+- Implement volume statistics
+
 ## v1.1.5
 
 - Revert fix from v1.1.2 to retry attach/detach when server is locked
