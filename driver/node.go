@@ -216,6 +216,14 @@ func (s *NodeService) NodeGetVolumeStats(ctx context.Context, req *proto.NodeGet
 			return nil, status.Error(codes.Internal, fmt.Sprintf("failed to get volume: %s", err))
 		}
 	}
+	volumeExists, err := s.volumeMountService.PathExists(req.VolumePath)
+	if err != nil {
+		return nil, status.Error(codes.Internal, fmt.Sprintf("failed to check for volume existence: %s", err))
+	}
+	if !volumeExists {
+		return nil, status.Error(codes.InvalidArgument, fmt.Sprintf("volume %s is not available on this node %v", volume.LinuxDevice, s.server.ID))
+	}
+
 	availableBytes, usedBytes, err := s.volumeStatsService.ByteFilesystemStats(req.VolumePath)
 	if err != nil {
 		return nil, status.Error(codes.Internal, fmt.Sprintf("failed to get volume byte stats: %s", err))

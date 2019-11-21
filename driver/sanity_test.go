@@ -3,7 +3,6 @@ package driver
 import (
 	"container/list"
 	"context"
-	"io/ioutil"
 	"net"
 	"os"
 	"sync"
@@ -76,22 +75,8 @@ func TestSanity(t *testing.T) {
 		}
 	}()
 
-	stagingDir, err := ioutil.TempDir("", "hcloud-csi-sanity-staging")
-	if err != nil {
-		t.Fatal(err)
-	}
-	defer os.RemoveAll(stagingDir)
-
-	targetDir, err := ioutil.TempDir("", "hcloud-csi-sanity-target")
-	if err != nil {
-		t.Fatal(err)
-	}
-	defer os.RemoveAll(targetDir)
-
 	sanity.Test(t, &sanity.Config{
-		StagingPath: stagingDir,
-		TargetPath:  targetDir,
-		Address:     endpoint,
+		Address: endpoint,
 	})
 }
 

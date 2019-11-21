@@ -752,7 +752,9 @@ func TestNodeServiceNodeGetInfo(t *testing.T) {
 func TestNodeServiceNodeExpandVolume(t *testing.T) {
 	env := newNodeServerTestEnv()
 
-	existingVolume := &csi.Volume{}
+	existingVolume := &csi.Volume{
+		LinuxDevice: "LinuxDevicePath",
+	}
 
 	env.volumeService.GetByIDFunc = func(ctx context.Context, id uint64) (*csi.Volume, error) {
 		if id != 1 {
@@ -761,7 +763,7 @@ func TestNodeServiceNodeExpandVolume(t *testing.T) {
 		return existingVolume, nil
 	}
 	env.volumeMountService.PathExistsFunc = func(path string) (bool, error) {
-		if path != "volumePath" {
+		if path != "LinuxDevicePath" {
 			t.Errorf("unexpected volume path passed to volume mount service: %s", path)
 		}
 		return true, nil
