@@ -194,7 +194,6 @@ spec:
         app: hcloud-csi
     spec:
       serviceAccount: hcloud-csi
-      hostNetwork: true
       containers:
         - name: csi-node-driver-registrar
           image: quay.io/k8scsi/csi-node-driver-registrar:v1.1.0
