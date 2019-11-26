@@ -127,15 +127,15 @@ func (s *LinuxMountService) Unpublish(volume *csi.Volume, targetPath string) err
 
 func (s *LinuxMountService) PathExists(path string) (bool, error) {
 	level.Debug(s.logger).Log(
-		"msg", "path exits",
+		"msg", "checking path existence",
 		"path", path,
 	)
 	_, err := os.Stat(path)
 	if err == nil {
 		return true, nil
-	} else if os.IsNotExist(err) {
-		return false, nil
-	} else {
-		return false, err
 	}
+	if os.IsNotExist(err) {
+		return false, nil
+	}
+	return false, err
 }

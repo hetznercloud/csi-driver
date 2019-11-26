@@ -10,7 +10,7 @@ import (
 func parseVolumeID(id string) (uint64, error) { return strconv.ParseUint(id, 10, 64) }
 func parseNodeID(id string) (uint64, error)   { return strconv.ParseUint(id, 10, 64) }
 
-func volumeSizeFromRequest(cr *proto.CapacityRange) (int, int, bool) {
+func volumeSizeFromCapacityRange(cr *proto.CapacityRange) (int, int, bool) {
 	if cr == nil {
 		return DefaultVolumeSize, 0, true
 	}

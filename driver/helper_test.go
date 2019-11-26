@@ -8,7 +8,7 @@ import (
 
 const GB = 1024 * 1024 * 1024
 
-func TestVolumeSizeFromRequest(t *testing.T) {
+func TestVolumeSizeFromCapacityRange(t *testing.T) {
 	testCases := []struct {
 		Name    string
 		CR      *proto.CapacityRange
@@ -111,8 +111,7 @@ func TestVolumeSizeFromRequest(t *testing.T) {
 
 	for _, testCase := range testCases {
 		t.Run(testCase.Name, func(t *testing.T) {
-			req := &proto.CreateVolumeRequest{CapacityRange: testCase.CR}
-			minSize, maxSize, ok := volumeSizeFromRequest(req.GetCapacityRange())
+			minSize, maxSize, ok := volumeSizeFromCapacityRange(testCase.CR)
 			if minSize != testCase.MinSize || maxSize != testCase.MaxSize || ok != testCase.OK {
 				t.Fatalf("min=%d max=%d ok=%v", minSize, maxSize, ok)
 			}

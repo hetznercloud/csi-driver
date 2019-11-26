@@ -216,6 +216,7 @@ func (s *NodeService) NodeGetVolumeStats(ctx context.Context, req *proto.NodeGet
 			return nil, status.Error(codes.Internal, fmt.Sprintf("failed to get volume: %s", err))
 		}
 	}
+
 	volumeExists, err := s.volumeMountService.PathExists(req.VolumePath)
 	if err != nil {
 		return nil, status.Error(codes.Internal, fmt.Sprintf("failed to check for volume existence: %s", err))
@@ -228,10 +229,12 @@ func (s *NodeService) NodeGetVolumeStats(ctx context.Context, req *proto.NodeGet
 	if err != nil {
 		return nil, status.Error(codes.Internal, fmt.Sprintf("failed to get volume byte stats: %s", err))
 	}
+
 	totalINodes, usedINodes, freeINodes, err := s.volumeStatsService.INodeFilesystemStats(req.VolumePath)
 	if err != nil {
 		return nil, status.Error(codes.Internal, fmt.Sprintf("failed to get volume inode stats: %s", err))
 	}
+
 	return &proto.NodeGetVolumeStatsResponse{
 		Usage: []*proto.VolumeUsage{
 			{

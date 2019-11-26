@@ -152,10 +152,5 @@ func (s *IdempotentService) Detach(ctx context.Context, volume *csi.Volume, serv
 }
 
 func (s *IdempotentService) Resize(ctx context.Context, volume *csi.Volume, size int) error {
-	switch err := s.volumeService.Resize(ctx, volume, size); err {
-	case nil:
-		return nil
-	default:
-		return err
-	}
+	return s.volumeService.Resize(ctx, volume, size)
 }

@@ -75,7 +75,8 @@ func TestSanity(t *testing.T) {
 			t.Fatal(err)
 		}
 	}()
-	tempDir, err := ioutil.TempDir("", "csi") // Clean up tmp dir
+
+	tempDir, err := ioutil.TempDir("", "csi")
 	if err != nil {
 		t.Fatal(err)
 	}

@@ -41,7 +41,7 @@ func (s *ControllerService) CreateVolume(ctx context.Context, req *proto.CreateV
 		return nil, status.Error(codes.InvalidArgument, "missing volume capabilities")
 	}
 
-	minSize, maxSize, ok := volumeSizeFromRequest(req.GetCapacityRange())
+	minSize, maxSize, ok := volumeSizeFromCapacityRange(req.GetCapacityRange())
 	if !ok {
 		return nil, status.Error(codes.OutOfRange, "invalid capacity range")
 	}
@@ -307,10 +307,12 @@ func (s *ControllerService) ControllerExpandVolume(ctx context.Context, req *pro
 		return nil, status.Error(codes.NotFound, "volume not found")
 	}
 	volume := &csi.Volume{ID: volumeID}
-	minSize, _, ok := volumeSizeFromRequest(req.GetCapacityRange())
+
+	minSize, _, ok := volumeSizeFromCapacityRange(req.GetCapacityRange())
 	if !ok {
 		return nil, status.Error(codes.OutOfRange, "invalid capacity range")
 	}
+
 	if err := s.volumeService.Resize(ctx, volume, minSize); err != nil {
 		code := codes.Internal
 		switch err {
@@ -319,6 +321,7 @@ func (s *ControllerService) ControllerExpandVolume(ctx context.Context, req *pro
 		}
 		return nil, status.Error(code, fmt.Sprintf("failed to expand volume: %s", err))
 	}
+
 	if volume, err = s.volumeService.GetByID(ctx, volumeID); err != nil {
 		code := codes.Internal
 		switch err {
@@ -327,10 +330,10 @@ func (s *ControllerService) ControllerExpandVolume(ctx context.Context, req *pro
 		}
 		return nil, status.Error(code, fmt.Sprintf("failed to expand volume: %s", err))
 	}
+
 	resp := &proto.ControllerExpandVolumeResponse{
 		CapacityBytes:         volume.SizeBytes(),
 		NodeExpansionRequired: true,
 	}
 	return resp, nil
-
 }
