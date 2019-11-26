@@ -15,10 +15,12 @@ import (
 )
 
 type NodeService struct {
-	logger             log.Logger
-	server             *hcloud.Server
-	volumeService      volumes.Service
-	volumeMountService volumes.MountService
+	logger              log.Logger
+	server              *hcloud.Server
+	volumeService       volumes.Service
+	volumeMountService  volumes.MountService
+	volumeResizeService volumes.ResizeService
+	volumeStatsService  volumes.StatsService
 }
 
 func NewNodeService(
@@ -26,12 +28,16 @@ func NewNodeService(
 	server *hcloud.Server,
 	volumeService volumes.Service,
 	volumeMountService volumes.MountService,
+	volumeResizeService volumes.ResizeService,
+	volumeStatsService volumes.StatsService,
 ) *NodeService {
 	return &NodeService{
-		logger:             logger,
-		server:             server,
-		volumeService:      volumeService,
-		volumeMountService: volumeMountService,
+		logger:              logger,
+		server:              server,
+		volumeService:       volumeService,
+		volumeMountService:  volumeMountService,
+		volumeResizeService: volumeResizeService,
+		volumeStatsService:  volumeStatsService,
 	}
 }
 
@@ -189,7 +195,62 @@ func (s *NodeService) NodeUnpublishVolume(ctx context.Context, req *proto.NodeUn
 }
 
 func (s *NodeService) NodeGetVolumeStats(ctx context.Context, req *proto.NodeGetVolumeStatsRequest) (*proto.NodeGetVolumeStatsResponse, error) {
-	return nil, status.Error(codes.Unimplemented, "volume stats are not supported")
+	if req.VolumeId == "" {
+		return nil, status.Error(codes.InvalidArgument, "missing volume id")
+	}
+	if req.VolumePath == "" {
+		return nil, status.Error(codes.InvalidArgument, "missing volume path")
+	}
+
+	volumeID, err := parseVolumeID(req.VolumeId)
+	if err != nil {
+		return nil, status.Error(codes.NotFound, "volume not found")
+	}
+
+	volume, err := s.volumeService.GetByID(ctx, volumeID)
+	if err != nil {
+		switch err {
+		case volumes.ErrVolumeNotFound:
+			return nil, status.Error(codes.NotFound, "volume not found")
+		default:
+			return nil, status.Error(codes.Internal, fmt.Sprintf("failed to get volume: %s", err))
+		}
+	}
+
+	volumeExists, err := s.volumeMountService.PathExists(req.VolumePath)
+	if err != nil {
+		return nil, status.Error(codes.Internal, fmt.Sprintf("failed to check for volume existence: %s", err))
+	}
+	if !volumeExists {
+		return nil, status.Error(codes.NotFound, fmt.Sprintf("volume %s is not available on this node %v", volume.LinuxDevice, s.server.ID))
+	}
+
+	availableBytes, usedBytes, err := s.volumeStatsService.ByteFilesystemStats(req.VolumePath)
+	if err != nil {
+		return nil, status.Error(codes.Internal, fmt.Sprintf("failed to get volume byte stats: %s", err))
+	}
+
+	totalINodes, usedINodes, freeINodes, err := s.volumeStatsService.INodeFilesystemStats(req.VolumePath)
+	if err != nil {
+		return nil, status.Error(codes.Internal, fmt.Sprintf("failed to get volume inode stats: %s", err))
+	}
+
+	return &proto.NodeGetVolumeStatsResponse{
+		Usage: []*proto.VolumeUsage{
+			{
+				Unit:      proto.VolumeUsage_BYTES,
+				Available: availableBytes,
+				Total:     volume.SizeBytes(),
+				Used:      usedBytes,
+			},
+			{
+				Unit:      proto.VolumeUsage_INODES,
+				Available: freeINodes,
+				Total:     totalINodes,
+				Used:      usedINodes,
+			},
+		},
+	}, nil
 }
 
 func (s *NodeService) NodeGetCapabilities(ctx context.Context, req *proto.NodeGetCapabilitiesRequest) (*proto.NodeGetCapabilitiesResponse, error) {
@@ -199,6 +260,20 @@ func (s *NodeService) NodeGetCapabilities(ctx context.Context, req *proto.NodeGe
 				Type: &proto.NodeServiceCapability_Rpc{
 					Rpc: &proto.NodeServiceCapability_RPC{
 						Type: proto.NodeServiceCapability_RPC_STAGE_UNSTAGE_VOLUME,
+					},
+				},
+			},
+			{
+				Type: &proto.NodeServiceCapability_Rpc{
+					Rpc: &proto.NodeServiceCapability_RPC{
+						Type: proto.NodeServiceCapability_RPC_EXPAND_VOLUME,
+					},
+				},
+			},
+			{
+				Type: &proto.NodeServiceCapability_Rpc{
+					Rpc: &proto.NodeServiceCapability_RPC{
+						Type: proto.NodeServiceCapability_RPC_GET_VOLUME_STATS,
 					},
 				},
 			},
@@ -221,6 +296,46 @@ func (s *NodeService) NodeGetInfo(context.Context, *proto.NodeGetInfoRequest) (*
 				TopologySegmentLocation: location,
 			},
 		},
+	}
+	return resp, nil
+}
+
+func (s *NodeService) NodeExpandVolume(ctx context.Context, req *proto.NodeExpandVolumeRequest) (*proto.NodeExpandVolumeResponse, error) {
+	if req.VolumeId == "" {
+		return nil, status.Error(codes.InvalidArgument, "missing volume id")
+	}
+	if req.VolumePath == "" {
+		return nil, status.Error(codes.InvalidArgument, "missing volume path")
+	}
+
+	volumeID, err := parseVolumeID(req.VolumeId)
+	if err != nil {
+		return nil, status.Error(codes.NotFound, "volume not found")
+	}
+
+	volume, err := s.volumeService.GetByID(ctx, volumeID)
+	if err != nil {
+		switch err {
+		case volumes.ErrVolumeNotFound:
+			return nil, status.Error(codes.NotFound, "volume not found")
+		default:
+			return nil, status.Error(codes.Internal, fmt.Sprintf("failed to get volume: %s", err))
+		}
+	}
+
+	volumeExists, err := s.volumeMountService.PathExists(volume.LinuxDevice)
+	if err != nil {
+		return nil, status.Error(codes.Internal, fmt.Sprintf("failed to check for volume existence: %s", err))
+	}
+	if !volumeExists {
+		return nil, status.Error(codes.Unavailable, fmt.Sprintf("volume %s is not available on this node %v", volume.LinuxDevice, s.server.ID))
+	}
+
+	if err := s.volumeResizeService.Resize(volume, req.VolumePath); err != nil {
+		return nil, status.Error(codes.Internal, fmt.Sprintf("failed to resize volume: %s", err))
+	}
+	resp := &proto.NodeExpandVolumeResponse{
+		CapacityBytes: volume.SizeBytes(),
 	}
 	return resp, nil
 }

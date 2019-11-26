@@ -39,7 +39,8 @@ func TestSanity(t *testing.T) {
 		&sanityVolumeService{},
 	)
 	volumeMountService := &sanityMountService{}
-
+	volumeResizeService := &sanityResizeService{}
+	volumeStatsService := &sanityStatsService{}
 	controllerService := NewControllerService(
 		log.With(logger, "component", "driver-controller-service"),
 		volumeService,
@@ -60,6 +61,8 @@ func TestSanity(t *testing.T) {
 		},
 		volumeService,
 		volumeMountService,
+		volumeResizeService,
+		volumeStatsService,
 	)
 
 	grpcServer := grpc.NewServer()
@@ -73,21 +76,15 @@ func TestSanity(t *testing.T) {
 		}
 	}()
 
-	stagingDir, err := ioutil.TempDir("", "hcloud-csi-sanity-staging")
+	tempDir, err := ioutil.TempDir("", "csi")
 	if err != nil {
 		t.Fatal(err)
 	}
-	defer os.RemoveAll(stagingDir)
-
-	targetDir, err := ioutil.TempDir("", "hcloud-csi-sanity-target")
-	if err != nil {
-		t.Fatal(err)
-	}
-	defer os.RemoveAll(targetDir)
+	defer os.RemoveAll(tempDir)
 
 	sanity.Test(t, &sanity.Config{
-		StagingPath: stagingDir,
-		TargetPath:  targetDir,
+		StagingPath: tempDir + "/hcloud-csi-sanity-staging",
+		TargetPath:  tempDir + "/hcloud-csi-sanity-target",
 		Address:     endpoint,
 	})
 }
@@ -109,10 +106,11 @@ func (s *sanityVolumeService) Create(ctx context.Context, opts volumes.CreateOpt
 	}
 
 	volume := &csi.Volume{
-		ID:       uint64(s.volumes.Len() + 1),
-		Name:     opts.Name,
-		Size:     opts.MinSize,
-		Location: opts.Location,
+		ID:          uint64(s.volumes.Len() + 1),
+		Name:        opts.Name,
+		Size:        opts.MinSize,
+		Location:    opts.Location,
+		LinuxDevice: "/dev/disk/by-id/scsi-0HC_Volume_" + string(s.volumes.Len()+1),
 	}
 
 	s.volumes.PushBack(volume)
@@ -162,6 +160,21 @@ func (s *sanityVolumeService) Delete(ctx context.Context, volume *csi.Volume) er
 	return volumes.ErrVolumeNotFound
 }
 
+func (s *sanityVolumeService) Resize(ctx context.Context, volume *csi.Volume, size int) error {
+	s.mu.Lock()
+	defer s.mu.Unlock()
+
+	for e := s.volumes.Front(); e != nil; e = e.Next() {
+		v := e.Value.(*csi.Volume)
+		if v.ID == volume.ID {
+			v.Size = size
+			return nil
+		}
+	}
+
+	return volumes.ErrVolumeNotFound
+}
+
 func (s *sanityVolumeService) Attach(ctx context.Context, volume *csi.Volume, server *csi.Server) error {
 	return nil
 }
@@ -186,4 +199,26 @@ func (s *sanityMountService) Publish(volume *csi.Volume, targetPath string, stag
 
 func (s *sanityMountService) Unpublish(volume *csi.Volume, targetPath string) error {
 	return nil
+}
+
+func (s *sanityMountService) PathExists(path string) (bool, error) {
+	if path == "some/path" {
+		return false, nil
+	}
+	return true, nil
+}
+
+type sanityResizeService struct{}
+
+func (s *sanityResizeService) Resize(volume *csi.Volume, volumePath string) error {
+	return nil
+}
+
+type sanityStatsService struct{}
+
+func (s *sanityStatsService) ByteFilesystemStats(volumePath string) (availableBytes int64, usedBytes int64, err error) {
+	return 1, 1, nil
+}
+func (s *sanityStatsService) INodeFilesystemStats(volumePath string) (total int64, used int64, free int64, err error) {
+	return 1, 1, 1, nil
 }

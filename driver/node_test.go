@@ -19,11 +19,12 @@ import (
 var _ proto.NodeServer = (*NodeService)(nil)
 
 type nodeServiceTestEnv struct {
-	ctx                context.Context
-	service            *NodeService
-	server             *hcloud.Server
-	volumeService      *mock.VolumeService
-	volumeMountService *mock.VolumeMountService
+	ctx                 context.Context
+	service             *NodeService
+	server              *hcloud.Server
+	volumeService       *mock.VolumeService
+	volumeMountService  *mock.VolumeMountService
+	volumeResizeService *mock.VolumeResizeService
 }
 
 func newNodeServerTestEnv() nodeServiceTestEnv {
@@ -36,8 +37,10 @@ func newNodeServerTestEnv() nodeServiceTestEnv {
 				},
 			},
 		}
-		volumeService      = &mock.VolumeService{}
-		volumeMountService = &mock.VolumeMountService{}
+		volumeService       = &mock.VolumeService{}
+		volumeMountService  = &mock.VolumeMountService{}
+		volumeResizeService = &mock.VolumeResizeService{}
+		volumeStatsService  = &mock.VolumeStatsService{}
 	)
 	return nodeServiceTestEnv{
 		ctx: context.Background(),
@@ -46,10 +49,13 @@ func newNodeServerTestEnv() nodeServiceTestEnv {
 			server,
 			volumeService,
 			volumeMountService,
+			volumeResizeService,
+			volumeStatsService,
 		),
-		server:             server,
-		volumeService:      volumeService,
-		volumeMountService: volumeMountService,
+		server:              server,
+		volumeService:       volumeService,
+		volumeMountService:  volumeMountService,
+		volumeResizeService: volumeResizeService,
 	}
 }
 
@@ -698,7 +704,7 @@ func TestNodeServiceNodeGetCapabilities(t *testing.T) {
 	if err != nil {
 		t.Fatal(err)
 	}
-	if c := len(resp.Capabilities); c != 1 {
+	if c := len(resp.Capabilities); c != 3 {
 		t.Fatalf("unexpected number of capabilities: %d", c)
 	}
 
@@ -708,6 +714,22 @@ func TestNodeServiceNodeGetCapabilities(t *testing.T) {
 	}
 	if cap1rpc.Type != proto.NodeServiceCapability_RPC_STAGE_UNSTAGE_VOLUME {
 		t.Errorf("unexpected type: %s", cap1rpc.Type)
+	}
+
+	cap2rpc := resp.Capabilities[1].GetRpc()
+	if cap2rpc == nil {
+		t.Fatal("unexpected capability at index 1")
+	}
+	if cap2rpc.Type != proto.NodeServiceCapability_RPC_EXPAND_VOLUME {
+		t.Errorf("unexpected type: %s", cap2rpc.Type)
+	}
+
+	cap3rpc := resp.Capabilities[2].GetRpc()
+	if cap3rpc == nil {
+		t.Fatal("unexpected capability at index 2")
+	}
+	if cap3rpc.Type != proto.NodeServiceCapability_RPC_GET_VOLUME_STATS {
+		t.Errorf("unexpected type: %s", cap3rpc.Type)
 	}
 }
 
@@ -724,5 +746,101 @@ func TestNodeServiceNodeGetInfo(t *testing.T) {
 	}
 	if resp.MaxVolumesPerNode != MaxVolumesPerNode {
 		t.Errorf("unexpected max volumes per node: %d", resp.MaxVolumesPerNode)
+	}
+}
+
+func TestNodeServiceNodeExpandVolume(t *testing.T) {
+	env := newNodeServerTestEnv()
+
+	existingVolume := &csi.Volume{
+		LinuxDevice: "LinuxDevicePath",
+	}
+
+	env.volumeService.GetByIDFunc = func(ctx context.Context, id uint64) (*csi.Volume, error) {
+		if id != 1 {
+			t.Errorf("unexpected volume id passed to volume service: %d", id)
+		}
+		return existingVolume, nil
+	}
+	env.volumeMountService.PathExistsFunc = func(path string) (bool, error) {
+		if path != "LinuxDevicePath" {
+			t.Errorf("unexpected volume path passed to volume mount service: %s", path)
+		}
+		return true, nil
+	}
+	env.volumeResizeService.ResizeFunc = func(volume *csi.Volume, volumePath string) error {
+		if volume != existingVolume {
+			t.Errorf("unexpected volume passed to volume mount service: %v", volume)
+		}
+		if volumePath != "volumePath" {
+			t.Errorf("unexpected volume path passed to volume service: %s", volumePath)
+		}
+		return nil
+	}
+
+	_, err := env.service.NodeExpandVolume(env.ctx, &proto.NodeExpandVolumeRequest{
+		VolumeId:   "1",
+		VolumePath: "volumePath",
+	})
+	if err != nil {
+		t.Fatal(err)
+	}
+}
+
+func TestNodeServiceNodeNodeExpandVolumeNotFound(t *testing.T) {
+	env := newNodeServerTestEnv()
+
+	env.volumeService.GetByIDFunc = func(ctx context.Context, id uint64) (*csi.Volume, error) {
+		return nil, volumes.ErrVolumeNotFound
+	}
+
+	_, err := env.service.NodeExpandVolume(env.ctx, &proto.NodeExpandVolumeRequest{
+		VolumeId:   "1",
+		VolumePath: "volumePath",
+	})
+	if grpc.Code(err) != codes.NotFound {
+		t.Fatalf("unexpected error: %v", err)
+	}
+}
+
+func TestNodeServiceNodeExpandVolumeInputErrors(t *testing.T) {
+	env := newNodeServerTestEnv()
+
+	testCases := []struct {
+		Name string
+		Req  *proto.NodeExpandVolumeRequest
+		Code codes.Code
+	}{
+		{
+			Name: "empty volume id",
+			Req: &proto.NodeExpandVolumeRequest{
+				VolumePath: "volumePath",
+			},
+			Code: codes.InvalidArgument,
+		},
+		{
+			Name: "empty volume path",
+			Req: &proto.NodeExpandVolumeRequest{
+				VolumeId: "1",
+			},
+			Code: codes.InvalidArgument,
+		},
+		{
+			Name: "invalid volume id",
+			Req: &proto.NodeExpandVolumeRequest{
+				VolumeId:   "xxx",
+				VolumePath: "volumePath",
+			},
+			Code: codes.NotFound,
+		},
+	}
+
+	for _, testCase := range testCases {
+		t.Run(testCase.Name, func(t *testing.T) {
+			_, err := env.service.NodeExpandVolume(env.ctx, testCase.Req)
+			if grpc.Code(err) != testCase.Code {
+				t.Fatalf("unexpected error: %s", err)
+			}
+		})
 	}
 }

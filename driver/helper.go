@@ -10,8 +10,7 @@ import (
 func parseVolumeID(id string) (uint64, error) { return strconv.ParseUint(id, 10, 64) }
 func parseNodeID(id string) (uint64, error)   { return strconv.ParseUint(id, 10, 64) }
 
-func volumeSizeFromRequest(req *proto.CreateVolumeRequest) (int, int, bool) {
-	cr := req.GetCapacityRange()
+func volumeSizeFromCapacityRange(cr *proto.CapacityRange) (int, int, bool) {
 	if cr == nil {
 		return DefaultVolumeSize, 0, true
 	}

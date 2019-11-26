@@ -88,6 +88,12 @@ func main() {
 	volumeMountService := volumes.NewLinuxMountService(
 		log.With(logger, "component", "linux-mount-service"),
 	)
+	volumeResizeService := volumes.NewLinuxResizeService(
+		log.With(logger, "component", "linux-resize-service"),
+	)
+	volumeStatsService := volumes.NewLinuxStatsService(
+		log.With(logger, "component", "linux-stats-service"),
+	)
 	controllerService := driver.NewControllerService(
 		log.With(logger, "component", "driver-controller-service"),
 		volumeService,
@@ -101,6 +107,8 @@ func main() {
 		server,
 		volumeService,
 		volumeMountService,
+		volumeResizeService,
+		volumeStatsService,
 	)
 
 	listener, err := net.Listen("unix", endpoint)

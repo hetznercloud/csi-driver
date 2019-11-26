@@ -60,6 +60,20 @@ func (s *IdentityService) GetPluginCapabilities(context.Context, *proto.GetPlugi
 					},
 				},
 			},
+			{
+				Type: &proto.PluginCapability_VolumeExpansion_{
+					VolumeExpansion: &proto.PluginCapability_VolumeExpansion{
+						Type: proto.PluginCapability_VolumeExpansion_ONLINE,
+					},
+				},
+			},
+			{
+				Type: &proto.PluginCapability_VolumeExpansion_{
+					VolumeExpansion: &proto.PluginCapability_VolumeExpansion{
+						Type: proto.PluginCapability_VolumeExpansion_OFFLINE,
+					},
+				},
+			},
 		},
 	}
 	return resp, nil

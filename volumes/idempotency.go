@@ -150,3 +150,7 @@ func (s *IdempotentService) Detach(ctx context.Context, volume *csi.Volume, serv
 		return err
 	}
 }
+
+func (s *IdempotentService) Resize(ctx context.Context, volume *csi.Volume, size int) error {
+	return s.volumeService.Resize(ctx, volume, size)
+}

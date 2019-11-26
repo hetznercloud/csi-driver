@@ -296,3 +296,51 @@ func (s *VolumeService) Detach(ctx context.Context, volume *csi.Volume, server *
 	}
 	return nil
 }
+
+func (s *VolumeService) Resize(ctx context.Context, volume *csi.Volume, size int) error {
+	level.Info(s.logger).Log(
+		"msg", "resize volume",
+		"volume-id", volume.ID,
+		"requested-size", size,
+	)
+
+	hcloudVolume, _, err := s.client.Volume.GetByID(ctx, int(volume.ID))
+	if err != nil {
+		level.Info(s.logger).Log(
+			"msg", "failed to get volume",
+			"volume-id", volume.ID,
+			"err", err,
+		)
+		return err
+	}
+	if hcloudVolume == nil {
+		level.Info(s.logger).Log(
+			"msg", "volume to resize not found",
+			"volume-id", volume.ID,
+		)
+		return volumes.ErrVolumeNotFound
+	}
+
+	action, _, err := s.client.Volume.Resize(ctx, hcloudVolume, size)
+	if err != nil {
+		level.Info(s.logger).Log(
+			"msg", "failed to resize volume",
+			"volume-id", volume.ID,
+			"size", size,
+			"err", err,
+		)
+		return err
+	}
+
+	_, errCh := s.client.Action.WatchProgress(ctx, action)
+	if err := <-errCh; err != nil {
+		level.Info(s.logger).Log(
+			"msg", "failed to resize volume",
+			"volume-id", volume.ID,
+			"size", size,
+			"err", err,
+		)
+		return err
+	}
+	return nil
+}
