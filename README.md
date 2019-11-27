@@ -7,25 +7,9 @@ enabling you to use Volumes within Kubernetes. Please note that this driver **re
 
 ## Getting Started
 
-1. If running Kubernetes < 1.14:
+1. Create an API token in the [Hetzner Cloud Console](https://console.hetzner.cloud/).
 
-   1. Make sure that the following [feature gates](https://kubernetes.io/docs/reference/command-line-tools-reference/feature-gates/)
-      are enabled in your cluster (kubelet and kube-apiserver):
-      ```
-      --feature-gates=CSINodeInfo=true,CSIDriverRegistry=true
-      ```
-
-   2. Create the custom resources `CSINodeInfo` and `CSIDriver` as described in the
-      [CSI objects section in the Kubernetes CSI documentation](https://kubernetes-csi.github.io/docs/csi-objects.html):
-
-      ```
-      kubectl apply -f https://raw.githubusercontent.com/kubernetes/csi-api/release-1.13/pkg/crd/manifests/csidriver.yaml
-      kubectl apply -f https://raw.githubusercontent.com/kubernetes/csi-api/release-1.13/pkg/crd/manifests/csinodeinfo.yaml
-      ```
-
-2. Create an API token in the [Hetzner Cloud Console](https://console.hetzner.cloud/).
-
-3. Create a secret containing the token:
+2. Create a secret containing the token:
 
    ```
    apiVersion: v1
@@ -37,19 +21,14 @@ enabling you to use Volumes within Kubernetes. Please note that this driver **re
      token: YOURTOKEN
    ```
 
-4. Deploy the CSI driver and wait until everything is up and running:
+3. Deploy the CSI driver and wait until everything is up and running:
 
+    Have a look at our [Version Matrix](README.md#version-matrix) to pick the correct deployment file.
    ```
-   kubectl apply -f https://raw.githubusercontent.com/hetznercloud/csi-driver/master/deploy/kubernetes/hcloud-csi.yml
-   ```
-
-   Or, if using Kubernetes < 1.14:
-
-   ```
-   kubectl apply -f https://raw.githubusercontent.com/hetznercloud/csi-driver/master/deploy/kubernetes/hcloud-csi-1.13.yml
+   kubectl apply -f https://raw.githubusercontent.com/hetznercloud/csi-driver/v1.2.0/deploy/kubernetes/hcloud-csi.yml
    ```
 
-5. To verify everything is working, create a persistent volume claim and a pod
+4. To verify everything is working, create a persistent volume claim and a pod
    which uses that volume:
 
    ```
@@ -88,6 +67,14 @@ enabling you to use Volumes within Kubernetes. Please note that this driver **re
    ```
    kubectl exec -it my-csi-app -- /bin/sh
    ```
+
+## Version Matrix
+
+| Kubernetes    | CSI Driver   | Deployment File |
+| ------------- | -----:| ------------------------------------------------------------------------------------------------------:|
+| 1.16          | 1.2.0 | https://raw.githubusercontent.com/hetznercloud/csi-driver/v1.2.0/deploy/kubernetes/hcloud-csi.yml      |
+| 1.14-1.15     | 1.1.5 | https://raw.githubusercontent.com/hetznercloud/csi-driver/v1.1.5/deploy/kubernetes/hcloud-csi.yml      |
+| 1.13          | 1.1.5 | https://raw.githubusercontent.com/hetznercloud/csi-driver/v1.1.5/deploy/kubernetes/hcloud-csi-1.13.yml |
 
 ## License
 

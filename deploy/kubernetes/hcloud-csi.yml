@@ -1,12 +1,4 @@
 ---
-apiVersion: storage.k8s.io/v1beta1
-kind: CSIDriver
-metadata:
-  name: csi.hetzner.cloud
-spec:
-  attachRequired: true
-  podInfoOnMount: true
----
 kind: StorageClass
 apiVersion: storage.k8s.io/v1
 metadata:
@@ -16,6 +8,7 @@ metadata:
     storageclass.kubernetes.io/is-default-class: "true"
 provisioner: csi.hetzner.cloud
 volumeBindingMode: WaitForFirstConsumer
+allowVolumeExpansion: true
 ---
 apiVersion: v1
 kind: ServiceAccount
@@ -35,8 +28,8 @@ rules:
   - apiGroups: [""]
     resources: ["nodes"]
     verbs: ["get", "list", "watch"]
-  - apiGroups: ["storage.k8s.io"]
-    resources: ["csinodes"]
+  - apiGroups: ["csi.storage.k8s.io"]
+    resources: ["csinodeinfos"]
     verbs: ["get", "list", "watch"]
   - apiGroups: ["storage.k8s.io"]
     resources: ["volumeattachments"]
@@ -63,6 +56,13 @@ rules:
   - apiGroups: ["snapshot.storage.k8s.io"]
     resources: ["volumesnapshotcontents"]
     verbs: ["get", "list"]
+  # cluster registrar
+  - apiGroups: ["apiextensions.k8s.io"]
+    resources: ["customresourcedefinitions"]
+    verbs: ["create", "list", "watch", "delete"]
+  - apiGroups: ["csi.storage.k8s.io"]
+    resources: ["csidrivers"]
+    verbs: ["create", "list", "watch", "delete"]
   # node
   - apiGroups: [""]
     resources: ["events"]
@@ -100,7 +100,20 @@ spec:
       serviceAccount: hcloud-csi
       containers:
         - name: csi-attacher
-          image: quay.io/k8scsi/csi-attacher:v1.1.1
+          image: quay.io/k8scsi/csi-attacher:v1.2.0
+          args:
+            - --csi-address=/var/lib/csi/sockets/pluginproxy/csi.sock
+            - --v=5
+          volumeMounts:
+            - name: socket-dir
+              mountPath: /var/lib/csi/sockets/pluginproxy/
+          securityContext:
+            privileged: true
+            capabilities:
+              add: ["SYS_ADMIN"]
+            allowPrivilegeEscalation: true
+        - name: csi-resizer
+          image: quay.io/k8scsi/csi-resizer:v0.3.0
           args:
             - --csi-address=/var/lib/csi/sockets/pluginproxy/csi.sock
             - --v=5
@@ -113,7 +126,7 @@ spec:
               add: ["SYS_ADMIN"]
             allowPrivilegeEscalation: true
         - name: csi-provisioner
-          image: quay.io/k8scsi/csi-provisioner:v1.2.1
+          image: quay.io/k8scsi/csi-provisioner:v1.3.0
           args:
             - --provisioner=csi.hetzner.cloud
             - --csi-address=/var/lib/csi/sockets/pluginproxy/csi.sock
@@ -127,8 +140,17 @@ spec:
             capabilities:
               add: ["SYS_ADMIN"]
             allowPrivilegeEscalation: true
+        - name: csi-cluster-driver-registrar
+          image: quay.io/k8scsi/csi-cluster-driver-registrar:v1.0.1
+          args:
+            - --pod-info-mount-version="v1"
+            - --csi-address=/var/lib/csi/sockets/pluginproxy/csi.sock
+            - --v=5
+          volumeMounts:
+            - name: socket-dir
+              mountPath: /var/lib/csi/sockets/pluginproxy/
         - name: hcloud-csi-driver
-          image: hetznercloud/hcloud-csi-driver:1.1.5
+          image: hetznercloud/hcloud-csi-driver:1.2.0
           imagePullPolicy: Always
           env:
             - name: CSI_ENDPOINT
@@ -143,14 +165,14 @@ spec:
           volumeMounts:
             - name: socket-dir
               mountPath: /var/lib/csi/sockets/pluginproxy/
+          ports:
+            - containerPort: 9189
+              name: metrics
           securityContext:
             privileged: true
             capabilities:
               add: ["SYS_ADMIN"]
             allowPrivilegeEscalation: true
-          ports:
-            - containerPort: 9189
-              name: metrics
       volumes:
         - name: socket-dir
           emptyDir: {}
@@ -193,7 +215,7 @@ spec:
           securityContext:
             privileged: true
         - name: hcloud-csi-driver
-          image: hetznercloud/hcloud-csi-driver:1.1.5
+          image: hetznercloud/hcloud-csi-driver:1.2.0
           imagePullPolicy: Always
           env:
             - name: CSI_ENDPOINT
@@ -218,7 +240,6 @@ spec:
           ports:
             - containerPort: 9189
               name: metrics
-
       volumes:
         - name: kubelet-dir
           hostPath:
