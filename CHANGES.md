@@ -1,6 +1,6 @@
 # Changes
 
-## master
+## v1.2.0
 
 - Implement volume resizing
 - Implement volume statistics
