@@ -9,11 +9,11 @@ require (
 	github.com/grpc-ecosystem/go-grpc-middleware v1.1.0
 	github.com/grpc-ecosystem/go-grpc-prometheus v1.2.0
 	github.com/hetznercloud/hcloud-go v1.17.0
-	github.com/kubernetes-csi/csi-test v2.4.0-rc1+incompatible
+	github.com/kubernetes-csi/csi-test/v3 v3.0.0-20191125181725-b9c750e7d185
 	github.com/prometheus/client_golang v1.1.0
 	github.com/spf13/afero v1.2.0 // indirect
-	golang.org/x/sys v0.0.0-20190801041406-cbf593c0f2f3
-	google.golang.org/grpc v1.19.0
+	golang.org/x/sys v0.0.0-20191113165036-4c7a9d0fe056
+	google.golang.org/grpc v1.25.1
 	k8s.io/apimachinery v0.0.0-20181215012845-4d029f033399 // indirect
 	k8s.io/klog v0.1.0 // indirect
 	k8s.io/kubernetes v1.14.0

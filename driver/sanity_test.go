@@ -12,7 +12,7 @@ import (
 	proto "github.com/container-storage-interface/spec/lib/go/csi"
 	"github.com/go-kit/kit/log"
 	"github.com/hetznercloud/hcloud-go/hcloud"
-	"github.com/kubernetes-csi/csi-test/pkg/sanity"
+	"github.com/kubernetes-csi/csi-test/v3/pkg/sanity"
 	"google.golang.org/grpc"
 
 	"hetzner.cloud/csi/csi"
@@ -82,11 +82,11 @@ func TestSanity(t *testing.T) {
 	}
 	defer os.RemoveAll(tempDir)
 
-	sanity.Test(t, &sanity.Config{
-		StagingPath: tempDir + "/hcloud-csi-sanity-staging",
-		TargetPath:  tempDir + "/hcloud-csi-sanity-target",
-		Address:     endpoint,
-	})
+	testConfig := sanity.NewTestConfig()
+	testConfig.StagingPath = tempDir + "/hcloud-csi-sanity-staging"
+	testConfig.TargetPath = tempDir + "/hcloud-csi-sanity-target"
+	testConfig.Address = endpoint
+	sanity.Test(t, testConfig)
 }
 
 type sanityVolumeService struct {
