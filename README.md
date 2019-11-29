@@ -12,6 +12,7 @@ enabling you to use Volumes within Kubernetes. Please note that this driver **re
 2. Create a secret containing the token:
 
    ```
+   # secret.yml
    apiVersion: v1
    kind: Secret
    metadata:
@@ -19,6 +20,11 @@ enabling you to use Volumes within Kubernetes. Please note that this driver **re
      namespace: kube-system
    stringData:
      token: YOURTOKEN
+   ```
+   
+   and apply it: 
+   ```
+   kubectl apply -f <secret.yml>
    ```
 
 3. Deploy the CSI driver and wait until everything is up and running:
