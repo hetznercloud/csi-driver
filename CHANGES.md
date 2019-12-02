@@ -1,5 +1,9 @@
 # Changes
 
+## v1.2.1
+
+- Add missing RBAC rules required for newer k8s version
+
 ## v1.2.0
 
 - Implement volume resizing
