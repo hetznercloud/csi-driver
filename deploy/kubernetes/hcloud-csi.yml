@@ -32,8 +32,11 @@ rules:
     resources: ["csinodeinfos"]
     verbs: ["get", "list", "watch"]
   - apiGroups: ["storage.k8s.io"]
+    resources: ["csinodes"]
+    verbs: ["get", "list", "watch"]
+  - apiGroups: ["storage.k8s.io"]
     resources: ["volumeattachments"]
-    verbs: ["get", "list", "watch", "update"]
+    verbs: ["get", "list", "watch", "update", "patch"]
   # provisioner
   - apiGroups: [""]
     resources: ["secrets"]
