@@ -1,4 +1,12 @@
 ---
+apiVersion: storage.k8s.io/v1beta1
+kind: CSIDriver
+metadata:
+  name: csi.hetzner.cloud
+spec:
+  attachRequired: true
+  podInfoOnMount: true
+---
 kind: StorageClass
 apiVersion: storage.k8s.io/v1
 metadata:
@@ -59,13 +67,6 @@ rules:
   - apiGroups: ["snapshot.storage.k8s.io"]
     resources: ["volumesnapshotcontents"]
     verbs: ["get", "list"]
-  # cluster registrar
-  - apiGroups: ["apiextensions.k8s.io"]
-    resources: ["customresourcedefinitions"]
-    verbs: ["create", "list", "watch", "delete"]
-  - apiGroups: ["csi.storage.k8s.io"]
-    resources: ["csidrivers"]
-    verbs: ["create", "list", "watch", "delete"]
   # node
   - apiGroups: [""]
     resources: ["events"]
@@ -143,15 +144,6 @@ spec:
             capabilities:
               add: ["SYS_ADMIN"]
             allowPrivilegeEscalation: true
-        - name: csi-cluster-driver-registrar
-          image: quay.io/k8scsi/csi-cluster-driver-registrar:v1.0.1
-          args:
-            - --pod-info-mount-version="v1"
-            - --csi-address=/var/lib/csi/sockets/pluginproxy/csi.sock
-            - --v=5
-          volumeMounts:
-            - name: socket-dir
-              mountPath: /var/lib/csi/sockets/pluginproxy/
         - name: hcloud-csi-driver
           image: hetznercloud/hcloud-csi-driver:1.2.1
           imagePullPolicy: Always
