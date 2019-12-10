@@ -556,9 +556,9 @@ func TestControllerServicePublishVolumeAttachErrors(t *testing.T) {
 			Code:        codes.ResourceExhausted,
 		},
 		{
-			Name:        "aborted",
+			Name:        "unavailable",
 			AttachError: volumes.ErrLockedServer,
-			Code:        codes.Aborted,
+			Code:        codes.Unavailable,
 		},
 	}
 
@@ -693,9 +693,9 @@ func TestControllerServiceUnpublishVolumeDetachErrors(t *testing.T) {
 			Code:        codes.NotFound,
 		},
 		{
-			Name:        "aborted",
+			Name:        "unavailable",
 			DetachError: volumes.ErrLockedServer,
-			Code:        codes.Aborted,
+			Code:        codes.Unavailable,
 		},
 	}
 

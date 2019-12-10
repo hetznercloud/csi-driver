@@ -164,7 +164,7 @@ func (s *ControllerService) ControllerPublishVolume(ctx context.Context, req *pr
 		case volumes.ErrAttachLimitReached:
 			code = codes.ResourceExhausted
 		case volumes.ErrLockedServer:
-			code = codes.Aborted
+			code = codes.Unavailable
 		}
 		return nil, status.Error(code, fmt.Sprintf("failed to publish volume: %s", err))
 	}
@@ -201,7 +201,7 @@ func (s *ControllerService) ControllerUnpublishVolume(ctx context.Context, req *
 		case volumes.ErrServerNotFound:
 			code = codes.NotFound
 		case volumes.ErrLockedServer:
-			code = codes.Aborted
+			code = codes.Unavailable
 		}
 		return nil, status.Error(code, fmt.Sprintf("failed to unpublish volume: %s", err))
 	}
