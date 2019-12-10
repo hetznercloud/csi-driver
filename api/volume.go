@@ -205,6 +205,9 @@ func (s *VolumeService) Attach(ctx context.Context, volume *csi.Volume, server *
 		if hcloud.IsError(err, hcloud.ErrorCodeLocked) {
 			return volumes.ErrLockedServer
 		}
+		if hcloud.IsError(err, hcloud.ErrorCode("volume_already_attached")) {
+			return volumes.ErrAttached
+		}
 		return err
 	}
 

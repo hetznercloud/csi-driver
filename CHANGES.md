@@ -1,5 +1,9 @@
 # Changes
 
+## master
+
+- Fix usage of `Aborted` error code, which leads to an increasing CPU usage
+
 ## v1.2.1
 
 - Add missing RBAC rules required for newer k8s version
