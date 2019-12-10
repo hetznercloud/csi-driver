@@ -1,6 +1,6 @@
 # Changes
 
-## master
+## v1.2.2
 
 - Fix usage of `Aborted` error code, which leads to an increasing CPU usage
 
