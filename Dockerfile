@@ -6,6 +6,6 @@ ADD . /csi/
 RUN CGO_ENABLED=0 go build -o driver.bin hetzner.cloud/csi/cmd/driver
 
 FROM alpine:3.10
-RUN apk add --no-cache ca-certificates e2fsprogs xfsprogs blkid xfsprogs-extra
+RUN apk add --no-cache ca-certificates e2fsprogs xfsprogs blkid xfsprogs-extra e2fsprogs-extra
 COPY --from=builder /csi/driver.bin /bin/hcloud-csi-driver
 ENTRYPOINT ["/bin/hcloud-csi-driver"]
