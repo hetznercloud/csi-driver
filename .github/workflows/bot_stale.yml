@@ -1,7 +1,7 @@
 name: "Close stale issues"
 on:
   schedule:
-    - cron: "0 0 * * *"
+    - cron: "30 12 * * *"
 jobs:
   stale:
     runs-on: ubuntu-latest
@@ -10,5 +10,10 @@ jobs:
         with:
           repo-token: ${{ secrets.GITHUB_TOKEN }}
           stale-issue-message: 'This issue has been marked as stale because it has not had recent activity. The bot will close the issue if no further action occurs.'
+          exempt-issue-label: 'pinned'
+          stale-issue-label: 'stale'
+          stale-pr-message: 'This PR has been marked as stale because it has not had recent activity. The bot will close the PR if no further action occurs.'
+          exempt-pr-label: 'pinned'
+          stale-pr-label: 'stale'
           days-before-stale: 30
           days-before-close: 5
