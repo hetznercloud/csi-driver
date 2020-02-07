@@ -60,6 +60,13 @@ func main() {
 		os.Exit(2)
 	}
 
+	if len(apiToken) != 64 {
+		level.Error(logger).Log(
+			"msg", "entered token is invalid (must be exactly 64 characters long)",
+		)
+		os.Exit(2)
+	}
+
 	hcloudServerID := getServerID()
 
 	hcloudClient := hcloud.NewClient(
