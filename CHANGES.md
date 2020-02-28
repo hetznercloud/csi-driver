@@ -1,8 +1,10 @@
 # Changes
 
-## master
+## v1.2.3
 
+- Add missing RBAC rules required for newer k8s version
 - Install `e2fsprogs-extra` for resizing
+- Add better error handling and validation for certain errors related to wrong API tokens
 
 ## v1.2.2
 
