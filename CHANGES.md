@@ -1,5 +1,9 @@
 # Changes
 
+## master
+
+- Update Go to 1.14
+
 ## v1.2.3
 
 - Add missing RBAC rules required for newer k8s version
