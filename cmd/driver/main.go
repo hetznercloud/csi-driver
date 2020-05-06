@@ -74,16 +74,13 @@ func main() {
 	}
 
 	enableDebug := os.Getenv("HCLOUD_DEBUG")
-	if enableDebug == "yes" {
+	if enableDebug != "" {
 		opts = append(opts, hcloud.WithDebugWriter(os.Stdout))
 	}
 
-	customPollingInterval := os.Getenv("HCLOUD_POLLING_INTERVAL")
+	customPollingInterval := os.Getenv("HCLOUD_POLLING_INTERVAL_SECONDS")
 	pollingInterval := 1
 	if customPollingInterval != "" {
-		level.Info(logger).Log(
-			"msg", "Got custom configuration for polling interval",
-		)
 		tmp, err := strconv.Atoi(customPollingInterval)
 		if err != nil {
 			level.Error(logger).Log(
@@ -91,6 +88,16 @@ func main() {
 			)
 			os.Exit(2)
 		}
+		if tmp < 1 {
+			level.Error(logger).Log(
+				"msg", "entered polling interval configuration needs to be more then 1",
+			)
+			os.Exit(2)
+		}
+		level.Info(logger).Log(
+			"msg", "Got custom configuration for polling interval", customPollingInterval,
+		)
+
 		pollingInterval = tmp
 	}
 	opts = append(opts, hcloud.WithPollInterval(time.Duration(pollingInterval)*time.Second))

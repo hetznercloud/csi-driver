@@ -30,7 +30,7 @@ func (l *LinuxStatsService) ByteFilesystemStats(volumePath string) (totalBytes i
 	}
 	availableBytes = int64(statfs.Bavail) * int64(statfs.Bsize)
 	usedBytes = (int64(statfs.Blocks) - int64(statfs.Bfree)) * int64(statfs.Bsize)
-	totalBytes = availableBytes + usedBytes
+	totalBytes = int64(statfs.Blocks) * int64(statfs.Bsize)
 	return
 }
 
