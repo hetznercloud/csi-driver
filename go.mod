@@ -1,6 +1,6 @@
 module hetzner.cloud/csi
 
-go 1.13
+go 1.14
 
 require (
 	github.com/container-storage-interface/spec v1.2.0
