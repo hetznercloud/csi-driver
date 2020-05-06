@@ -216,8 +216,8 @@ func (s *sanityResizeService) Resize(volume *csi.Volume, volumePath string) erro
 
 type sanityStatsService struct{}
 
-func (s *sanityStatsService) ByteFilesystemStats(volumePath string) (availableBytes int64, usedBytes int64, err error) {
-	return 1, 1, nil
+func (s *sanityStatsService) ByteFilesystemStats(volumePath string) (totalBytes int64, availableBytes int64, usedBytes int64, err error) {
+	return 1, 1, 1, nil
 }
 func (s *sanityStatsService) INodeFilesystemStats(volumePath string) (total int64, used int64, free int64, err error) {
 	return 1, 1, 1, nil

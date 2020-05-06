@@ -202,30 +202,15 @@ func (s *NodeService) NodeGetVolumeStats(ctx context.Context, req *proto.NodeGet
 		return nil, status.Error(codes.InvalidArgument, "missing volume path")
 	}
 
-	volumeID, err := parseVolumeID(req.VolumeId)
-	if err != nil {
-		return nil, status.Error(codes.NotFound, "volume not found")
-	}
-
-	volume, err := s.volumeService.GetByID(ctx, volumeID)
-	if err != nil {
-		switch err {
-		case volumes.ErrVolumeNotFound:
-			return nil, status.Error(codes.NotFound, "volume not found")
-		default:
-			return nil, status.Error(codes.Internal, fmt.Sprintf("failed to get volume: %s", err))
-		}
-	}
-
 	volumeExists, err := s.volumeMountService.PathExists(req.VolumePath)
 	if err != nil {
 		return nil, status.Error(codes.Internal, fmt.Sprintf("failed to check for volume existence: %s", err))
 	}
 	if !volumeExists {
-		return nil, status.Error(codes.NotFound, fmt.Sprintf("volume %s is not available on this node %v", volume.LinuxDevice, s.server.ID))
+		return nil, status.Error(codes.NotFound, fmt.Sprintf("volume %s is not available on this node %v", req.VolumePath, s.server.ID))
 	}
 
-	availableBytes, usedBytes, err := s.volumeStatsService.ByteFilesystemStats(req.VolumePath)
+	totalBytes, availableBytes, usedBytes, err := s.volumeStatsService.ByteFilesystemStats(req.VolumePath)
 	if err != nil {
 		return nil, status.Error(codes.Internal, fmt.Sprintf("failed to get volume byte stats: %s", err))
 	}
@@ -240,7 +225,7 @@ func (s *NodeService) NodeGetVolumeStats(ctx context.Context, req *proto.NodeGet
 			{
 				Unit:      proto.VolumeUsage_BYTES,
 				Available: availableBytes,
-				Total:     volume.SizeBytes(),
+				Total:     totalBytes,
 				Used:      usedBytes,
 			},
 			{
