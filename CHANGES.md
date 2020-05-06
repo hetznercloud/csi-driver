@@ -2,6 +2,10 @@
 
 ## master
 
+- Update `csi-attacher` sidecar to v2.2.0
+- Update `csi-provisioner` sidecar to v1.6.0
+- Update `csi-node-driver-registrar` sidecar to v1.3.0
+- Add livenessProbe support
 - Update Go to 1.14
 
 ## v1.2.3
