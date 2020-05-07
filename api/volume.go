@@ -2,6 +2,7 @@ package api
 
 import (
 	"context"
+	"time"
 
 	"github.com/go-kit/kit/log"
 	"github.com/go-kit/kit/log/level"
@@ -210,7 +211,7 @@ func (s *VolumeService) Attach(ctx context.Context, volume *csi.Volume, server *
 		}
 		return err
 	}
-
+	time.Sleep(3 * time.Second) // We know that the Attach action will take some time, so we wait 3 seconds before starting polling the action status. Within these 3 seconds the volume attach action may be already finished.
 	_, errCh := s.client.Action.WatchProgress(ctx, action)
 	if err := <-errCh; err != nil {
 		level.Info(s.logger).Log(

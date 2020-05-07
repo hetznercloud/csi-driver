@@ -121,11 +121,11 @@ func (s *VolumeResizeService) Resize(volume *csi.Volume, volumePath string) erro
 }
 
 type VolumeStatsService struct {
-	ByteFilesystemStatsFunc  func(volumePath string) (availableBytes int64, usedBytes int64, err error)
+	ByteFilesystemStatsFunc  func(volumePath string) (totalBytes int64, availableBytes int64, usedBytes int64, err error)
 	INodeFilesystemStatsFunc func(volumePath string) (total int64, used int64, free int64, err error)
 }
 
-func (s *VolumeStatsService) ByteFilesystemStats(volumePath string) (availableBytes int64, usedBytes int64, err error) {
+func (s *VolumeStatsService) ByteFilesystemStats(volumePath string) (totalBytes int64, availableBytes int64, usedBytes int64, err error) {
 	if s.ByteFilesystemStatsFunc == nil {
 		panic("not implemented")
 	}

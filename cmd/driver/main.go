@@ -8,6 +8,7 @@ import (
 	"os"
 	"strconv"
 	"strings"
+	"time"
 
 	proto "github.com/container-storage-interface/spec/lib/go/csi"
 	"github.com/go-kit/kit/log"
@@ -67,13 +68,37 @@ func main() {
 		os.Exit(2)
 	}
 
-	hcloudServerID := getServerID()
-
-	hcloudClient := hcloud.NewClient(
+	opts := []hcloud.ClientOption{
 		hcloud.WithToken(apiToken),
 		hcloud.WithApplication("csi-driver", driver.PluginVersion),
-	)
+	}
 
+	enableDebug := os.Getenv("HCLOUD_DEBUG")
+	if enableDebug != "" {
+		opts = append(opts, hcloud.WithDebugWriter(os.Stdout))
+	}
+
+	pollingInterval := 1
+	if customPollingInterval := os.Getenv("HCLOUD_POLLING_INTERVAL_SECONDS"); customPollingInterval != "" {
+		tmp, err := strconv.Atoi(customPollingInterval)
+		if err != nil || tmp < 1 {
+			level.Error(logger).Log(
+				"msg", "entered polling interval configuration is not a integer that is higher than 1",
+			)
+			os.Exit(2)
+		}
+		level.Info(logger).Log(
+			"msg", "got custom configuration for polling interval",
+			"interval", customPollingInterval,
+		)
+
+		pollingInterval = tmp
+	}
+	opts = append(opts, hcloud.WithPollInterval(time.Duration(pollingInterval)*time.Second))
+
+	hcloudClient := hcloud.NewClient(opts...)
+
+	hcloudServerID := getServerID()
 	level.Debug(logger).Log("msg", "fetching server")
 	server, _, err := hcloudClient.Server.GetByID(context.Background(), hcloudServerID)
 	if err != nil {

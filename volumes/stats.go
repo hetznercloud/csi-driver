@@ -7,7 +7,7 @@ import (
 
 // StatsService get statistics about mounted volumes.
 type StatsService interface {
-	ByteFilesystemStats(volumePath string) (availableBytes int64, usedBytes int64, err error)
+	ByteFilesystemStats(volumePath string) (totalBytes int64, availableBytes int64, usedBytes int64, err error)
 	INodeFilesystemStats(volumePath string) (total int64, used int64, free int64, err error)
 }
 
@@ -22,7 +22,7 @@ func NewLinuxStatsService(logger log.Logger) *LinuxStatsService {
 	}
 }
 
-func (l *LinuxStatsService) ByteFilesystemStats(volumePath string) (availableBytes int64, usedBytes int64, err error) {
+func (l *LinuxStatsService) ByteFilesystemStats(volumePath string) (totalBytes int64, availableBytes int64, usedBytes int64, err error) {
 	statfs := &unix.Statfs_t{}
 	err = unix.Statfs(volumePath, statfs)
 	if err != nil {
@@ -30,6 +30,7 @@ func (l *LinuxStatsService) ByteFilesystemStats(volumePath string) (availableByt
 	}
 	availableBytes = int64(statfs.Bavail) * int64(statfs.Bsize)
 	usedBytes = (int64(statfs.Blocks) - int64(statfs.Bfree)) * int64(statfs.Bsize)
+	totalBytes = int64(statfs.Blocks) * int64(statfs.Bsize)
 	return
 }
 

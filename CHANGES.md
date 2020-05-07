@@ -1,12 +1,14 @@
 # Changes
 
 ## master
-
 - Update `csi-attacher` sidecar to v2.2.0
 - Update `csi-provisioner` sidecar to v1.6.0
 - Update `csi-node-driver-registrar` sidecar to v1.3.0
 - Add livenessProbe support
 - Update Go to 1.14
+- Reduce the amount of API calls from CSI driver
+- Add option to configure the Action polling interval via `HCLOUD_POLLING_INTERVAL_SECONDS`
+- Add option to enable the debug mode via `HCLOUD_DEBUG`
 
 ## v1.2.3
 
