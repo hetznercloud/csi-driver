@@ -88,7 +88,8 @@ func main() {
 			os.Exit(2)
 		}
 		level.Info(logger).Log(
-			"msg", "got custom configuration for polling interval", customPollingInterval,
+			"msg", "got custom configuration for polling interval",
+			"interval", customPollingInterval,
 		)
 
 		pollingInterval = tmp
