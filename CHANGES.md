@@ -1,5 +1,9 @@
 # Changes
 
+## v1.3.1
+
+- Add correct deployment file for latest version
+
 ## v1.3.0
 
 - Update `csi-attacher` sidecar to v2.2.0
