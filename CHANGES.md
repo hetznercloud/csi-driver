@@ -1,5 +1,9 @@
 # Changes
 
+## master
+
+- Fix stuck volume terminating when the volume was already deleted
+
 ## v1.3.1
 
 - Add correct deployment file for latest version
