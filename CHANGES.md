@@ -1,6 +1,6 @@
 # Changes
 
-## master
+## v1.3.2
 
 - Fix stuck volume terminating when the volume was already deleted
 
