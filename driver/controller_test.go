@@ -683,11 +683,6 @@ func TestControllerServiceUnpublishVolumeDetachErrors(t *testing.T) {
 		Code        codes.Code
 	}{
 		{
-			Name:        "volume not found",
-			DetachError: volumes.ErrVolumeNotFound,
-			Code:        codes.NotFound,
-		},
-		{
 			Name:        "server not found",
 			DetachError: volumes.ErrServerNotFound,
 			Code:        codes.NotFound,
