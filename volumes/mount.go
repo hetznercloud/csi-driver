@@ -3,6 +3,7 @@ package volumes
 import (
 	"fmt"
 	"os"
+	"strings"
 
 	"github.com/go-kit/kit/log"
 	"github.com/go-kit/kit/log/level"
@@ -15,15 +16,10 @@ const DefaultFSType = "ext4"
 
 // MountOpts specifies options for mounting a volume.
 type MountOpts struct {
-	FSType     string
-	Readonly   bool
-	Additional []string // Additional mount options/flags passed to /bin/mount
-}
-
-func NewMountOpts() MountOpts {
-	return MountOpts{
-		FSType: DefaultFSType,
-	}
+	BlockVolume bool
+	FSType      string
+	Readonly    bool
+	Additional  []string // Additional mount options/flags passed to /bin/mount
 }
 
 // MountService mounts volumes.
@@ -52,6 +48,10 @@ func NewLinuxMountService(logger log.Logger) *LinuxMountService {
 }
 
 func (s *LinuxMountService) Stage(volume *csi.Volume, stagingTargetPath string, opts MountOpts) error {
+	if opts.FSType == "" {
+		opts.FSType = DefaultFSType
+	}
+
 	level.Debug(s.logger).Log(
 		"msg", "staging volume",
 		"volume-name", volume.Name,
@@ -87,27 +87,35 @@ func (s *LinuxMountService) Unstage(volume *csi.Volume, stagingTargetPath string
 }
 
 func (s *LinuxMountService) Publish(volume *csi.Volume, targetPath string, stagingTargetPath string, opts MountOpts) error {
-	level.Debug(s.logger).Log(
-		"msg", "publishing volume",
-		"volume-name", volume.Name,
-		"target-path", targetPath,
-		"staging-target-path", stagingTargetPath,
-		"fs-type", opts.FSType,
-		"readonly", opts.Readonly,
-		"additional-mount-options", opts.Additional,
-	)
-
-	if err := s.mounter.Interface.MakeDir(targetPath); err != nil {
-		return err
+	if opts.BlockVolume {
+		if err := s.mounter.Interface.MakeFile(targetPath); err != nil {
+			return err
+		}
+	} else {
+		if opts.FSType == "" {
+			opts.FSType = DefaultFSType
+		}
+		if err := s.mounter.Interface.MakeDir(targetPath); err != nil {
+			return err
+		}
 	}
 
 	options := []string{"bind"}
 	if opts.Readonly {
 		options = append(options, "ro")
 	}
-	for _, o := range opts.Additional {
-		options = append(options, o)
-	}
+	options = append(options, opts.Additional...)
+
+	level.Debug(s.logger).Log(
+		"msg", "publishing volume",
+		"volume-name", volume.Name,
+		"target-path", targetPath,
+		"staging-target-path", stagingTargetPath,
+		"fs-type", opts.FSType,
+		"block-volume", opts.BlockVolume,
+		"readonly", opts.Readonly,
+		"mount-options", strings.Join(options, ", "),
+	)
 
 	if err := s.mounter.Interface.Mount(stagingTargetPath, targetPath, opts.FSType, options); err != nil {
 		return err
