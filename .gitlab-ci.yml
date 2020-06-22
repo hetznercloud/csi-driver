@@ -1,0 +1,12 @@
+---
+include:
+  - project: "hc/ops/ci"
+    file: "k8s/release.yml"
+
+stages:
+  - build
+  - release
+
+variables:
+  GOPROXY: goproxy.prodext.hcinfra.de
+  GONOSUMDB: hetzner.cloud

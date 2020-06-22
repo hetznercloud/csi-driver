@@ -107,6 +107,32 @@ func TestNodeServiceNodeStageVolume(t *testing.T) {
 	}
 }
 
+func TestNodeServiceNodeStageBlockVolume(t *testing.T) {
+	env := newNodeServerTestEnv()
+
+	existingVolume := &csi.Volume{ID: 1}
+	env.volumeService.GetByIDFunc = func(_ context.Context, id uint64) (*csi.Volume, error) {
+		if id != existingVolume.ID {
+			t.Errorf("unexpected volume id: %d", id)
+		}
+		return existingVolume, nil
+	}
+
+	_, err := env.service.NodeStageVolume(env.ctx, &proto.NodeStageVolumeRequest{
+		VolumeId:          "1",
+		StagingTargetPath: "staging",
+		VolumeCapability: &proto.VolumeCapability{
+			AccessMode: &proto.VolumeCapability_AccessMode{
+				Mode: proto.VolumeCapability_AccessMode_SINGLE_NODE_WRITER,
+			},
+			AccessType: &proto.VolumeCapability_Block{Block: &proto.VolumeCapability_BlockVolume{}},
+		},
+	})
+	if err != nil {
+		t.Fatal(err)
+	}
+}
+
 func TestNodeServiceNodeStageVolumeNotFound(t *testing.T) {
 	env := newNodeServerTestEnv()
 
@@ -168,6 +194,10 @@ func TestNodeServiceNodeStageVolumeStageError(t *testing.T) {
 func TestNodeServiceNodeStageVolumeInputErrors(t *testing.T) {
 	env := newNodeServerTestEnv()
 
+	env.volumeService.GetByIDFunc = func(ctx context.Context, id uint64) (*csi.Volume, error) {
+		return &csi.Volume{}, nil
+	}
+
 	testCases := []struct {
 		Name string
 		Req  *proto.NodeStageVolumeRequest
@@ -218,7 +248,7 @@ func TestNodeServiceNodeStageVolumeInputErrors(t *testing.T) {
 			Code: codes.InvalidArgument,
 		},
 		{
-			Name: "no mount access type",
+			Name: "unsupported access type",
 			Req: &proto.NodeStageVolumeRequest{
 				VolumeId:          "1",
 				StagingTargetPath: "staging",
@@ -416,6 +446,51 @@ func TestNodeServiceNodePublishVolume(t *testing.T) {
 	}
 }
 
+func TestNodeServiceNodePublishBlockVolume(t *testing.T) {
+	env := newNodeServerTestEnv()
+
+	existingVolume := &csi.Volume{ID: 1, LinuxDevice: "linuxDevicePath"}
+	env.volumeService.GetByIDFunc = func(_ context.Context, id uint64) (*csi.Volume, error) {
+		if id != existingVolume.ID {
+			t.Errorf("unexpected volume id passed to volume service: %d", id)
+		}
+		return existingVolume, nil
+	}
+
+	env.volumeMountService.PublishFunc = func(
+		volume *csi.Volume, targetPath, stagingTargetPath string, opts volumes.MountOpts,
+	) error {
+		if volume != existingVolume {
+			t.Errorf("unexpected volume: %v", volume)
+		}
+		if targetPath != "target" {
+			t.Errorf("unexpected target path: %s", targetPath)
+		}
+		if stagingTargetPath != volume.LinuxDevice {
+			t.Errorf("unexpected staging target path: %s", stagingTargetPath)
+		}
+		return nil
+	}
+
+	_, err := env.service.NodePublishVolume(env.ctx, &proto.NodePublishVolumeRequest{
+		VolumeId:          "1",
+		StagingTargetPath: "staging",
+		TargetPath:        "target",
+		VolumeCapability: &proto.VolumeCapability{
+			AccessMode: &proto.VolumeCapability_AccessMode{
+				Mode: proto.VolumeCapability_AccessMode_SINGLE_NODE_WRITER,
+			},
+			AccessType: &proto.VolumeCapability_Block{
+				Block: &proto.VolumeCapability_BlockVolume{},
+			},
+		},
+	})
+
+	if err != nil {
+		t.Fatal(err)
+	}
+}
+
 func TestNodeServiceNodePublishVolumeNotFound(t *testing.T) {
 	env := newNodeServerTestEnv()
 
@@ -478,6 +553,10 @@ func TestNodeServiceNodePublishPublishError(t *testing.T) {
 
 func TestNodeServiceNodePublishVolumeInputErrors(t *testing.T) {
 	env := newNodeServerTestEnv()
+
+	env.volumeService.GetByIDFunc = func(ctx context.Context, id uint64) (*csi.Volume, error) {
+		return &csi.Volume{}, nil
+	}
 
 	testCases := []struct {
 		Name string

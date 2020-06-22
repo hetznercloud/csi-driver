@@ -1,5 +1,9 @@
 # Changes
 
+## v1.4.0
+
+- Allow mounting of Hetzner Cloud Volumes as raw block volumes.
+
 ## v1.3.2
 
 - Fix stuck volume terminating when the volume was already deleted

@@ -52,11 +52,6 @@ func (s *NodeService) NodeStageVolume(ctx context.Context, req *proto.NodeStageV
 		return nil, status.Error(codes.InvalidArgument, "missing volume capability")
 	}
 
-	mount := req.VolumeCapability.GetMount()
-	if mount == nil {
-		return nil, status.Error(codes.InvalidArgument, "no mount capability")
-	}
-
 	volumeID, err := parseVolumeID(req.VolumeId)
 	if err != nil {
 		return nil, status.Error(codes.NotFound, "volume not found")
@@ -72,18 +67,22 @@ func (s *NodeService) NodeStageVolume(ctx context.Context, req *proto.NodeStageV
 		}
 	}
 
-	opts := volumes.NewMountOpts()
-	if mount.FsType != "" {
-		opts.FSType = mount.FsType
+	switch {
+	case req.VolumeCapability.GetBlock() != nil:
+		return &proto.NodeStageVolumeResponse{}, nil
+	case req.VolumeCapability.GetMount() != nil:
+		mount := req.VolumeCapability.GetMount()
+		opts := volumes.MountOpts{
+			FSType:     mount.FsType,
+			Additional: mount.MountFlags,
+		}
+		if err := s.volumeMountService.Stage(volume, req.StagingTargetPath, opts); err != nil {
+			return nil, status.Error(codes.Internal, fmt.Sprintf("failed to stage volume: %s", err))
+		}
+		return &proto.NodeStageVolumeResponse{}, nil
+	default:
+		return nil, status.Error(codes.InvalidArgument, "stage volume: unsupported volume capability")
 	}
-	opts.Additional = mount.MountFlags
-
-	if err := s.volumeMountService.Stage(volume, req.StagingTargetPath, opts); err != nil {
-		return nil, status.Error(codes.Internal, fmt.Sprintf("failed to stage volume: %s", err))
-	}
-
-	resp := &proto.NodeStageVolumeResponse{}
-	return resp, nil
 }
 
 func (s *NodeService) NodeUnstageVolume(ctx context.Context, req *proto.NodeUnstageVolumeRequest) (*proto.NodeUnstageVolumeResponse, error) {
@@ -128,11 +127,6 @@ func (s *NodeService) NodePublishVolume(ctx context.Context, req *proto.NodePubl
 		return nil, status.Error(codes.InvalidArgument, "missing target path")
 	}
 
-	mount := req.VolumeCapability.GetMount()
-	if mount == nil {
-		return nil, status.Error(codes.InvalidArgument, "no mount capability")
-	}
-
 	volumeID, err := parseVolumeID(req.VolumeId)
 	if err != nil {
 		return nil, status.Error(codes.NotFound, "volume not found")
@@ -148,19 +142,27 @@ func (s *NodeService) NodePublishVolume(ctx context.Context, req *proto.NodePubl
 		}
 	}
 
-	opts := volumes.NewMountOpts()
-	opts.Readonly = req.Readonly
-	if mount.FsType != "" {
-		opts.FSType = mount.FsType
+	switch {
+	case req.VolumeCapability.GetBlock() != nil:
+		opts := volumes.MountOpts{BlockVolume: true}
+		if err := s.volumeMountService.Publish(volume, req.TargetPath, volume.LinuxDevice, opts); err != nil {
+			return nil, status.Error(codes.Internal, fmt.Sprintf("failed to publish block volume: %s", err))
+		}
+		return &proto.NodePublishVolumeResponse{}, nil
+	case req.VolumeCapability.GetMount() != nil:
+		mount := req.VolumeCapability.GetMount()
+		opts := volumes.MountOpts{
+			FSType:     mount.FsType,
+			Readonly:   req.Readonly,
+			Additional: mount.MountFlags,
+		}
+		if err := s.volumeMountService.Publish(volume, req.TargetPath, req.StagingTargetPath, opts); err != nil {
+			return nil, status.Error(codes.Internal, fmt.Sprintf("failed to publish volume: %s", err))
+		}
+		return &proto.NodePublishVolumeResponse{}, nil
+	default:
+		return nil, status.Error(codes.InvalidArgument, "publish volume: unsupported volume capability")
 	}
-	opts.Additional = mount.MountFlags
-
-	if err := s.volumeMountService.Publish(volume, req.TargetPath, req.StagingTargetPath, opts); err != nil {
-		return nil, status.Error(codes.Internal, fmt.Sprintf("failed to publish volume: %s", err))
-	}
-
-	resp := &proto.NodePublishVolumeResponse{}
-	return resp, nil
 }
 
 func (s *NodeService) NodeUnpublishVolume(ctx context.Context, req *proto.NodeUnpublishVolumeRequest) (*proto.NodeUnpublishVolumeResponse, error) {
