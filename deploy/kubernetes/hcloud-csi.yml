@@ -147,7 +147,7 @@ spec:
               add: ["SYS_ADMIN"]
             allowPrivilegeEscalation: true
         - name: hcloud-csi-driver
-          image: hetznercloud/hcloud-csi-driver:1.3.2
+          image: hetznercloud/hcloud-csi-driver:1.4.0
           imagePullPolicy: Always
           env:
             - name: CSI_ENDPOINT
@@ -209,6 +209,13 @@ spec:
       labels:
         app: hcloud-csi
     spec:
+      tolerations:
+        - effect: NoExecute
+          operator: Exists
+        - effect: NoSchedule
+          operator: Exists
+        - key: CriticalAddonsOnly
+          operator: Exists
       serviceAccount: hcloud-csi
       containers:
         - name: csi-node-driver-registrar
@@ -231,7 +238,7 @@ spec:
           securityContext:
             privileged: true
         - name: hcloud-csi-driver
-          image: hetznercloud/hcloud-csi-driver:1.3.2
+          image: hetznercloud/hcloud-csi-driver:1.4.0
           imagePullPolicy: Always
           env:
             - name: CSI_ENDPOINT
@@ -298,6 +305,8 @@ kind: Service
 metadata:
   name: hcloud-csi-controller-metrics
   namespace: kube-system
+  labels:
+    app: hcloud-csi
 spec:
   selector:
     app: hcloud-csi-controller
@@ -312,6 +321,8 @@ kind: Service
 metadata:
   name: hcloud-csi-node-metrics
   namespace: kube-system
+  labels:
+    app: hcloud-csi
 spec:
   selector:
     app: hcloud-csi
