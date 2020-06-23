@@ -3,7 +3,7 @@
 ## v1.4.0
 
 - Allow mounting of Hetzner Cloud Volumes as raw block volumes.
-
+- Add label (`app: hcloud-csi`) to `hcloud-csi-controller-metrics` and `hcloud-csi-node-metrics`
 ## v1.3.2
 
 - Fix stuck volume terminating when the volume was already deleted

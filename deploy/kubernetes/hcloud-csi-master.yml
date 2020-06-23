@@ -305,6 +305,8 @@ kind: Service
 metadata:
   name: hcloud-csi-controller-metrics
   namespace: kube-system
+  labels:
+    app: hcloud-csi
 spec:
   selector:
     app: hcloud-csi-controller
@@ -319,6 +321,8 @@ kind: Service
 metadata:
   name: hcloud-csi-node-metrics
   namespace: kube-system
+  labels:
+    app: hcloud-csi
 spec:
   selector:
     app: hcloud-csi
