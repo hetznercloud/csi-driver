@@ -209,6 +209,13 @@ spec:
       labels:
         app: hcloud-csi
     spec:
+      tolerations:
+        - effect: NoExecute
+          operator: Exists
+        - effect: NoSchedule
+          operator: Exists
+        - key: CriticalAddonsOnly
+          operator: Exists
       serviceAccount: hcloud-csi
       containers:
         - name: csi-node-driver-registrar
