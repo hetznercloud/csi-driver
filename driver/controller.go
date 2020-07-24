@@ -196,8 +196,9 @@ func (s *ControllerService) ControllerUnpublishVolume(ctx context.Context, req *
 	if err := s.volumeService.Detach(ctx, volume, server); err != nil {
 		code := codes.Internal
 		switch err {
-		case volumes.ErrVolumeNotFound:
-			code = codes.NotFound
+		case volumes.ErrVolumeNotFound: // Based on the spec it is save to assume that the call was successful if the volume is not found
+			resp := &proto.ControllerUnpublishVolumeResponse{}
+			return resp, nil
 		case volumes.ErrServerNotFound:
 			code = codes.NotFound
 		case volumes.ErrLockedServer:

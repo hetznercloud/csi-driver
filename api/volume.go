@@ -241,6 +241,14 @@ func (s *VolumeService) Detach(ctx context.Context, volume *csi.Volume, server *
 
 	hcloudVolume, _, err := s.client.Volume.GetByID(ctx, int(volume.ID))
 	if err != nil {
+		if hcloud.IsError(err, hcloud.ErrorCodeNotFound) {
+			level.Info(s.logger).Log(
+				"msg", "volume to detach not found",
+				"volume-id", volume.ID,
+				"err", err,
+			)
+			return volumes.ErrVolumeNotFound
+		}
 		level.Info(s.logger).Log(
 			"msg", "failed to get volume to detach",
 			"volume-id", volume.ID,

@@ -209,6 +209,13 @@ spec:
       labels:
         app: hcloud-csi
     spec:
+      tolerations:
+        - effect: NoExecute
+          operator: Exists
+        - effect: NoSchedule
+          operator: Exists
+        - key: CriticalAddonsOnly
+          operator: Exists
       serviceAccount: hcloud-csi
       containers:
         - name: csi-node-driver-registrar
@@ -298,6 +305,8 @@ kind: Service
 metadata:
   name: hcloud-csi-controller-metrics
   namespace: kube-system
+  labels:
+    app: hcloud-csi
 spec:
   selector:
     app: hcloud-csi-controller
@@ -312,6 +321,8 @@ kind: Service
 metadata:
   name: hcloud-csi-node-metrics
   namespace: kube-system
+  labels:
+    app: hcloud-csi
 spec:
   selector:
     app: hcloud-csi
