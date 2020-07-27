@@ -98,7 +98,7 @@ func main() {
 
 	hcloudClient := hcloud.NewClient(opts...)
 
-	hcloudServerID := getServerID()
+	hcloudServerID := getServerID(hcloudClient)
 	level.Debug(logger).Log("msg", "fetching server")
 	server, _, err := hcloudClient.Server.GetByID(context.Background(), hcloudServerID)
 	if err != nil {
@@ -190,7 +190,7 @@ func main() {
 	}
 }
 
-func getServerID() int {
+func getServerID(hcloudClient *hcloud.Client) int {
 	if s := os.Getenv("HCLOUD_SERVER_ID"); s != "" {
 		id, err := strconv.Atoi(s)
 		if err != nil {
@@ -205,6 +205,27 @@ func getServerID() int {
 			"server-id", id,
 		)
 		return id
+	}
+
+	if s := os.Getenv("KUBE_NODE_NAME"); s != "" {
+		server, _, err := hcloudClient.Server.GetByName(context.Background(), s)
+		if err != nil {
+			level.Debug(logger).Log(
+				"msg", "error while getting server through node name",
+				"err", err,
+			)
+		}
+		if server != nil {
+			level.Debug(logger).Log(
+				"msg", "using server name from KUBE_NODE_NAME env var",
+				"server-id", server.ID,
+			)
+			return server.ID
+		}
+		level.Debug(logger).Log(
+			"msg", "server not found by name, fallback to metadata service",
+			"err", err,
+		)
 	}
 
 	level.Debug(logger).Log(
