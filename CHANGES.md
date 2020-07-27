@@ -1,5 +1,9 @@
 # Changes
 
+## master
+
+- Allow using the node name as node indicator instead of using the metadata service
+
 ## v1.4.0
 
 - Allow mounting of Hetzner Cloud Volumes as raw block volumes.

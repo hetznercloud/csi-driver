@@ -250,6 +250,11 @@ spec:
                 secretKeyRef:
                   name: hcloud-csi
                   key: token
+            - name: KUBE_NODE_NAME
+              valueFrom:
+                fieldRef:
+                  apiVersion: v1
+                  fieldPath: spec.nodeName
           volumeMounts:
             - name: kubelet-dir
               mountPath: /var/lib/kubelet
