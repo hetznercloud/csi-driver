@@ -2,7 +2,9 @@
 
 ## master
 
-- Allow using the node name as node indicator instead of using the metadata service
+- Allow using the node name as node indicator instead of using the
+  metadata service
+- Allow to tune the log level using the `LOG_LEVEL` environment variable.
 
 ## v1.4.0
 
