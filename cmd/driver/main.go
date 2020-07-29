@@ -27,6 +27,7 @@ var logger log.Logger
 
 func main() {
 	logger = log.NewLogfmtLogger(log.NewSyncWriter(os.Stdout))
+	logger = level.NewFilter(logger, parseLogLevel(os.Getenv("LOG_LEVEL")))
 	logger = log.With(logger, "ts", log.DefaultTimestampUTC)
 
 	endpoint := os.Getenv("CSI_ENDPOINT")
@@ -253,6 +254,21 @@ func getInstanceID() (int, error) {
 		return 0, err
 	}
 	return strconv.Atoi(string(body))
+}
+
+func parseLogLevel(lvl string) level.Option {
+	switch lvl {
+	case "debug":
+		return level.AllowDebug()
+	case "info":
+		return level.AllowInfo()
+	case "warn":
+		return level.AllowWarn()
+	case "error":
+		return level.AllowError()
+	default:
+		return level.AllowAll()
+	}
 }
 
 func requestLogger(logger log.Logger) grpc.UnaryServerInterceptor {
