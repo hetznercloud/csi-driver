@@ -154,6 +154,11 @@ spec:
               value: unix:///var/lib/csi/sockets/pluginproxy/csi.sock
             - name: METRICS_ENDPOINT
               value: 0.0.0.0:9189
+            - name: KUBE_NODE_NAME
+              valueFrom:
+                fieldRef:
+                  apiVersion: v1
+                  fieldPath: spec.nodeName
             - name: HCLOUD_TOKEN
               valueFrom:
                 secretKeyRef:
