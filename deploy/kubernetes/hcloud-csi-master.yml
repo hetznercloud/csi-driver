@@ -197,6 +197,10 @@ spec:
       volumes:
         - name: socket-dir
           emptyDir: {}
+      dnsConfig:
+        options:
+          - name: ndots
+            value: "1"
 ---
 kind: DaemonSet
 apiVersion: apps/v1
@@ -309,6 +313,10 @@ spec:
           hostPath:
             path: /dev
             type: Directory
+      dnsConfig:
+        options:
+          - name: ndots
+            value: "1"
 ---
 apiVersion: v1
 kind: Service
