@@ -102,7 +102,7 @@ func (s *NodeService) NodeUnstageVolume(ctx context.Context, req *proto.NodeUnst
 	if err != nil {
 		switch err {
 		case volumes.ErrVolumeNotFound:
-			return nil, status.Error(codes.NotFound, "volume not found")
+			return &proto.NodeUnstageVolumeResponse{}, nil
 		default:
 			return nil, status.Error(codes.Internal, fmt.Sprintf("failed to get volume: %s", err))
 		}
@@ -182,7 +182,7 @@ func (s *NodeService) NodeUnpublishVolume(ctx context.Context, req *proto.NodeUn
 	if err != nil {
 		switch err {
 		case volumes.ErrVolumeNotFound:
-			return nil, status.Error(codes.NotFound, "volume not found")
+			return &proto.NodeUnpublishVolumeResponse{}, nil
 		default:
 			return nil, status.Error(codes.Internal, fmt.Sprintf("failed to get volume: %s", err))
 		}

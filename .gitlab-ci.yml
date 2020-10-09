@@ -4,9 +4,43 @@ include:
     file: "k8s/release.yml"
 
 stages:
+  - test
   - build
   - release
 
 variables:
   GOPROXY: goproxy.prodext.hcinfra.de
   GONOSUMDB: hetzner.cloud
+
+test:unit:
+  image: golang:1.15
+  script:
+    - go test $(go list ./... | grep -v e2etests) -v
+  tags:
+    - hc-bladerunner
+
+.test:k8s: &testk8se2e
+  image: docker:git
+  variables:
+    K8S_VERSION: 1.17.12
+  before_script:
+    - apk add --no-cache git make musl-dev go
+  script:
+    - go test $(go list ./... | grep e2etests) -v -timeout 60m
+  tags:
+    - hc-bladerunner-build
+
+test:k8s-1-17:
+  <<: *testk8se2e
+  variables:
+    K8S_VERSION: 1.17.12
+
+test:k8s-1-18:
+  <<: *testk8se2e
+  variables:
+    K8S_VERSION: 1.18.9
+
+test:k8s-1-19:
+  <<: *testk8se2e
+  variables:
+    K8S_VERSION: 1.19.2

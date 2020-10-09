@@ -333,7 +333,7 @@ func TestNodeServiceNodeUnstageVolumeNotFound(t *testing.T) {
 		VolumeId:          "1",
 		StagingTargetPath: "staging",
 	})
-	if grpc.Code(err) != codes.NotFound {
+	if err != nil {
 		t.Fatalf("unexpected error: %v", err)
 	}
 }
@@ -708,7 +708,7 @@ func TestNodeServiceNodeUnpublishVolumeNotFound(t *testing.T) {
 		VolumeId:   "1",
 		TargetPath: "target",
 	})
-	if grpc.Code(err) != codes.NotFound {
+	if err != nil {
 		t.Fatalf("unexpected error: %v", err)
 	}
 }

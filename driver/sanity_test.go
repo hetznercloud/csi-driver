@@ -3,6 +3,7 @@ package driver
 import (
 	"container/list"
 	"context"
+	"fmt"
 	"io/ioutil"
 	"net"
 	"os"
@@ -110,7 +111,7 @@ func (s *sanityVolumeService) Create(ctx context.Context, opts volumes.CreateOpt
 		Name:        opts.Name,
 		Size:        opts.MinSize,
 		Location:    opts.Location,
-		LinuxDevice: "/dev/disk/by-id/scsi-0HC_Volume_" + string(s.volumes.Len()+1),
+		LinuxDevice: fmt.Sprintf("/dev/disk/by-id/scsi-0HC_Volume_%d", s.volumes.Len()+1),
 	}
 
 	s.volumes.PushBack(volume)

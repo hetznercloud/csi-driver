@@ -82,6 +82,28 @@ enabling you to use Volumes within Kubernetes. Please note that this driver **re
 | 1.14-1.15     | 1.1.5 | https://raw.githubusercontent.com/hetznercloud/csi-driver/v1.1.5/deploy/kubernetes/hcloud-csi.yml      |
 | 1.13          | 1.1.5 | https://raw.githubusercontent.com/hetznercloud/csi-driver/v1.1.5/deploy/kubernetes/hcloud-csi-1.13.yml |
 
+
+## E2E Tests
+
+The Hetzner Cloud CSI Driver was tested against the official k8s e2e tests for a specific version. You can run the tests with the following commands. Keep in mind, that these tests run on real cloud servers and will create volumes that will be billed. 
+
+**Test Server Setup:** 
+1x CPX21 (Ubuntu 18.04)
+
+**Requirements: Docker and Go 1.15**
+1. Configure your environment correctly
+```bash
+export HCLOUD_TOKEN=<specifiy a project token>
+export K8S_VERSION=1.19.2 # The specific (latest) version is needed here
+export USE_SSH_KEYS=key1,key2 # Name or IDs of your SSH Keys within the Hetzner Cloud, the servers will be accessable with that keys
+```
+2. Run the tests
+```bash
+go test $(go list ./... | grep e2etests) -v -timeout 60m
+```
+The tests will now run, this will take a while (~30 min).
+
+***If the tests fail, make sure to clean up the project with the Hetzner Cloud Console or the hcloud cli.***
 ## License
 
 MIT license

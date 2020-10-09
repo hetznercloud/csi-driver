@@ -1,6 +1,6 @@
 module hetzner.cloud/csi
 
-go 1.14
+go 1.15
 
 require (
 	github.com/container-storage-interface/spec v1.2.0
@@ -14,6 +14,7 @@ require (
 	github.com/modern-go/reflect2 v1.0.1 // indirect
 	github.com/prometheus/client_golang v1.1.0
 	github.com/spf13/afero v1.2.0 // indirect
+	golang.org/x/crypto v0.0.0-20190308221718-c2843e01d9a2
 	golang.org/x/lint v0.0.0-20190313153728-d0100b6bd8b3 // indirect
 	golang.org/x/sys v0.0.0-20191113165036-4c7a9d0fe056
 	golang.org/x/tools v0.0.0-20190524140312-2c0ae7006135 // indirect
