@@ -1,0 +1,23 @@
+StorageClass:
+  FromName: true
+DriverInfo:
+  Name: csi.hetzner.cloud
+  SupportedSizeRange:
+    Max: 15Gi
+    Min: 10Gi
+  Capabilities:
+    persistence: true
+    block: true
+    fsGroup: true
+    exec: false
+    snapshotDataSource: false
+    pvcDataSource: false
+    RWX: false
+    multipods: false
+    controllerExpansion: true
+    nodeExpansion: true
+    volumeLimits: false
+    singleNodeVolume: true
+  SupportedFsType:
+    ext4:
+    xfs:

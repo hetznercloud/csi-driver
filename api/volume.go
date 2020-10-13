@@ -145,6 +145,10 @@ func (s *VolumeService) Delete(ctx context.Context, volume *csi.Volume) error {
 		}
 		return err
 	}
+	level.Info(s.logger).Log(
+		"msg", "volume deleted",
+		"volume-id", volume.ID,
+	)
 
 	return nil
 }
@@ -190,6 +194,23 @@ func (s *VolumeService) Attach(ctx context.Context, volume *csi.Volume, server *
 			"server-id", server.ID,
 		)
 		return volumes.ErrServerNotFound
+	}
+
+	if hcloudVolume.Server != nil {
+		if hcloudVolume.Server.ID == hcloudServer.ID {
+			level.Info(s.logger).Log(
+				"msg", "volume is already attached to this server",
+				"volume-id", volume.ID,
+				"server-id", server.ID,
+			)
+			return nil
+		}
+		level.Info(s.logger).Log(
+			"msg", "volume is already attached to another server",
+			"volume-id", volume.ID,
+			"server-id", hcloudVolume.Server.ID,
+		)
+		return volumes.ErrAttached
 	}
 
 	action, _, err := s.client.Volume.Attach(ctx, hcloudVolume, hcloudServer)

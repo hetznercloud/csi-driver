@@ -2,6 +2,7 @@ package driver
 
 import (
 	"context"
+	"errors"
 	"fmt"
 	"strconv"
 
@@ -110,7 +111,10 @@ func (s *ControllerService) DeleteVolume(ctx context.Context, req *proto.DeleteV
 	if volumeID, err := parseVolumeID(req.VolumeId); err == nil {
 		volume := &csi.Volume{ID: volumeID}
 		if err := s.volumeService.Delete(ctx, volume); err != nil {
-			if err == volumes.ErrAttached {
+			if errors.Is(err, volumes.ErrVolumeNotFound) {
+				return &proto.DeleteVolumeResponse{}, nil
+			}
+			if errors.Is(err, volumes.ErrAttached) {
 				return nil, status.Error(codes.FailedPrecondition, err.Error())
 			}
 			return nil, status.Error(codes.Internal, err.Error())
