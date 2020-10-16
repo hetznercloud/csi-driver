@@ -5,6 +5,7 @@ include:
 
 stages:
   - test
+  - E2E
   - build
   - release
 
@@ -12,15 +13,17 @@ variables:
   GOPROXY: goproxy.prodext.hcinfra.de
   GONOSUMDB: hetzner.cloud
 
-test:unit:
+unit:
   image: golang:1.15
+  stage: test
   script:
     - go test $(go list ./... | grep -v e2etests) -v
   tags:
     - hc-bladerunner
 
-.test:k8s: &testk8se2e
+.k8se2e: &k8se2e
   image: docker:git
+  stage: E2E
   variables:
     K8S_VERSION: 1.17.12
   before_script:
@@ -30,17 +33,17 @@ test:unit:
   tags:
     - hc-bladerunner-build
 
-test:k8s-1-17:
-  <<: *testk8se2e
+k8s 1.17:
+  <<: *k8se2e
   variables:
-    K8S_VERSION: 1.17.12
+    K8S_VERSION: 1.17.13
 
-test:k8s-1-18:
-  <<: *testk8se2e
+k8s 1.18:
+  <<: *k8se2e
   variables:
-    K8S_VERSION: 1.18.9
+    K8S_VERSION: 1.18.10
 
-test:k8s-1-19:
-  <<: *testk8se2e
+k8s 1.19:
+  <<: *k8se2e
   variables:
-    K8S_VERSION: 1.19.2
+    K8S_VERSION: 1.19.3
