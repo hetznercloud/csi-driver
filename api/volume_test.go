@@ -1,7 +1,7 @@
 package api
 
 import (
-	"hetzner.cloud/csi/volumes"
+	"github.com/hetznercloud/csi-driver/volumes"
 )
 
 var _ volumes.Service = (*VolumeService)(nil)

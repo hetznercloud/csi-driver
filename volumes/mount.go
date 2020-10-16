@@ -3,13 +3,15 @@ package volumes
 import (
 	"fmt"
 	"os"
+	"path/filepath"
 	"strings"
 
 	"github.com/go-kit/kit/log"
 	"github.com/go-kit/kit/log/level"
-	"k8s.io/kubernetes/pkg/util/mount"
+	"k8s.io/utils/exec"
+	"k8s.io/utils/mount"
 
-	"hetzner.cloud/csi/csi"
+	"github.com/hetznercloud/csi-driver/csi"
 )
 
 const DefaultFSType = "ext4"
@@ -42,7 +44,7 @@ func NewLinuxMountService(logger log.Logger) *LinuxMountService {
 		logger: logger,
 		mounter: &mount.SafeFormatAndMount{
 			Interface: mount.New(""),
-			Exec:      mount.NewOsExec(),
+			Exec:      exec.New(),
 		},
 	}
 }
@@ -59,10 +61,10 @@ func (s *LinuxMountService) Stage(volume *csi.Volume, stagingTargetPath string, 
 		"fs-type", opts.FSType,
 	)
 
-	isNotMountPoint, err := s.mounter.Interface.IsNotMountPoint(stagingTargetPath)
+	isNotMountPoint, err := s.mounter.Interface.IsLikelyNotMountPoint(stagingTargetPath)
 	if err != nil {
 		if os.IsNotExist(err) {
-			if err := s.mounter.Interface.MakeDir(stagingTargetPath); err != nil {
+			if err := os.Mkdir(stagingTargetPath, 0750); err != nil {
 				return err
 			}
 			isNotMountPoint = true
@@ -87,15 +89,23 @@ func (s *LinuxMountService) Unstage(volume *csi.Volume, stagingTargetPath string
 }
 
 func (s *LinuxMountService) Publish(volume *csi.Volume, targetPath string, stagingTargetPath string, opts MountOpts) error {
+	targetPathPermissions := os.FileMode(0750)
 	if opts.BlockVolume {
-		if err := s.mounter.Interface.MakeFile(targetPath); err != nil {
+		if err := os.MkdirAll(filepath.Dir(targetPath), targetPathPermissions); err != nil {
 			return err
 		}
+
+		mountFilePermissions := os.FileMode(0660)
+		mountFile, err := os.OpenFile(targetPath, os.O_CREATE, mountFilePermissions)
+		if err != nil {
+			return err
+		}
+		_ = mountFile.Close()
 	} else {
 		if opts.FSType == "" {
 			opts.FSType = DefaultFSType
 		}
-		if err := s.mounter.Interface.MakeDir(targetPath); err != nil {
+		if err := os.MkdirAll(targetPath, targetPathPermissions); err != nil {
 			return err
 		}
 	}

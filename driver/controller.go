@@ -12,8 +12,8 @@ import (
 	"google.golang.org/grpc/codes"
 	"google.golang.org/grpc/status"
 
-	"hetzner.cloud/csi/csi"
-	"hetzner.cloud/csi/volumes"
+	"github.com/hetznercloud/csi-driver/csi"
+	"github.com/hetznercloud/csi-driver/volumes"
 )
 
 type ControllerService struct {
@@ -341,4 +341,8 @@ func (s *ControllerService) ControllerExpandVolume(ctx context.Context, req *pro
 		NodeExpansionRequired: true,
 	}
 	return resp, nil
+}
+
+func (s *ControllerService) ControllerGetVolume(ctx context.Context, req *proto.ControllerGetVolumeRequest) (*proto.ControllerGetVolumeResponse, error) {
+	return nil, status.Errorf(codes.Unimplemented, "method ControllerGetVolume not implemented")
 }

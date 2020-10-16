@@ -16,8 +16,8 @@ import (
 	"github.com/kubernetes-csi/csi-test/v3/pkg/sanity"
 	"google.golang.org/grpc"
 
-	"hetzner.cloud/csi/csi"
-	"hetzner.cloud/csi/volumes"
+	"github.com/hetznercloud/csi-driver/csi"
+	"github.com/hetznercloud/csi-driver/volumes"
 )
 
 func TestSanity(t *testing.T) {

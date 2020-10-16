@@ -7,9 +7,9 @@ import (
 
 	"github.com/go-kit/kit/log"
 
-	"hetzner.cloud/csi/csi"
-	"hetzner.cloud/csi/mock"
-	"hetzner.cloud/csi/volumes"
+	"github.com/hetznercloud/csi-driver/csi"
+	"github.com/hetznercloud/csi-driver/mock"
+	"github.com/hetznercloud/csi-driver/volumes"
 )
 
 var _ volumes.Service = (*volumes.IdempotentService)(nil)

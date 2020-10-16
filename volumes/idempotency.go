@@ -6,7 +6,7 @@ import (
 	"github.com/go-kit/kit/log"
 	"github.com/go-kit/kit/log/level"
 
-	"hetzner.cloud/csi/csi"
+	"github.com/hetznercloud/csi-driver/csi"
 )
 
 // IdempotentService wraps a volume service and provides idempotency as required by the CSI spec.
