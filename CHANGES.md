@@ -1,5 +1,9 @@
 # Changes
 
+## v1.5.1
+
+- Add correct deployment file for latest version
+
 ## v1.5.0
 
 - Allow using the node name as node indicator instead of using the
