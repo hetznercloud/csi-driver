@@ -147,13 +147,18 @@ spec:
               add: ["SYS_ADMIN"]
             allowPrivilegeEscalation: true
         - name: hcloud-csi-driver
-          image: hetznercloud/hcloud-csi-driver:1.4.0
+          image: hetznercloud/hcloud-csi-driver:v1.5.0
           imagePullPolicy: Always
           env:
             - name: CSI_ENDPOINT
               value: unix:///var/lib/csi/sockets/pluginproxy/csi.sock
             - name: METRICS_ENDPOINT
               value: 0.0.0.0:9189
+            - name: KUBE_NODE_NAME
+              valueFrom:
+                fieldRef:
+                  apiVersion: v1
+                  fieldPath: spec.nodeName
             - name: HCLOUD_TOKEN
               valueFrom:
                 secretKeyRef:
@@ -238,7 +243,7 @@ spec:
           securityContext:
             privileged: true
         - name: hcloud-csi-driver
-          image: hetznercloud/hcloud-csi-driver:1.4.0
+          image: hetznercloud/hcloud-csi-driver:v1.5.0
           imagePullPolicy: Always
           env:
             - name: CSI_ENDPOINT
@@ -250,6 +255,11 @@ spec:
                 secretKeyRef:
                   name: hcloud-csi
                   key: token
+            - name: KUBE_NODE_NAME
+              valueFrom:
+                fieldRef:
+                  apiVersion: v1
+                  fieldPath: spec.nodeName
           volumeMounts:
             - name: kubelet-dir
               mountPath: /var/lib/kubelet

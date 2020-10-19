@@ -1,10 +1,16 @@
 # Changes
 
-## master
+## v1.5.0
 
 - Allow using the node name as node indicator instead of using the
   metadata service
-- Allow to tune the log level using the `LOG_LEVEL` environment variable.
+- Allow to tune the log level using the `LOG_LEVEL` environment variable
+- Update k8s dependencies to v1.17.12
+- Update Go to 1.15
+- Update hcloud-go to 1.22.0
+- Update csi driver container to alpine linux v3.12
+- Note: As of this release all versions are end-to-end tested against the 
+  official Kubernetes testsuite, as a result a few smaller issues where fixed
 
 ## v1.4.0
 
