@@ -4,7 +4,7 @@ import (
 	"context"
 	"errors"
 
-	"hetzner.cloud/csi/csi"
+	"github.com/hetznercloud/csi-driver/csi"
 )
 
 var (

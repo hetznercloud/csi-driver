@@ -1,8 +1,8 @@
 package api
 
 import (
+	"github.com/hetznercloud/csi-driver/csi"
 	"github.com/hetznercloud/hcloud-go/hcloud"
-	"hetzner.cloud/csi/csi"
 )
 
 func toDomainVolume(hcloudVolume *hcloud.Volume) *csi.Volume {

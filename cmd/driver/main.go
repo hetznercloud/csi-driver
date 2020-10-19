@@ -17,10 +17,10 @@ import (
 	"github.com/hetznercloud/hcloud-go/hcloud"
 	"google.golang.org/grpc"
 
-	"hetzner.cloud/csi/api"
-	"hetzner.cloud/csi/driver"
-	"hetzner.cloud/csi/metrics"
-	"hetzner.cloud/csi/volumes"
+	"github.com/hetznercloud/csi-driver/api"
+	"github.com/hetznercloud/csi-driver/driver"
+	"github.com/hetznercloud/csi-driver/metrics"
+	"github.com/hetznercloud/csi-driver/volumes"
 )
 
 var logger log.Logger

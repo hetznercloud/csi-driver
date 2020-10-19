@@ -3,9 +3,10 @@ package volumes
 import (
 	"github.com/go-kit/kit/log"
 	"github.com/go-kit/kit/log/level"
-	"hetzner.cloud/csi/csi"
-	"k8s.io/kubernetes/pkg/util/mount"
+	"github.com/hetznercloud/csi-driver/csi"
 	"k8s.io/kubernetes/pkg/util/resizefs"
+	"k8s.io/utils/exec"
+	"k8s.io/utils/mount"
 )
 
 // ResizeService resizes volumes.
@@ -24,7 +25,7 @@ func NewLinuxResizeService(logger log.Logger) *LinuxResizeService {
 		logger: logger,
 		resizer: resizefs.NewResizeFs(&mount.SafeFormatAndMount{
 			Interface: mount.New(""),
-			Exec:      mount.NewOsExec(),
+			Exec:      exec.New(),
 		}),
 	}
 }

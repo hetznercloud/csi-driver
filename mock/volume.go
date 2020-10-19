@@ -3,8 +3,8 @@ package mock
 import (
 	"context"
 
-	"hetzner.cloud/csi/csi"
-	"hetzner.cloud/csi/volumes"
+	"github.com/hetznercloud/csi-driver/csi"
+	"github.com/hetznercloud/csi-driver/volumes"
 )
 
 type VolumeService struct {

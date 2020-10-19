@@ -10,9 +10,9 @@ import (
 	"google.golang.org/grpc"
 	"google.golang.org/grpc/codes"
 
-	"hetzner.cloud/csi/csi"
-	"hetzner.cloud/csi/mock"
-	"hetzner.cloud/csi/volumes"
+	"github.com/hetznercloud/csi-driver/csi"
+	"github.com/hetznercloud/csi-driver/mock"
+	"github.com/hetznercloud/csi-driver/volumes"
 )
 
 var _ proto.ControllerServer = (*ControllerService)(nil)

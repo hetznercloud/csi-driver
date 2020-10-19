@@ -8,8 +8,8 @@ import (
 	"github.com/go-kit/kit/log/level"
 	"github.com/hetznercloud/hcloud-go/hcloud"
 
-	"hetzner.cloud/csi/csi"
-	"hetzner.cloud/csi/volumes"
+	"github.com/hetznercloud/csi-driver/csi"
+	"github.com/hetznercloud/csi-driver/volumes"
 )
 
 type VolumeService struct {

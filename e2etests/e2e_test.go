@@ -32,7 +32,7 @@ func TestCSIDriver(t *testing.T) {
 		fmt.Println("Running in Gitlab CI")
 	}
 	if testIdentifier == "" {
-		testIdentifier = fmt.Sprintf("local-%d", rand.Int())
+		testIdentifier = fmt.Sprintf("local-%d", rng.Int())
 		fmt.Println("Running locally")
 	}
 
