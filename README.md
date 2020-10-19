@@ -31,7 +31,7 @@ enabling you to use Volumes within Kubernetes. Please note that this driver **re
 
     Have a look at our [Version Matrix](README.md#version-matrix) to pick the correct deployment file.
    ```
-   kubectl apply -f https://raw.githubusercontent.com/hetznercloud/csi-driver/v1.4.0/deploy/kubernetes/hcloud-csi.yml
+   kubectl apply -f https://raw.githubusercontent.com/hetznercloud/csi-driver/v1.5.0/deploy/kubernetes/hcloud-csi.yml
    ```
 
 4. To verify everything is working, create a persistent volume claim and a pod
