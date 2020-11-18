@@ -25,7 +25,7 @@ unit:
   image: docker:git
   stage: E2E
   variables:
-    K8S_VERSION: 1.17.12
+    K8S_VERSION: 1.17.14
   before_script:
     - apk add --no-cache git make musl-dev go
   script:
@@ -36,14 +36,14 @@ unit:
 k8s 1.17:
   <<: *k8se2e
   variables:
-    K8S_VERSION: 1.17.13
+    K8S_VERSION: 1.17.14
 
 k8s 1.18:
   <<: *k8se2e
   variables:
-    K8S_VERSION: 1.18.10
+    K8S_VERSION: 1.18.12
 
 k8s 1.19:
   <<: *k8se2e
   variables:
-    K8S_VERSION: 1.19.3
+    K8S_VERSION: 1.19.4
