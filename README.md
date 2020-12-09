@@ -85,6 +85,7 @@ related only to an unsupported version.
 
 | Kubernetes | CSI Driver    | Deployment File                                                                                    |
 | ---------- | -------------:| --------------------------------------------------------------------------------------------------:|
+| 1.20       | master        | https://raw.githubusercontent.com/hetznercloud/csi-driver/master/deploy/kubernetes/hcloud-csi.yml  |
 | 1.19       | 1.5.1, master | https://raw.githubusercontent.com/hetznercloud/csi-driver/v1.5.1/deploy/kubernetes/hcloud-csi.yml  |
 | 1.18       | 1.5.1, master | https://raw.githubusercontent.com/hetznercloud/csi-driver/v1.5.1/deploy/kubernetes/hcloud-csi.yml  |
 | 1.17       | 1.5.1         | https://raw.githubusercontent.com/hetznercloud/csi-driver/v1.5.1/deploy/kubernetes/hcloud-csi.yml  |
@@ -107,7 +108,7 @@ will create volumes that will be billed.
 1. Configure your environment correctly
    ```bash
    export HCLOUD_TOKEN=<specifiy a project token>
-   export K8S_VERSION=1.19.2 # The specific (latest) version is needed here
+   export K8S_VERSION=1.20.0 # The specific (latest) version is needed here
    export USE_SSH_KEYS=key1,key2 # Name or IDs of your SSH Keys within the Hetzner Cloud, the servers will be accessable with that keys
    ```
 2. Run the tests
