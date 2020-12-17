@@ -29,7 +29,7 @@ enabling you to use Volumes within Kubernetes. Please note that this driver **re
 
 3. Deploy the CSI driver and wait until everything is up and running:
 
-    Have a look at our [Version Matrix](README.md#version-matrix) to pick the correct deployment file.
+    Have a look at our [Version Matrix](README.md#versioning-policy) to pick the correct deployment file.
    ```
    kubectl apply -f https://raw.githubusercontent.com/hetznercloud/csi-driver/v1.5.1/deploy/kubernetes/hcloud-csi.yml
    ```
@@ -88,8 +88,6 @@ related only to an unsupported version.
 | 1.20       | master        | https://raw.githubusercontent.com/hetznercloud/csi-driver/master/deploy/kubernetes/hcloud-csi.yml  |
 | 1.19       | 1.5.1, master | https://raw.githubusercontent.com/hetznercloud/csi-driver/v1.5.1/deploy/kubernetes/hcloud-csi.yml  |
 | 1.18       | 1.5.1, master | https://raw.githubusercontent.com/hetznercloud/csi-driver/v1.5.1/deploy/kubernetes/hcloud-csi.yml  |
-| 1.17       | 1.5.1         | https://raw.githubusercontent.com/hetznercloud/csi-driver/v1.5.1/deploy/kubernetes/hcloud-csi.yml  |
-| 1.16       | 1.4.0         | https://raw.githubusercontent.com/hetznercloud/csi-driver/v1.4.0/deploy/kubernetes/hcloud-csi.yml  |
 
 
 ## E2E Tests
