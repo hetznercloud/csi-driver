@@ -1,3 +1,9 @@
+# Fork Notes
+
+We experienced issues with a root server in the cluster. CSI doesn't work there. So the csi daemonset should not schedule a pod there.
+
+So this fork adds an anti affinity to root server nodes. In other words nodes that have `instance.hetzner.cloud/is-root-server` set to `true`.
+
 # Container Storage Interface driver for Hetzner Cloud
 
 [![GitHub Actions status](https://github.com/hetznercloud/csi-driver/workflows/Run%20tests/badge.svg)](https://github.com/hetznercloud/csi-driver/actions)
