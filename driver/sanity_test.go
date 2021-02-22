@@ -73,7 +73,7 @@ func TestSanity(t *testing.T) {
 
 	go func() {
 		if err := grpcServer.Serve(listener); err != nil {
-			t.Fatal(err)
+			fmt.Printf("%s\n", err)
 		}
 	}()
 
