@@ -14,7 +14,7 @@ variables:
   GONOSUMDB: hetzner.cloud
 
 unit:
-  image: golang:1.15
+  image: golang:1.16
   stage: test
   script:
     - go test $(go list ./... | grep -v e2etests) -v
@@ -36,14 +36,14 @@ unit:
 k8s 1.18:
   <<: *k8se2e
   variables:
-    K8S_VERSION: 1.18.12
+    K8S_VERSION: 1.18.16
 
 k8s 1.19:
   <<: *k8se2e
   variables:
-    K8S_VERSION: 1.19.4
+    K8S_VERSION: 1.19.8
 
 k8s 1.20:
   <<: *k8se2e
   variables:
-    K8S_VERSION: 1.20.0
+    K8S_VERSION: 1.20.4

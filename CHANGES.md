@@ -1,5 +1,10 @@
 # Changes
 
+## Unreleased
+
+- Update Go to 1.16
+- Update csi driver container to alpine linux v3.13
+
 ## v1.5.1
 
 - Add correct deployment file for latest version
