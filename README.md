@@ -89,6 +89,10 @@ related only to an unsupported version.
 | 1.19       | 1.5.1, master | https://raw.githubusercontent.com/hetznercloud/csi-driver/v1.5.1/deploy/kubernetes/hcloud-csi.yml  |
 | 1.18       | 1.5.1, master | https://raw.githubusercontent.com/hetznercloud/csi-driver/v1.5.1/deploy/kubernetes/hcloud-csi.yml  |
 
+| Microk8s   | CSI Driver    | Deployment File                                                                                    |
+| ---------- | -------------:| --------------------------------------------------------------------------------------------------:|
+| 1.20       | master        | https://raw.githubusercontent.com/hetznercloud/csi-driver/master/deploy/kubernetes/hcloud-csi-master-microk8s.yml  |
+
 
 ## E2E Tests
 
