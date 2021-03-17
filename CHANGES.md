@@ -4,6 +4,7 @@
 
 - Update Go to 1.16
 - Update csi driver container to alpine linux v3.13
+- Update hcloud-go to 1.24.0
 
 ## v1.5.1
 
