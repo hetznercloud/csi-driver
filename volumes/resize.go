@@ -5,8 +5,8 @@ import (
 	"github.com/go-kit/kit/log/level"
 	"github.com/hetznercloud/csi-driver/csi"
 	"k8s.io/kubernetes/pkg/util/resizefs"
+	"k8s.io/mount-utils"
 	"k8s.io/utils/exec"
-	"k8s.io/utils/mount"
 )
 
 // ResizeService resizes volumes.
