@@ -1,15 +1,14 @@
 package volumes
 
 import (
-	"fmt"
 	"os"
 	"path/filepath"
 	"strings"
 
 	"github.com/go-kit/kit/log"
 	"github.com/go-kit/kit/log/level"
+	"k8s.io/mount-utils"
 	"k8s.io/utils/exec"
-	"k8s.io/utils/mount"
 
 	"github.com/hetznercloud/csi-driver/csi"
 )
@@ -61,7 +60,7 @@ func (s *LinuxMountService) Stage(volume *csi.Volume, stagingTargetPath string, 
 		"fs-type", opts.FSType,
 	)
 
-	isNotMountPoint, err := s.mounter.Interface.IsLikelyNotMountPoint(stagingTargetPath)
+	isNotMountPoint, err := s.mounter.IsLikelyNotMountPoint(stagingTargetPath)
 	if err != nil {
 		if os.IsNotExist(err) {
 			if err := os.Mkdir(stagingTargetPath, 0750); err != nil {
@@ -73,7 +72,7 @@ func (s *LinuxMountService) Stage(volume *csi.Volume, stagingTargetPath string, 
 		}
 	}
 	if !isNotMountPoint {
-		return fmt.Errorf("%q is not a valid mount point", stagingTargetPath)
+		return nil
 	}
 
 	return s.mounter.FormatAndMount(volume.LinuxDevice, stagingTargetPath, opts.FSType, nil)
@@ -85,10 +84,22 @@ func (s *LinuxMountService) Unstage(volume *csi.Volume, stagingTargetPath string
 		"volume-name", volume.Name,
 		"staging-target-path", stagingTargetPath,
 	)
-	return s.mounter.Interface.Unmount(stagingTargetPath)
+	return mount.CleanupMountPoint(stagingTargetPath, s.mounter, false)
 }
 
 func (s *LinuxMountService) Publish(volume *csi.Volume, targetPath string, stagingTargetPath string, opts MountOpts) error {
+	isNotMountPoint, err := mount.IsNotMountPoint(s.mounter, targetPath)
+	if err != nil {
+		if os.IsNotExist(err) {
+			isNotMountPoint = true
+		} else {
+			return err
+		}
+	}
+
+	if !isNotMountPoint {
+		return nil
+	}
 	targetPathPermissions := os.FileMode(0750)
 	if opts.BlockVolume {
 		if err := os.MkdirAll(filepath.Dir(targetPath), targetPathPermissions); err != nil {
@@ -127,7 +138,7 @@ func (s *LinuxMountService) Publish(volume *csi.Volume, targetPath string, stagi
 		"mount-options", strings.Join(options, ", "),
 	)
 
-	if err := s.mounter.Interface.Mount(stagingTargetPath, targetPath, opts.FSType, options); err != nil {
+	if err := s.mounter.Mount(stagingTargetPath, targetPath, opts.FSType, options); err != nil {
 		return err
 	}
 
@@ -140,7 +151,7 @@ func (s *LinuxMountService) Unpublish(volume *csi.Volume, targetPath string) err
 		"volume-name", volume.Name,
 		"target-path", targetPath,
 	)
-	return s.mounter.Interface.Unmount(targetPath)
+	return mount.CleanupMountPoint(targetPath, s.mounter, true)
 }
 
 func (s *LinuxMountService) PathExists(path string) (bool, error) {
