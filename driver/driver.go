@@ -2,7 +2,7 @@ package driver
 
 const (
 	PluginName    = "csi.hetzner.cloud"
-	PluginVersion = "1.5.1"
+	PluginVersion = "1.5.2"
 
 	MaxVolumesPerNode = 16
 	MinVolumeSize     = 10 // GB
