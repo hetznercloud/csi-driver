@@ -147,7 +147,7 @@ spec:
               add: ["SYS_ADMIN"]
             allowPrivilegeEscalation: true
         - name: hcloud-csi-driver
-          image: hetznercloud/hcloud-csi-driver:1.5.1
+          image: hetznercloud/hcloud-csi-driver:1.5.2
           imagePullPolicy: Always
           env:
             - name: CSI_ENDPOINT
@@ -243,7 +243,7 @@ spec:
           securityContext:
             privileged: true
         - name: hcloud-csi-driver
-          image: hetznercloud/hcloud-csi-driver:1.5.1
+          image: hetznercloud/hcloud-csi-driver:1.5.2
           imagePullPolicy: Always
           env:
             - name: CSI_ENDPOINT
