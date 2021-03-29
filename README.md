@@ -3,7 +3,7 @@
 [![GitHub Actions status](https://github.com/hetznercloud/csi-driver/workflows/Run%20tests/badge.svg)](https://github.com/hetznercloud/csi-driver/actions)
 
 This is a [Container Storage Interface](https://github.com/container-storage-interface/spec) driver for Hetzner Cloud
-enabling you to use Volumes within Kubernetes. Please note that this driver **requires Kubernetes 1.13 or newer**.
+enabling you to use ReadWriteOnce Volumes within Kubernetes. Please note that this driver **requires Kubernetes 1.13 or newer**.
 
 ## Getting Started
 
