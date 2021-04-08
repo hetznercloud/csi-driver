@@ -221,6 +221,15 @@ spec:
           operator: Exists
         - key: CriticalAddonsOnly
           operator: Exists
+      affinity:
+        nodeAffinity:
+          requiredDuringSchedulingIgnoredDuringExecution:
+            nodeSelectorTerms:
+              - matchExpressions:
+                - key: "instance.hetzner.cloud/is-root-server"
+                  operator: NotIn
+                  values:
+                    - "true"
       serviceAccount: hcloud-csi
       containers:
         - name: csi-node-driver-registrar
