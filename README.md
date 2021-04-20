@@ -74,6 +74,14 @@ enabling you to use ReadWriteOnce Volumes within Kubernetes. Please note that th
    kubectl exec -it my-csi-app -- /bin/sh
    ```
 
+## Integration with Root Servers
+
+Root servers can be part of the cluster, but the CSI plugin doesn't work there. Taint the root server as follows to skip that node for the daemonset.
+
+```bash
+kubectl taint node <node name> instance.hetzner.cloud/is-root-server:true
+```
+
 ## Versioning policy
 
 We aim to support the latest three versions of Kubernetes. After a new
@@ -85,10 +93,9 @@ related only to an unsupported version.
 
 | Kubernetes | CSI Driver    | Deployment File                                                                                    |
 | ---------- | -------------:| --------------------------------------------------------------------------------------------------:|
+| 1.21       | master        | https://raw.githubusercontent.com/hetznercloud/csi-driver/master/deploy/kubernetes/hcloud-csi.yml  |
 | 1.20       | master        | https://raw.githubusercontent.com/hetznercloud/csi-driver/master/deploy/kubernetes/hcloud-csi.yml  |
 | 1.19       | 1.5.1, master | https://raw.githubusercontent.com/hetznercloud/csi-driver/v1.5.1/deploy/kubernetes/hcloud-csi.yml  |
-| 1.18       | 1.5.1, master | https://raw.githubusercontent.com/hetznercloud/csi-driver/v1.5.1/deploy/kubernetes/hcloud-csi.yml  |
-
 
 ## E2E Tests
 
@@ -106,7 +113,7 @@ will create volumes that will be billed.
 1. Configure your environment correctly
    ```bash
    export HCLOUD_TOKEN=<specifiy a project token>
-   export K8S_VERSION=1.20.0 # The specific (latest) version is needed here
+   export K8S_VERSION=1.21.0 # The specific (latest) version is needed here
    export USE_SSH_KEYS=key1,key2 # Name or IDs of your SSH Keys within the Hetzner Cloud, the servers will be accessable with that keys
    ```
 2. Run the tests
@@ -117,15 +124,6 @@ will create volumes that will be billed.
 The tests will now run, this will take a while (~30 min).
 
 **If the tests fail, make sure to clean up the project with the Hetzner Cloud Console or the hcloud cli.**
-
-## Integration with Root Servers
-
-Root servers can be part of the cluster, but the CSI plugin doesn't work there. Taint the root server as follows to skip that node for the daemonset.
-
-```bash
-kubectl taint node <node name> instance.hetzner.cloud/is-root-server:true
-```
-
 
 ## License
 
