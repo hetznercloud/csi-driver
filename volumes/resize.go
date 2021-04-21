@@ -4,7 +4,6 @@ import (
 	"github.com/go-kit/kit/log"
 	"github.com/go-kit/kit/log/level"
 	"github.com/hetznercloud/csi-driver/csi"
-	"k8s.io/kubernetes/pkg/util/resizefs"
 	"k8s.io/mount-utils"
 	"k8s.io/utils/exec"
 )
@@ -17,16 +16,16 @@ type ResizeService interface {
 // LinuxResizeService resizes volumes on a Linux system.
 type LinuxResizeService struct {
 	logger  log.Logger
-	resizer *resizefs.ResizeFs
+	resizer *mount.ResizeFs
 }
 
 func NewLinuxResizeService(logger log.Logger) *LinuxResizeService {
 	return &LinuxResizeService{
 		logger: logger,
-		resizer: resizefs.NewResizeFs(&mount.SafeFormatAndMount{
+		resizer: mount.NewResizeFs(mount.SafeFormatAndMount{
 			Interface: mount.New(""),
 			Exec:      exec.New(),
-		}),
+		}.Exec),
 	}
 }
 
