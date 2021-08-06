@@ -132,8 +132,14 @@ func (s *hcloudK8sSetup) RunE2ETests() error {
 		return fmt.Errorf("%s send testdriverfile file: %s %v", op, "templates/testdrivers/1.18.yml", err)
 	}
 
-	fmt.Printf("%s: Execute e2e.test\n", op)
-	err = RunCommandOnServer(s.privKey, s.server, fmt.Sprintf("KUBECONFIG=/root/.kube/config ./e2e.test -ginkgo.v -ginkgo.focus='External.Storage' -ginkgo.skip='\\[Disruptive\\]' -storage.testdriver=test-driver.yml"))
+	fmt.Printf("%s: Execute parallel e2e.test\n", op)
+	err = RunCommandOnServer(s.privKey, s.server, fmt.Sprintf("KUBECONFIG=/root/.kube/config ./ginkgo -p -v -focus='External.Storage' -skip='\\[Feature:|\\[Disruptive\\]|\\[Serial\\]' ./e2e.test -- -storage.testdriver=test-driver.yml"))
+	if err != nil {
+		return fmt.Errorf("%s run e2e tests: %s", op, err)
+	}
+
+	fmt.Printf("%s: Execute serial e2e.test\n", op)
+	err = RunCommandOnServer(s.privKey, s.server, fmt.Sprintf("KUBECONFIG=/root/.kube/config ./ginkgo -v -focus='External.Storage.*(\\[Feature:|\\[Serial\\])' ./e2e.test -- -storage.testdriver=test-driver.yml"))
 	if err != nil {
 		return fmt.Errorf("%s run e2e tests: %s", op, err)
 	}
