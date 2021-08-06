@@ -12,12 +12,33 @@ jobs:
       with:
         go-version: '1.16'
     - uses: actions/checkout@master
+    - name: Check whether HCLOUD_TOKEN needs to be fetched from TTS
+      id: check_tts
+      env:
+        TTS_TOKEN: ${{ secrets.TTS_TOKEN }}
+        HCLOUD_TOKEN: ${{ secrets.HCLOUD_TOKEN }}
+      run: |
+        echo "::set-output name=tts_token_set::${{ env.TTS_TOKEN != '' }}"
+        echo "::set-output name=hcloud_token_set::${{ env.HCLOUD_TOKEN != '' }}"
+    - name: Fetch HCLOUD_TOKEN
+      if: steps.check_tts.outputs.tts_token_set == 'true'
+      env:
+        TTS_TOKEN: ${{ secrets.TTS_TOKEN }}
+      run: |
+        echo "HCLOUD_TOKEN=$(./script/get-token.sh)" >> $GITHUB_ENV
+    - name: Set HCLOUD_TOKEN directly
+      if: steps.check_tts.outputs.hcloud_token_set == 'true'
+      env:
+        HCLOUD_TOKEN: ${{ secrets.HCLOUD_TOKEN }}
+      run: |
+        echo "HCLOUD_TOKEN=$HCLOUD_TOKEN" >> $GITHUB_ENV
+    - name: Blow up if no HCLOUD_TOKEN or TTS_TOKEN set.
+      if: steps.check_tts.outputs.hcloud_token_set == 'false' && steps.check_tts.outputs.tts_token_set == 'false'
+      run: |
+        echo "::error ::Couldn't determine HCLOUD_TOKEN. Check your repository secrets are setup correctly."
     - name: Run tests
       env:
         K8S_VERSION: ${{ matrix.k8s }}
-        TTS_TOKEN: ${{ secrets.TTS_TOKEN }}
       run: |
-        export HCLOUD_TOKEN=$(./script/get-token.sh)
-        cat resp.json
         go test $(go list ./... | grep e2etests) -v -timeout 60m
         ./script/delete-token.sh $HCLOUD_TOKEN
