@@ -47,6 +47,9 @@ rules:
   - apiGroups: ["storage.k8s.io"]
     resources: ["volumeattachments"]
     verbs: ["get", "list", "watch", "update", "patch"]
+  - apiGroups: ["storage.k8s.io"]
+    resources: ["volumeattachments/status"]
+    verbs: ["patch"]
   # provisioner
   - apiGroups: [""]
     resources: ["secrets"]
@@ -69,6 +72,10 @@ rules:
   - apiGroups: ["snapshot.storage.k8s.io"]
     resources: ["volumesnapshotcontents"]
     verbs: ["get", "list"]
+  # resizer
+  - apiGroups: [""]
+    resources: ["pods"]
+    verbs: ["get", "list", "watch"]
   # node
   - apiGroups: [""]
     resources: ["events"]
@@ -106,7 +113,7 @@ spec:
       serviceAccount: hcloud-csi
       containers:
         - name: csi-attacher
-          image: quay.io/k8scsi/csi-attacher:v2.2.0
+          image: k8s.gcr.io/sig-storage/csi-attacher:v3.2.1
           args:
             - --csi-address=/var/lib/csi/sockets/pluginproxy/csi.sock
             - --v=5
@@ -119,7 +126,7 @@ spec:
               add: ["SYS_ADMIN"]
             allowPrivilegeEscalation: true
         - name: csi-resizer
-          image: quay.io/k8scsi/csi-resizer:v0.3.0
+          image: k8s.gcr.io/sig-storage/csi-resizer:v1.2.0
           args:
             - --csi-address=/var/lib/csi/sockets/pluginproxy/csi.sock
             - --v=5
@@ -132,11 +139,11 @@ spec:
               add: ["SYS_ADMIN"]
             allowPrivilegeEscalation: true
         - name: csi-provisioner
-          image: quay.io/k8scsi/csi-provisioner:v1.6.0
+          image: k8s.gcr.io/sig-storage/csi-provisioner:v2.2.2
           args:
-            - --provisioner=csi.hetzner.cloud
             - --csi-address=/var/lib/csi/sockets/pluginproxy/csi.sock
             - --feature-gates=Topology=true
+            - --default-fstype=ext4
             - --v=5
           volumeMounts:
             - name: socket-dir
@@ -188,7 +195,7 @@ spec:
             allowPrivilegeEscalation: true
         - name: liveness-probe
           imagePullPolicy: Always
-          image: quay.io/k8scsi/livenessprobe:v1.1.0
+          image: k8s.gcr.io/sig-storage/livenessprobe:v2.3.0
           args:
             - --csi-address=/var/lib/csi/sockets/pluginproxy/csi.sock
           volumeMounts:
@@ -233,7 +240,7 @@ spec:
       serviceAccount: hcloud-csi
       containers:
         - name: csi-node-driver-registrar
-          image: quay.io/k8scsi/csi-node-driver-registrar:v1.3.0
+          image: k8s.gcr.io/sig-storage/csi-node-driver-registrar:v2.2.0
           args:
             - --v=5
             - --csi-address=/csi/csi.sock
@@ -295,7 +302,7 @@ spec:
             periodSeconds: 2
         - name: liveness-probe
           imagePullPolicy: Always
-          image: quay.io/k8scsi/livenessprobe:v1.1.0
+          image: k8s.gcr.io/sig-storage/livenessprobe:v2.3.0
           args:
             - --csi-address=/csi/csi.sock
           volumeMounts:
