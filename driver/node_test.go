@@ -886,7 +886,7 @@ func TestNodeServiceNodeExpandBlockVolume(t *testing.T) {
 		return true, nil
 	}
 	env.volumeResizeService.ResizeFunc = func(volume *csi.Volume, volumePath string) error {
-			t.Errorf("This function should never be called.")
+		t.Errorf("This function should never be called.")
 		return nil
 	}
 
