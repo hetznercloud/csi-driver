@@ -20,6 +20,7 @@ write_files:
     alias ksy="kubectl -n kube-system"
     alias kgp="kubectl get pods"
     alias kgs="kubectl get services"
+    alias cilog="cat /var/log/cloud-init-output.log"
     export HCLOUD_TOKEN={{.HcloudToken}}
   path: /root/.bashrc
 runcmd:
@@ -32,6 +33,10 @@ runcmd:
 - apt install -y kubectl={{.K8sVersion}}-00 kubeadm={{.K8sVersion}}-00 kubelet={{.K8sVersion}}-00 docker.io
 - systemctl daemon-reload
 - systemctl restart kubelet
+# Download and install latest hcloud cli release for easier debugging on host
+- curl -s https://api.github.com/repos/hetznercloud/cli/releases/latest | grep browser_download_url | grep linux-amd64 | cut -d '"' -f 4 | wget -qi -
+- tar xvzf hcloud-linux-amd64.tar.gz && cp hcloud /usr/bin/hcloud && chmod +x /usr/bin/hcloud
+{{if .IsClusterServer}}
 - kubeadm init  --config /tmp/kubeadm-config.yaml
 - mkdir -p /root/.kube
 - cp -i /etc/kubernetes/admin.conf /root/.kube/config
@@ -43,6 +48,8 @@ runcmd:
 - KUBECONFIG=/root/.kube/config kubectl apply -f  https://raw.githubusercontent.com/hetznercloud/hcloud-cloud-controller-manager/master/deploy/ccm.yaml
 - cd /root/ && curl --location https://dl.k8s.io/v{{.K8sVersion}}/kubernetes-test-linux-amd64.tar.gz | tar --strip-components=3 -zxf - kubernetes/test/bin/e2e.test kubernetes/test/bin/ginkgo
 - KUBECONFIG=/root/.kube/config kubectl taint nodes --all node-role.kubernetes.io/master-
-# Download and install latest hcloud cli release for easier debugging on host
-- curl -s https://api.github.com/repos/hetznercloud/cli/releases/latest | grep browser_download_url | grep linux-amd64 | cut -d '"' -f 4 | wget -qi -
-- tar xvzf hcloud-linux-amd64.tar.gz && cp hcloud /usr/bin/hcloud && chmod +x /usr/bin/hcloud
+- kubeadm token create --print-join-command >> /root/join.txt
+{{else}}
+- {{.JoinCMD}}
+- sleep 10 # to get the joining work
+{{end}}
