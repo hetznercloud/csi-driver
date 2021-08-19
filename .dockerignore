@@ -1,0 +1,14 @@
+.dockerignore
+Dockerfile
+.git/
+.github/
+.gitlab-ci.yml
+.idea/
+CHANGES.md
+LICENSE
+README.md
+e2etests/
+deploy/
+mock/
+script/
+**/*_test.go
