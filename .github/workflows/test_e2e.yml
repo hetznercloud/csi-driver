@@ -36,6 +36,14 @@ jobs:
       if: steps.check_tts.outputs.hcloud_token_set == 'false' && steps.check_tts.outputs.tts_token_set == 'false'
       run: |
         echo "::error ::Couldn't determine HCLOUD_TOKEN. Check your repository secrets are setup correctly."
+    - uses: actions/cache@v2
+      with:
+        path: |
+          ~/go/pkg/mod
+          ~/.cache/go-build
+        key: ${{ runner.os }}-go-${{ hashFiles('**/go.sum') }}
+        restore-keys: |
+          ${{ runner.os }}-go-
     - name: Run tests
       env:
         K8S_VERSION: ${{ matrix.k8s }}

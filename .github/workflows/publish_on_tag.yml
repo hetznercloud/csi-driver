@@ -1,23 +1,28 @@
-name: Push latest version
+name: Push tagged version
 on:
   push:
     tags:
       - 'v*.*.*'
 jobs:
-  test:
+  publish:
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/setup-go@v2
-        with:
-          go-version: '1.16'
       - uses: actions/checkout@master
-      - name: Publish tag to registry
-        env:
-          DOCKER_USER: ${{ secrets.DOCKER_USER }}
-          DOCKER_PASSWORD: ${{ secrets.DOCKER_PASSWORD }}
-        run: |
-          export RELEASE_VERSION=$(echo ${GITHUB_REF:11})
-          docker version
-          docker login -u "$DOCKER_USER" -p "$DOCKER_PASSWORD"
-          docker build -t hetznercloud/hcloud-csi-driver:$RELEASE_VERSION .
-          docker push hetznercloud/hcloud-csi-driver:$RELEASE_VERSION
+      - id: release_version
+        run: echo ::set-output name=value::${GITHUB_REF:11}
+      - name: Set up Docker Buildx
+        uses: docker/setup-buildx-action@v1
+      - name: Login to DockerHub
+        uses: docker/login-action@v1
+        with:
+          username: ${{ secrets.DOCKER_USER }}
+          password: ${{ secrets.DOCKER_PASSWORD }}
+      - name: Build and push
+        id: docker_build
+        uses: docker/build-push-action@v2
+        with:
+          context: .
+          push: true
+          tags: ${{ github.repository_owner }}/hcloud-csi-driver:${{ steps.release_version.outputs.value}}
+          cache-from: type=registry,ref=${{ github.repository_owner }}/hcloud-csi-driver:buildcache
+          cache-to: type=registry,ref=${{ github.repository_owner }}/hcloud-csi-driver:buildcache,mode=max
