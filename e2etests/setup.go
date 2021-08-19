@@ -325,9 +325,9 @@ func runCmd(name string, argv []string, env []string) error {
 func (s *hcloudK8sSetup) prepareCSIDriverDeploymentFile() error {
 	const op = "hcloudK8sSetup/prepareCSIDriverDeploymentFile"
 	fmt.Printf("[%s] %s: Read master deployment file\n", s.MainNode.Name, op)
-	deploymentFile, err := ioutil.ReadFile("../deploy/kubernetes/hcloud-csi-master.yml")
+	deploymentFile, err := ioutil.ReadFile("../deploy/kubernetes/hcloud-csi.yml")
 	if err != nil {
-		return fmt.Errorf("%s: read csi driver deployment file %s: %v", op, "../deploy/kubernetes/hcloud-csi-master.yml", err)
+		return fmt.Errorf("%s: read csi driver deployment file %s: %v", op, "../deploy/kubernetes/hcloud-csi.yml", err)
 	}
 
 	fmt.Printf("[%s] %s: Prepare deployment file and transfer it\n", s.MainNode.Name, op)

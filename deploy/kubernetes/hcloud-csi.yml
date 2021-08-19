@@ -207,10 +207,10 @@ spec:
           requiredDuringSchedulingIgnoredDuringExecution:
             nodeSelectorTerms:
               - matchExpressions:
-                  - key: "instance.hetzner.cloud/is-root-server"
-                    operator: NotIn
-                    values:
-                      - "true"
+                - key: "instance.hetzner.cloud/is-root-server"
+                  operator: NotIn
+                  values:
+                    - "true"
       serviceAccount: hcloud-csi
       containers:
         - name: csi-node-driver-registrar
