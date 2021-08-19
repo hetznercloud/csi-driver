@@ -1,8 +1,13 @@
 #cloud-config
 write_files:
 - content: |
+    overlay
+    br_netfilter
+  path: /etc/modules-load.d/containerd.conf
+- content: |
     net.bridge.bridge-nf-call-ip6tables = 1
     net.bridge.bridge-nf-call-iptables = 1
+    net.ipv4.ip_forward = 1
   path: /etc/sysctl.d/k8s.conf
 - content: |
     apiVersion: kubeadm.k8s.io/v1beta2
@@ -25,13 +30,20 @@ write_files:
   path: /root/.bashrc
 runcmd:
 - export HOME=/root
+- modprobe overlay
+- modprobe br_netfilter
 - sysctl --system
 - apt install -y apt-transport-https curl
 - curl -s https://packages.cloud.google.com/apt/doc/apt-key.gpg | apt-key add -
 - echo "deb https://apt.kubernetes.io/ kubernetes-xenial main" > /etc/apt/sources.list.d/kubernetes.list
+- curl -fsSL https://download.docker.com/linux/ubuntu/gpg | gpg --dearmor -o /usr/share/keyrings/docker-archive-keyring.gpg
+- echo "deb [arch=amd64 signed-by=/usr/share/keyrings/docker-archive-keyring.gpg] https://download.docker.com/linux/ubuntu $(lsb_release -cs) stable" | tee /etc/apt/sources.list.d/docker.list > /dev/null
 - apt update
-- apt install -y kubectl={{.K8sVersion}}-00 kubeadm={{.K8sVersion}}-00 kubelet={{.K8sVersion}}-00 docker.io
+- apt install -y kubectl={{.K8sVersion}}-00 kubeadm={{.K8sVersion}}-00 kubelet={{.K8sVersion}}-00 containerd.io
 - systemctl daemon-reload
+- mkdir -p /etc/containerd
+- containerd config default | tee /etc/containerd/config.toml
+- systemctl restart containerd
 - systemctl restart kubelet
 # Download and install latest hcloud cli release for easier debugging on host
 - curl -s https://api.github.com/repos/hetznercloud/cli/releases/latest | grep browser_download_url | grep linux-amd64 | cut -d '"' -f 4 | wget -qi -
@@ -46,7 +58,7 @@ runcmd:
 - KUBECONFIG=/root/.kube/config kubectl -n kube-system create secret generic hcloud-csi --from-literal=token={{.HcloudToken}}
 - KUBECONFIG=/root/.kube/config kubectl -n kube-system create secret generic hcloud --from-literal=token={{.HcloudToken}}
 - KUBECONFIG=/root/.kube/config kubectl apply -f  https://raw.githubusercontent.com/hetznercloud/hcloud-cloud-controller-manager/master/deploy/ccm.yaml
-- cd /root/ && curl --location https://dl.k8s.io/v{{.K8sVersion}}/kubernetes-test-linux-amd64.tar.gz | tar --strip-components=3 -zxf - kubernetes/test/bin/e2e.test kubernetes/test/bin/ginkgo
+- cd /root/ && curl  -s --location https://dl.k8s.io/v{{.K8sVersion}}/kubernetes-test-linux-amd64.tar.gz | tar --strip-components=3 -zxf - kubernetes/test/bin/e2e.test kubernetes/test/bin/ginkgo
 - KUBECONFIG=/root/.kube/config kubectl taint nodes --all node-role.kubernetes.io/master-
 - kubeadm token create --print-join-command >> /root/join.txt
 {{else}}

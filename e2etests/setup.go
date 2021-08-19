@@ -92,10 +92,7 @@ func (s *hcloudK8sSetup) PrepareTestEnv(ctx context.Context, additionalSSHKeys [
 	}
 
 	fmt.Printf("[cluster-node] %s Load Image:\n", op)
-	transferCmd := "docker load --input ci-hcloud-csi-driver.tar"
-	if s.K8sDistribution == K8sDistributionK3s {
-		transferCmd = "ctr -n=k8s.io image import ci-hcloud-csi-driver.tar"
-	}
+	transferCmd := "ctr -n=k8s.io image import ci-hcloud-csi-driver.tar"
 	err = RunCommandOnServer(s.privKey, s.MainNode, transferCmd)
 	if err != nil {
 		return fmt.Errorf("%s: Load image %s", op, err)
@@ -145,10 +142,9 @@ func (s *hcloudK8sSetup) createClusterWorker(ctx context.Context, additionalSSHK
 	}
 
 	fmt.Printf("[%s] %s Load Image\n", srv.Name, op)
-	transferCmd := "docker load --input ci-hcloud-csi-driver.tar"
-	if s.K8sDistribution == K8sDistributionK3s {
-		transferCmd = "ctr -n=k8s.io image import ci-hcloud-csi-driver.tar"
-	}
+
+	transferCmd := "ctr -n=k8s.io image import ci-hcloud-csi-driver.tar"
+
 	err = RunCommandOnServer(s.privKey, srv, transferCmd)
 	if err != nil {
 		fmt.Printf("[%s] %s: load image on worker: %v", srv.Name, op, err)

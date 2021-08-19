@@ -5,7 +5,7 @@ jobs:
     runs-on: ubuntu-latest
     strategy:
       matrix:
-        k8s: [ k8s-1.19.10, k8s-1.20.6, k8s-1.21.0 ]
+        k8s: [ k8s-1.19.10, k8s-1.20.6, k8s-1.21.0, k8s-1.22.0 ]
     name: k8s ${{ matrix.k8s }}
     steps:
     - uses: actions/setup-go@v2
