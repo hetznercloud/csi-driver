@@ -114,11 +114,9 @@ spec:
       containers:
         - name: csi-attacher
           image: k8s.gcr.io/sig-storage/csi-attacher:v3.2.1
-          args:
-            - --csi-address=/var/lib/csi/sockets/pluginproxy/csi.sock
           volumeMounts:
             - name: socket-dir
-              mountPath: /var/lib/csi/sockets/pluginproxy/
+              mountPath: /run/csi
           securityContext:
             privileged: true
             capabilities:
@@ -126,11 +124,10 @@ spec:
             allowPrivilegeEscalation: true
         - name: csi-resizer
           image: k8s.gcr.io/sig-storage/csi-resizer:v1.2.0
-          args:
-            - --csi-address=/var/lib/csi/sockets/pluginproxy/csi.sock
+
           volumeMounts:
             - name: socket-dir
-              mountPath: /var/lib/csi/sockets/pluginproxy/
+              mountPath: /run/csi
           securityContext:
             privileged: true
             capabilities:
@@ -139,12 +136,11 @@ spec:
         - name: csi-provisioner
           image: k8s.gcr.io/sig-storage/csi-provisioner:v2.2.2
           args:
-            - --csi-address=/var/lib/csi/sockets/pluginproxy/csi.sock
             - --feature-gates=Topology=true
             - --default-fstype=ext4
           volumeMounts:
             - name: socket-dir
-              mountPath: /var/lib/csi/sockets/pluginproxy/
+              mountPath: /run/csi
           securityContext:
             privileged: true
             capabilities:
@@ -155,7 +151,7 @@ spec:
           imagePullPolicy: Always
           env:
             - name: CSI_ENDPOINT
-              value: unix:///var/lib/csi/sockets/pluginproxy/csi.sock
+              value: unix:///run/csi/socket
             - name: METRICS_ENDPOINT
               value: 0.0.0.0:9189
             - name: KUBE_NODE_NAME
@@ -170,7 +166,7 @@ spec:
                   key: token
           volumeMounts:
             - name: socket-dir
-              mountPath: /var/lib/csi/sockets/pluginproxy/
+              mountPath: /run/csi
           ports:
             - containerPort: 9189
               name: metrics
@@ -193,10 +189,8 @@ spec:
         - name: liveness-probe
           imagePullPolicy: Always
           image: k8s.gcr.io/sig-storage/livenessprobe:v2.3.0
-          args:
-            - --csi-address=/var/lib/csi/sockets/pluginproxy/csi.sock
           volumeMounts:
-            - mountPath: /var/lib/csi/sockets/pluginproxy/
+            - mountPath: /run/csi
               name: socket-dir
       volumes:
         - name: socket-dir
@@ -230,8 +224,7 @@ spec:
         - name: csi-node-driver-registrar
           image: k8s.gcr.io/sig-storage/csi-node-driver-registrar:v2.2.0
           args:
-            - --csi-address=/csi/csi.sock
-            - --kubelet-registration-path=/var/lib/kubelet/plugins/csi.hetzner.cloud/csi.sock
+            - --kubelet-registration-path=/var/lib/kubelet/plugins/csi.hetzner.cloud/socket
           env:
             - name: KUBE_NODE_NAME
               valueFrom:
@@ -240,7 +233,7 @@ spec:
                   fieldPath: spec.nodeName
           volumeMounts:
             - name: plugin-dir
-              mountPath: /csi
+              mountPath: /run/csi
             - name: registration-dir
               mountPath: /registration
           securityContext:
@@ -250,7 +243,7 @@ spec:
           imagePullPolicy: Always
           env:
             - name: CSI_ENDPOINT
-              value: unix:///csi/csi.sock
+              value: unix:///run/csi/socket
             - name: METRICS_ENDPOINT
               value: 0.0.0.0:9189
             - name: HCLOUD_TOKEN
@@ -268,7 +261,7 @@ spec:
               mountPath: /var/lib/kubelet
               mountPropagation: "Bidirectional"
             - name: plugin-dir
-              mountPath: /csi
+              mountPath: /run/csi
             - name: device-dir
               mountPath: /dev
           securityContext:
@@ -290,10 +283,8 @@ spec:
         - name: liveness-probe
           imagePullPolicy: Always
           image: k8s.gcr.io/sig-storage/livenessprobe:v2.3.0
-          args:
-            - --csi-address=/csi/csi.sock
           volumeMounts:
-            - mountPath: /csi
+            - mountPath: /run/csi
               name: plugin-dir
       volumes:
         - name: kubelet-dir
