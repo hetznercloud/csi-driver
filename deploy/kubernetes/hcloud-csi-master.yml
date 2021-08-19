@@ -116,7 +116,6 @@ spec:
           image: k8s.gcr.io/sig-storage/csi-attacher:v3.2.1
           args:
             - --csi-address=/var/lib/csi/sockets/pluginproxy/csi.sock
-            - --v=5
           volumeMounts:
             - name: socket-dir
               mountPath: /var/lib/csi/sockets/pluginproxy/
@@ -129,7 +128,6 @@ spec:
           image: k8s.gcr.io/sig-storage/csi-resizer:v1.2.0
           args:
             - --csi-address=/var/lib/csi/sockets/pluginproxy/csi.sock
-            - --v=5
           volumeMounts:
             - name: socket-dir
               mountPath: /var/lib/csi/sockets/pluginproxy/
@@ -144,7 +142,6 @@ spec:
             - --csi-address=/var/lib/csi/sockets/pluginproxy/csi.sock
             - --feature-gates=Topology=true
             - --default-fstype=ext4
-            - --v=5
           volumeMounts:
             - name: socket-dir
               mountPath: /var/lib/csi/sockets/pluginproxy/
@@ -242,7 +239,6 @@ spec:
         - name: csi-node-driver-registrar
           image: k8s.gcr.io/sig-storage/csi-node-driver-registrar:v2.2.0
           args:
-            - --v=5
             - --csi-address=/csi/csi.sock
             - --kubelet-registration-path=/var/lib/kubelet/plugins/csi.hetzner.cloud/csi.sock
           env:

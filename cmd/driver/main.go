@@ -267,7 +267,7 @@ func parseLogLevel(lvl string) level.Option {
 	case "error":
 		return level.AllowError()
 	default:
-		return level.AllowAll()
+		return level.AllowInfo()
 	}
 }
 
