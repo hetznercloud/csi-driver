@@ -241,11 +241,11 @@ func (s *hcloudK8sSetup) PrepareK8s() (string, error) {
 
 	patch := `{"spec":{"template":{"spec":{"containers":[{"name":"hcloud-csi-driver","env":[{"name":"LOG_LEVEL","value":"debug"}]}]}}}}`
 	fmt.Printf("[%s] %s: Patch deployment for debug logging\n", s.MainNode.Name, op)
-	err = RunCommandOnServer(s.privKey, s.MainNode, fmt.Sprintf("KUBECONFIG=/root/.kube/config kubectl patch statefulset hcloud-csi-controller --patch '%s'", patch))
+	err = RunCommandOnServer(s.privKey, s.MainNode, fmt.Sprintf("KUBECONFIG=/root/.kube/config kubectl patch statefulset hcloud-csi-controller -n kube-system --patch '%s'", patch))
 	if err != nil {
 		return "", fmt.Errorf("%s Patch StatefulSet: %s", op, err)
 	}
-	err = RunCommandOnServer(s.privKey, s.MainNode, fmt.Sprintf("KUBECONFIG=/root/.kube/config kubectl patch daemonset hcloud-csi-node --patch '%s'", patch))
+	err = RunCommandOnServer(s.privKey, s.MainNode, fmt.Sprintf("KUBECONFIG=/root/.kube/config kubectl patch daemonset hcloud-csi-node -n kube-system --patch '%s'", patch))
 	if err != nil {
 		return "", fmt.Errorf("%s Patch DaemonSet: %s", op, err)
 	}
