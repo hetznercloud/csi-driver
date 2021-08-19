@@ -47,3 +47,8 @@ k8s 1.21:
   <<: *k8se2e
   variables:
     K8S_VERSION: k8s-1.21.0
+
+k8s 1.22:
+  <<: *k8se2e
+  variables:
+    K8S_VERSION: k8s-1.22.0
