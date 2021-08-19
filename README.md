@@ -104,26 +104,56 @@ tests for a specific version. You can run the tests with the following
 commands. Keep in mind, that these tests run on real cloud servers and
 will create volumes that will be billed.
 
-**Test Server Setup**:
+**Development/Testing**
 
-1x CPX21 (Ubuntu 18.04)
+For local development, you will need the following tools installed:
 
-**Requirements: Docker and Go 1.16**
+ * Docker
+ * Golang 1.16
+ * [Skaffold](https://skaffold.dev/)
+ * [k3sup](https://github.com/alexellis/k3sup#readme)
+ * [hcloud CLI](https://github.com/hetznercloud/cli#readme)
 
-1. Configure your environment correctly
-   ```bash
-   export HCLOUD_TOKEN=<specifiy a project token>
-   export K8S_VERSION=1.21.0 # The specific (latest) version is needed here
-   export USE_SSH_KEYS=key1,key2 # Name or IDs of your SSH Keys within the Hetzner Cloud, the servers will be accessable with that keys
-   ```
-2. Run the tests
-   ```bash
-   go test $(go list ./... | grep e2etests) -v -timeout 60m
-   ```
+You will also need to set a `HCLOUD_TOKEN` in your shell session:
 
-The tests will now run, this will take a while (~30 min).
+```sh
+ $ export HCLOUD_TOKEN=<token>
+```
 
-**If the tests fail, make sure to clean up the project with the Hetzner Cloud Console or the hcloud cli.**
+You can quickly bring up a dev cluster test environment in Hetzner Cloud.
+
+```sh
+  $ eval $(INSTANCES=3 hack/dev-up.sh)
+  # In about a minute, you should have a 3 node cluster of CPX11 instances (cost is around 2 cents per hour)
+  $ kubectl get nodes
+  # Now let's run the app.
+  $ SKAFFOLD_DEFAULT_REPO=my_dockerhub_username skaffold dev
+  # In a minute or two, the project should be built into an image, deployed into the test cluster.
+  # Logs will now be tailing out to your shell.
+  # If you make changes to the project, the image will be rebuilt and pushed to the cluster, restarting pods as needed.
+  # You can even debug the containers running remotely in The Cloud(tm) using standard Golang delve.
+  ^C
+  $ skaffold debug
+  # The logs will indicate which debug ports are available.
+  # IMPORTANT! The created servers are not automatically cleaned up. You must remember to delete everything yourself:
+  $ hack/dev-down.sh
+```
+
+### A note about `SKAFFOLD_DEFAULT_REPO`
+
+When you use Skaffold to deploy the driver to a remote cluster in Hetzner Cloud, you need somewhere to host the images. The default image repository is owned by Hetzner, and thus cannot be used for local development purposes. Instead, you can point Skaffold at your own Docker Hub, ghcr.io, Quay.io, or whatever. The Skaffold docks talk more about [Image Repository Handling](https://skaffold.dev/docs/environment/image-registries/) in gory detail, if you need more information.
+
+Please see the [Skaffold Documentation](https://skaffold.dev/docs/) for more information on the things you can do with Skaffold.
+
+### Running end-to-end tests
+
+Note, these tests will create and detach a *lot* of volumes. You will likely run into API request limits if you run this too frequently.
+The tests take 10-20 minutes.
+
+
+```sh
+hack/run-e2e-tests.sh
+```
 
 ## License
 

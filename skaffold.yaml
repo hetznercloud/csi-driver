@@ -1,0 +1,16 @@
+apiVersion: skaffold/v2beta19
+kind: Config
+metadata:
+  name: csi-driver
+build:
+  artifacts:
+  - image: hetznercloud/hcloud-csi-driver
+    docker:
+      dockerfile: Dockerfile
+      cacheFrom:
+        - hetznercloud/hcloud-csi-driver:buildcache
+  local:
+    useBuildkit: true
+deploy:
+  kustomize:
+    paths: [hack/]

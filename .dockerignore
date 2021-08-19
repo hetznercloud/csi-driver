@@ -4,11 +4,14 @@ Dockerfile
 .github/
 .gitlab-ci.yml
 .idea/
+.vscode/
 CHANGES.md
 LICENSE
 README.md
 e2etests/
 deploy/
+hack/
 mock/
 script/
 **/*_test.go
+skaffold.yaml

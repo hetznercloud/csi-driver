@@ -1,0 +1,32 @@
+# This Kustomization is specifically designed for the Skaffold-powered dev environment.
+# $ eval $(hack/dev-up.sh) && skaffold dev
+
+apiVersion: kustomize.config.k8s.io/v1beta1
+kind: Kustomization
+resources:
+  - ../deploy
+patches:
+  - target:
+      kind: DaemonSet
+      name: hcloud-csi-node
+    patch: |-
+      - op: add
+        path: /spec/template/spec/containers/1/env/-
+        value:
+          name: LOG_LEVEL
+          value: info
+      - op: replace
+        path: /spec/template/spec/containers/1/env/2/valueFrom/secretKeyRef/name
+        value: hcloud
+  - target:
+      kind: StatefulSet
+      name: hcloud-csi-controller
+    patch: |-
+      - op: add
+        path: /spec/template/spec/containers/3/env/-
+        value:
+          name: LOG_LEVEL
+          value: info
+      - op: replace
+        path: /spec/template/spec/containers/3/env/3/valueFrom/secretKeyRef/name
+        value: hcloud

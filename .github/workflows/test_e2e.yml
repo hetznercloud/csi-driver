@@ -1,12 +1,23 @@
 name: Run e2e tests
-on: [push]
+on:
+  pull_request:
+    branches: [master]
+  push:
+    branches: [master]
+
 jobs:
   test:
     runs-on: ubuntu-latest
     strategy:
       matrix:
-        k8s: [ k8s-1.19.10, k8s-1.20.6, k8s-1.21.0, k8s-1.22.0 ]
-    name: k8s ${{ matrix.k8s }}
+        k8s:
+          - test_version: v1.19.14
+            major: 19
+          - test_version: v1.20.10
+            major: 20
+          - test_version: v1.21.4
+            major: 21
+    name: k8s v1.${{ matrix.k8s.major }}
     steps:
     - uses: actions/setup-go@v2
       with:
@@ -31,22 +42,59 @@ jobs:
       env:
         HCLOUD_TOKEN: ${{ secrets.HCLOUD_TOKEN }}
       run: |
+        # If HCLOUD_TOKEN has multiple items (delimited with a comma) then grab a random one.
+        HCLOUD_TOKEN=$(echo $HCLOUD_TOKEN | tr ',' '\n' | shuf -n1)
         echo "HCLOUD_TOKEN=$HCLOUD_TOKEN" >> $GITHUB_ENV
+        echo "::add-mask::$HCLOUD_TOKEN"
     - name: Blow up if no HCLOUD_TOKEN or TTS_TOKEN set.
       if: steps.check_tts.outputs.hcloud_token_set == 'false' && steps.check_tts.outputs.tts_token_set == 'false'
       run: |
         echo "::error ::Couldn't determine HCLOUD_TOKEN. Check your repository secrets are setup correctly."
-    - uses: actions/cache@v2
+    - name: cache deps
+      uses: actions/cache@v2
       with:
         path: |
-          ~/go/pkg/mod
-          ~/.cache/go-build
-        key: ${{ runner.os }}-go-${{ hashFiles('**/go.sum') }}
-        restore-keys: |
-          ${{ runner.os }}-go-
-    - name: Run tests
-      env:
-        K8S_VERSION: ${{ matrix.k8s }}
+          ~/bin/k3sup
+          ~/bin/skaffold
+        # Use this workflow file as cache key in case we change the versions we download below.
+        key: bin-deps-${{ hashFiles('.github/workflows/test_e2e.yml') }}
+    - name: install deps
       run: |
-        go test $(go list ./... | grep e2etests) -v -timeout 60m
-        ./script/delete-token.sh $HCLOUD_TOKEN
+        mkdir -p ~/bin
+        [[ ! -f ~/bin/skaffold ]] && curl -Lo ~/bin/skaffold https://storage.googleapis.com/skaffold/releases/latest/skaffold-linux-amd64 && chmod +x ~/bin/skaffold
+        [[ ! -f ~/bin/k3sup ]] && curl -Lo ~/bin/k3sup https://github.com/alexellis/k3sup/releases/download/0.11.0/k3sup && chmod +x ~/bin/k3sup
+        echo "$HOME/bin" >> $GITHUB_PATH
+    - name: Login to DockerHub
+      uses: docker/login-action@v1
+      with:
+        username: ${{ secrets.DOCKER_USER }}
+        password: ${{ secrets.DOCKER_PASSWORD }}
+    - name: Log in to the Container registry
+      uses: docker/login-action@f054a8b539a109f9f41c372932f1ae047eff08c9
+      with:
+        registry: ghcr.io
+        username: ${{ github.actor }}
+        password: ${{ secrets.GITHUB_TOKEN }}
+    - uses: 3bit/setup-hcloud@v1
+    - name: run e2e tests
+      env:
+        K3S_CHANNEL: v1.${{ matrix.k8s.major }}
+        SCOPE: ci-${{ matrix.k8s.major }}-${{ github.run_id }}
+        SKAFFOLD_DEFAULT_REPO: ghcr.io/${{ github.repository_owner }}
+        SSH_KEYS: ${{ secrets.SSH_KEYS }}
+        KUBE_VERSION: ${{ matrix.k8s.test_version }}
+      run: |
+        set -uex -o pipefail
+        eval $(INSTANCES=1 hack/dev-up.sh)
+        skaffold run
+        hack/run-e2e-tests.sh
+    - name: cleanup environment
+      if: always()
+      env:
+        SCOPE: ci-${{ matrix.k8s.major }}-${{ github.run_id }}
+      run: hack/dev-down.sh
+    - name: Cleanup TTS token
+      if: always() && steps.check_tts.outputs.tts_token_set == 'true'
+      env:
+        TTS_TOKEN: ${{ secrets.TTS_TOKEN }}
+      run: ./script/delete-token.sh $HCLOUD_TOKEN
