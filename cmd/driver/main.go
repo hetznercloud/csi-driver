@@ -2,9 +2,7 @@ package main
 
 import (
 	"context"
-	"io/ioutil"
 	"net"
-	"net/http"
 	"os"
 	"strconv"
 	"strings"
@@ -15,6 +13,7 @@ import (
 	"github.com/go-kit/kit/log/level"
 	grpc_middleware "github.com/grpc-ecosystem/go-grpc-middleware"
 	"github.com/hetznercloud/hcloud-go/hcloud"
+	"github.com/hetznercloud/hcloud-go/hcloud/metadata"
 	"google.golang.org/grpc"
 
 	"github.com/hetznercloud/csi-driver/api"
@@ -97,9 +96,23 @@ func main() {
 	}
 	opts = append(opts, hcloud.WithPollInterval(time.Duration(pollingInterval)*time.Second))
 
+	metricsEndpoint := os.Getenv("METRICS_ENDPOINT")
+	if metricsEndpoint == "" {
+		// Use a default endpoint
+		metricsEndpoint = ":9189"
+	}
+
+	m := metrics.New(
+		log.With(logger, "component", "metrics-service"),
+		metricsEndpoint,
+	)
+	opts = append(opts, hcloud.WithInstrumentation(m.Registry()))
+
 	hcloudClient := hcloud.NewClient(opts...)
 
-	hcloudServerID := getServerID(hcloudClient)
+	metadataClient := metadata.NewClient(metadata.WithInstrumentation(m.Registry()))
+
+	hcloudServerID := getServerID(hcloudClient, metadataClient)
 	level.Debug(logger).Log("msg", "fetching server")
 	server, _, err := hcloudClient.Server.GetByID(context.Background(), hcloudServerID)
 	if err != nil {
@@ -153,22 +166,11 @@ func main() {
 		os.Exit(1)
 	}
 
-	metricsEndpoint := os.Getenv("METRICS_ENDPOINT")
-	if metricsEndpoint == "" {
-		// Use a default endpoint
-		metricsEndpoint = ":9189"
-	}
-
-	metrics := metrics.New(
-		log.With(logger, "component", "metrics-service"),
-		metricsEndpoint,
-	)
-
 	grpcServer := grpc.NewServer(
 		grpc.UnaryInterceptor(
 			grpc_middleware.ChainUnaryServer(
 				requestLogger(log.With(logger, "component", "grpc-server")),
-				metrics.UnaryServerInterceptor(),
+				m.UnaryServerInterceptor(),
 			),
 		),
 	)
@@ -177,8 +179,25 @@ func main() {
 	proto.RegisterIdentityServer(grpcServer, identityService)
 	proto.RegisterNodeServer(grpcServer, nodeService)
 
-	metrics.InitializeMetrics(grpcServer)
-	metrics.Serve()
+	m.InitializeMetrics(grpcServer)
+	enableMetrics := true // Default to true to keep the old behavior of exporting them always. This is deprecated
+	if enableMetricsEnv := os.Getenv("ENABLE_METRICS"); enableMetricsEnv != "" {
+		enableMetrics, err = strconv.ParseBool(enableMetricsEnv)
+		if err != nil {
+			level.Error(logger).Log(
+				"msg", "ENABLE_METRICS can only contain a boolean value, true or false",
+				"err", err,
+			)
+			os.Exit(1)
+		}
+	} else {
+		level.Warn(logger).Log(
+			"msg", "the environment variable ENABLE_METRICS should be set to true, you can disable metrics by setting this env to false. Not specifying the ENV is deprecated. With v1.9.0 we will change the default to false and in v1.10.0 we will fail on start when the ENABLE_METRICS is not specified.",
+		)
+	}
+	if enableMetrics {
+		m.Serve()
+	}
 
 	identityService.SetReady(true)
 
@@ -191,7 +210,7 @@ func main() {
 	}
 }
 
-func getServerID(hcloudClient *hcloud.Client) int {
+func getServerID(hcloudClient *hcloud.Client, metadataClient *metadata.Client) int {
 	if s := os.Getenv("HCLOUD_SERVER_ID"); s != "" {
 		id, err := strconv.Atoi(s)
 		if err != nil {
@@ -232,7 +251,7 @@ func getServerID(hcloudClient *hcloud.Client) int {
 	level.Debug(logger).Log(
 		"msg", "getting instance id from metadata service",
 	)
-	id, err := getInstanceID()
+	id, err := metadataClient.InstanceID()
 	if err != nil {
 		level.Error(logger).Log(
 			"msg", "failed to get instance id from metadata service",
@@ -241,19 +260,6 @@ func getServerID(hcloudClient *hcloud.Client) int {
 		os.Exit(1)
 	}
 	return id
-}
-
-func getInstanceID() (int, error) {
-	resp, err := http.Get("http://169.254.169.254/2009-04-04/meta-data/instance-id")
-	if err != nil {
-		return 0, err
-	}
-	defer resp.Body.Close()
-	body, err := ioutil.ReadAll(resp.Body)
-	if err != nil {
-		return 0, err
-	}
-	return strconv.Atoi(string(body))
 }
 
 func parseLogLevel(lvl string) level.Option {
