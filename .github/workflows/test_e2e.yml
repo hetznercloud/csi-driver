@@ -64,11 +64,6 @@ jobs:
         [[ ! -f ~/bin/skaffold ]] && curl -Lo ~/bin/skaffold https://storage.googleapis.com/skaffold/releases/latest/skaffold-linux-amd64 && chmod +x ~/bin/skaffold
         [[ ! -f ~/bin/k3sup ]] && curl -Lo ~/bin/k3sup https://github.com/alexellis/k3sup/releases/download/0.11.0/k3sup && chmod +x ~/bin/k3sup
         echo "$HOME/bin" >> $GITHUB_PATH
-    - name: Login to DockerHub
-      uses: docker/login-action@v1
-      with:
-        username: ${{ secrets.DOCKER_USER }}
-        password: ${{ secrets.DOCKER_PASSWORD }}
     - name: Log in to the Container registry
       uses: docker/login-action@f054a8b539a109f9f41c372932f1ae047eff08c9
       with:
