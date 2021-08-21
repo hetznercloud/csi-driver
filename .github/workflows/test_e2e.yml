@@ -66,16 +66,21 @@ jobs:
         echo "$HOME/bin" >> $GITHUB_PATH
     - name: Log in to the Container registry
       uses: docker/login-action@f054a8b539a109f9f41c372932f1ae047eff08c9
+      if: ${{ github.repository_owner != "hetznercloud" }}
       with:
         registry: ghcr.io
         username: ${{ github.actor }}
         password: ${{ secrets.GITHUB_TOKEN }}
     - uses: 3bit/setup-hcloud@v1
+    - if: ${{ github.repository_owner != "hetznercloud" }}
+      env:
+        REPO_OWNER: ${{ github.repository_owner }}
+      run: |
+        echo "SKAFFOLD_DEFAULT_REPO=ghcr.io/$REPO_OWNER" >> $GITHUB_ENV
     - name: run e2e tests
       env:
         K3S_CHANNEL: v1.${{ matrix.k8s.major }}
         SCOPE: ci-${{ matrix.k8s.major }}-${{ github.run_id }}
-        SKAFFOLD_DEFAULT_REPO: ghcr.io/${{ github.repository_owner }}
         SSH_KEYS: ${{ secrets.SSH_KEYS }}
         KUBE_VERSION: ${{ matrix.k8s.test_version }}
       run: |
