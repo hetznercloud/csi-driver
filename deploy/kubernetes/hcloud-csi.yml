@@ -124,7 +124,6 @@ spec:
             allowPrivilegeEscalation: true
         - name: csi-resizer
           image: k8s.gcr.io/sig-storage/csi-resizer:v1.2.0
-
           volumeMounts:
             - name: socket-dir
               mountPath: /run/csi
@@ -147,7 +146,7 @@ spec:
               add: ["SYS_ADMIN"]
             allowPrivilegeEscalation: true
         - name: hcloud-csi-driver
-          image: hetznercloud/hcloud-csi-driver:1.5.3
+          image: hetznercloud/hcloud-csi-driver:1.6.0
           imagePullPolicy: Always
           env:
             - name: CSI_ENDPOINT
@@ -221,6 +220,15 @@ spec:
           operator: Exists
         - key: CriticalAddonsOnly
           operator: Exists
+      affinity:
+        nodeAffinity:
+          requiredDuringSchedulingIgnoredDuringExecution:
+            nodeSelectorTerms:
+              - matchExpressions:
+                  - key: "instance.hetzner.cloud/is-root-server"
+                    operator: NotIn
+                    values:
+                      - "true"
       serviceAccount: hcloud-csi
       containers:
         - name: csi-node-driver-registrar
@@ -241,7 +249,7 @@ spec:
           securityContext:
             privileged: true
         - name: hcloud-csi-driver
-          image: hetznercloud/hcloud-csi-driver:1.5.3
+          image: hetznercloud/hcloud-csi-driver:1.6.0
           imagePullPolicy: Always
           env:
             - name: CSI_ENDPOINT
@@ -249,7 +257,7 @@ spec:
             - name: METRICS_ENDPOINT
               value: 0.0.0.0:9189
             - name: ENABLE_METRICS
-              value:  "true"
+              value: "true"
             - name: HCLOUD_TOKEN
               valueFrom:
                 secretKeyRef:
