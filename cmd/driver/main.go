@@ -78,7 +78,7 @@ func main() {
 		opts = append(opts, hcloud.WithDebugWriter(os.Stdout))
 	}
 
-	pollingInterval := 1
+	pollingInterval := 3
 	if customPollingInterval := os.Getenv("HCLOUD_POLLING_INTERVAL_SECONDS"); customPollingInterval != "" {
 		tmp, err := strconv.Atoi(customPollingInterval)
 		if err != nil || tmp < 1 {
