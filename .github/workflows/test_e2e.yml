@@ -10,7 +10,7 @@ jobs:
     steps:
     - uses: actions/setup-go@v2
       with:
-        go-version: '1.16'
+        go-version: '1.17'
     - uses: actions/checkout@master
     - name: Check whether HCLOUD_TOKEN needs to be fetched from TTS
       id: check_tts
