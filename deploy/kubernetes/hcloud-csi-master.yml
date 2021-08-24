@@ -153,6 +153,8 @@ spec:
               value: unix:///run/csi/socket
             - name: METRICS_ENDPOINT
               value: 0.0.0.0:9189
+            - name: ENABLE_METRICS
+              value: "true"
             - name: KUBE_NODE_NAME
               valueFrom:
                 fieldRef:
@@ -254,6 +256,8 @@ spec:
               value: unix:///run/csi/socket
             - name: METRICS_ENDPOINT
               value: 0.0.0.0:9189
+            - name: ENABLE_METRICS
+              value: "true"
             - name: HCLOUD_TOKEN
               valueFrom:
                 secretKeyRef:

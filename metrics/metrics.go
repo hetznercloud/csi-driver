@@ -59,6 +59,9 @@ func (s *Metrics) InitializeMetrics(server *grpc.Server) {
 	s.grpcMetrics.InitializeMetrics(server)
 }
 
+func (s *Metrics) Registry() *prometheus.Registry {
+	return s.reg
+}
 func (s *Metrics) Serve() {
 	httpServer := &http.Server{Handler: promhttp.HandlerFor(s.reg, promhttp.HandlerOpts{}), Addr: s.addr}
 
