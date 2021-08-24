@@ -88,14 +88,14 @@ We aim to support the latest three versions of Kubernetes. After a new
 Kubernetes version has been released we will stop supporting the oldest
 previously supported version. This does not necessarily mean that the
 CSI driver does not still work with this version. However, it means that
-we do not test that version anymore. Additionally we will not fix bugs
+we do not test that version anymore. Additionally, we will not fix bugs
 related only to an unsupported version.
 
 | Kubernetes | CSI Driver    | Deployment File                                                                                    |
 | ---------- | -------------:| --------------------------------------------------------------------------------------------------:|
-| 1.21       | master        | https://raw.githubusercontent.com/hetznercloud/csi-driver/master/deploy/kubernetes/hcloud-csi.yml  |
-| 1.20       | master        | https://raw.githubusercontent.com/hetznercloud/csi-driver/master/deploy/kubernetes/hcloud-csi.yml  |
-| 1.19       | 1.5.1, master | https://raw.githubusercontent.com/hetznercloud/csi-driver/v1.5.1/deploy/kubernetes/hcloud-csi.yml  |
+| 1.22       | 1.6.0, master | https://raw.githubusercontent.com/hetznercloud/csi-driver/v1.6.0/deploy/kubernetes/hcloud-csi.yml  |
+| 1.21       | 1.6.0, master | https://raw.githubusercontent.com/hetznercloud/csi-driver/v1.6.0/deploy/kubernetes/hcloud-csi.yml  |
+| 1.20       | 1.6.0, master | https://raw.githubusercontent.com/hetznercloud/csi-driver/v1.6.0/deploy/kubernetes/hcloud-csi.yml  |
 
 ## E2E Tests
 
