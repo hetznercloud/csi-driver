@@ -7,7 +7,9 @@ jobs:
   publish:
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@master
+      - uses: actions/checkout@v2
+        with:
+          fetch-depth: 0
       - id: release_version
         run: echo ::set-output name=value::${GITHUB_REF:11}
       - name: Set up Docker Buildx
