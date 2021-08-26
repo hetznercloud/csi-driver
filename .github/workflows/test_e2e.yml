@@ -1,9 +1,5 @@
 name: Run e2e tests
-on:
-  push:
-    branches: [master]
-  pull_request:
-    branches: [master]
+on: [push]
 concurrency: ci-${{ github.ref }}
 jobs:
   test:
