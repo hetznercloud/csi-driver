@@ -117,21 +117,11 @@ spec:
           volumeMounts:
             - name: socket-dir
               mountPath: /run/csi
-          securityContext:
-            privileged: true
-            capabilities:
-              add: ["SYS_ADMIN"]
-            allowPrivilegeEscalation: true
         - name: csi-resizer
           image: k8s.gcr.io/sig-storage/csi-resizer:v1.2.0
           volumeMounts:
             - name: socket-dir
               mountPath: /run/csi
-          securityContext:
-            privileged: true
-            capabilities:
-              add: ["SYS_ADMIN"]
-            allowPrivilegeEscalation: true
         - name: csi-provisioner
           image: k8s.gcr.io/sig-storage/csi-provisioner:v2.2.2
           args:
@@ -140,11 +130,6 @@ spec:
           volumeMounts:
             - name: socket-dir
               mountPath: /run/csi
-          securityContext:
-            privileged: true
-            capabilities:
-              add: ["SYS_ADMIN"]
-            allowPrivilegeEscalation: true
         - name: hcloud-csi-driver
           image: hetznercloud/hcloud-csi-driver:1.6.0
           imagePullPolicy: Always
@@ -184,9 +169,6 @@ spec:
             periodSeconds: 2
           securityContext:
             privileged: true
-            capabilities:
-              add: ["SYS_ADMIN"]
-            allowPrivilegeEscalation: true
         - name: liveness-probe
           imagePullPolicy: Always
           image: k8s.gcr.io/sig-storage/livenessprobe:v2.3.0
@@ -246,8 +228,6 @@ spec:
               mountPath: /run/csi
             - name: registration-dir
               mountPath: /registration
-          securityContext:
-            privileged: true
         - name: hcloud-csi-driver
           image: hetznercloud/hcloud-csi-driver:1.6.0
           imagePullPolicy: Always
