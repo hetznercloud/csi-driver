@@ -98,7 +98,7 @@ func (s *hcloudK8sSetup) PrepareTestEnv(ctx context.Context, additionalSSHKeys [
 		return fmt.Errorf("%s: Load image %s", op, err)
 	}
 
-	var workers = 1 // Change this value if you want to have more workers for the test
+	var workers = 3 // Change this value if you want to have more workers for the test
 	var wg sync.WaitGroup
 	for worker := 1; worker <= workers; worker++ {
 		wg.Add(1)
