@@ -279,18 +279,23 @@ func parseLogLevel(lvl string) level.Option {
 
 func requestLogger(logger log.Logger) grpc.UnaryServerInterceptor {
 	return func(ctx context.Context, req interface{}, info *grpc.UnaryServerInfo, handler grpc.UnaryHandler) (interface{}, error) {
-		level.Debug(logger).Log(
-			"msg", "handling request",
-			"req", req,
-		)
+		isProbe := info.FullMethod == "/csi.v1.Identity/Probe"
+
+		if !isProbe {
+			level.Debug(logger).Log(
+				"msg", "handling request",
+				"method", info.FullMethod,
+				"req", req,
+			)
+		}
 		resp, err := handler(ctx, req)
 		if err != nil {
 			level.Error(logger).Log(
 				"msg", "handler failed",
 				"err", err,
 			)
-		} else {
-			level.Debug(logger).Log("msg", "finished handling request")
+		} else if !isProbe {
+			level.Debug(logger).Log("msg", "finished handling request", "method", info.FullMethod, "err", err)
 		}
 		return resp, err
 	}
