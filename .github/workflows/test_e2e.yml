@@ -1,5 +1,6 @@
 name: Run e2e tests
 on: [push]
+concurrency: ci-${{ github.ref }}
 jobs:
   test:
     runs-on: ubuntu-latest
@@ -14,30 +15,22 @@ jobs:
     - uses: actions/checkout@v2
       with:
         fetch-depth: 0
-    - name: Check whether HCLOUD_TOKEN needs to be fetched from TTS
-      id: check_tts
+    - name: HCLOUD_TOKEN
       env:
         TTS_TOKEN: ${{ secrets.TTS_TOKEN }}
         HCLOUD_TOKEN: ${{ secrets.HCLOUD_TOKEN }}
       run: |
-        echo "::set-output name=tts_token_set::${{ env.TTS_TOKEN != '' }}"
-        echo "::set-output name=hcloud_token_set::${{ env.HCLOUD_TOKEN != '' }}"
-    - name: Fetch HCLOUD_TOKEN
-      if: steps.check_tts.outputs.tts_token_set == 'true'
-      env:
-        TTS_TOKEN: ${{ secrets.TTS_TOKEN }}
-      run: |
-        echo "HCLOUD_TOKEN=$(./script/get-token.sh)" >> $GITHUB_ENV
-    - name: Set HCLOUD_TOKEN directly
-      if: steps.check_tts.outputs.hcloud_token_set == 'true'
-      env:
-        HCLOUD_TOKEN: ${{ secrets.HCLOUD_TOKEN }}
-      run: |
-        echo "HCLOUD_TOKEN=$HCLOUD_TOKEN" >> $GITHUB_ENV
-    - name: Blow up if no HCLOUD_TOKEN or TTS_TOKEN set.
-      if: steps.check_tts.outputs.hcloud_token_set == 'false' && steps.check_tts.outputs.tts_token_set == 'false'
-      run: |
-        echo "::error ::Couldn't determine HCLOUD_TOKEN. Check your repository secrets are setup correctly."
+        set -ueo pipefail
+        if [[ "${TTS_TOKEN:-}" != "" ]]; then
+          token="$(./script/get-token.sh)"
+          echo "::add-mask::$token"
+          echo "HCLOUD_TOKEN=$token" >> "$GITHUB_ENV"
+        elif [[ "${HCLOUD_TOKEN:-}" != "" ]]; then
+          echo "HCLOUD_TOKEN=$HCLOUD_TOKEN" >> "$GITHUB_ENV"
+        else
+          echo "::error ::Couldn't determine HCLOUD_TOKEN. Check that repository secrets are setup correctly."
+          exit 1
+        fi
     - uses: actions/cache@v2
       with:
         path: |

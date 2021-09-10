@@ -25,7 +25,7 @@ func TestMain(m *testing.M) {
 
 func TestOfficialTestsuite(t *testing.T) {
 	t.Run("parallel tests", func(t *testing.T) {
-		err := RunCommandVisibleOnServer(testCluster.setup.privKey, testCluster.setup.MainNode, fmt.Sprintf("KUBECONFIG=/root/.kube/config ./ginkgo -p -v -focus='External.Storage' -skip='\\[Feature:|\\[Disruptive\\]|\\[Serial\\]' ./e2e.test -- -storage.testdriver=test-driver.yml"))
+		err := RunCommandVisibleOnServer(testCluster.setup.privKey, testCluster.setup.MainNode, fmt.Sprintf("KUBECONFIG=/root/.kube/config ./ginkgo -nodes=6 -v -focus='External.Storage' -skip='\\[Feature:|\\[Disruptive\\]|\\[Serial\\]' ./e2e.test -- -storage.testdriver=test-driver.yml"))
 		if err != nil {
 			t.Error(err)
 		}
