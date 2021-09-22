@@ -110,6 +110,15 @@ spec:
       labels:
         app: hcloud-csi-controller
     spec:
+      affinity:
+        nodeAffinity:
+          requiredDuringSchedulingIgnoredDuringExecution:
+            nodeSelectorTerms:
+              - matchExpressions:
+                  - key: "instance.hetzner.cloud/is-root-server"
+                    operator: NotIn
+                    values:
+                      - "true"    
       serviceAccount: hcloud-csi
       containers:
         - name: csi-attacher
