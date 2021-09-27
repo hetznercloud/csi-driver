@@ -295,6 +295,8 @@ spec:
         - name: liveness-probe
           imagePullPolicy: Always
           image: k8s.gcr.io/sig-storage/livenessprobe:v2.3.0
+          args:
+            - --csi-address=/run/csi/socket
           volumeMounts:
             - mountPath: /run/csi
               name: plugin-dir
