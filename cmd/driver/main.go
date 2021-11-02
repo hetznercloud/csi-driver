@@ -122,6 +122,14 @@ func main() {
 		)
 		os.Exit(1)
 	}
+
+	// Cover potential cases where the server is not found. This results in a
+	// nil server object and nil error. If we do not do this, we will panic
+	// when trying to log the server.Name.
+	if server == nil {
+		level.Error(logger).Log("msg", "failed to fetch server", "err", "not found")
+		os.Exit(1)
+	}
 	level.Info(logger).Log("msg", "fetched server", "server-name", server.Name)
 
 	volumeService := volumes.NewIdempotentService(
