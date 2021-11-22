@@ -3,7 +3,7 @@ on: [push]
 concurrency: ci-${{ github.ref }}
 jobs:
   test:
-    runs-on: ubuntu-latest
+    runs-on: self-hosted
     strategy:
       matrix:
         k8s: [ k8s-1.19.10, k8s-1.20.6, k8s-1.21.0, k8s-1.22.0 ]
@@ -17,16 +17,15 @@ jobs:
         fetch-depth: 0
     - name: HCLOUD_TOKEN
       env:
-        TTS_TOKEN: ${{ secrets.TTS_TOKEN }}
         HCLOUD_TOKEN: ${{ secrets.HCLOUD_TOKEN }}
       run: |
         set -ueo pipefail
-        if [[ "${TTS_TOKEN:-}" != "" ]]; then
-          token="$(./script/get-token.sh)"
-          echo "::add-mask::$token"
-          echo "HCLOUD_TOKEN=$token" >> "$GITHUB_ENV"
-        elif [[ "${HCLOUD_TOKEN:-}" != "" ]]; then
+        if [[ "${HCLOUD_TOKEN:-}" != "" ]]; then
           echo "HCLOUD_TOKEN=$HCLOUD_TOKEN" >> "$GITHUB_ENV"
+        elif [[ "${TTS_TOKEN:-}" != "" ]]; then
+                  token="$(./script/get-token.sh)"
+                  echo "::add-mask::$token"
+                  echo "HCLOUD_TOKEN=$token" >> "$GITHUB_ENV"
         else
           echo "::error ::Couldn't determine HCLOUD_TOKEN. Check that repository secrets are setup correctly."
           exit 1
