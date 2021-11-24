@@ -30,12 +30,14 @@ func (s *VolumeService) Create(ctx context.Context, opts volumes.CreateOpts) (*c
 		"volume-name", opts.Name,
 		"volume-size", opts.MinSize,
 		"volume-location", opts.Location,
+		"volume-format", opts.Format,
 	)
 
 	result, _, err := s.client.Volume.Create(ctx, hcloud.VolumeCreateOpts{
 		Name:     opts.Name,
 		Size:     opts.MinSize,
 		Location: &hcloud.Location{Name: opts.Location},
+		Format:   opts.Format,
 	})
 	if err != nil {
 		level.Info(s.logger).Log(
