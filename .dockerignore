@@ -12,3 +12,4 @@ deploy/
 mock/
 script/
 **/*_test.go
+kustomization.yaml
