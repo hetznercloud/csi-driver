@@ -79,7 +79,7 @@ enabling you to use ReadWriteOnce Volumes within Kubernetes. Please note that th
 Root servers can be part of the cluster, but the CSI plugin doesn't work there. Taint the root server as follows to skip that node for the daemonset.
 
 ```bash
-kubectl taint node <node name> instance.hetzner.cloud/is-root-server:true
+kubectl label nodes <node name> instance.hetzner.cloud/is-root-server=true
 ```
 
 ## Versioning policy
