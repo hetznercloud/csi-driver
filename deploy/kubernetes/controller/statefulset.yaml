@@ -23,7 +23,7 @@ spec:
                 operator: NotIn
                 values:
                 - "true"    
-      serviceAccount: hcloud-csi
+      serviceAccount: hcloud-csi-controller
       containers:
       - name: csi-attacher
         image: k8s.gcr.io/sig-storage/csi-attacher:v3.2.1
