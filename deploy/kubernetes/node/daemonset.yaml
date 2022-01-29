@@ -47,8 +47,9 @@ spec:
         - name: registration-dir
           mountPath: /registration
       - name: hcloud-csi-driver
-        image: hetznercloud/hcloud-csi-driver:1.6.0
+        image: hetznercloud/hcloud-csi-driver:latest
         imagePullPolicy: Always
+        command: [/bin/hcloud-csi-driver-node]
         env:
         - name: CSI_ENDPOINT
           value: unix:///run/csi/socket

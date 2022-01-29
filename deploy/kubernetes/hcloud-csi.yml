@@ -228,7 +228,9 @@ spec:
         volumeMounts:
         - mountPath: /run/csi
           name: socket-dir
-      - env:
+      - command:
+        - /bin/hcloud-csi-driver-controller
+        env:
         - name: CSI_ENDPOINT
           value: unix:///run/csi/socket
         - name: METRICS_ENDPOINT
@@ -245,7 +247,7 @@ spec:
             secretKeyRef:
               key: token
               name: hcloud-csi
-        image: hetznercloud/hcloud-csi-driver:1.6.0
+        image: hetznercloud/hcloud-csi-driver:latest
         imagePullPolicy: Always
         livenessProbe:
           failureThreshold: 5
@@ -317,7 +319,9 @@ spec:
           name: plugin-dir
         - mountPath: /registration
           name: registration-dir
-      - env:
+      - command:
+        - /bin/hcloud-csi-driver-node
+        env:
         - name: CSI_ENDPOINT
           value: unix:///run/csi/socket
         - name: METRICS_ENDPOINT
@@ -334,7 +338,7 @@ spec:
             fieldRef:
               apiVersion: v1
               fieldPath: spec.nodeName
-        image: hetznercloud/hcloud-csi-driver:1.6.0
+        image: hetznercloud/hcloud-csi-driver:latest
         imagePullPolicy: Always
         livenessProbe:
           failureThreshold: 5
