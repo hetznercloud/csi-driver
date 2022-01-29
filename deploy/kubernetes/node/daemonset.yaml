@@ -30,7 +30,6 @@ spec:
                 operator: NotIn
                 values:
                 - "true"
-      serviceAccount: hcloud-csi
       containers:
       - name: csi-node-driver-registrar
         image: k8s.gcr.io/sig-storage/csi-node-driver-registrar:v2.2.0
