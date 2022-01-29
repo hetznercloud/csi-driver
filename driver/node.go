@@ -52,31 +52,17 @@ func (s *NodeService) NodeStageVolume(ctx context.Context, req *proto.NodeStageV
 		return nil, status.Error(codes.InvalidArgument, "missing volume capability")
 	}
 
-	volumeID, err := parseVolumeID(req.VolumeId)
-	if err != nil {
-		return nil, status.Error(codes.NotFound, "volume not found")
-	}
-
-	volume, err := s.volumeService.GetByID(ctx, volumeID)
-	if err != nil {
-		switch err {
-		case volumes.ErrVolumeNotFound:
-			return nil, status.Error(codes.NotFound, "volume not found")
-		default:
-			return nil, status.Error(codes.Internal, fmt.Sprintf("failed to get volume: %s", err))
-		}
-	}
-
 	switch {
 	case req.VolumeCapability.GetBlock() != nil:
 		return &proto.NodeStageVolumeResponse{}, nil
 	case req.VolumeCapability.GetMount() != nil:
 		mount := req.VolumeCapability.GetMount()
+		devicePath := req.GetVolumeContext()["devicePath"]
 		opts := volumes.MountOpts{
 			FSType:     mount.FsType,
 			Additional: mount.MountFlags,
 		}
-		if err := s.volumeMountService.Stage(volume, req.StagingTargetPath, opts); err != nil {
+		if err := s.volumeMountService.Stage(devicePath, req.StagingTargetPath, opts); err != nil {
 			return nil, status.Error(codes.Internal, fmt.Sprintf("failed to stage volume: %s", err))
 		}
 		return &proto.NodeStageVolumeResponse{}, nil
@@ -93,22 +79,7 @@ func (s *NodeService) NodeUnstageVolume(ctx context.Context, req *proto.NodeUnst
 		return nil, status.Error(codes.InvalidArgument, "missing staging target path")
 	}
 
-	volumeID, err := parseVolumeID(req.VolumeId)
-	if err != nil {
-		return nil, status.Error(codes.NotFound, "volume not found")
-	}
-
-	volume, err := s.volumeService.GetByID(ctx, volumeID)
-	if err != nil {
-		switch err {
-		case volumes.ErrVolumeNotFound:
-			return &proto.NodeUnstageVolumeResponse{}, nil
-		default:
-			return nil, status.Error(codes.Internal, fmt.Sprintf("failed to get volume: %s", err))
-		}
-	}
-
-	if err := s.volumeMountService.Unstage(volume, req.StagingTargetPath); err != nil {
+	if err := s.volumeMountService.Unstage(req.StagingTargetPath); err != nil {
 		return nil, status.Error(codes.Internal, fmt.Sprintf("failed to unstage volume: %s", err))
 	}
 
@@ -127,25 +98,12 @@ func (s *NodeService) NodePublishVolume(ctx context.Context, req *proto.NodePubl
 		return nil, status.Error(codes.InvalidArgument, "missing target path")
 	}
 
-	volumeID, err := parseVolumeID(req.VolumeId)
-	if err != nil {
-		return nil, status.Error(codes.NotFound, "volume not found")
-	}
-
-	volume, err := s.volumeService.GetByID(ctx, volumeID)
-	if err != nil {
-		switch err {
-		case volumes.ErrVolumeNotFound:
-			return nil, status.Error(codes.NotFound, "volume not found")
-		default:
-			return nil, status.Error(codes.Internal, fmt.Sprintf("failed to get volume: %s", err))
-		}
-	}
+	devicePath := req.GetPublishContext()["devicePath"]
 
 	switch {
 	case req.VolumeCapability.GetBlock() != nil:
 		opts := volumes.MountOpts{BlockVolume: true}
-		if err := s.volumeMountService.Publish(volume, req.TargetPath, volume.LinuxDevice, opts); err != nil {
+		if err := s.volumeMountService.Publish(req.TargetPath, devicePath, opts); err != nil {
 			return nil, status.Error(codes.Internal, fmt.Sprintf("failed to publish block volume: %s", err))
 		}
 		return &proto.NodePublishVolumeResponse{}, nil
@@ -156,7 +114,7 @@ func (s *NodeService) NodePublishVolume(ctx context.Context, req *proto.NodePubl
 			Readonly:   req.Readonly,
 			Additional: mount.MountFlags,
 		}
-		if err := s.volumeMountService.Publish(volume, req.TargetPath, req.StagingTargetPath, opts); err != nil {
+		if err := s.volumeMountService.Publish(req.TargetPath, req.StagingTargetPath, opts); err != nil {
 			return nil, status.Error(codes.Internal, fmt.Sprintf("failed to publish volume: %s", err))
 		}
 		return &proto.NodePublishVolumeResponse{}, nil
@@ -173,22 +131,7 @@ func (s *NodeService) NodeUnpublishVolume(ctx context.Context, req *proto.NodeUn
 		return nil, status.Error(codes.InvalidArgument, "missing target path")
 	}
 
-	volumeID, err := parseVolumeID(req.VolumeId)
-	if err != nil {
-		return nil, status.Error(codes.NotFound, "volume not found")
-	}
-
-	volume, err := s.volumeService.GetByID(ctx, volumeID)
-	if err != nil {
-		switch err {
-		case volumes.ErrVolumeNotFound:
-			return &proto.NodeUnpublishVolumeResponse{}, nil
-		default:
-			return nil, status.Error(codes.Internal, fmt.Sprintf("failed to get volume: %s", err))
-		}
-	}
-
-	if err := s.volumeMountService.Unpublish(volume, req.TargetPath); err != nil {
+	if err := s.volumeMountService.Unpublish(req.TargetPath); err != nil {
 		return nil, status.Error(codes.Internal, fmt.Sprintf("failed to unpublish volume: %s", err))
 	}
 
