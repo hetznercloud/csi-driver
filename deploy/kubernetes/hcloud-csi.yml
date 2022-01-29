@@ -228,7 +228,9 @@ spec:
         volumeMounts:
         - mountPath: /run/csi
           name: socket-dir
-      - env:
+      - command:
+        - /bin/hcloud-csi-driver-controller
+        env:
         - name: CSI_ENDPOINT
           value: unix:///run/csi/socket
         - name: METRICS_ENDPOINT
@@ -317,7 +319,9 @@ spec:
           name: plugin-dir
         - mountPath: /registration
           name: registration-dir
-      - env:
+      - command:
+        - /bin/hcloud-csi-driver-node
+        env:
         - name: CSI_ENDPOINT
           value: unix:///run/csi/socket
         - name: METRICS_ENDPOINT

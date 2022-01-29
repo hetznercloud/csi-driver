@@ -49,6 +49,7 @@ spec:
       - name: hcloud-csi-driver
         image: hetznercloud/hcloud-csi-driver:latest
         imagePullPolicy: Always
+        command: [/bin/hcloud-csi-driver-node]
         env:
         - name: CSI_ENDPOINT
           value: unix:///run/csi/socket
