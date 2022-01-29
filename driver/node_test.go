@@ -62,19 +62,7 @@ func newNodeServerTestEnv() nodeServiceTestEnv {
 func TestNodeServiceNodeStageVolume(t *testing.T) {
 	env := newNodeServerTestEnv()
 
-	existingVolume := &csi.Volume{}
-
-	env.volumeService.GetByIDFunc = func(ctx context.Context, id uint64) (*csi.Volume, error) {
-		if id != 1 {
-			t.Errorf("unexpected volume id passed to volume service: %d", id)
-		}
-		return existingVolume, nil
-	}
-
-	env.volumeMountService.StageFunc = func(volume *csi.Volume, stagingTargetPath string, opts volumes.MountOpts) error {
-		if volume != existingVolume {
-			t.Errorf("unexpected volume passed to volume mount service: %v", volume)
-		}
+	env.volumeMountService.StageFunc = func(devicePath string, stagingTargetPath string, opts volumes.MountOpts) error {
 		if stagingTargetPath != "staging" {
 			t.Errorf("unexpected staging target path passed to volume mount service: %s", stagingTargetPath)
 		}
@@ -133,41 +121,10 @@ func TestNodeServiceNodeStageBlockVolume(t *testing.T) {
 	}
 }
 
-func TestNodeServiceNodeStageVolumeNotFound(t *testing.T) {
-	env := newNodeServerTestEnv()
-
-	env.volumeService.GetByIDFunc = func(ctx context.Context, id uint64) (*csi.Volume, error) {
-		return nil, volumes.ErrVolumeNotFound
-	}
-
-	_, err := env.service.NodeStageVolume(env.ctx, &proto.NodeStageVolumeRequest{
-		VolumeId:          "1",
-		StagingTargetPath: "staging",
-		VolumeCapability: &proto.VolumeCapability{
-			AccessMode: &proto.VolumeCapability_AccessMode{
-				Mode: proto.VolumeCapability_AccessMode_SINGLE_NODE_WRITER,
-			},
-			AccessType: &proto.VolumeCapability_Mount{
-				Mount: &proto.VolumeCapability_MountVolume{
-					FsType:     "ext4",
-					MountFlags: []string{"flag1", "flag2"},
-				},
-			},
-		},
-	})
-	if grpc.Code(err) != codes.NotFound {
-		t.Fatalf("unexpected error: %v", err)
-	}
-}
-
 func TestNodeServiceNodeStageVolumeStageError(t *testing.T) {
 	env := newNodeServerTestEnv()
 
-	env.volumeService.GetByIDFunc = func(ctx context.Context, id uint64) (*csi.Volume, error) {
-		return &csi.Volume{}, nil
-	}
-
-	env.volumeMountService.StageFunc = func(volume *csi.Volume, stagingTargetPath string, opts volumes.MountOpts) error {
+	env.volumeMountService.StageFunc = func(devicePath string, stagingTargetPath string, opts volumes.MountOpts) error {
 		return io.EOF
 	}
 
@@ -260,25 +217,6 @@ func TestNodeServiceNodeStageVolumeInputErrors(t *testing.T) {
 			},
 			Code: codes.InvalidArgument,
 		},
-		{
-			Name: "invalid volume id",
-			Req: &proto.NodeStageVolumeRequest{
-				VolumeId:          "xxx",
-				StagingTargetPath: "staging",
-				VolumeCapability: &proto.VolumeCapability{
-					AccessMode: &proto.VolumeCapability_AccessMode{
-						Mode: proto.VolumeCapability_AccessMode_SINGLE_NODE_WRITER,
-					},
-					AccessType: &proto.VolumeCapability_Mount{
-						Mount: &proto.VolumeCapability_MountVolume{
-							FsType:     "ext4",
-							MountFlags: []string{"flag1", "flag2"},
-						},
-					},
-				},
-			},
-			Code: codes.NotFound,
-		},
 	}
 
 	for _, testCase := range testCases {
@@ -294,19 +232,7 @@ func TestNodeServiceNodeStageVolumeInputErrors(t *testing.T) {
 func TestNodeServiceNodeUnstageVolume(t *testing.T) {
 	env := newNodeServerTestEnv()
 
-	existingVolume := &csi.Volume{}
-
-	env.volumeService.GetByIDFunc = func(ctx context.Context, id uint64) (*csi.Volume, error) {
-		if id != 1 {
-			t.Errorf("unexpected volume id passed to volume service: %d", id)
-		}
-		return existingVolume, nil
-	}
-
-	env.volumeMountService.UnstageFunc = func(volume *csi.Volume, stagingTargetPath string) error {
-		if volume != existingVolume {
-			t.Errorf("unexpected volume passed to volume mount service: %v", volume)
-		}
+	env.volumeMountService.UnstageFunc = func(stagingTargetPath string) error {
 		if stagingTargetPath != "staging" {
 			t.Errorf("unexpected staging target path passed to volume mount service: %s", stagingTargetPath)
 		}
@@ -322,30 +248,10 @@ func TestNodeServiceNodeUnstageVolume(t *testing.T) {
 	}
 }
 
-func TestNodeServiceNodeUnstageVolumeNotFound(t *testing.T) {
-	env := newNodeServerTestEnv()
-
-	env.volumeService.GetByIDFunc = func(ctx context.Context, id uint64) (*csi.Volume, error) {
-		return nil, volumes.ErrVolumeNotFound
-	}
-
-	_, err := env.service.NodeUnstageVolume(env.ctx, &proto.NodeUnstageVolumeRequest{
-		VolumeId:          "1",
-		StagingTargetPath: "staging",
-	})
-	if err != nil {
-		t.Fatalf("unexpected error: %v", err)
-	}
-}
-
 func TestNodeServiceNodeUnstageVolumeUnstageError(t *testing.T) {
 	env := newNodeServerTestEnv()
 
-	env.volumeService.GetByIDFunc = func(ctx context.Context, id uint64) (*csi.Volume, error) {
-		return &csi.Volume{}, nil
-	}
-
-	env.volumeMountService.UnstageFunc = func(volume *csi.Volume, stagingTargetPath string) error {
+	env.volumeMountService.UnstageFunc = func(stagingTargetPath string) error {
 		return io.EOF
 	}
 
@@ -380,14 +286,6 @@ func TestNodeServiceNodeUnstageVolumeInputErrors(t *testing.T) {
 			},
 			Code: codes.InvalidArgument,
 		},
-		{
-			Name: "invalid volume id",
-			Req: &proto.NodeUnstageVolumeRequest{
-				VolumeId:          "xxx",
-				StagingTargetPath: "staging",
-			},
-			Code: codes.NotFound,
-		},
 	}
 
 	for _, testCase := range testCases {
@@ -403,19 +301,7 @@ func TestNodeServiceNodeUnstageVolumeInputErrors(t *testing.T) {
 func TestNodeServiceNodePublishVolume(t *testing.T) {
 	env := newNodeServerTestEnv()
 
-	existingVolume := &csi.Volume{}
-
-	env.volumeService.GetByIDFunc = func(ctx context.Context, id uint64) (*csi.Volume, error) {
-		if id != 1 {
-			t.Errorf("unexpected volume id passed to volume service: %d", id)
-		}
-		return existingVolume, nil
-	}
-
-	env.volumeMountService.PublishFunc = func(volume *csi.Volume, targetPath string, stagingTargetPath string, opts volumes.MountOpts) error {
-		if volume != existingVolume {
-			t.Errorf("unexpected volume passed to volume mount service: %v", volume)
-		}
+	env.volumeMountService.PublishFunc = func(targetPath string, stagingTargetPath string, opts volumes.MountOpts) error {
 		if targetPath != "target" {
 			t.Errorf("unexpected target path passed to volume service: %s", targetPath)
 		}
@@ -449,24 +335,13 @@ func TestNodeServiceNodePublishVolume(t *testing.T) {
 func TestNodeServiceNodePublishBlockVolume(t *testing.T) {
 	env := newNodeServerTestEnv()
 
-	existingVolume := &csi.Volume{ID: 1, LinuxDevice: "linuxDevicePath"}
-	env.volumeService.GetByIDFunc = func(_ context.Context, id uint64) (*csi.Volume, error) {
-		if id != existingVolume.ID {
-			t.Errorf("unexpected volume id passed to volume service: %d", id)
-		}
-		return existingVolume, nil
-	}
-
 	env.volumeMountService.PublishFunc = func(
-		volume *csi.Volume, targetPath, stagingTargetPath string, opts volumes.MountOpts,
+		targetPath, stagingTargetPath string, opts volumes.MountOpts,
 	) error {
-		if volume != existingVolume {
-			t.Errorf("unexpected volume: %v", volume)
-		}
 		if targetPath != "target" {
 			t.Errorf("unexpected target path: %s", targetPath)
 		}
-		if stagingTargetPath != volume.LinuxDevice {
+		if stagingTargetPath != "foopath" {
 			t.Errorf("unexpected staging target path: %s", stagingTargetPath)
 		}
 		return nil
@@ -484,6 +359,7 @@ func TestNodeServiceNodePublishBlockVolume(t *testing.T) {
 				Block: &proto.VolumeCapability_BlockVolume{},
 			},
 		},
+		PublishContext: map[string]string{"devicePath": "foopath"},
 	})
 
 	if err != nil {
@@ -491,42 +367,10 @@ func TestNodeServiceNodePublishBlockVolume(t *testing.T) {
 	}
 }
 
-func TestNodeServiceNodePublishVolumeNotFound(t *testing.T) {
-	env := newNodeServerTestEnv()
-
-	env.volumeService.GetByIDFunc = func(ctx context.Context, id uint64) (*csi.Volume, error) {
-		return nil, volumes.ErrVolumeNotFound
-	}
-
-	_, err := env.service.NodePublishVolume(env.ctx, &proto.NodePublishVolumeRequest{
-		VolumeId:          "1",
-		TargetPath:        "target",
-		StagingTargetPath: "staging",
-		VolumeCapability: &proto.VolumeCapability{
-			AccessMode: &proto.VolumeCapability_AccessMode{
-				Mode: proto.VolumeCapability_AccessMode_SINGLE_NODE_WRITER,
-			},
-			AccessType: &proto.VolumeCapability_Mount{
-				Mount: &proto.VolumeCapability_MountVolume{
-					FsType:     "ext4",
-					MountFlags: []string{"flag1", "flag2"},
-				},
-			},
-		},
-	})
-	if grpc.Code(err) != codes.NotFound {
-		t.Fatalf("unexpected error: %v", err)
-	}
-}
-
 func TestNodeServiceNodePublishPublishError(t *testing.T) {
 	env := newNodeServerTestEnv()
 
-	env.volumeService.GetByIDFunc = func(ctx context.Context, id uint64) (*csi.Volume, error) {
-		return &csi.Volume{}, nil
-	}
-
-	env.volumeMountService.PublishFunc = func(volume *csi.Volume, targetPath string, stagingTargetPath string, opts volumes.MountOpts) error {
+	env.volumeMountService.PublishFunc = func(targetPath string, stagingTargetPath string, opts volumes.MountOpts) error {
 		return io.EOF
 	}
 
@@ -621,26 +465,6 @@ func TestNodeServiceNodePublishVolumeInputErrors(t *testing.T) {
 			Code: codes.InvalidArgument,
 		},
 		{
-			Name: "invalid volume id",
-			Req: &proto.NodePublishVolumeRequest{
-				VolumeId:          "xxx",
-				TargetPath:        "target",
-				StagingTargetPath: "staging",
-				VolumeCapability: &proto.VolumeCapability{
-					AccessMode: &proto.VolumeCapability_AccessMode{
-						Mode: proto.VolumeCapability_AccessMode_SINGLE_NODE_WRITER,
-					},
-					AccessType: &proto.VolumeCapability_Mount{
-						Mount: &proto.VolumeCapability_MountVolume{
-							FsType:     "ext4",
-							MountFlags: []string{"flag1", "flag2"},
-						},
-					},
-				},
-			},
-			Code: codes.NotFound,
-		},
-		{
 			Name: "no mount access type",
 			Req: &proto.NodePublishVolumeRequest{
 				VolumeId:          "1",
@@ -669,19 +493,7 @@ func TestNodeServiceNodePublishVolumeInputErrors(t *testing.T) {
 func TestNodeServiceNodeUnpublishVolume(t *testing.T) {
 	env := newNodeServerTestEnv()
 
-	existingVolume := &csi.Volume{}
-
-	env.volumeService.GetByIDFunc = func(ctx context.Context, id uint64) (*csi.Volume, error) {
-		if id != 1 {
-			t.Errorf("unexpected volume id passed to volume service: %d", id)
-		}
-		return existingVolume, nil
-	}
-
-	env.volumeMountService.UnpublishFunc = func(volume *csi.Volume, targetPath string) error {
-		if volume != existingVolume {
-			t.Errorf("unexpected volume passed to volume mount service: %v", volume)
-		}
+	env.volumeMountService.UnpublishFunc = func(targetPath string) error {
 		if targetPath != "target" {
 			t.Errorf("unexpected target path passed to volume service: %s", targetPath)
 		}
@@ -697,30 +509,10 @@ func TestNodeServiceNodeUnpublishVolume(t *testing.T) {
 	}
 }
 
-func TestNodeServiceNodeUnpublishVolumeNotFound(t *testing.T) {
-	env := newNodeServerTestEnv()
-
-	env.volumeService.GetByIDFunc = func(ctx context.Context, id uint64) (*csi.Volume, error) {
-		return nil, volumes.ErrVolumeNotFound
-	}
-
-	_, err := env.service.NodeUnpublishVolume(env.ctx, &proto.NodeUnpublishVolumeRequest{
-		VolumeId:   "1",
-		TargetPath: "target",
-	})
-	if err != nil {
-		t.Fatalf("unexpected error: %v", err)
-	}
-}
-
 func TestNodeServiceNodeUnpublishUnpublishError(t *testing.T) {
 	env := newNodeServerTestEnv()
 
-	env.volumeService.GetByIDFunc = func(ctx context.Context, id uint64) (*csi.Volume, error) {
-		return &csi.Volume{}, nil
-	}
-
-	env.volumeMountService.UnpublishFunc = func(volume *csi.Volume, targetPath string) error {
+	env.volumeMountService.UnpublishFunc = func(targetPath string) error {
 		return io.EOF
 	}
 
@@ -754,14 +546,6 @@ func TestNodeServiceNodeUnpublishVolumeInputErrors(t *testing.T) {
 				VolumeId: "1",
 			},
 			Code: codes.InvalidArgument,
-		},
-		{
-			Name: "invalid volume id",
-			Req: &proto.NodeUnpublishVolumeRequest{
-				VolumeId:   "xxx",
-				TargetPath: "target",
-			},
-			Code: codes.NotFound,
 		},
 	}
 

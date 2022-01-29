@@ -179,7 +179,21 @@ func (s *ControllerService) ControllerPublishVolume(ctx context.Context, req *pr
 		return nil, status.Error(code, fmt.Sprintf("failed to publish volume: %s", err))
 	}
 
-	resp := &proto.ControllerPublishVolumeResponse{}
+	volume, err = s.volumeService.GetByID(ctx, volumeID)
+	if err != nil {
+		switch err {
+		case volumes.ErrVolumeNotFound:
+			return nil, status.Error(codes.NotFound, "volume not found")
+		default:
+			return nil, status.Error(codes.Internal, fmt.Sprintf("failed to get volume: %s", err))
+		}
+	}
+
+	resp := &proto.ControllerPublishVolumeResponse{
+		PublishContext: map[string]string{
+			"devicePath": volume.LinuxDevice,
+		},
+	}
 	return resp, nil
 }
 
