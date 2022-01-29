@@ -391,6 +391,13 @@ func TestControllerServiceDeleteVolumeInternalError(t *testing.T) {
 func TestControllerServicePublishVolume(t *testing.T) {
 	env := newControllerServiceTestEnv()
 
+	env.volumeService.GetByIDFunc = func(ctx context.Context, id uint64) (*csi.Volume, error) {
+		if id != 1 {
+			t.Errorf("unexpected volume id passed to volume service: %d", id)
+		}
+		return &csi.Volume{ID: id, LinuxDevice: "foopath"}, nil
+	}
+
 	env.volumeService.AttachFunc = func(ctx context.Context, volume *csi.Volume, server *csi.Server) error {
 		if volume.ID != 1 {
 			t.Errorf("unexpected volume id passed to volume service: %d", volume.ID)
@@ -410,9 +417,13 @@ func TestControllerServicePublishVolume(t *testing.T) {
 			},
 		},
 	}
-	_, err := env.service.ControllerPublishVolume(env.ctx, req)
+	resp, err := env.service.ControllerPublishVolume(env.ctx, req)
 	if err != nil {
 		t.Fatal(err)
+	}
+
+	if devicePath := resp.PublishContext["devicePath"]; devicePath != "foopath" {
+		t.Errorf("unexpected devicePath returned from publish: %s", devicePath)
 	}
 }
 
