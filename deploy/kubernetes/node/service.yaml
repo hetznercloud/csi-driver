@@ -1,0 +1,14 @@
+apiVersion: v1
+kind: Service
+metadata:
+  name: hcloud-csi-node-metrics
+  namespace: kube-system
+  labels:
+    app: hcloud-csi
+spec:
+  selector:
+    app: hcloud-csi
+  ports:
+    - port: 9189
+      name: metrics
+      targetPort: metrics
