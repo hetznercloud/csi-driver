@@ -245,7 +245,7 @@ spec:
             secretKeyRef:
               key: token
               name: hcloud-csi
-        image: hetznercloud/hcloud-csi-driver:1.6.0
+        image: hetznercloud/hcloud-csi-driver:latest
         imagePullPolicy: Always
         livenessProbe:
           failureThreshold: 5
@@ -334,7 +334,7 @@ spec:
             fieldRef:
               apiVersion: v1
               fieldPath: spec.nodeName
-        image: hetznercloud/hcloud-csi-driver:1.6.0
+        image: hetznercloud/hcloud-csi-driver:latest
         imagePullPolicy: Always
         livenessProbe:
           failureThreshold: 5

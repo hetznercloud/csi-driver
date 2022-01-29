@@ -67,32 +67,32 @@ func (s *VolumeService) Resize(ctx context.Context, volume *csi.Volume, size int
 }
 
 type VolumeMountService struct {
-	StageFunc      func(volume *csi.Volume, stagingTargetPath string, opts volumes.MountOpts) error
-	UnstageFunc    func(volume *csi.Volume, stagingTargetPath string) error
-	PublishFunc    func(volume *csi.Volume, targetPath string, stagingTargetPath string, opts volumes.MountOpts) error
-	UnpublishFunc  func(volume *csi.Volume, targetPath string) error
+	StageFunc      func(devicePath string, stagingTargetPath string, opts volumes.MountOpts) error
+	UnstageFunc    func(stagingTargetPath string) error
+	PublishFunc    func(targetPath string, stagingTargetPath string, opts volumes.MountOpts) error
+	UnpublishFunc  func(targetPath string) error
 	PathExistsFunc func(path string) (bool, error)
 }
 
-func (s *VolumeMountService) Stage(volume *csi.Volume, stagingTargetPath string, opts volumes.MountOpts) error {
+func (s *VolumeMountService) Stage(devicePath string, stagingTargetPath string, opts volumes.MountOpts) error {
 	if s.StageFunc == nil {
 		panic("not implemented")
 	}
-	return s.StageFunc(volume, stagingTargetPath, opts)
+	return s.StageFunc(devicePath, stagingTargetPath, opts)
 }
 
-func (s *VolumeMountService) Unstage(volume *csi.Volume, stagingTargetPath string) error {
+func (s *VolumeMountService) Unstage(stagingTargetPath string) error {
 	if s.UnstageFunc == nil {
 		panic("not implemented")
 	}
-	return s.UnstageFunc(volume, stagingTargetPath)
+	return s.UnstageFunc(stagingTargetPath)
 }
 
-func (s *VolumeMountService) Publish(volume *csi.Volume, targetPath string, stagingTargetPath string, opts volumes.MountOpts) error {
+func (s *VolumeMountService) Publish(targetPath string, stagingTargetPath string, opts volumes.MountOpts) error {
 	if s.PublishFunc == nil {
 		panic("not implemented")
 	}
-	return s.PublishFunc(volume, targetPath, stagingTargetPath, opts)
+	return s.PublishFunc(targetPath, stagingTargetPath, opts)
 }
 
 func (s *VolumeMountService) PathExists(path string) (bool, error) {
@@ -102,11 +102,11 @@ func (s *VolumeMountService) PathExists(path string) (bool, error) {
 	return s.PathExistsFunc(path)
 }
 
-func (s *VolumeMountService) Unpublish(volume *csi.Volume, targetPath string) error {
+func (s *VolumeMountService) Unpublish(targetPath string) error {
 	if s.UnpublishFunc == nil {
 		panic("not implemented")
 	}
-	return s.UnpublishFunc(volume, targetPath)
+	return s.UnpublishFunc(targetPath)
 }
 
 type VolumeResizeService struct {

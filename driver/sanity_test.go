@@ -186,19 +186,19 @@ func (s *sanityVolumeService) Detach(ctx context.Context, volume *csi.Volume, se
 
 type sanityMountService struct{}
 
-func (s *sanityMountService) Stage(volume *csi.Volume, stagingTargetPath string, opts volumes.MountOpts) error {
+func (s *sanityMountService) Stage(devicePath string, stagingTargetPath string, opts volumes.MountOpts) error {
 	return nil
 }
 
-func (s *sanityMountService) Unstage(volume *csi.Volume, stagingTargetPath string) error {
+func (s *sanityMountService) Unstage(stagingTargetPath string) error {
 	return nil
 }
 
-func (s *sanityMountService) Publish(volume *csi.Volume, targetPath string, stagingTargetPath string, opts volumes.MountOpts) error {
+func (s *sanityMountService) Publish(targetPath string, stagingTargetPath string, opts volumes.MountOpts) error {
 	return nil
 }
 
-func (s *sanityMountService) Unpublish(volume *csi.Volume, targetPath string) error {
+func (s *sanityMountService) Unpublish(targetPath string) error {
 	return nil
 }
 
