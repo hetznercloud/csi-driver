@@ -195,7 +195,7 @@ spec:
     app: hcloud-csi
 ---
 apiVersion: apps/v1
-kind: StatefulSet
+kind: Deployment
 metadata:
   name: hcloud-csi-controller
   namespace: kube-system
@@ -204,21 +204,11 @@ spec:
   selector:
     matchLabels:
       app: hcloud-csi-controller
-  serviceName: hcloud-csi-controller
   template:
     metadata:
       labels:
         app: hcloud-csi-controller
     spec:
-      affinity:
-        nodeAffinity:
-          requiredDuringSchedulingIgnoredDuringExecution:
-            nodeSelectorTerms:
-            - matchExpressions:
-              - key: instance.hetzner.cloud/is-root-server
-                operator: NotIn
-                values:
-                - "true"
       containers:
       - image: k8s.gcr.io/sig-storage/csi-attacher:v3.2.1
         name: csi-attacher
@@ -272,8 +262,6 @@ spec:
         - containerPort: 9808
           name: healthz
           protocol: TCP
-        securityContext:
-          privileged: true
         volumeMounts:
         - mountPath: /run/csi
           name: socket-dir
@@ -283,7 +271,7 @@ spec:
         volumeMounts:
         - mountPath: /run/csi
           name: socket-dir
-      serviceAccount: hcloud-csi-controller
+      serviceAccountName: hcloud-csi-controller
       volumes:
       - emptyDir: {}
         name: socket-dir
