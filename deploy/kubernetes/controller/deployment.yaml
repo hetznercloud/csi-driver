@@ -1,4 +1,4 @@
-kind: StatefulSet
+kind: Deployment
 apiVersion: apps/v1
 metadata:
   name: hcloud-csi-controller
@@ -7,23 +7,13 @@ spec:
   selector:
     matchLabels:
       app: hcloud-csi-controller
-  serviceName: hcloud-csi-controller
   replicas: 1
   template:
     metadata:
       labels:
         app: hcloud-csi-controller
     spec:
-      affinity:
-        nodeAffinity:
-          requiredDuringSchedulingIgnoredDuringExecution:
-            nodeSelectorTerms:
-            - matchExpressions:
-              - key: "instance.hetzner.cloud/is-root-server"
-                operator: NotIn
-                values:
-                - "true"    
-      serviceAccount: hcloud-csi-controller
+      serviceAccountName: hcloud-csi-controller
       containers:
       - name: csi-attacher
         image: k8s.gcr.io/sig-storage/csi-attacher:v3.2.1
@@ -80,8 +70,6 @@ spec:
           initialDelaySeconds: 10
           timeoutSeconds: 3
           periodSeconds: 2
-        securityContext:
-          privileged: true
       - name: liveness-probe
         imagePullPolicy: Always
         image: k8s.gcr.io/sig-storage/livenessprobe:v2.3.0
