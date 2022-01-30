@@ -615,26 +615,13 @@ func TestNodeServiceNodeGetInfo(t *testing.T) {
 func TestNodeServiceNodeExpandVolume(t *testing.T) {
 	env := newNodeServerTestEnv()
 
-	existingVolume := &csi.Volume{
-		LinuxDevice: "LinuxDevicePath",
-	}
-
-	env.volumeService.GetByIDFunc = func(ctx context.Context, id uint64) (*csi.Volume, error) {
-		if id != 1 {
-			t.Errorf("unexpected volume id passed to volume service: %d", id)
-		}
-		return existingVolume, nil
-	}
 	env.volumeMountService.PathExistsFunc = func(path string) (bool, error) {
 		if path != "LinuxDevicePath" {
 			t.Errorf("unexpected volume path passed to volume mount service: %s", path)
 		}
 		return true, nil
 	}
-	env.volumeResizeService.ResizeFunc = func(volume *csi.Volume, volumePath string) error {
-		if volume != existingVolume {
-			t.Errorf("unexpected volume passed to volume mount service: %v", volume)
-		}
+	env.volumeResizeService.ResizeFunc = func(volumePath string) error {
 		if volumePath != "volumePath" {
 			t.Errorf("unexpected volume path passed to volume service: %s", volumePath)
 		}
@@ -669,7 +656,7 @@ func TestNodeServiceNodeExpandBlockVolume(t *testing.T) {
 		}
 		return true, nil
 	}
-	env.volumeResizeService.ResizeFunc = func(volume *csi.Volume, volumePath string) error {
+	env.volumeResizeService.ResizeFunc = func(volumePath string) error {
 		t.Errorf("This function should never be called.")
 		return nil
 	}
@@ -689,22 +676,6 @@ func TestNodeServiceNodeExpandBlockVolume(t *testing.T) {
 	}
 }
 
-func TestNodeServiceNodeNodeExpandVolumeNotFound(t *testing.T) {
-	env := newNodeServerTestEnv()
-
-	env.volumeService.GetByIDFunc = func(ctx context.Context, id uint64) (*csi.Volume, error) {
-		return nil, volumes.ErrVolumeNotFound
-	}
-
-	_, err := env.service.NodeExpandVolume(env.ctx, &proto.NodeExpandVolumeRequest{
-		VolumeId:   "1",
-		VolumePath: "volumePath",
-	})
-	if grpc.Code(err) != codes.NotFound {
-		t.Fatalf("unexpected error: %v", err)
-	}
-}
-
 func TestNodeServiceNodeExpandVolumeInputErrors(t *testing.T) {
 	env := newNodeServerTestEnv()
 
@@ -714,26 +685,11 @@ func TestNodeServiceNodeExpandVolumeInputErrors(t *testing.T) {
 		Code codes.Code
 	}{
 		{
-			Name: "empty volume id",
-			Req: &proto.NodeExpandVolumeRequest{
-				VolumePath: "volumePath",
-			},
-			Code: codes.InvalidArgument,
-		},
-		{
 			Name: "empty volume path",
 			Req: &proto.NodeExpandVolumeRequest{
 				VolumeId: "1",
 			},
 			Code: codes.InvalidArgument,
-		},
-		{
-			Name: "invalid volume id",
-			Req: &proto.NodeExpandVolumeRequest{
-				VolumeId:   "xxx",
-				VolumePath: "volumePath",
-			},
-			Code: codes.NotFound,
 		},
 	}
 

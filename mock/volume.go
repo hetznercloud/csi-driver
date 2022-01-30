@@ -110,14 +110,14 @@ func (s *VolumeMountService) Unpublish(targetPath string) error {
 }
 
 type VolumeResizeService struct {
-	ResizeFunc func(volume *csi.Volume, volumePath string) error
+	ResizeFunc func(volumePath string) error
 }
 
-func (s *VolumeResizeService) Resize(volume *csi.Volume, volumePath string) error {
+func (s *VolumeResizeService) Resize(volumePath string) error {
 	if s.ResizeFunc == nil {
 		panic("not implemented")
 	}
-	return s.ResizeFunc(volume, volumePath)
+	return s.ResizeFunc(volumePath)
 }
 
 type VolumeStatsService struct {
