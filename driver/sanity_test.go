@@ -76,7 +76,6 @@ func TestSanity(t *testing.T) {
 	defer os.RemoveAll(tempDir)
 
 	testConfig := sanity.NewTestConfig()
-	testConfig.StagingPath = tempDir + "/hcloud-csi-sanity-staging"
 	testConfig.TargetPath = tempDir + "/hcloud-csi-sanity-target"
 	testConfig.Address = endpoint
 	sanity.Test(t, testConfig)
@@ -178,15 +177,7 @@ func (s *sanityVolumeService) Detach(ctx context.Context, volume *csi.Volume, se
 
 type sanityMountService struct{}
 
-func (s *sanityMountService) Stage(devicePath string, stagingTargetPath string, opts volumes.MountOpts) error {
-	return nil
-}
-
-func (s *sanityMountService) Unstage(stagingTargetPath string) error {
-	return nil
-}
-
-func (s *sanityMountService) Publish(targetPath string, stagingTargetPath string, opts volumes.MountOpts) error {
+func (s *sanityMountService) Publish(targetPath string, devicePath string, opts volumes.MountOpts) error {
 	return nil
 }
 

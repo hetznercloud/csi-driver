@@ -23,9 +23,7 @@ type MountOpts struct {
 
 // MountService mounts volumes.
 type MountService interface {
-	Stage(devicePath string, stagingTargetPath string, opts MountOpts) error
-	Unstage(stagingTargetPath string) error
-	Publish(targetPath string, stagingTargetPath string, opts MountOpts) error
+	Publish(targetPath string, devicePath string, opts MountOpts) error
 	Unpublish(targetPath string) error
 	PathExists(path string) (bool, error)
 }
@@ -46,45 +44,7 @@ func NewLinuxMountService(logger log.Logger) *LinuxMountService {
 	}
 }
 
-func (s *LinuxMountService) Stage(devicePath string, stagingTargetPath string, opts MountOpts) error {
-	if opts.FSType == "" {
-		opts.FSType = DefaultFSType
-	}
-
-	level.Debug(s.logger).Log(
-		"msg", "staging volume",
-		"device-path", devicePath,
-		"staging-target-path", stagingTargetPath,
-		"fs-type", opts.FSType,
-	)
-
-	isNotMountPoint, err := s.mounter.IsLikelyNotMountPoint(stagingTargetPath)
-	if err != nil {
-		if os.IsNotExist(err) {
-			if err := os.Mkdir(stagingTargetPath, 0750); err != nil {
-				return err
-			}
-			isNotMountPoint = true
-		} else {
-			return err
-		}
-	}
-	if !isNotMountPoint {
-		return nil
-	}
-
-	return s.mounter.FormatAndMount(devicePath, stagingTargetPath, opts.FSType, nil)
-}
-
-func (s *LinuxMountService) Unstage(stagingTargetPath string) error {
-	level.Debug(s.logger).Log(
-		"msg", "unstaging volume",
-		"staging-target-path", stagingTargetPath,
-	)
-	return mount.CleanupMountPoint(stagingTargetPath, s.mounter, false)
-}
-
-func (s *LinuxMountService) Publish(targetPath string, stagingTargetPath string, opts MountOpts) error {
+func (s *LinuxMountService) Publish(targetPath string, devicePath string, opts MountOpts) error {
 	isNotMountPoint, err := mount.IsNotMountPoint(s.mounter, targetPath)
 	if err != nil {
 		if os.IsNotExist(err) {
@@ -94,11 +54,14 @@ func (s *LinuxMountService) Publish(targetPath string, stagingTargetPath string,
 		}
 	}
 
+	var mountOptions []string
+
 	if !isNotMountPoint {
 		return nil
 	}
 	targetPathPermissions := os.FileMode(0750)
 	if opts.BlockVolume {
+		mountOptions = append(mountOptions, "bind")
 		if err := os.MkdirAll(filepath.Dir(targetPath), targetPathPermissions); err != nil {
 			return err
 		}
@@ -118,23 +81,22 @@ func (s *LinuxMountService) Publish(targetPath string, stagingTargetPath string,
 		}
 	}
 
-	options := []string{"bind"}
 	if opts.Readonly {
-		options = append(options, "ro")
+		mountOptions = append(mountOptions, "ro")
 	}
-	options = append(options, opts.Additional...)
+	mountOptions = append(mountOptions, opts.Additional...)
 
 	level.Debug(s.logger).Log(
 		"msg", "publishing volume",
 		"target-path", targetPath,
-		"staging-target-path", stagingTargetPath,
+		"device-path", devicePath,
 		"fs-type", opts.FSType,
 		"block-volume", opts.BlockVolume,
 		"readonly", opts.Readonly,
-		"mount-options", strings.Join(options, ", "),
+		"mount-options", strings.Join(mountOptions, ", "),
 	)
 
-	if err := s.mounter.Mount(stagingTargetPath, targetPath, opts.FSType, options); err != nil {
+	if err := s.mounter.Mount(devicePath, targetPath, opts.FSType, mountOptions); err != nil {
 		return err
 	}
 
