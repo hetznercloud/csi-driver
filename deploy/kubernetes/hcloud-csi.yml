@@ -306,12 +306,6 @@ spec:
       containers:
       - args:
         - --kubelet-registration-path=/var/lib/kubelet/plugins/csi.hetzner.cloud/socket
-        env:
-        - name: KUBE_NODE_NAME
-          valueFrom:
-            fieldRef:
-              apiVersion: v1
-              fieldPath: spec.nodeName
         image: k8s.gcr.io/sig-storage/csi-node-driver-registrar:v2.2.0
         name: csi-node-driver-registrar
         volumeMounts:
@@ -328,16 +322,6 @@ spec:
           value: 0.0.0.0:9189
         - name: ENABLE_METRICS
           value: "true"
-        - name: HCLOUD_TOKEN
-          valueFrom:
-            secretKeyRef:
-              key: token
-              name: hcloud-csi
-        - name: KUBE_NODE_NAME
-          valueFrom:
-            fieldRef:
-              apiVersion: v1
-              fieldPath: spec.nodeName
         image: hetznercloud/hcloud-csi-driver:latest
         imagePullPolicy: Always
         livenessProbe:
