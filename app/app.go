@@ -16,7 +16,6 @@ import (
 	"github.com/hetznercloud/csi-driver/driver"
 	"github.com/hetznercloud/csi-driver/metrics"
 	"github.com/hetznercloud/hcloud-go/hcloud"
-	"github.com/hetznercloud/hcloud-go/hcloud/metadata"
 	"github.com/prometheus/client_golang/prometheus"
 	"google.golang.org/grpc"
 )
@@ -137,68 +136,6 @@ func CreateHcloudClient(metricsRegistry *prometheus.Registry, logger log.Logger)
 	opts = append(opts, hcloud.WithPollInterval(time.Duration(pollingInterval)*time.Second))
 
 	return hcloud.NewClient(opts...), nil
-}
-
-// GetServer retrieves the hcloud server the application is running on.
-func GetServer(logger log.Logger, hcloudClient *hcloud.Client, metadataClient *metadata.Client) (*hcloud.Server, error) {
-	hcloudServerID, err := getServerID(logger, hcloudClient, metadataClient)
-	level.Debug(logger).Log("msg", "fetching server")
-	server, _, err := hcloudClient.Server.GetByID(context.Background(), hcloudServerID)
-	if err != nil {
-		return nil, err
-	}
-
-	// Cover potential cases where the server is not found. This results in a
-	// nil server object and nil error. If we do not do this, we will panic
-	// when trying to log the server.Name.
-	if server == nil {
-		return nil, errors.New("could not determine server")
-	}
-
-	level.Info(logger).Log("msg", "fetched server", "server-name", server.Name)
-
-	return server, nil
-}
-
-func getServerID(logger log.Logger, hcloudClient *hcloud.Client, metadataClient *metadata.Client) (int, error) {
-	if s := os.Getenv("HCLOUD_SERVER_ID"); s != "" {
-		id, err := strconv.Atoi(s)
-		if err != nil {
-			return 0, errors.New(fmt.Sprintf("invalid server id in HCLOUD_SERVER_ID env var: %s", err))
-		}
-		level.Debug(logger).Log(
-			"msg", "using server id from HCLOUD_SERVER_ID env var",
-			"server-id", id,
-		)
-		return id, nil
-	}
-
-	if s := os.Getenv("KUBE_NODE_NAME"); s != "" {
-		server, _, err := hcloudClient.Server.GetByName(context.Background(), s)
-		if err != nil {
-			return 0, errors.New(fmt.Sprintf("error while getting server through node name: %s", err))
-		}
-		if server != nil {
-			level.Debug(logger).Log(
-				"msg", "using server name from KUBE_NODE_NAME env var",
-				"server-id", server.ID,
-			)
-			return server.ID, nil
-		}
-		level.Debug(logger).Log(
-			"msg", "server not found by name, fallback to metadata service",
-			"err", err,
-		)
-	}
-
-	level.Debug(logger).Log(
-		"msg", "getting instance id from metadata service",
-	)
-	id, err := metadataClient.InstanceID()
-	if err != nil {
-		return 0, errors.New(fmt.Sprintf("failed to get instance id from metadata service: %s", err))
-	}
-	return id, nil
 }
 
 func CreateGRPCServer(logger log.Logger, metricsInterceptor grpc.UnaryServerInterceptor) *grpc.Server {

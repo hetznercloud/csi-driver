@@ -44,11 +44,6 @@ spec:
           value: 0.0.0.0:9189
         - name: ENABLE_METRICS
           value: "true"
-        - name: KUBE_NODE_NAME
-          valueFrom:
-            fieldRef:
-              apiVersion: v1
-              fieldPath: spec.nodeName
         - name: HCLOUD_TOKEN
           valueFrom:
             secretKeyRef:

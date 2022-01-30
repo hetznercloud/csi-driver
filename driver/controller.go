@@ -25,12 +25,10 @@ type ControllerService struct {
 func NewControllerService(
 	logger log.Logger,
 	volumeService volumes.Service,
-	location string,
 ) *ControllerService {
 	return &ControllerService{
 		logger:        logger,
 		volumeService: volumeService,
-		location:      location,
 	}
 }
 
@@ -59,12 +57,23 @@ func (s *ControllerService) CreateVolume(ctx context.Context, req *proto.CreateV
 		}
 	}
 
-	// Take the location where to create the volume from the request's
-	// accessibility requirements, falling back to the location where the
-	// controller pod has been scheduled if no requirements have been provided.
-	var location = s.location
-	if loc := locationFromTopologyRequirement(req.AccessibilityRequirements); loc != nil {
-		location = *loc
+	// Take the location where to create the volume from the request accessibility requirements.
+	location := ""
+	if req.AccessibilityRequirements != nil {
+		for _, top := range req.AccessibilityRequirements.Preferred {
+			if loc, ok := top.Segments[TopologySegmentLocation]; ok {
+				location = loc
+			}
+		}
+		for _, top := range req.AccessibilityRequirements.Requisite {
+			if loc, ok := top.Segments[TopologySegmentLocation]; ok {
+				location = loc
+			}
+		}
+	}
+
+	if location == "" {
+		return nil, status.Error(codes.InvalidArgument, fmt.Sprintf("location topology information missing"))
 	}
 
 	// Create the volume. The service handles idempotency as required by the CSI spec.

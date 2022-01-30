@@ -32,7 +32,6 @@ func newControllerServiceTestEnv() *controllerServiceTestEnv {
 		service: NewControllerService(
 			logger,
 			volumeService,
-			"testloc",
 		),
 		volumeService: volumeService,
 	}

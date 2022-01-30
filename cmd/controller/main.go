@@ -10,7 +10,6 @@ import (
 	"github.com/hetznercloud/csi-driver/app"
 	"github.com/hetznercloud/csi-driver/driver"
 	"github.com/hetznercloud/csi-driver/volumes"
-	"github.com/hetznercloud/hcloud-go/hcloud/metadata"
 )
 
 var logger log.Logger
@@ -29,17 +28,6 @@ func main() {
 		os.Exit(1)
 	}
 
-	metadataClient := metadata.NewClient(metadata.WithInstrumentation(m.Registry()))
-
-	server, err := app.GetServer(logger, hcloudClient, metadataClient)
-	if err != nil {
-		level.Error(logger).Log(
-			"msg", "failed to fetch server",
-			"err", err,
-		)
-		os.Exit(1)
-	}
-
 	volumeService := volumes.NewIdempotentService(
 		log.With(logger, "component", "idempotent-volume-service"),
 		api.NewVolumeService(
@@ -50,7 +38,6 @@ func main() {
 	controllerService := driver.NewControllerService(
 		log.With(logger, "component", "driver-controller-service"),
 		volumeService,
-		server.Datacenter.Location.Name,
 	)
 	identityService := driver.NewIdentityService(
 		log.With(logger, "component", "driver-identity-service"),
