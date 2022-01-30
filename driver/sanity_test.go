@@ -211,7 +211,7 @@ func (s *sanityMountService) PathExists(path string) (bool, error) {
 
 type sanityResizeService struct{}
 
-func (s *sanityResizeService) Resize(volume *csi.Volume, volumePath string) error {
+func (s *sanityResizeService) Resize(volumePath string) error {
 	return nil
 }
 

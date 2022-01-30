@@ -231,44 +231,15 @@ func (s *NodeService) NodeGetInfo(context.Context, *proto.NodeGetInfoRequest) (*
 }
 
 func (s *NodeService) NodeExpandVolume(ctx context.Context, req *proto.NodeExpandVolumeRequest) (*proto.NodeExpandVolumeResponse, error) {
-	if req.VolumeId == "" {
-		return nil, status.Error(codes.InvalidArgument, "missing volume id")
-	}
 	if req.VolumePath == "" {
 		return nil, status.Error(codes.InvalidArgument, "missing volume path")
 	}
 
-	volumeID, err := parseVolumeID(req.VolumeId)
-	if err != nil {
-		return nil, status.Error(codes.NotFound, "volume not found")
-	}
-
-	volume, err := s.volumeService.GetByID(ctx, volumeID)
-	if err != nil {
-		switch err {
-		case volumes.ErrVolumeNotFound:
-			return nil, status.Error(codes.NotFound, "volume not found")
-		default:
-			return nil, status.Error(codes.Internal, fmt.Sprintf("failed to get volume: %s", err))
-		}
-	}
-
-	volumeExists, err := s.volumeMountService.PathExists(volume.LinuxDevice)
-	if err != nil {
-		return nil, status.Error(codes.Internal, fmt.Sprintf("failed to check for volume existence: %s", err))
-	}
-	if !volumeExists {
-		return nil, status.Error(codes.Unavailable, fmt.Sprintf("volume %s is not available on this node %v", volume.LinuxDevice, s.server.ID))
-	}
-
 	if req.VolumeCapability.GetBlock() == nil {
-		if err := s.volumeResizeService.Resize(volume, req.VolumePath); err != nil {
+		if err := s.volumeResizeService.Resize(req.VolumePath); err != nil {
 			return nil, status.Error(codes.Internal, fmt.Sprintf("failed to resize volume: %s", err))
 		}
 	}
 
-	resp := &proto.NodeExpandVolumeResponse{
-		CapacityBytes: volume.SizeBytes(),
-	}
-	return resp, nil
+	return &proto.NodeExpandVolumeResponse{}, nil
 }

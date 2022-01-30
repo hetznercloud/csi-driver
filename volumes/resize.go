@@ -1,16 +1,18 @@
 package volumes
 
 import (
+	"errors"
+	"fmt"
+
 	"github.com/go-kit/kit/log"
 	"github.com/go-kit/kit/log/level"
-	"github.com/hetznercloud/csi-driver/csi"
 	"k8s.io/mount-utils"
 	"k8s.io/utils/exec"
 )
 
 // ResizeService resizes volumes.
 type ResizeService interface {
-	Resize(volume *csi.Volume, volumePath string) error
+	Resize(volumePath string) error
 }
 
 // LinuxResizeService resizes volumes on a Linux system.
@@ -29,13 +31,19 @@ func NewLinuxResizeService(logger log.Logger) *LinuxResizeService {
 	}
 }
 
-func (l *LinuxResizeService) Resize(volume *csi.Volume, volumePath string) error {
-	level.Debug(l.logger).Log(
+func (l *LinuxResizeService) Resize(volumePath string) error {
+	devicePath, _, err := mount.GetDeviceNameFromMount(mount.New(""), volumePath)
+	if err != nil {
+		return errors.New(fmt.Sprintf("failed to determine mount path for %s: %s", volumePath, err))
+	}
+
+	level.Info(l.logger).Log(
 		"msg", "resizing volume",
-		"volume-name", volume.Name,
 		"volume-path", volumePath,
+		"device-path", devicePath,
 	)
-	if _, err := l.resizer.Resize(volume.LinuxDevice, volumePath); err != nil {
+
+	if _, err := l.resizer.Resize(devicePath, volumePath); err != nil {
 		return err
 	}
 	return nil
