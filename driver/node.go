@@ -40,57 +40,16 @@ func NewNodeService(
 }
 
 func (s *NodeService) NodeStageVolume(ctx context.Context, req *proto.NodeStageVolumeRequest) (*proto.NodeStageVolumeResponse, error) {
-	if req.VolumeId == "" {
-		return nil, status.Error(codes.InvalidArgument, "missing volume id")
-	}
-	if req.StagingTargetPath == "" {
-		return nil, status.Error(codes.InvalidArgument, "missing staging target path")
-	}
-	if req.VolumeCapability == nil {
-		return nil, status.Error(codes.InvalidArgument, "missing volume capability")
-	}
-
-	switch {
-	case req.VolumeCapability.GetBlock() != nil:
-		return &proto.NodeStageVolumeResponse{}, nil
-	case req.VolumeCapability.GetMount() != nil:
-		mount := req.VolumeCapability.GetMount()
-		devicePath := req.GetPublishContext()["devicePath"]
-		opts := volumes.MountOpts{
-			FSType:     mount.FsType,
-			Additional: mount.MountFlags,
-		}
-		if err := s.volumeMountService.Stage(devicePath, req.StagingTargetPath, opts); err != nil {
-			return nil, status.Error(codes.Internal, fmt.Sprintf("failed to stage volume: %s", err))
-		}
-		return &proto.NodeStageVolumeResponse{}, nil
-	default:
-		return nil, status.Error(codes.InvalidArgument, "stage volume: unsupported volume capability")
-	}
+	return nil, status.Error(codes.Unimplemented, "not supported")
 }
 
 func (s *NodeService) NodeUnstageVolume(ctx context.Context, req *proto.NodeUnstageVolumeRequest) (*proto.NodeUnstageVolumeResponse, error) {
-	if req.VolumeId == "" {
-		return nil, status.Error(codes.InvalidArgument, "missing volume id")
-	}
-	if req.StagingTargetPath == "" {
-		return nil, status.Error(codes.InvalidArgument, "missing staging target path")
-	}
-
-	if err := s.volumeMountService.Unstage(req.StagingTargetPath); err != nil {
-		return nil, status.Error(codes.Internal, fmt.Sprintf("failed to unstage volume: %s", err))
-	}
-
-	resp := &proto.NodeUnstageVolumeResponse{}
-	return resp, nil
+	return nil, status.Error(codes.Unimplemented, "not supported")
 }
 
 func (s *NodeService) NodePublishVolume(ctx context.Context, req *proto.NodePublishVolumeRequest) (*proto.NodePublishVolumeResponse, error) {
 	if req.VolumeId == "" {
 		return nil, status.Error(codes.InvalidArgument, "missing volume id")
-	}
-	if req.StagingTargetPath == "" {
-		return nil, status.Error(codes.InvalidArgument, "missing staging target path")
 	}
 	if req.TargetPath == "" {
 		return nil, status.Error(codes.InvalidArgument, "missing target path")
@@ -98,27 +57,25 @@ func (s *NodeService) NodePublishVolume(ctx context.Context, req *proto.NodePubl
 
 	devicePath := req.GetPublishContext()["devicePath"]
 
+	var opts volumes.MountOpts
 	switch {
 	case req.VolumeCapability.GetBlock() != nil:
-		opts := volumes.MountOpts{BlockVolume: true}
-		if err := s.volumeMountService.Publish(req.TargetPath, devicePath, opts); err != nil {
-			return nil, status.Error(codes.Internal, fmt.Sprintf("failed to publish block volume: %s", err))
-		}
-		return &proto.NodePublishVolumeResponse{}, nil
+		opts = volumes.MountOpts{BlockVolume: true}
 	case req.VolumeCapability.GetMount() != nil:
 		mount := req.VolumeCapability.GetMount()
-		opts := volumes.MountOpts{
+		opts = volumes.MountOpts{
 			FSType:     mount.FsType,
 			Readonly:   req.Readonly,
 			Additional: mount.MountFlags,
 		}
-		if err := s.volumeMountService.Publish(req.TargetPath, req.StagingTargetPath, opts); err != nil {
-			return nil, status.Error(codes.Internal, fmt.Sprintf("failed to publish volume: %s", err))
-		}
-		return &proto.NodePublishVolumeResponse{}, nil
 	default:
 		return nil, status.Error(codes.InvalidArgument, "publish volume: unsupported volume capability")
 	}
+
+	if err := s.volumeMountService.Publish(req.TargetPath, devicePath, opts); err != nil {
+		return nil, status.Error(codes.Internal, fmt.Sprintf("failed to publish volume: %s", err))
+	}
+	return &proto.NodePublishVolumeResponse{}, nil
 }
 
 func (s *NodeService) NodeUnpublishVolume(ctx context.Context, req *proto.NodeUnpublishVolumeRequest) (*proto.NodeUnpublishVolumeResponse, error) {
@@ -184,13 +141,6 @@ func (s *NodeService) NodeGetVolumeStats(ctx context.Context, req *proto.NodeGet
 func (s *NodeService) NodeGetCapabilities(ctx context.Context, req *proto.NodeGetCapabilitiesRequest) (*proto.NodeGetCapabilitiesResponse, error) {
 	resp := &proto.NodeGetCapabilitiesResponse{
 		Capabilities: []*proto.NodeServiceCapability{
-			{
-				Type: &proto.NodeServiceCapability_Rpc{
-					Rpc: &proto.NodeServiceCapability_RPC{
-						Type: proto.NodeServiceCapability_RPC_STAGE_UNSTAGE_VOLUME,
-					},
-				},
-			},
 			{
 				Type: &proto.NodeServiceCapability_Rpc{
 					Rpc: &proto.NodeServiceCapability_RPC{

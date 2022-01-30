@@ -44,250 +44,22 @@ func newNodeServerTestEnv() nodeServiceTestEnv {
 	}
 }
 
-func TestNodeServiceNodeStageVolume(t *testing.T) {
-	env := newNodeServerTestEnv()
-
-	env.volumeMountService.StageFunc = func(devicePath string, stagingTargetPath string, opts volumes.MountOpts) error {
-		if stagingTargetPath != "staging" {
-			t.Errorf("unexpected staging target path passed to volume mount service: %s", stagingTargetPath)
-		}
-		if opts.FSType != "ext4" {
-			t.Errorf("unexpected fs type in mount options: %s", opts.FSType)
-		}
-		if len(opts.Additional) != 2 || opts.Additional[0] != "flag1" || opts.Additional[1] != "flag2" {
-			t.Errorf("unexpected additional options in mount options: %v", opts.Additional)
-		}
-		return nil
-	}
-
-	_, err := env.service.NodeStageVolume(env.ctx, &proto.NodeStageVolumeRequest{
-		VolumeId:          "1",
-		StagingTargetPath: "staging",
-		VolumeCapability: &proto.VolumeCapability{
-			AccessMode: &proto.VolumeCapability_AccessMode{
-				Mode: proto.VolumeCapability_AccessMode_SINGLE_NODE_WRITER,
-			},
-			AccessType: &proto.VolumeCapability_Mount{
-				Mount: &proto.VolumeCapability_MountVolume{
-					FsType:     "ext4",
-					MountFlags: []string{"flag1", "flag2"},
-				},
-			},
-		},
-	})
-	if err != nil {
-		t.Fatal(err)
-	}
-}
-
-func TestNodeServiceNodeStageBlockVolume(t *testing.T) {
-	env := newNodeServerTestEnv()
-
-	_, err := env.service.NodeStageVolume(env.ctx, &proto.NodeStageVolumeRequest{
-		VolumeId:          "1",
-		StagingTargetPath: "staging",
-		VolumeCapability: &proto.VolumeCapability{
-			AccessMode: &proto.VolumeCapability_AccessMode{
-				Mode: proto.VolumeCapability_AccessMode_SINGLE_NODE_WRITER,
-			},
-			AccessType: &proto.VolumeCapability_Block{Block: &proto.VolumeCapability_BlockVolume{}},
-		},
-	})
-	if err != nil {
-		t.Fatal(err)
-	}
-}
-
-func TestNodeServiceNodeStageVolumeStageError(t *testing.T) {
-	env := newNodeServerTestEnv()
-
-	env.volumeMountService.StageFunc = func(devicePath string, stagingTargetPath string, opts volumes.MountOpts) error {
-		return io.EOF
-	}
-
-	_, err := env.service.NodeStageVolume(env.ctx, &proto.NodeStageVolumeRequest{
-		VolumeId:          "1",
-		StagingTargetPath: "staging",
-		VolumeCapability: &proto.VolumeCapability{
-			AccessMode: &proto.VolumeCapability_AccessMode{
-				Mode: proto.VolumeCapability_AccessMode_SINGLE_NODE_WRITER,
-			},
-			AccessType: &proto.VolumeCapability_Mount{
-				Mount: &proto.VolumeCapability_MountVolume{
-					FsType:     "ext4",
-					MountFlags: []string{"flag1", "flag2"},
-				},
-			},
-		},
-	})
-	if grpc.Code(err) != codes.Internal {
-		t.Fatalf("unexpected error: %v", err)
-	}
-}
-
-func TestNodeServiceNodeStageVolumeInputErrors(t *testing.T) {
-	env := newNodeServerTestEnv()
-
-	testCases := []struct {
-		Name string
-		Req  *proto.NodeStageVolumeRequest
-		Code codes.Code
-	}{
-		{
-			Name: "empty volume id",
-			Req: &proto.NodeStageVolumeRequest{
-				StagingTargetPath: "staging",
-				VolumeCapability: &proto.VolumeCapability{
-					AccessMode: &proto.VolumeCapability_AccessMode{
-						Mode: proto.VolumeCapability_AccessMode_SINGLE_NODE_WRITER,
-					},
-					AccessType: &proto.VolumeCapability_Mount{
-						Mount: &proto.VolumeCapability_MountVolume{
-							FsType:     "ext4",
-							MountFlags: []string{"flag1", "flag2"},
-						},
-					},
-				},
-			},
-			Code: codes.InvalidArgument,
-		},
-		{
-			Name: "empty staging target path",
-			Req: &proto.NodeStageVolumeRequest{
-				VolumeId: "1",
-				VolumeCapability: &proto.VolumeCapability{
-					AccessMode: &proto.VolumeCapability_AccessMode{
-						Mode: proto.VolumeCapability_AccessMode_SINGLE_NODE_WRITER,
-					},
-					AccessType: &proto.VolumeCapability_Mount{
-						Mount: &proto.VolumeCapability_MountVolume{
-							FsType:     "ext4",
-							MountFlags: []string{"flag1", "flag2"},
-						},
-					},
-				},
-			},
-			Code: codes.InvalidArgument,
-		},
-		{
-			Name: "empty volume capability",
-			Req: &proto.NodeStageVolumeRequest{
-				VolumeId:          "1",
-				StagingTargetPath: "staging",
-			},
-			Code: codes.InvalidArgument,
-		},
-		{
-			Name: "unsupported access type",
-			Req: &proto.NodeStageVolumeRequest{
-				VolumeId:          "1",
-				StagingTargetPath: "staging",
-				VolumeCapability: &proto.VolumeCapability{
-					AccessMode: &proto.VolumeCapability_AccessMode{
-						Mode: proto.VolumeCapability_AccessMode_SINGLE_NODE_WRITER,
-					},
-				},
-			},
-			Code: codes.InvalidArgument,
-		},
-	}
-
-	for _, testCase := range testCases {
-		t.Run(testCase.Name, func(t *testing.T) {
-			_, err := env.service.NodeStageVolume(env.ctx, testCase.Req)
-			if grpc.Code(err) != testCase.Code {
-				t.Fatalf("unexpected error: %s", err)
-			}
-		})
-	}
-}
-
-func TestNodeServiceNodeUnstageVolume(t *testing.T) {
-	env := newNodeServerTestEnv()
-
-	env.volumeMountService.UnstageFunc = func(stagingTargetPath string) error {
-		if stagingTargetPath != "staging" {
-			t.Errorf("unexpected staging target path passed to volume mount service: %s", stagingTargetPath)
-		}
-		return nil
-	}
-
-	_, err := env.service.NodeUnstageVolume(env.ctx, &proto.NodeUnstageVolumeRequest{
-		VolumeId:          "1",
-		StagingTargetPath: "staging",
-	})
-	if err != nil {
-		t.Fatal(err)
-	}
-}
-
-func TestNodeServiceNodeUnstageVolumeUnstageError(t *testing.T) {
-	env := newNodeServerTestEnv()
-
-	env.volumeMountService.UnstageFunc = func(stagingTargetPath string) error {
-		return io.EOF
-	}
-
-	_, err := env.service.NodeUnstageVolume(env.ctx, &proto.NodeUnstageVolumeRequest{
-		VolumeId:          "1",
-		StagingTargetPath: "staging",
-	})
-	if grpc.Code(err) != codes.Internal {
-		t.Fatalf("unexpected error: %v", err)
-	}
-}
-
-func TestNodeServiceNodeUnstageVolumeInputErrors(t *testing.T) {
-	env := newNodeServerTestEnv()
-
-	testCases := []struct {
-		Name string
-		Req  *proto.NodeUnstageVolumeRequest
-		Code codes.Code
-	}{
-		{
-			Name: "empty volume id",
-			Req: &proto.NodeUnstageVolumeRequest{
-				StagingTargetPath: "staging",
-			},
-			Code: codes.InvalidArgument,
-		},
-		{
-			Name: "empty staging target path",
-			Req: &proto.NodeUnstageVolumeRequest{
-				VolumeId: "1",
-			},
-			Code: codes.InvalidArgument,
-		},
-	}
-
-	for _, testCase := range testCases {
-		t.Run(testCase.Name, func(t *testing.T) {
-			_, err := env.service.NodeUnstageVolume(env.ctx, testCase.Req)
-			if grpc.Code(err) != testCase.Code {
-				t.Fatalf("unexpected error: %s", err)
-			}
-		})
-	}
-}
-
 func TestNodeServiceNodePublishVolume(t *testing.T) {
 	env := newNodeServerTestEnv()
 
-	env.volumeMountService.PublishFunc = func(targetPath string, stagingTargetPath string, opts volumes.MountOpts) error {
+	env.volumeMountService.PublishFunc = func(targetPath string, devicePath string, opts volumes.MountOpts) error {
 		if targetPath != "target" {
 			t.Errorf("unexpected target path passed to volume service: %s", targetPath)
 		}
-		if stagingTargetPath != "staging" {
-			t.Errorf("unexpected staging target path passed to volume mount service: %s", stagingTargetPath)
+		if devicePath != "devpath" {
+			t.Errorf("unexpected device path passed to volume mount service: %s", devicePath)
 		}
 		return nil
 	}
 
 	_, err := env.service.NodePublishVolume(env.ctx, &proto.NodePublishVolumeRequest{
-		VolumeId:          "1",
-		TargetPath:        "target",
-		StagingTargetPath: "staging",
+		VolumeId:   "1",
+		TargetPath: "target",
 		VolumeCapability: &proto.VolumeCapability{
 			AccessMode: &proto.VolumeCapability_AccessMode{
 				Mode: proto.VolumeCapability_AccessMode_SINGLE_NODE_WRITER,
@@ -298,6 +70,9 @@ func TestNodeServiceNodePublishVolume(t *testing.T) {
 					MountFlags: []string{"flag1", "flag2"},
 				},
 			},
+		},
+		PublishContext: map[string]string{
+			"devicePath": "devpath",
 		},
 	})
 	if err != nil {
@@ -309,21 +84,20 @@ func TestNodeServiceNodePublishBlockVolume(t *testing.T) {
 	env := newNodeServerTestEnv()
 
 	env.volumeMountService.PublishFunc = func(
-		targetPath, stagingTargetPath string, opts volumes.MountOpts,
+		targetPath, devicePath string, opts volumes.MountOpts,
 	) error {
 		if targetPath != "target" {
 			t.Errorf("unexpected target path: %s", targetPath)
 		}
-		if stagingTargetPath != "foopath" {
-			t.Errorf("unexpected staging target path: %s", stagingTargetPath)
+		if devicePath != "devpath" {
+			t.Errorf("unexpected device path: %s", devicePath)
 		}
 		return nil
 	}
 
 	_, err := env.service.NodePublishVolume(env.ctx, &proto.NodePublishVolumeRequest{
-		VolumeId:          "1",
-		StagingTargetPath: "staging",
-		TargetPath:        "target",
+		VolumeId:   "1",
+		TargetPath: "target",
 		VolumeCapability: &proto.VolumeCapability{
 			AccessMode: &proto.VolumeCapability_AccessMode{
 				Mode: proto.VolumeCapability_AccessMode_SINGLE_NODE_WRITER,
@@ -332,7 +106,7 @@ func TestNodeServiceNodePublishBlockVolume(t *testing.T) {
 				Block: &proto.VolumeCapability_BlockVolume{},
 			},
 		},
-		PublishContext: map[string]string{"devicePath": "foopath"},
+		PublishContext: map[string]string{"devicePath": "devpath"},
 	})
 
 	if err != nil {
@@ -343,14 +117,13 @@ func TestNodeServiceNodePublishBlockVolume(t *testing.T) {
 func TestNodeServiceNodePublishPublishError(t *testing.T) {
 	env := newNodeServerTestEnv()
 
-	env.volumeMountService.PublishFunc = func(targetPath string, stagingTargetPath string, opts volumes.MountOpts) error {
+	env.volumeMountService.PublishFunc = func(targetPath string, devicePath string, opts volumes.MountOpts) error {
 		return io.EOF
 	}
 
 	_, err := env.service.NodePublishVolume(env.ctx, &proto.NodePublishVolumeRequest{
-		VolumeId:          "1",
-		TargetPath:        "target",
-		StagingTargetPath: "staging",
+		VolumeId:   "1",
+		TargetPath: "target",
 		VolumeCapability: &proto.VolumeCapability{
 			AccessMode: &proto.VolumeCapability_AccessMode{
 				Mode: proto.VolumeCapability_AccessMode_SINGLE_NODE_WRITER,
@@ -379,8 +152,7 @@ func TestNodeServiceNodePublishVolumeInputErrors(t *testing.T) {
 		{
 			Name: "empty volume id",
 			Req: &proto.NodePublishVolumeRequest{
-				TargetPath:        "target",
-				StagingTargetPath: "staging",
+				TargetPath: "target",
 				VolumeCapability: &proto.VolumeCapability{
 					AccessMode: &proto.VolumeCapability_AccessMode{
 						Mode: proto.VolumeCapability_AccessMode_SINGLE_NODE_WRITER,
@@ -398,27 +170,7 @@ func TestNodeServiceNodePublishVolumeInputErrors(t *testing.T) {
 		{
 			Name: "empty target path",
 			Req: &proto.NodePublishVolumeRequest{
-				VolumeId:          "1",
-				StagingTargetPath: "staging",
-				VolumeCapability: &proto.VolumeCapability{
-					AccessMode: &proto.VolumeCapability_AccessMode{
-						Mode: proto.VolumeCapability_AccessMode_SINGLE_NODE_WRITER,
-					},
-					AccessType: &proto.VolumeCapability_Mount{
-						Mount: &proto.VolumeCapability_MountVolume{
-							FsType:     "ext4",
-							MountFlags: []string{"flag1", "flag2"},
-						},
-					},
-				},
-			},
-			Code: codes.InvalidArgument,
-		},
-		{
-			Name: "empty staging target path",
-			Req: &proto.NodePublishVolumeRequest{
-				VolumeId:   "1",
-				TargetPath: "target",
+				VolumeId: "1",
 				VolumeCapability: &proto.VolumeCapability{
 					AccessMode: &proto.VolumeCapability_AccessMode{
 						Mode: proto.VolumeCapability_AccessMode_SINGLE_NODE_WRITER,
@@ -436,9 +188,8 @@ func TestNodeServiceNodePublishVolumeInputErrors(t *testing.T) {
 		{
 			Name: "no mount access type",
 			Req: &proto.NodePublishVolumeRequest{
-				VolumeId:          "1",
-				TargetPath:        "target",
-				StagingTargetPath: "staging",
+				VolumeId:   "1",
+				TargetPath: "target",
 				VolumeCapability: &proto.VolumeCapability{
 					AccessMode: &proto.VolumeCapability_AccessMode{
 						Mode: proto.VolumeCapability_AccessMode_SINGLE_NODE_WRITER,
@@ -536,32 +287,24 @@ func TestNodeServiceNodeGetCapabilities(t *testing.T) {
 	if err != nil {
 		t.Fatal(err)
 	}
-	if c := len(resp.Capabilities); c != 3 {
+	if c := len(resp.Capabilities); c != 2 {
 		t.Fatalf("unexpected number of capabilities: %d", c)
 	}
 
-	cap1rpc := resp.Capabilities[0].GetRpc()
-	if cap1rpc == nil {
+	caprpc := resp.Capabilities[0].GetRpc()
+	if caprpc == nil {
 		t.Fatal("unexpected capability at index 0")
 	}
-	if cap1rpc.Type != proto.NodeServiceCapability_RPC_STAGE_UNSTAGE_VOLUME {
-		t.Errorf("unexpected type: %s", cap1rpc.Type)
+	if caprpc.Type != proto.NodeServiceCapability_RPC_EXPAND_VOLUME {
+		t.Errorf("unexpected type: %s", caprpc.Type)
 	}
 
-	cap2rpc := resp.Capabilities[1].GetRpc()
-	if cap2rpc == nil {
+	caprpc = resp.Capabilities[1].GetRpc()
+	if caprpc == nil {
 		t.Fatal("unexpected capability at index 1")
 	}
-	if cap2rpc.Type != proto.NodeServiceCapability_RPC_EXPAND_VOLUME {
-		t.Errorf("unexpected type: %s", cap2rpc.Type)
-	}
-
-	cap3rpc := resp.Capabilities[2].GetRpc()
-	if cap3rpc == nil {
-		t.Fatal("unexpected capability at index 2")
-	}
-	if cap3rpc.Type != proto.NodeServiceCapability_RPC_GET_VOLUME_STATS {
-		t.Errorf("unexpected type: %s", cap3rpc.Type)
+	if caprpc.Type != proto.NodeServiceCapability_RPC_GET_VOLUME_STATS {
+		t.Errorf("unexpected type: %s", caprpc.Type)
 	}
 }
 
