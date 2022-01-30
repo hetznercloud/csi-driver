@@ -7,11 +7,9 @@ import (
 
 	proto "github.com/container-storage-interface/spec/lib/go/csi"
 	"github.com/go-kit/kit/log"
-	"github.com/hetznercloud/hcloud-go/hcloud"
 	"google.golang.org/grpc"
 	"google.golang.org/grpc/codes"
 
-	"github.com/hetznercloud/csi-driver/csi"
 	"github.com/hetznercloud/csi-driver/mock"
 	"github.com/hetznercloud/csi-driver/volumes"
 )
@@ -21,23 +19,12 @@ var _ proto.NodeServer = (*NodeService)(nil)
 type nodeServiceTestEnv struct {
 	ctx                 context.Context
 	service             *NodeService
-	server              *hcloud.Server
-	volumeService       *mock.VolumeService
 	volumeMountService  *mock.VolumeMountService
 	volumeResizeService *mock.VolumeResizeService
 }
 
 func newNodeServerTestEnv() nodeServiceTestEnv {
 	var (
-		server = &hcloud.Server{
-			ID: 1,
-			Datacenter: &hcloud.Datacenter{
-				Location: &hcloud.Location{
-					Name: "test",
-				},
-			},
-		}
-		volumeService       = &mock.VolumeService{}
 		volumeMountService  = &mock.VolumeMountService{}
 		volumeResizeService = &mock.VolumeResizeService{}
 		volumeStatsService  = &mock.VolumeStatsService{}
@@ -46,14 +33,11 @@ func newNodeServerTestEnv() nodeServiceTestEnv {
 		ctx: context.Background(),
 		service: NewNodeService(
 			log.NewNopLogger(),
-			server,
-			volumeService,
+			"1",
 			volumeMountService,
 			volumeResizeService,
 			volumeStatsService,
 		),
-		server:              server,
-		volumeService:       volumeService,
 		volumeMountService:  volumeMountService,
 		volumeResizeService: volumeResizeService,
 	}
@@ -97,14 +81,6 @@ func TestNodeServiceNodeStageVolume(t *testing.T) {
 
 func TestNodeServiceNodeStageBlockVolume(t *testing.T) {
 	env := newNodeServerTestEnv()
-
-	existingVolume := &csi.Volume{ID: 1}
-	env.volumeService.GetByIDFunc = func(_ context.Context, id uint64) (*csi.Volume, error) {
-		if id != existingVolume.ID {
-			t.Errorf("unexpected volume id: %d", id)
-		}
-		return existingVolume, nil
-	}
 
 	_, err := env.service.NodeStageVolume(env.ctx, &proto.NodeStageVolumeRequest{
 		VolumeId:          "1",
@@ -150,10 +126,6 @@ func TestNodeServiceNodeStageVolumeStageError(t *testing.T) {
 
 func TestNodeServiceNodeStageVolumeInputErrors(t *testing.T) {
 	env := newNodeServerTestEnv()
-
-	env.volumeService.GetByIDFunc = func(ctx context.Context, id uint64) (*csi.Volume, error) {
-		return &csi.Volume{}, nil
-	}
 
 	testCases := []struct {
 		Name string
@@ -398,10 +370,6 @@ func TestNodeServiceNodePublishPublishError(t *testing.T) {
 func TestNodeServiceNodePublishVolumeInputErrors(t *testing.T) {
 	env := newNodeServerTestEnv()
 
-	env.volumeService.GetByIDFunc = func(ctx context.Context, id uint64) (*csi.Volume, error) {
-		return &csi.Volume{}, nil
-	}
-
 	testCases := []struct {
 		Name string
 		Req  *proto.NodePublishVolumeRequest
@@ -640,16 +608,6 @@ func TestNodeServiceNodeExpandVolume(t *testing.T) {
 func TestNodeServiceNodeExpandBlockVolume(t *testing.T) {
 	env := newNodeServerTestEnv()
 
-	existingVolume := &csi.Volume{
-		LinuxDevice: "LinuxDevicePath",
-	}
-
-	env.volumeService.GetByIDFunc = func(ctx context.Context, id uint64) (*csi.Volume, error) {
-		if id != 1 {
-			t.Errorf("unexpected volume id passed to volume service: %d", id)
-		}
-		return existingVolume, nil
-	}
 	env.volumeMountService.PathExistsFunc = func(path string) (bool, error) {
 		if path != "LinuxDevicePath" {
 			t.Errorf("unexpected volume path passed to volume mount service: %s", path)

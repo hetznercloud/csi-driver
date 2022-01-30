@@ -4,6 +4,8 @@ import (
 	"context"
 	"errors"
 
+	"github.com/hetznercloud/hcloud-go/hcloud"
+
 	"github.com/hetznercloud/csi-driver/csi"
 )
 
@@ -19,6 +21,7 @@ var (
 
 type Service interface {
 	Create(ctx context.Context, opts CreateOpts) (*csi.Volume, error)
+	GetServerByID(ctx context.Context, id int) (*hcloud.Server, error)
 	GetByID(ctx context.Context, id uint64) (*csi.Volume, error)
 	GetByName(ctx context.Context, name string) (*csi.Volume, error)
 	Delete(ctx context.Context, volume *csi.Volume) error

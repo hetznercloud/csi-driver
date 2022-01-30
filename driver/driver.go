@@ -8,5 +8,6 @@ const (
 	MinVolumeSize     = 10 // GB
 	DefaultVolumeSize = MinVolumeSize
 
+	TopologySegmentServerID = PluginName + "/server-id"
 	TopologySegmentLocation = PluginName + "/location"
 )

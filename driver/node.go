@@ -3,11 +3,9 @@ package driver
 import (
 	"context"
 	"fmt"
-	"strconv"
 
 	proto "github.com/container-storage-interface/spec/lib/go/csi"
 	"github.com/go-kit/kit/log"
-	"github.com/hetznercloud/hcloud-go/hcloud"
 	"google.golang.org/grpc/codes"
 	"google.golang.org/grpc/status"
 
@@ -16,8 +14,7 @@ import (
 
 type NodeService struct {
 	logger              log.Logger
-	server              *hcloud.Server
-	volumeService       volumes.Service
+	serverID            string
 	volumeMountService  volumes.MountService
 	volumeResizeService volumes.ResizeService
 	volumeStatsService  volumes.StatsService
@@ -25,16 +22,14 @@ type NodeService struct {
 
 func NewNodeService(
 	logger log.Logger,
-	server *hcloud.Server,
-	volumeService volumes.Service,
+	serverID string,
 	volumeMountService volumes.MountService,
 	volumeResizeService volumes.ResizeService,
 	volumeStatsService volumes.StatsService,
 ) *NodeService {
 	return &NodeService{
 		logger:              logger,
-		server:              server,
-		volumeService:       volumeService,
+		serverID:            serverID,
 		volumeMountService:  volumeMountService,
 		volumeResizeService: volumeResizeService,
 		volumeStatsService:  volumeStatsService,
@@ -152,7 +147,7 @@ func (s *NodeService) NodeGetVolumeStats(ctx context.Context, req *proto.NodeGet
 		return nil, status.Error(codes.Internal, fmt.Sprintf("failed to check for volume existence: %s", err))
 	}
 	if !volumeExists {
-		return nil, status.Error(codes.NotFound, fmt.Sprintf("volume %s is not available on this node %v", req.VolumePath, s.server.ID))
+		return nil, status.Error(codes.NotFound, fmt.Sprintf("volume %s is not available on this node", req.VolumePath))
 	}
 
 	totalBytes, availableBytes, usedBytes, err := s.volumeStatsService.ByteFilesystemStats(req.VolumePath)
@@ -213,17 +208,12 @@ func (s *NodeService) NodeGetCapabilities(ctx context.Context, req *proto.NodeGe
 }
 
 func (s *NodeService) NodeGetInfo(context.Context, *proto.NodeGetInfoRequest) (*proto.NodeGetInfoResponse, error) {
-	if s.server == nil || s.server.Datacenter == nil || s.server.Datacenter.Location == nil || s.server.Datacenter.Location.Name == "" {
-		return nil, status.Error(codes.Internal, "cannot determine node location")
-	}
-	location := s.server.Datacenter.Location.Name
-
 	resp := &proto.NodeGetInfoResponse{
-		NodeId:            strconv.Itoa(s.server.ID),
+		NodeId:            s.serverID,
 		MaxVolumesPerNode: MaxVolumesPerNode,
 		AccessibleTopology: &proto.Topology{
 			Segments: map[string]string{
-				TopologySegmentLocation: location,
+				TopologySegmentServerID: s.serverID,
 			},
 		},
 	}

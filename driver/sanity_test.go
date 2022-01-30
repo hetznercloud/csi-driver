@@ -3,6 +3,7 @@ package driver
 import (
 	"container/list"
 	"context"
+	"errors"
 	"fmt"
 	"io/ioutil"
 	"net"
@@ -12,12 +13,12 @@ import (
 
 	proto "github.com/container-storage-interface/spec/lib/go/csi"
 	"github.com/go-kit/kit/log"
-	"github.com/hetznercloud/hcloud-go/hcloud"
 	"github.com/kubernetes-csi/csi-test/v3/pkg/sanity"
 	"google.golang.org/grpc"
 
 	"github.com/hetznercloud/csi-driver/csi"
 	"github.com/hetznercloud/csi-driver/volumes"
+	"github.com/hetznercloud/hcloud-go/hcloud"
 )
 
 func TestSanity(t *testing.T) {
@@ -52,15 +53,7 @@ func TestSanity(t *testing.T) {
 	)
 	nodeService := NewNodeService(
 		log.With(logger, "component", "driver-node-service"),
-		&hcloud.Server{
-			ID: 123456,
-			Datacenter: &hcloud.Datacenter{
-				Location: &hcloud.Location{
-					Name: "testloc",
-				},
-			},
-		},
-		volumeService,
+		"123456",
 		volumeMountService,
 		volumeResizeService,
 		volumeStatsService,
@@ -116,6 +109,10 @@ func (s *sanityVolumeService) Create(ctx context.Context, opts volumes.CreateOpt
 
 	s.volumes.PushBack(volume)
 	return volume, nil
+}
+
+func (s *sanityVolumeService) GetServerByID(ctx context.Context, id int) (*hcloud.Server, error) {
+	return nil, errors.New("Not implemented")
 }
 
 func (s *sanityVolumeService) GetByID(ctx context.Context, id uint64) (*csi.Volume, error) {

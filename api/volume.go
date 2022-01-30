@@ -65,6 +65,11 @@ func (s *VolumeService) Create(ctx context.Context, opts volumes.CreateOpts) (*c
 	return toDomainVolume(result.Volume), nil
 }
 
+func (s *VolumeService) GetServerByID(ctx context.Context, id int) (*hcloud.Server, error) {
+	server, _, err := s.client.Server.GetByID(ctx, id)
+	return server, err
+}
+
 func (s *VolumeService) GetByID(ctx context.Context, id uint64) (*csi.Volume, error) {
 	hcloudVolume, _, err := s.client.Volume.GetByID(ctx, int(id))
 	if err != nil {

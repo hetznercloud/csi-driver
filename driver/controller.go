@@ -34,6 +34,62 @@ func NewControllerService(
 	}
 }
 
+// Attempts to infer location information from topology requirements.
+// The requirements can either contain an explicit location, or a server ID. In the latter case, the Server is looked up
+// to determine its location. Failure to do so is handled gracefully with a warning, and the controller will proceed
+// with fallback logic.
+func (s *ControllerService) locationFromTopologyRequirement(ctx context.Context, tr *proto.TopologyRequirement) *string {
+	if tr == nil {
+		return nil
+	}
+
+	for _, top := range tr.Preferred {
+		if location, ok := top.Segments[TopologySegmentLocation]; ok {
+			return &location
+		}
+	}
+	for _, top := range tr.Requisite {
+		if location, ok := top.Segments[TopologySegmentLocation]; ok {
+			return &location
+		}
+	}
+
+	serverID := 0
+	var err error
+	for _, top := range tr.Preferred {
+		if id, ok := top.Segments[TopologySegmentServerID]; ok {
+			serverID, err = strconv.Atoi(id)
+		}
+	}
+	for _, top := range tr.Requisite {
+		if id, ok := top.Segments[TopologySegmentServerID]; ok {
+			serverID, err = strconv.Atoi(id)
+		}
+	}
+
+	if err != nil {
+		level.Warn(s.logger).Log("msg", "error looking up server ID from topology requirements", "err", err)
+		return nil
+	}
+
+	if serverID == 0 {
+		return nil
+	}
+
+	level.Info(s.logger).Log("msg", fmt.Sprintf("looking up server ID %d from topology requirements", serverID))
+
+	server, err := s.volumeService.GetServerByID(ctx, serverID)
+	if err != nil {
+		level.Warn(s.logger).Log("msg", "error looking up server ID from topology requirements", "err", err)
+		return nil
+	}
+	if server == nil {
+		return nil
+	}
+
+	return &server.Datacenter.Location.Name
+}
+
 func (s *ControllerService) CreateVolume(ctx context.Context, req *proto.CreateVolumeRequest) (*proto.CreateVolumeResponse, error) {
 	if req.Name == "" {
 		return nil, status.Error(codes.InvalidArgument, "missing name")
@@ -63,7 +119,7 @@ func (s *ControllerService) CreateVolume(ctx context.Context, req *proto.CreateV
 	// accessibility requirements, falling back to the location where the
 	// controller pod has been scheduled if no requirements have been provided.
 	var location = s.location
-	if loc := locationFromTopologyRequirement(req.AccessibilityRequirements); loc != nil {
+	if loc := s.locationFromTopologyRequirement(ctx, req.AccessibilityRequirements); loc != nil {
 		location = *loc
 	}
 

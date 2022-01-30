@@ -7,6 +7,7 @@ import (
 	"github.com/go-kit/kit/log/level"
 
 	"github.com/hetznercloud/csi-driver/csi"
+	"github.com/hetznercloud/hcloud-go/hcloud"
 )
 
 // IdempotentService wraps a volume service and provides idempotency as required by the CSI spec.
@@ -94,6 +95,10 @@ func (s *IdempotentService) Create(ctx context.Context, opts CreateOpts) (*csi.V
 	}
 
 	return nil, err
+}
+
+func (s *IdempotentService) GetServerByID(ctx context.Context, id int) (*hcloud.Server, error) {
+	return s.volumeService.GetServerByID(ctx, id)
 }
 
 func (s *IdempotentService) GetByID(ctx context.Context, id uint64) (*csi.Volume, error) {

@@ -3,18 +3,21 @@ package mock
 import (
 	"context"
 
+	"github.com/hetznercloud/hcloud-go/hcloud"
+
 	"github.com/hetznercloud/csi-driver/csi"
 	"github.com/hetznercloud/csi-driver/volumes"
 )
 
 type VolumeService struct {
-	CreateFunc    func(ctx context.Context, opts volumes.CreateOpts) (*csi.Volume, error)
-	GetByIDFunc   func(ctx context.Context, id uint64) (*csi.Volume, error)
-	GetByNameFunc func(ctx context.Context, name string) (*csi.Volume, error)
-	DeleteFunc    func(ctx context.Context, volume *csi.Volume) error
-	AttachFunc    func(ctx context.Context, volume *csi.Volume, server *csi.Server) error
-	DetachFunc    func(ctx context.Context, volume *csi.Volume, server *csi.Server) error
-	ResizeFunc    func(ctx context.Context, volume *csi.Volume, size int) error
+	CreateFunc        func(ctx context.Context, opts volumes.CreateOpts) (*csi.Volume, error)
+	GetServerByIDFunc func(ctx context.Context, id int) (*hcloud.Server, error)
+	GetByIDFunc       func(ctx context.Context, id uint64) (*csi.Volume, error)
+	GetByNameFunc     func(ctx context.Context, name string) (*csi.Volume, error)
+	DeleteFunc        func(ctx context.Context, volume *csi.Volume) error
+	AttachFunc        func(ctx context.Context, volume *csi.Volume, server *csi.Server) error
+	DetachFunc        func(ctx context.Context, volume *csi.Volume, server *csi.Server) error
+	ResizeFunc        func(ctx context.Context, volume *csi.Volume, size int) error
 }
 
 func (s *VolumeService) Create(ctx context.Context, opts volumes.CreateOpts) (*csi.Volume, error) {
@@ -22,6 +25,13 @@ func (s *VolumeService) Create(ctx context.Context, opts volumes.CreateOpts) (*c
 		panic("not implemented")
 	}
 	return s.CreateFunc(ctx, opts)
+}
+
+func (s *VolumeService) GetServerByID(ctx context.Context, id int) (*hcloud.Server, error) {
+	if s.GetServerByIDFunc == nil {
+		panic("not implemented")
+	}
+	return s.GetServerByIDFunc(ctx, id)
 }
 
 func (s *VolumeService) GetByID(ctx context.Context, id uint64) (*csi.Volume, error) {
