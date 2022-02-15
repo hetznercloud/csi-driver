@@ -52,7 +52,7 @@ spec:
         - name: HCLOUD_TOKEN
           valueFrom:
             secretKeyRef:
-              name: hcloud-csi
+              name: hcloud
               key: token
         volumeMounts:
         - name: socket-dir

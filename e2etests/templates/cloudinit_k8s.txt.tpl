@@ -55,7 +55,6 @@ runcmd:
 - until KUBECONFIG=/root/.kube/config kubectl get node; do sleep 2;done
 - KUBECONFIG=/root/.kube/config kubectl apply -f https://raw.githubusercontent.com/coreos/flannel/master/Documentation/kube-flannel.yml
 - KUBECONFIG=/root/.kube/config kubectl -n kube-system patch ds kube-flannel-ds --type json -p '[{"op":"add","path":"/spec/template/spec/tolerations/-","value":{"key":"node.cloudprovider.kubernetes.io/uninitialized","value":"true","effect":"NoSchedule"}}]'
-- KUBECONFIG=/root/.kube/config kubectl -n kube-system create secret generic hcloud-csi --from-literal=token={{.HcloudToken}}
 - KUBECONFIG=/root/.kube/config kubectl -n kube-system create secret generic hcloud --from-literal=token={{.HcloudToken}}
 - KUBECONFIG=/root/.kube/config kubectl apply -f  https://raw.githubusercontent.com/hetznercloud/hcloud-cloud-controller-manager/master/deploy/ccm.yaml
 - cd /root/ && curl  -s --location https://dl.k8s.io/v{{.K8sVersion}}/kubernetes-test-linux-amd64.tar.gz | tar --strip-components=3 -zxf - kubernetes/test/bin/e2e.test kubernetes/test/bin/ginkgo

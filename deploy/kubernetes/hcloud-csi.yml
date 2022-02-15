@@ -246,7 +246,7 @@ spec:
           valueFrom:
             secretKeyRef:
               key: token
-              name: hcloud-csi
+              name: hcloud
         image: hetznercloud/hcloud-csi-driver:latest
         imagePullPolicy: Always
         livenessProbe:
@@ -332,7 +332,7 @@ spec:
           valueFrom:
             secretKeyRef:
               key: token
-              name: hcloud-csi
+              name: hcloud
         - name: KUBE_NODE_NAME
           valueFrom:
             fieldRef:
