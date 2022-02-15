@@ -16,7 +16,7 @@ enabling you to use ReadWriteOnce Volumes within Kubernetes. Please note that th
    apiVersion: v1
    kind: Secret
    metadata:
-     name: hcloud-csi
+     name: hcloud
      namespace: kube-system
    stringData:
      token: YOURTOKEN
