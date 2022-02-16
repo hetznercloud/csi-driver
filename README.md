@@ -16,7 +16,7 @@ enabling you to use ReadWriteOnce Volumes within Kubernetes. Please note that th
    apiVersion: v1
    kind: Secret
    metadata:
-     name: hcloud
+     name: hcloud-csi
      namespace: kube-system
    stringData:
      token: YOURTOKEN
@@ -31,7 +31,7 @@ enabling you to use ReadWriteOnce Volumes within Kubernetes. Please note that th
 
     Have a look at our [Version Matrix](README.md#versioning-policy) to pick the correct deployment file.
    ```
-   kubectl apply -f https://raw.githubusercontent.com/hetznercloud/csi-driver/v1.5.1/deploy/kubernetes/hcloud-csi.yml
+   kubectl apply -f https://raw.githubusercontent.com/hetznercloud/csi-driver/v1.6.0/deploy/kubernetes/hcloud-csi.yml
    ```
 
 4. To verify everything is working, create a persistent volume claim and a pod
