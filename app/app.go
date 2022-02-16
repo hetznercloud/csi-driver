@@ -114,7 +114,10 @@ func CreateHcloudClient(metricsRegistry *prometheus.Registry, logger log.Logger)
 		hcloud.WithApplication("csi-driver", driver.PluginVersion),
 		hcloud.WithInstrumentation(metricsRegistry),
 	}
-
+	hcloudEndpoint := os.Getenv("HCLOUD_ENDPOINT")
+	if hcloudEndpoint != "" {
+		opts = append(opts, hcloud.WithEndpoint(hcloudEndpoint))
+	}
 	enableDebug := os.Getenv("HCLOUD_DEBUG")
 	if enableDebug != "" {
 		opts = append(opts, hcloud.WithDebugWriter(os.Stdout))
