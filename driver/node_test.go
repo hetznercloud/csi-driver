@@ -47,7 +47,7 @@ func newNodeServerTestEnv() nodeServiceTestEnv {
 func TestNodeServiceNodePublishVolume(t *testing.T) {
 	env := newNodeServerTestEnv()
 
-	env.volumeMountService.PublishFunc = func(targetPath string, devicePath string, opts volumes.MountOpts) error {
+	env.volumeMountService.PublishFunc = func(volumeID string, targetPath string, devicePath string, encryptionPassphrase string, opts volumes.MountOpts) error {
 		if targetPath != "target" {
 			t.Errorf("unexpected target path passed to volume service: %s", targetPath)
 		}
@@ -84,7 +84,7 @@ func TestNodeServiceNodePublishBlockVolume(t *testing.T) {
 	env := newNodeServerTestEnv()
 
 	env.volumeMountService.PublishFunc = func(
-		targetPath, devicePath string, opts volumes.MountOpts,
+		volumeID string, targetPath, devicePath string, encryptionPassphrase string, opts volumes.MountOpts,
 	) error {
 		if targetPath != "target" {
 			t.Errorf("unexpected target path: %s", targetPath)
@@ -117,7 +117,7 @@ func TestNodeServiceNodePublishBlockVolume(t *testing.T) {
 func TestNodeServiceNodePublishPublishError(t *testing.T) {
 	env := newNodeServerTestEnv()
 
-	env.volumeMountService.PublishFunc = func(targetPath string, devicePath string, opts volumes.MountOpts) error {
+	env.volumeMountService.PublishFunc = func(volumeID string, targetPath string, devicePath string, encryptionPassphrase string, opts volumes.MountOpts) error {
 		return io.EOF
 	}
 
@@ -213,7 +213,7 @@ func TestNodeServiceNodePublishVolumeInputErrors(t *testing.T) {
 func TestNodeServiceNodeUnpublishVolume(t *testing.T) {
 	env := newNodeServerTestEnv()
 
-	env.volumeMountService.UnpublishFunc = func(targetPath string) error {
+	env.volumeMountService.UnpublishFunc = func(volumeID string, targetPath string) error {
 		if targetPath != "target" {
 			t.Errorf("unexpected target path passed to volume service: %s", targetPath)
 		}
@@ -232,7 +232,7 @@ func TestNodeServiceNodeUnpublishVolume(t *testing.T) {
 func TestNodeServiceNodeUnpublishUnpublishError(t *testing.T) {
 	env := newNodeServerTestEnv()
 
-	env.volumeMountService.UnpublishFunc = func(targetPath string) error {
+	env.volumeMountService.UnpublishFunc = func(volumeID string, targetPath string) error {
 		return io.EOF
 	}
 
@@ -333,7 +333,7 @@ func TestNodeServiceNodeExpandVolume(t *testing.T) {
 		}
 		return true, nil
 	}
-	env.volumeResizeService.ResizeFunc = func(volumePath string) error {
+	env.volumeResizeService.ResizeFunc = func(volumeID string, volumePath string) error {
 		if volumePath != "volumePath" {
 			t.Errorf("unexpected volume path passed to volume service: %s", volumePath)
 		}
@@ -358,7 +358,7 @@ func TestNodeServiceNodeExpandBlockVolume(t *testing.T) {
 		}
 		return true, nil
 	}
-	env.volumeResizeService.ResizeFunc = func(volumePath string) error {
+	env.volumeResizeService.ResizeFunc = func(volumeID string, volumePath string) error {
 		t.Errorf("This function should never be called.")
 		return nil
 	}

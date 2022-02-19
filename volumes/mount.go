@@ -23,15 +23,16 @@ type MountOpts struct {
 
 // MountService mounts volumes.
 type MountService interface {
-	Publish(targetPath string, devicePath string, opts MountOpts) error
-	Unpublish(targetPath string) error
+	Publish(tvolumeID string, argetPath string, devicePath string, encryptionPassphrase string, opts MountOpts) error
+	Unpublish(volumeID string, targetPath string) error
 	PathExists(path string) (bool, error)
 }
 
 // LinuxMountService mounts volumes on a Linux system.
 type LinuxMountService struct {
-	logger  log.Logger
-	mounter *mount.SafeFormatAndMount
+	logger     log.Logger
+	mounter    *mount.SafeFormatAndMount
+	cryptSetup *CryptSetup
 }
 
 func NewLinuxMountService(logger log.Logger) *LinuxMountService {
@@ -41,10 +42,13 @@ func NewLinuxMountService(logger log.Logger) *LinuxMountService {
 			Interface: mount.New(""),
 			Exec:      exec.New(),
 		},
+		cryptSetup: &CryptSetup{
+			logger: logger,
+		},
 	}
 }
 
-func (s *LinuxMountService) Publish(targetPath string, devicePath string, opts MountOpts) error {
+func (s *LinuxMountService) Publish(volumeID string, targetPath string, devicePath string, encryptionPassphrase string, opts MountOpts) error {
 	isNotMountPoint, err := mount.IsNotMountPoint(s.mounter, targetPath)
 	if err != nil {
 		if os.IsNotExist(err) {
@@ -86,8 +90,9 @@ func (s *LinuxMountService) Publish(targetPath string, devicePath string, opts M
 	}
 	mountOptions = append(mountOptions, opts.Additional...)
 
-	level.Debug(s.logger).Log(
+	level.Info(s.logger).Log(
 		"msg", "publishing volume",
+		"volume-id", volumeID,
 		"target-path", targetPath,
 		"device-path", devicePath,
 		"fs-type", opts.FSType,
@@ -96,19 +101,44 @@ func (s *LinuxMountService) Publish(targetPath string, devicePath string, opts M
 		"mount-options", strings.Join(mountOptions, ", "),
 	)
 
-	if err := s.mounter.Mount(devicePath, targetPath, opts.FSType, mountOptions); err != nil {
+	if encryptionPassphrase != "" {
+		luksDeviceName := "volume-" + volumeID
+		if !opts.Readonly {
+			if err = s.cryptSetup.FormatSafe(devicePath, encryptionPassphrase); err != nil {
+				return err
+			}
+		}
+		if err := s.cryptSetup.Open(devicePath, luksDeviceName, encryptionPassphrase); err != nil {
+			return err
+		}
+		luksDevicePath := GenerateLUKSDevicePath(luksDeviceName)
+		devicePath = luksDevicePath
+	}
+
+	if err := s.mounter.FormatAndMount(devicePath, targetPath, opts.FSType, mountOptions); err != nil {
 		return err
 	}
 
 	return nil
 }
 
-func (s *LinuxMountService) Unpublish(targetPath string) error {
-	level.Debug(s.logger).Log(
+func (s *LinuxMountService) Unpublish(volumeID string, targetPath string) error {
+	level.Info(s.logger).Log(
 		"msg", "unpublishing volume",
+		"volume-id", volumeID,
 		"target-path", targetPath,
 	)
-	return mount.CleanupMountPoint(targetPath, s.mounter, true)
+
+	if err := mount.CleanupMountPoint(targetPath, s.mounter, true); err != nil {
+		return err
+	}
+
+	luksDeviceName := "volume-" + volumeID
+	if err := s.cryptSetup.Close(luksDeviceName); err != nil {
+		return err
+	}
+
+	return nil
 }
 
 func (s *LinuxMountService) PathExists(path string) (bool, error) {

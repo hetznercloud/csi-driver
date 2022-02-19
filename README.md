@@ -74,6 +74,32 @@ enabling you to use ReadWriteOnce Volumes within Kubernetes. Please note that th
    kubectl exec -it my-csi-app -- /bin/sh
    ```
 
+5. To add encryption with LUKS you have to create a dedicate secret containing an encryption passphrase and duplicate the default `hcloud-volumes` storage class with added parameters referencing this secret:
+
+   ```
+   apiVersion: v1
+   kind: Secret
+   metadata:
+     name: encryption-secret
+     namespace: kube-system
+   stringData:
+     encryption-passphrase: foobar
+
+   --- 
+
+   apiVersion: storage.k8s.io/v1
+   kind: StorageClass
+   metadata:
+     name: hcloud-volumes-encrypted
+   provisioner: csi.hetzner.cloud
+   reclaimPolicy: Delete
+   volumeBindingMode: WaitForFirstConsumer
+   allowVolumeExpansion: true
+   parameters:
+     csi.storage.k8s.io/node-publish-secret-name: encryption
+     csi.storage.k8s.io/node-publish-secret-namespace: default
+   ```
+
 ## Integration with Root Servers
 
 Root servers can be part of the cluster, but the CSI plugin doesn't work there. Taint the root server as follows to skip that node for the daemonset.
