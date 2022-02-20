@@ -123,6 +123,16 @@ related only to an unsupported version.
 | 1.21       | 1.6.0, master | https://raw.githubusercontent.com/hetznercloud/csi-driver/v1.6.0/deploy/kubernetes/hcloud-csi.yml  |
 | 1.20       | 1.6.0, master | https://raw.githubusercontent.com/hetznercloud/csi-driver/v1.6.0/deploy/kubernetes/hcloud-csi.yml  |
 
+## Integration Tests
+
+**Requirements: Docker**
+
+The core operations like publishing and resizing can be tested locally with Docker.
+
+```bash
+go test $(go list ./... | grep integrationtests) -v
+```
+
 ## E2E Tests
 
 The Hetzner Cloud CSI Driver was tested against the official k8s e2e

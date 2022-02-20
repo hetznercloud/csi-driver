@@ -15,6 +15,10 @@ type CryptSetup struct {
 	logger log.Logger
 }
 
+func NewCryptSetup(logger log.Logger) *CryptSetup {
+	return &CryptSetup{logger: logger}
+}
+
 func (cs *CryptSetup) IsFormatted(devicePath string) (bool, error) {
 	output, code, err := command(cryptsetupExecuable, "isLuks", devicePath)
 	if err != nil {

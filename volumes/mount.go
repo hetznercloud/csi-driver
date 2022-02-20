@@ -42,9 +42,7 @@ func NewLinuxMountService(logger log.Logger) *LinuxMountService {
 			Interface: mount.New(""),
 			Exec:      exec.New(),
 		},
-		cryptSetup: &CryptSetup{
-			logger: logger,
-		},
+		cryptSetup: NewCryptSetup(logger),
 	}
 }
 

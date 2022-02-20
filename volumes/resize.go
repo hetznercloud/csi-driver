@@ -29,9 +29,7 @@ func NewLinuxResizeService(logger log.Logger) *LinuxResizeService {
 			Interface: mount.New(""),
 			Exec:      exec.New(),
 		}.Exec),
-		cryptSetup: &CryptSetup{
-			logger: logger,
-		},
+		cryptSetup: NewCryptSetup(logger),
 	}
 }
 
