@@ -58,25 +58,27 @@ func (s *NodeService) NodePublishVolume(ctx context.Context, req *proto.NodePubl
 	}
 
 	devicePath := req.GetPublishContext()["devicePath"]
-	volumeID := req.GetVolumeId()
-	encryptionPassphrase := req.Secrets[encryptionPassphraseKey]
 
 	var opts volumes.MountOpts
 	switch {
 	case req.VolumeCapability.GetBlock() != nil:
-		opts = volumes.MountOpts{BlockVolume: true}
+		opts = volumes.MountOpts{
+			BlockVolume:          true,
+			EncryptionPassphrase: req.Secrets[encryptionPassphraseKey],
+		}
 	case req.VolumeCapability.GetMount() != nil:
 		mount := req.VolumeCapability.GetMount()
 		opts = volumes.MountOpts{
-			FSType:     mount.FsType,
-			Readonly:   req.Readonly,
-			Additional: mount.MountFlags,
+			FSType:               mount.FsType,
+			Readonly:             req.Readonly,
+			Additional:           mount.MountFlags,
+			EncryptionPassphrase: req.Secrets[encryptionPassphraseKey],
 		}
 	default:
 		return nil, status.Error(codes.InvalidArgument, "publish volume: unsupported volume capability")
 	}
 
-	if err := s.volumeMountService.Publish(volumeID, req.TargetPath, devicePath, encryptionPassphrase, opts); err != nil {
+	if err := s.volumeMountService.Publish(req.TargetPath, devicePath, opts); err != nil {
 		return nil, status.Error(codes.Internal, fmt.Sprintf("failed to publish volume: %s", err))
 	}
 	return &proto.NodePublishVolumeResponse{}, nil
@@ -90,9 +92,7 @@ func (s *NodeService) NodeUnpublishVolume(ctx context.Context, req *proto.NodeUn
 		return nil, status.Error(codes.InvalidArgument, "missing target path")
 	}
 
-	volumeID := req.GetVolumeId()
-
-	if err := s.volumeMountService.Unpublish(volumeID, req.TargetPath); err != nil {
+	if err := s.volumeMountService.Unpublish(req.TargetPath); err != nil {
 		return nil, status.Error(codes.Internal, fmt.Sprintf("failed to unpublish volume: %s", err))
 	}
 
@@ -184,10 +184,8 @@ func (s *NodeService) NodeExpandVolume(ctx context.Context, req *proto.NodeExpan
 		return nil, status.Error(codes.InvalidArgument, "missing volume path")
 	}
 
-	volumeID := req.GetVolumeId()
-
 	if req.VolumeCapability.GetBlock() == nil {
-		if err := s.volumeResizeService.Resize(volumeID, req.VolumePath); err != nil {
+		if err := s.volumeResizeService.Resize(req.VolumePath); err != nil {
 			return nil, status.Error(codes.Internal, fmt.Sprintf("failed to resize volume: %s", err))
 		}
 	}

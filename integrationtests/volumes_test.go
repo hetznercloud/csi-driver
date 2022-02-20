@@ -32,16 +32,17 @@ func TestVolumePublishUnpublish(t *testing.T) {
 			if err != nil {
 				t.Fatal(err)
 			}
-			volumeID := "123"
 			targetPath, err := ioutil.TempDir(os.TempDir(), "")
 			if err != nil {
 				t.Fatal()
 			}
 
-			if err := mountService.Publish(volumeID, targetPath, device, test.passphrase, volumes.MountOpts{}); err != nil {
+			if err := mountService.Publish(targetPath, device, volumes.MountOpts{
+				EncryptionPassphrase: test.passphrase,
+			}); err != nil {
 				t.Fatal(err)
 			}
-			defer mountService.Unpublish(volumeID, targetPath)
+			defer mountService.Unpublish(targetPath)
 
 			if files, err := ioutil.ReadDir(targetPath); err != nil {
 				t.Fatal(err)
@@ -51,7 +52,7 @@ func TestVolumePublishUnpublish(t *testing.T) {
 				}
 			}
 
-			if err := mountService.Unpublish(volumeID, targetPath); err != nil {
+			if err := mountService.Unpublish(targetPath); err != nil {
 				t.Fatal(err)
 			}
 		})
@@ -88,7 +89,6 @@ func TestVolumeResize(t *testing.T) {
 			if err != nil {
 				t.Fatal(err)
 			}
-			volumeID := "123"
 			targetPath, err := ioutil.TempDir(os.TempDir(), "")
 			if err != nil {
 				t.Fatal()
@@ -120,10 +120,12 @@ func TestVolumeResize(t *testing.T) {
 				t.Fatal()
 			}
 
-			if err := mountService.Publish(volumeID, targetPath, device, test.passphrase, volumes.MountOpts{}); err != nil {
+			if err := mountService.Publish(targetPath, device, volumes.MountOpts{
+				EncryptionPassphrase: test.passphrase,
+			}); err != nil {
 				t.Fatal(err)
 			}
-			defer mountService.Unpublish(volumeID, targetPath)
+			defer mountService.Unpublish(targetPath)
 
 			if size, err := getFakeDeviceSizeKilobytes(targetPath); err != nil {
 				t.Fatal(t)
@@ -131,7 +133,7 @@ func TestVolumeResize(t *testing.T) {
 				t.Error(fmt.Errorf("expected initial size of %d KB, got %d KB", test.initialSize, size))
 			}
 
-			if err := resizeService.Resize(volumeID, targetPath); err != nil {
+			if err := resizeService.Resize(targetPath); err != nil {
 				t.Fatal(err)
 			}
 
@@ -141,7 +143,7 @@ func TestVolumeResize(t *testing.T) {
 				t.Fatal(fmt.Errorf("expected final size of %d KB, got %d KB", test.finalSize, size))
 			}
 
-			if err := mountService.Unpublish(volumeID, targetPath); err != nil {
+			if err := mountService.Unpublish(targetPath); err != nil {
 				t.Fatal(err)
 			}
 		})

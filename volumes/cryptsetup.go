@@ -120,6 +120,11 @@ func (cs *CryptSetup) Resize(luksDeviceName string) error {
 	return nil
 }
 
+func GenerateLUKSDeviceName(devicePath string) string {
+	segments := strings.Split(devicePath, "/")
+	return segments[len(segments)-1]
+}
+
 func GenerateLUKSDevicePath(luksDeviceName string) string {
 	return "/dev/mapper/" + luksDeviceName
 }

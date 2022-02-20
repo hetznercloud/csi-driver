@@ -177,11 +177,11 @@ func (s *sanityVolumeService) Detach(ctx context.Context, volume *csi.Volume, se
 
 type sanityMountService struct{}
 
-func (s *sanityMountService) Publish(volumeID string, targetPath string, devicePath string, encryptionPassphrase string, opts volumes.MountOpts) error {
+func (s *sanityMountService) Publish(targetPath string, devicePath string, opts volumes.MountOpts) error {
 	return nil
 }
 
-func (s *sanityMountService) Unpublish(volumeID string, targetPath string) error {
+func (s *sanityMountService) Unpublish(targetPath string) error {
 	return nil
 }
 
@@ -194,7 +194,7 @@ func (s *sanityMountService) PathExists(path string) (bool, error) {
 
 type sanityResizeService struct{}
 
-func (s *sanityResizeService) Resize(volumeID string, volumePath string) error {
+func (s *sanityResizeService) Resize(volumePath string) error {
 	return nil
 }
 

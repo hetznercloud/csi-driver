@@ -12,7 +12,7 @@ import (
 
 // ResizeService resizes volumes.
 type ResizeService interface {
-	Resize(volumeID string, targetPath string) error
+	Resize(volumePath string) error
 }
 
 // LinuxResizeService resizes volumes on a Linux system.
@@ -33,7 +33,7 @@ func NewLinuxResizeService(logger log.Logger) *LinuxResizeService {
 	}
 }
 
-func (l *LinuxResizeService) Resize(volumeID string, volumePath string) error {
+func (l *LinuxResizeService) Resize(volumePath string) error {
 	devicePath, _, err := mount.GetDeviceNameFromMount(mount.New(""), volumePath)
 	if err != nil {
 		return errors.New(fmt.Sprintf("failed to determine mount path for %s: %s", volumePath, err))
@@ -41,12 +41,11 @@ func (l *LinuxResizeService) Resize(volumeID string, volumePath string) error {
 
 	level.Info(l.logger).Log(
 		"msg", "resizing volume",
-		"volume-id", volumeID,
 		"volume-path", volumePath,
 		"device-path", devicePath,
 	)
 
-	luksDeviceName := "volume-" + volumeID
+	luksDeviceName := GenerateLUKSDeviceName(devicePath)
 	active, err := l.cryptSetup.IsActive(luksDeviceName)
 	if err != nil {
 		return err
