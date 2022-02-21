@@ -112,7 +112,7 @@ func TestVolumeResize(t *testing.T) {
 					t.Fatal(err)
 				}
 				if err := cryptSetup.Close(decryptedName); err != nil {
-					t.Fatal(t)
+					t.Fatal(err)
 				}
 			}
 
@@ -128,7 +128,7 @@ func TestVolumeResize(t *testing.T) {
 			defer mountService.Unpublish(targetPath)
 
 			if size, err := getFakeDeviceSizeKilobytes(targetPath); err != nil {
-				t.Fatal(t)
+				t.Fatal(err)
 			} else if size != test.initialSize {
 				t.Error(fmt.Errorf("expected initial size of %d KB, got %d KB", test.initialSize, size))
 			}
@@ -138,7 +138,7 @@ func TestVolumeResize(t *testing.T) {
 			}
 
 			if size, err := getFakeDeviceSizeKilobytes(targetPath); err != nil {
-				t.Fatal(t)
+				t.Fatal(err)
 			} else if size != test.finalSize {
 				t.Fatal(fmt.Errorf("expected final size of %d KB, got %d KB", test.finalSize, size))
 			}
