@@ -5,6 +5,7 @@ import (
 	"fmt"
 	"os"
 	"path/filepath"
+	"regexp"
 	"strings"
 
 	"github.com/go-kit/kit/log"
@@ -29,6 +30,8 @@ type MountService interface {
 	Publish(targetPath string, devicePath string, opts MountOpts) error
 	Unpublish(targetPath string) error
 	PathExists(path string) (bool, error)
+	FormatDisk(disk string, fstype string) error
+	DetectDiskFormat(disk string) (string, error)
 }
 
 // LinuxMountService mounts volumes on a Linux system.
@@ -99,14 +102,24 @@ func (s *LinuxMountService) Publish(targetPath string, devicePath string, opts M
 		"block-volume", opts.BlockVolume,
 		"readonly", opts.Readonly,
 		"mount-options", strings.Join(mountOptions, ", "),
+		"encrypted", opts.EncryptionPassphrase != "",
 	)
 
 	if opts.EncryptionPassphrase != "" {
+		existingFSType, err := s.DetectDiskFormat(devicePath)
+		if err != nil {
+			return fmt.Errorf("unable to detect existing disk format of %s: %w", devicePath, err)
+		}
 		luksDeviceName := GenerateLUKSDeviceName(devicePath)
-		if !opts.Readonly {
-			if err = s.cryptSetup.FormatSafe(devicePath, opts.EncryptionPassphrase); err != nil {
+		if existingFSType == "" {
+			if opts.Readonly {
+				return fmt.Errorf("cannot publish unformatted disk %s in read-only mode", devicePath)
+			}
+			if err = s.cryptSetup.Format(devicePath, opts.EncryptionPassphrase); err != nil {
 				return err
 			}
+		} else if existingFSType != "crypto_LUKS" {
+			return fmt.Errorf("requested encrypted volume, but disk %s already is formatted with %s", devicePath, existingFSType)
 		}
 		if err := s.cryptSetup.Open(devicePath, luksDeviceName, opts.EncryptionPassphrase); err != nil {
 			return err
@@ -115,7 +128,22 @@ func (s *LinuxMountService) Publish(targetPath string, devicePath string, opts M
 		devicePath = luksDevicePath
 	}
 
-	if err := s.mounter.FormatAndMount(devicePath, targetPath, opts.FSType, mountOptions); err != nil {
+	existingFSType, err := s.DetectDiskFormat(devicePath)
+	if err != nil {
+		return fmt.Errorf("unable to detect existing disk format of %s: %w", devicePath, err)
+	}
+	if existingFSType == "" {
+		if opts.Readonly {
+			return fmt.Errorf("cannot publish unformatted disk %s in read-only mode", devicePath)
+		}
+		if err = s.FormatDisk(devicePath, opts.FSType); err != nil {
+			return err
+		}
+	} else if existingFSType != opts.FSType {
+		return fmt.Errorf("requested %s volume, but disk %s already is formatted with %s", opts.FSType, devicePath, existingFSType)
+	}
+
+	if err := s.mounter.Mount(devicePath, targetPath, opts.FSType, mountOptions); err != nil {
 		return err
 	}
 
@@ -159,4 +187,53 @@ func (s *LinuxMountService) PathExists(path string) (bool, error) {
 		return false, nil
 	}
 	return false, err
+}
+
+func (s *LinuxMountService) FormatDisk(disk string, fstype string) error {
+	level.Info(s.logger).Log(
+		"msg", "formatting disk",
+		"disk", disk,
+		"fstype", fstype,
+	)
+	switch fstype {
+	case "ext4":
+		_, _, err := command("mkfs.ext4", "-F", "-m0", disk)
+		return err
+	case "xfs":
+		_, _, err := command("mkfs.xfs", disk)
+		return err
+	default:
+		return fmt.Errorf("unsupported disk format %s", fstype)
+	}
+}
+
+// see https://github.com/kubernetes/mount-utils/blob/master/mount_linux.go
+func (s *LinuxMountService) DetectDiskFormat(disk string) (string, error) {
+	args := []string{"-p", "-s", "TYPE", "-s", "PTTYPE", "-o", "export", disk}
+	output, exitCode, err := command("blkid", args...)
+	if exitCode == 2 {
+		return "", nil
+	}
+	if err != nil {
+		return "", err
+	}
+
+	fstypeRegex := regexp.MustCompile(`TYPE=(.*)`)
+	pttypeRegex := regexp.MustCompile(`PTTYPE=(.*)`)
+	fstype := ""
+	pttype := ""
+	fstypeMatch := fstypeRegex.FindStringSubmatch(output)
+	if fstypeMatch != nil {
+		fstype = fstypeMatch[1]
+	}
+	pttypeMatch := pttypeRegex.FindStringSubmatch(output)
+	if pttypeMatch != nil {
+		pttype = pttypeMatch[1]
+	}
+
+	if pttype != "" {
+		return "", fmt.Errorf("disk %s propably contains partitions", disk)
+	}
+
+	return fstype, nil
 }

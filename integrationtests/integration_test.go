@@ -96,6 +96,8 @@ func NewTestingWriter(t *testing.T) TestingWriter {
 }
 
 func (w TestingWriter) Write(p []byte) (n int, err error) {
-	w.t.Log(string(p))
+	if os.Getenv("TEST_DEBUG_MODE") != "" {
+		w.t.Log(string(p))
+	}
 	return len(p), nil
 }

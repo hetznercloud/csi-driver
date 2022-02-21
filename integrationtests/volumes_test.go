@@ -17,21 +17,96 @@ func TestVolumePublishUnpublish(t *testing.T) {
 	}
 
 	tests := []struct {
-		name       string
-		passphrase string
+		name          string
+		passphrase    string
+		prepare       func(svc volumes.MountService, cs *volumes.CryptSetup, device string) error
+		expectedError error
 	}{
-		{"plain", ""},
-		{"encrypted", "passphrase"},
+		{
+			"plain",
+			"",
+			nil,
+			nil,
+		},
+		{
+			"plain-correct-formatted",
+			"",
+			func(svc volumes.MountService, cs *volumes.CryptSetup, device string) error {
+				return svc.FormatDisk(device, "ext4")
+			},
+			nil,
+		},
+		{
+			"plain-wrong-formatted",
+			"",
+			func(svc volumes.MountService, cs *volumes.CryptSetup, device string) error {
+				return svc.FormatDisk(device, "xfs")
+			},
+			fmt.Errorf("requested ext4 volume, but disk /dev-fake-plain-wrong-formatted already is formatted with xfs"),
+		},
+		{
+			"encrypted",
+			"passphrase",
+			nil,
+			nil,
+		},
+		{
+			"encrypted-correct-formatted-1",
+			"passphrase",
+			func(svc volumes.MountService, cs *volumes.CryptSetup, device string) error {
+				if err := cs.Format(device, "passphrase"); err != nil {
+					return err
+				}
+				return nil
+			},
+			nil,
+		},
+		{
+			"encrypted-correct-formatted-2",
+			"passphrase",
+			func(svc volumes.MountService, cs *volumes.CryptSetup, device string) error {
+				if err := cs.Format(device, "passphrase"); err != nil {
+					return err
+				}
+				luksDeviceName := volumes.GenerateLUKSDeviceName(device)
+				if err := cs.Open(device, luksDeviceName, "passphrase"); err != nil {
+					return err
+				}
+				defer cs.Close(luksDeviceName)
+				luksDevicePath := volumes.GenerateLUKSDevicePath(luksDeviceName)
+				if err := svc.FormatDisk(luksDevicePath, "ext4"); err != nil {
+					return err
+				}
+				return nil
+			},
+			nil,
+		},
+		{
+			"encrypted-wrong-formatted-1",
+			"passphrase",
+			func(svc volumes.MountService, cs *volumes.CryptSetup, device string) error {
+				return svc.FormatDisk(device, "ext4")
+			},
+			fmt.Errorf("requested encrypted volume, but disk /dev-fake-encrypted-wrong-formatted-1 already is formatted with ext4"),
+		},
 	}
 
 	for _, test := range tests {
 		t.Run(test.name, func(t *testing.T) {
 			logger := log.NewLogfmtLogger(NewTestingWriter(t))
 			mountService := volumes.NewLinuxMountService(logger)
+			cryptSetup := volumes.NewCryptSetup(logger)
 			device, err := createFakeDevice("fake-"+test.name, 32)
 			if err != nil {
 				t.Fatal(err)
 			}
+
+			if test.prepare != nil {
+				if err := test.prepare(mountService, cryptSetup, device); err != nil {
+					t.Fatal(err)
+				}
+			}
+
 			targetPath, err := ioutil.TempDir(os.TempDir(), "")
 			if err != nil {
 				t.Fatal()
@@ -40,16 +115,16 @@ func TestVolumePublishUnpublish(t *testing.T) {
 			if err := mountService.Publish(targetPath, device, volumes.MountOpts{
 				EncryptionPassphrase: test.passphrase,
 			}); err != nil {
-				t.Fatal(err)
+				if test.expectedError == nil {
+					t.Fatal(err)
+				} else if test.expectedError.Error() != err.Error() {
+					t.Fatal(fmt.Errorf("expected error %q but got %q", test.expectedError.Error(), err.Error()))
+				}
 			}
 			defer mountService.Unpublish(targetPath)
 
-			if files, err := ioutil.ReadDir(targetPath); err != nil {
+			if _, err := ioutil.ReadDir(targetPath); err != nil {
 				t.Fatal(err)
-			} else {
-				if len(files) != 1 || !files[0].IsDir() || files[0].Name() != "lost+found" {
-					t.Fatal("expected an fresh ext4 formatted disk with only lost+found directory")
-				}
 			}
 
 			if err := mountService.Unpublish(targetPath); err != nil {
@@ -148,4 +223,70 @@ func TestVolumeResize(t *testing.T) {
 			}
 		})
 	}
+}
+
+func TestDetectDiskFormat(t *testing.T) {
+	if !runTestInDockerImage(t, true) {
+		return
+	}
+
+	tests := []*struct {
+		name           string
+		prepare        func(*volumes.LinuxMountService, string) error
+		expectedFormat string
+	}{
+		{
+			"empty",
+			nil,
+			"",
+		},
+		{
+			"ext4",
+			func(svc *volumes.LinuxMountService, disk string) error {
+				return svc.FormatDisk(disk, "ext4")
+			},
+			"ext4",
+		},
+		{
+			"xfs",
+			func(svc *volumes.LinuxMountService, disk string) error {
+				return svc.FormatDisk(disk, "xfs")
+			},
+			"xfs",
+		},
+		{
+			"crypto_LUKS",
+			func(svc *volumes.LinuxMountService, disk string) error {
+				logger := log.NewLogfmtLogger(NewTestingWriter(t))
+				cryptSetup := volumes.NewCryptSetup(logger)
+				err := cryptSetup.Format(disk, "passphrase")
+				return err
+			},
+			"crypto_LUKS",
+		},
+	}
+
+	for _, test := range tests {
+		t.Run(test.name, func(t *testing.T) {
+			logger := log.NewLogfmtLogger(NewTestingWriter(t))
+			mountService := volumes.NewLinuxMountService(logger)
+			disk, err := createFakeDevice(test.name, 32)
+			if err != nil {
+				t.Fatal(err)
+			}
+			if test.prepare != nil {
+				if err := test.prepare(mountService, disk); err != nil {
+					t.Fatal(err)
+				}
+			}
+			format, err := mountService.DetectDiskFormat(disk)
+			if err != nil {
+				t.Fatal(err)
+			}
+			if format != test.expectedFormat {
+				t.Error(fmt.Errorf("expected format %q, got %q", test.expectedFormat, format))
+			}
+		})
+	}
+
 }

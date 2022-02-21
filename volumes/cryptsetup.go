@@ -19,17 +19,6 @@ func NewCryptSetup(logger log.Logger) *CryptSetup {
 	return &CryptSetup{logger: logger}
 }
 
-func (cs *CryptSetup) IsFormatted(devicePath string) (bool, error) {
-	output, code, err := command(cryptsetupExecuable, "isLuks", devicePath)
-	if err != nil {
-		if code == 1 {
-			return false, nil
-		}
-		return false, fmt.Errorf("unable to check LUKS device %s formatting status: %s", devicePath, output)
-	}
-	return true, nil
-}
-
 func (cs *CryptSetup) IsActive(luksDeviceName string) (bool, error) {
 	output, code, err := command(cryptsetupExecuable, "status", luksDeviceName)
 	if err != nil {
@@ -39,22 +28,6 @@ func (cs *CryptSetup) IsActive(luksDeviceName string) (bool, error) {
 		return false, fmt.Errorf("unable to check LUKS device %s activity: %s", luksDeviceName, output)
 	}
 	return true, nil
-}
-
-func (cs *CryptSetup) FormatSafe(devicePath string, passphrase string) error {
-	isFormatted, err := cs.IsFormatted(devicePath)
-	if err != nil {
-		return err
-	}
-	if isFormatted {
-		return nil
-	}
-
-	if err := cs.Format(devicePath, passphrase); err != nil {
-		return err
-	}
-
-	return nil
 }
 
 func (cs *CryptSetup) Format(devicePath string, passphrase string) error {
@@ -145,7 +118,7 @@ func commandWithStdin(stdin string, name string, args ...string) (string, int, e
 		if !ok {
 			return output, 0, err
 		}
-		return output, exitError.ExitCode(), exitError
+		return output, exitError.ExitCode(), fmt.Errorf("%w\n%s", exitError, output)
 	}
 	return output, 0, nil
 }

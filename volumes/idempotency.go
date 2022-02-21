@@ -29,7 +29,6 @@ func (s *IdempotentService) Create(ctx context.Context, opts CreateOpts) (*csi.V
 		"min-size", opts.MinSize,
 		"max-size", opts.MaxSize,
 		"location", opts.Location,
-		"format", opts.Format,
 	)
 
 	volume, err := s.volumeService.Create(ctx, opts)

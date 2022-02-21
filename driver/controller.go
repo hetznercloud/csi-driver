@@ -48,14 +48,9 @@ func (s *ControllerService) CreateVolume(ctx context.Context, req *proto.CreateV
 	}
 
 	// Check if ALL volume capabilities are supported.
-	var fsType *string
 	for i, cap := range req.VolumeCapabilities {
 		if !isCapabilitySupported(cap) {
 			return nil, status.Error(codes.InvalidArgument, fmt.Sprintf("capability at index %d is not supported", i))
-		}
-		// If this volume is destined to have a filesystem on it, we can pass that information along to hcloud API.
-		if mount := cap.GetMount(); mount != nil {
-			fsType = &mount.FsType
 		}
 	}
 
@@ -73,7 +68,6 @@ func (s *ControllerService) CreateVolume(ctx context.Context, req *proto.CreateV
 		MinSize:  minSize,
 		MaxSize:  maxSize,
 		Location: location,
-		Format:   fsType,
 	})
 	if err != nil {
 		level.Error(s.logger).Log(
