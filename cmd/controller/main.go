@@ -30,14 +30,21 @@ func main() {
 	}
 
 	metadataClient := metadata.NewClient(metadata.WithInstrumentation(m.Registry()))
+	var location string
 
-	server, err := app.GetServer(logger, hcloudClient, metadataClient)
-	if err != nil {
-		level.Error(logger).Log(
-			"msg", "failed to fetch server",
-			"err", err,
-		)
-		os.Exit(1)
+	if s := os.Getenv("HCLOUD_SERVER_OVERRIDE_LOCATION_NAME"); s != "" {
+		location = s
+	} else {
+		server, err := app.GetServer(logger, hcloudClient, metadataClient)
+		if err != nil {
+			level.Error(logger).Log(
+				"msg", "failed to fetch server",
+				"err", err,
+			)
+			os.Exit(1)
+		}
+
+		location = server.Datacenter.Location.Name
 	}
 
 	volumeService := volumes.NewIdempotentService(
@@ -50,7 +57,7 @@ func main() {
 	controllerService := driver.NewControllerService(
 		log.With(logger, "component", "driver-controller-service"),
 		volumeService,
-		server.Datacenter.Location.Name,
+		location,
 	)
 	identityService := driver.NewIdentityService(
 		log.With(logger, "component", "driver-identity-service"),
