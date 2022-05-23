@@ -24,6 +24,23 @@ func NewVolumeService(logger log.Logger, client *hcloud.Client) *VolumeService {
 	}
 }
 
+func (s *VolumeService) All(ctx context.Context) ([]*csi.Volume, error) {
+	hcloudVolumes, err := s.client.Volume.All(ctx)
+	if err != nil {
+		level.Info(s.logger).Log(
+			"msg", "failed to get volumes",
+			"err", err,
+		)
+		return nil, err
+	}
+
+	volumes := make([]*csi.Volume, 0, len(hcloudVolumes))
+	for i, hcloudVolume := range hcloudVolumes {
+		volumes[i] = toDomainVolume(hcloudVolume)
+	}
+	return volumes, nil
+}
+
 func (s *VolumeService) Create(ctx context.Context, opts volumes.CreateOpts) (*csi.Volume, error) {
 	level.Info(s.logger).Log(
 		"msg", "creating volume",

@@ -96,6 +96,10 @@ func (s *IdempotentService) Create(ctx context.Context, opts CreateOpts) (*csi.V
 	return nil, err
 }
 
+func (s *IdempotentService) All(ctx context.Context) ([]*csi.Volume, error) {
+	return s.volumeService.All(ctx)
+}
+
 func (s *IdempotentService) GetByID(ctx context.Context, id uint64) (*csi.Volume, error) {
 	return s.volumeService.GetByID(ctx, id)
 }

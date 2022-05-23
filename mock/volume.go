@@ -12,12 +12,20 @@ import (
 type VolumeService struct {
 	CreateFunc        func(ctx context.Context, opts volumes.CreateOpts) (*csi.Volume, error)
 	GetServerByIDFunc func(ctx context.Context, id int) (*hcloud.Server, error)
+	AllFunc           func(ctx context.Context) ([]*csi.Volume, error)
 	GetByIDFunc       func(ctx context.Context, id uint64) (*csi.Volume, error)
 	GetByNameFunc     func(ctx context.Context, name string) (*csi.Volume, error)
 	DeleteFunc        func(ctx context.Context, volume *csi.Volume) error
 	AttachFunc        func(ctx context.Context, volume *csi.Volume, server *csi.Server) error
 	DetachFunc        func(ctx context.Context, volume *csi.Volume, server *csi.Server) error
 	ResizeFunc        func(ctx context.Context, volume *csi.Volume, size int) error
+}
+
+func (s *VolumeService) All(ctx context.Context) ([]*csi.Volume, error) {
+	if s.AllFunc == nil {
+		panic("not implemented")
+	}
+	return s.AllFunc(ctx)
 }
 
 func (s *VolumeService) Create(ctx context.Context, opts volumes.CreateOpts) (*csi.Volume, error) {
