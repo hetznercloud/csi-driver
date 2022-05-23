@@ -25,6 +25,7 @@ type Service interface {
 	Attach(ctx context.Context, volume *csi.Volume, server *csi.Server) error
 	Detach(ctx context.Context, volume *csi.Volume, server *csi.Server) error
 	Resize(ctx context.Context, volume *csi.Volume, size int) error
+	All(ctx context.Context) ([]*csi.Volume, error)
 }
 
 // CreateOpts specifies the options for creating a volume.

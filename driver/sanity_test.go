@@ -86,6 +86,19 @@ type sanityVolumeService struct {
 	volumes list.List
 }
 
+func (s *sanityVolumeService) All(ctx context.Context) ([]*csi.Volume, error) {
+	s.mu.Lock()
+	defer s.mu.Unlock()
+
+	vols := []*csi.Volume{}
+	for e := s.volumes.Front(); e != nil; e = e.Next() {
+		v := e.Value.(*csi.Volume)
+		vols = append(vols, v)
+
+	}
+	return vols, nil
+}
+
 func (s *sanityVolumeService) Create(ctx context.Context, opts volumes.CreateOpts) (*csi.Volume, error) {
 	s.mu.Lock()
 	defer s.mu.Unlock()

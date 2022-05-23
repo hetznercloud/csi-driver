@@ -267,8 +267,31 @@ func (s *ControllerService) ValidateVolumeCapabilities(ctx context.Context, req 
 	return resp, nil
 }
 
-func (s *ControllerService) ListVolumes(context.Context, *proto.ListVolumesRequest) (*proto.ListVolumesResponse, error) {
-	return nil, status.Error(codes.Unimplemented, "listing volumes is not supported")
+func (s *ControllerService) ListVolumes(ctx context.Context, req *proto.ListVolumesRequest) (*proto.ListVolumesResponse, error) {
+	vols, err := s.volumeService.All(ctx)
+
+	if err != nil {
+		return nil, status.Error(codes.Internal, err.Error())
+	}
+
+	resp := &proto.ListVolumesResponse{Entries: make([]*proto.ListVolumesResponse_Entry, 0, len(vols))}
+	for i, volume := range vols {
+		resp.Entries[i] = &proto.ListVolumesResponse_Entry{
+			Volume: &proto.Volume{
+				VolumeId:      strconv.FormatUint(volume.ID, 10),
+				CapacityBytes: volume.SizeBytes(),
+				AccessibleTopology: []*proto.Topology{
+					{
+						Segments: map[string]string{
+							TopologySegmentLocation: volume.Location,
+						},
+					},
+				},
+			},
+		}
+	}
+
+	return resp, nil
 }
 
 func (s *ControllerService) GetCapacity(context.Context, *proto.GetCapacityRequest) (*proto.GetCapacityResponse, error) {
@@ -296,6 +319,13 @@ func (s *ControllerService) ControllerGetCapabilities(context.Context, *proto.Co
 				Type: &proto.ControllerServiceCapability_Rpc{
 					Rpc: &proto.ControllerServiceCapability_RPC{
 						Type: proto.ControllerServiceCapability_RPC_EXPAND_VOLUME,
+					},
+				},
+			},
+			{
+				Type: &proto.ControllerServiceCapability_Rpc{
+					Rpc: &proto.ControllerServiceCapability_RPC{
+						Type: proto.ControllerServiceCapability_RPC_LIST_VOLUMES,
 					},
 				},
 			},
