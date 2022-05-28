@@ -1,10 +1,9 @@
 package main
 
 import (
-	"fmt"
+	"context"
 	"os"
 	"strconv"
-	"strings"
 
 	proto "github.com/container-storage-interface/spec/lib/go/csi"
 	"github.com/go-kit/kit/log"
@@ -30,17 +29,17 @@ func main() {
 		os.Exit(1)
 	}
 
-	serverAZ, err := metadataClient.AvailabilityZone()
+	hcloudClient, err := app.CreateHcloudClient(m.Registry(), logger)
 	if err != nil {
-		level.Error(logger).Log("msg", "failed to fetch server availability-zone from metadata service", "err", err)
+		level.Error(logger).Log("msg", "failed to initialize hcloud client", "err", err)
 		os.Exit(1)
 	}
-	parts := strings.Split(serverAZ, "-")
-	if len(parts) != 2 {
-		level.Error(logger).Log("msg", fmt.Sprintf("unexpected server availability zone: %s", serverAZ), "err", err)
-		os.Exit(1)
+
+	server, _, err := hcloudClient.Server.GetByID(context.Background(), serverID)
+	if err != nil {
+		level.Error(logger).Log("msg", "failed to fetch server from API", "err", err)
 	}
-	serverLocation := parts[0]
+	serverLocation := server.Datacenter.Location.Name
 
 	level.Info(logger).Log("msg", "Fetched data from metadata service", "id", serverID, "location", serverLocation)
 
