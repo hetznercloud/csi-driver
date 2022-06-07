@@ -104,7 +104,7 @@ func (tc *TestCluster) initialize() error {
 	}
 	if buildImage {
 		fmt.Printf("%s: Building image\n", op)
-		if _, err := integrationtests.DockerBuild(imageName, "../", "Dockerfile"); err != nil {
+		if _, err := integrationtests.DockerBuild(imageName, "../"); err != nil {
 			return fmt.Errorf("%s: %v", op, err)
 		}
 	}

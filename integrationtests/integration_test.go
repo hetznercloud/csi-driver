@@ -31,7 +31,7 @@ func prepareDockerImage() error {
 		os.Exit(1)
 	}
 
-	if output, err := DockerBuild(testImageName, ".", "Dockerfile"); err != nil {
+	if output, err := DockerBuild(testImageName, "."); err != nil {
 		fmt.Printf("Error building docker image: %v\n%s\n", err, output)
 		os.Exit(1)
 	}

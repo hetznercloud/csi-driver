@@ -9,13 +9,10 @@ import (
 
 const dockerExecutable = "docker"
 
-func DockerBuild(imageName string, dir string, dockerfile string) (string, error) {
+func DockerBuild(imageName string, dir string) (string, error) {
 	dockerArgs := []string{"build"}
 	if runtime.GOOS != "linux" || runtime.GOARCH != "amd64" {
-		dockerArgs = []string{"buildx", "build", "--platform=linux/amd64"}
-	}
-	if dockerfile != "" {
-		dockerArgs = append(dockerArgs, "-f", dockerfile)
+		dockerArgs = []string{"buildx", "build", "--platform=linux/amd64", "--load"}
 	}
 	dockerArgs = append(dockerArgs, "-t", imageName, dir)
 	return runCmd(dockerExecutable, dockerArgs...)
