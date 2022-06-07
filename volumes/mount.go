@@ -67,6 +67,9 @@ func (s *LinuxMountService) Publish(targetPath string, devicePath string, opts M
 	if !isNotMountPoint {
 		return nil
 	}
+	if opts.FSType == "" {
+		opts.FSType = DefaultFSType
+	}
 	targetPathPermissions := os.FileMode(0750)
 	if opts.BlockVolume {
 		mountOptions = append(mountOptions, "bind")
@@ -81,9 +84,6 @@ func (s *LinuxMountService) Publish(targetPath string, devicePath string, opts M
 		}
 		_ = mountFile.Close()
 	} else {
-		if opts.FSType == "" {
-			opts.FSType = DefaultFSType
-		}
 		if err := os.MkdirAll(targetPath, targetPathPermissions); err != nil {
 			return err
 		}
