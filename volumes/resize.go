@@ -17,8 +17,9 @@ type ResizeService interface {
 
 // LinuxResizeService resizes volumes on a Linux system.
 type LinuxResizeService struct {
-	logger  log.Logger
-	resizer *mount.ResizeFs
+	logger     log.Logger
+	resizer    *mount.ResizeFs
+	cryptSetup *CryptSetup
 }
 
 func NewLinuxResizeService(logger log.Logger) *LinuxResizeService {
@@ -28,6 +29,7 @@ func NewLinuxResizeService(logger log.Logger) *LinuxResizeService {
 			Interface: mount.New(""),
 			Exec:      exec.New(),
 		}.Exec),
+		cryptSetup: NewCryptSetup(logger),
 	}
 }
 
@@ -42,6 +44,19 @@ func (l *LinuxResizeService) Resize(volumePath string) error {
 		"volume-path", volumePath,
 		"device-path", devicePath,
 	)
+
+	luksDeviceName := GenerateLUKSDeviceName(devicePath)
+	active, err := l.cryptSetup.IsActive(luksDeviceName)
+	if err != nil {
+		return err
+	}
+	if active {
+		luksDevicePath := GenerateLUKSDevicePath(luksDeviceName)
+		if err := l.cryptSetup.Resize(luksDeviceName); err != nil {
+			return err
+		}
+		devicePath = luksDevicePath
+	}
 
 	if _, err := l.resizer.Resize(devicePath, volumePath); err != nil {
 		return err

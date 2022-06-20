@@ -11,6 +11,7 @@ import (
 
 	"k8s.io/client-go/tools/clientcmd"
 
+	"github.com/hetznercloud/csi-driver/integrationtests"
 	"github.com/hetznercloud/hcloud-go/hcloud"
 	corev1 "k8s.io/api/core/v1"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
@@ -103,13 +104,13 @@ func (tc *TestCluster) initialize() error {
 	}
 	if buildImage {
 		fmt.Printf("%s: Building image\n", op)
-		if err := runCmd("docker", []string{"build", "-t", imageName, "../"}, nil); err != nil {
+		if _, err := integrationtests.DockerBuild(imageName, "../"); err != nil {
 			return fmt.Errorf("%s: %v", op, err)
 		}
 	}
 
 	fmt.Printf("%s: Saving image to disk\n", op)
-	if err := runCmd("docker", []string{"save", "--output", "ci-hcloud-csi-driver.tar", imageName}, nil); err != nil {
+	if _, err := integrationtests.DockerSave(imageName, "ci-hcloud-csi-driver.tar"); err != nil {
 		return fmt.Errorf("%s: %v", op, err)
 	}
 
