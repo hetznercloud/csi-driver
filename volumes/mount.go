@@ -3,14 +3,15 @@ package volumes
 import (
 	"errors"
 	"fmt"
-	"github.com/go-kit/kit/log"
-	"github.com/go-kit/kit/log/level"
-	"k8s.io/mount-utils"
-	"k8s.io/utils/exec"
 	"os"
 	"path/filepath"
 	"regexp"
 	"strings"
+
+	"github.com/go-kit/kit/log"
+	"github.com/go-kit/kit/log/level"
+	"k8s.io/mount-utils"
+	"k8s.io/utils/exec"
 )
 
 const DefaultFSType = "ext4"
