@@ -70,6 +70,7 @@ func (s *NodeService) NodePublishVolume(ctx context.Context, req *proto.NodePubl
 		mount := req.VolumeCapability.GetMount()
 		opts = volumes.MountOpts{
 			FSType:               mount.FsType,
+			FSGroup:              mount.VolumeMountGroup,
 			Readonly:             req.Readonly,
 			Additional:           mount.MountFlags,
 			EncryptionPassphrase: req.Secrets[encryptionPassphraseKey],
@@ -161,6 +162,13 @@ func (s *NodeService) NodeGetCapabilities(ctx context.Context, req *proto.NodeGe
 					},
 				},
 			},
+			{
+				Type: &proto.NodeServiceCapability_Rpc{
+					Rpc: &proto.NodeServiceCapability_RPC{
+						Type: proto.NodeServiceCapability_RPC_VOLUME_MOUNT_GROUP,
+					},
+				},
+			},
 		},
 	}
 	return resp, nil
@@ -180,8 +188,19 @@ func (s *NodeService) NodeGetInfo(context.Context, *proto.NodeGetInfoRequest) (*
 }
 
 func (s *NodeService) NodeExpandVolume(ctx context.Context, req *proto.NodeExpandVolumeRequest) (*proto.NodeExpandVolumeResponse, error) {
+	if req.VolumeId == "" {
+		return nil, status.Error(codes.InvalidArgument, "missing volume id")
+	}
 	if req.VolumePath == "" {
 		return nil, status.Error(codes.InvalidArgument, "missing volume path")
+	}
+	volumeExists, err := s.volumeMountService.PathExists(req.VolumePath)
+	if err != nil {
+		return nil, status.Error(codes.Internal, fmt.Sprintf("failed to check for volume existence: %s", err))
+	}
+
+	if !volumeExists {
+		return nil, status.Error(codes.NotFound, fmt.Sprintf("volume %s is not available on this node", req.VolumePath))
 	}
 
 	if req.VolumeCapability.GetBlock() == nil {

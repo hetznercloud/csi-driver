@@ -466,6 +466,7 @@ func (s *hcloudK8sSetup) getSSHKey(ctx context.Context) error {
 	if err != nil {
 		return err
 	}
+
 	sshKey, _, err := s.Hcloud.SSHKey.Create(ctx, hcloud.SSHKeyCreateOpts{
 		Name:      fmt.Sprintf("s-%s", s.TestIdentifier),
 		PublicKey: pubKey,

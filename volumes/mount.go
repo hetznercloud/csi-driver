@@ -3,15 +3,14 @@ package volumes
 import (
 	"errors"
 	"fmt"
-	"os"
-	"path/filepath"
-	"regexp"
-	"strings"
-
 	"github.com/go-kit/kit/log"
 	"github.com/go-kit/kit/log/level"
 	"k8s.io/mount-utils"
 	"k8s.io/utils/exec"
+	"os"
+	"path/filepath"
+	"regexp"
+	"strings"
 )
 
 const DefaultFSType = "ext4"
@@ -20,6 +19,7 @@ const DefaultFSType = "ext4"
 type MountOpts struct {
 	BlockVolume          bool
 	FSType               string
+	FSGroup              string
 	Readonly             bool
 	Additional           []string // Additional mount options/flags passed to /bin/mount
 	EncryptionPassphrase string
@@ -94,17 +94,6 @@ func (s *LinuxMountService) Publish(targetPath string, devicePath string, opts M
 	}
 	mountOptions = append(mountOptions, opts.Additional...)
 
-	level.Info(s.logger).Log(
-		"msg", "publishing volume",
-		"target-path", targetPath,
-		"device-path", devicePath,
-		"fs-type", opts.FSType,
-		"block-volume", opts.BlockVolume,
-		"readonly", opts.Readonly,
-		"mount-options", strings.Join(mountOptions, ", "),
-		"encrypted", opts.EncryptionPassphrase != "",
-	)
-
 	if opts.EncryptionPassphrase != "" {
 		existingFSType, err := s.DetectDiskFormat(devicePath)
 		if err != nil {
@@ -142,6 +131,17 @@ func (s *LinuxMountService) Publish(targetPath string, devicePath string, opts M
 	} else if existingFSType != opts.FSType {
 		return fmt.Errorf("requested %s volume, but disk %s already is formatted with %s", opts.FSType, devicePath, existingFSType)
 	}
+
+	level.Info(s.logger).Log(
+		"msg", "publishing volume",
+		"target-path", targetPath,
+		"device-path", devicePath,
+		"fs-type", opts.FSType,
+		"block-volume", opts.BlockVolume,
+		"readonly", opts.Readonly,
+		"mount-options", strings.Join(mountOptions, ", "),
+		"encrypted", opts.EncryptionPassphrase != "",
+	)
 
 	if err := s.mounter.Mount(devicePath, targetPath, opts.FSType, mountOptions); err != nil {
 		return err
