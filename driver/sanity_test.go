@@ -3,6 +3,7 @@ package driver
 import (
 	"container/list"
 	"context"
+	"errors"
 	"fmt"
 	"io/ioutil"
 	"net"
@@ -12,7 +13,7 @@ import (
 
 	proto "github.com/container-storage-interface/spec/lib/go/csi"
 	"github.com/go-kit/kit/log"
-	"github.com/kubernetes-csi/csi-test/v3/pkg/sanity"
+	"github.com/kubernetes-csi/csi-test/v4/pkg/sanity"
 	"google.golang.org/grpc"
 
 	"github.com/hetznercloud/csi-driver/csi"
@@ -76,7 +77,9 @@ func TestSanity(t *testing.T) {
 	defer os.RemoveAll(tempDir)
 
 	testConfig := sanity.NewTestConfig()
-	testConfig.TargetPath = tempDir + "/hcloud-csi-sanity-target"
+	testConfig.CreateTargetDir = func(path string) (string, error) {
+		return tempDir + "/hcloud-csi-sanity-target", nil
+	}
 	testConfig.Address = endpoint
 	sanity.Test(t, testConfig)
 }
@@ -216,6 +219,9 @@ func (s *sanityMountService) DetectDiskFormat(disk string) (string, error) {
 type sanityResizeService struct{}
 
 func (s *sanityResizeService) Resize(volumePath string) error {
+	if volumePath == "some/path" {
+		return errors.New("path not found")
+	}
 	return nil
 }
 

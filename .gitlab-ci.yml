@@ -1,6 +1,6 @@
 ---
 include:
-  - project: "hc/ops/ci"
+  - project: "cloud/operations/ci"
     file: "k8s/release.yml"
 
 stages:
@@ -17,9 +17,10 @@ unit:
   image: golang:1.17
   stage: test
   script:
-    - go test $(go list ./... | grep -v e2etests) -v
+    - go test $(go list ./... | grep -v e2etests | grep -v integrationtests) -v
   tags:
     - hc-bladerunner
+
 
 .k8se2e: &k8se2e
   image: docker:git
