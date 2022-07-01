@@ -20,7 +20,6 @@ const DefaultFSType = "ext4"
 type MountOpts struct {
 	BlockVolume          bool
 	FSType               string
-	FSGroup              string
 	Readonly             bool
 	Additional           []string // Additional mount options/flags passed to /bin/mount
 	EncryptionPassphrase string
@@ -93,6 +92,7 @@ func (s *LinuxMountService) Publish(targetPath string, devicePath string, opts M
 	if opts.Readonly {
 		mountOptions = append(mountOptions, "ro")
 	}
+
 	mountOptions = append(mountOptions, opts.Additional...)
 
 	if opts.EncryptionPassphrase != "" {

@@ -53,3 +53,13 @@ k8s 1.22:
   <<: *k8se2e
   variables:
     K8S_VERSION: k8s-1.22.0
+
+k8s 1.23:
+  <<: *k8se2e
+  variables:
+    K8S_VERSION: k8s-1.23.8
+
+k8s 1.24:
+  <<: *k8se2e
+  variables:
+    K8S_VERSION: k8s-1.24.2

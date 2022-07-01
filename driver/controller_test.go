@@ -729,7 +729,7 @@ func TestControllerServiceControllerGetCapabilities(t *testing.T) {
 		t.Fatal(err)
 	}
 
-	if len(resp.Capabilities) != 3 {
+	if len(resp.Capabilities) != 4 {
 		t.Fatalf("unexpected number of capabilities: %d", len(resp.Capabilities))
 	}
 }

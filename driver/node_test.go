@@ -287,7 +287,7 @@ func TestNodeServiceNodeGetCapabilities(t *testing.T) {
 	if err != nil {
 		t.Fatal(err)
 	}
-	if c := len(resp.Capabilities); c != 3 {
+	if c := len(resp.Capabilities); c != 2 {
 		t.Fatalf("unexpected number of capabilities: %d", c)
 	}
 
