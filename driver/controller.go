@@ -268,13 +268,17 @@ func (s *ControllerService) ValidateVolumeCapabilities(ctx context.Context, req 
 }
 
 func (s *ControllerService) ListVolumes(ctx context.Context, req *proto.ListVolumesRequest) (*proto.ListVolumesResponse, error) {
+	if req.StartingToken != "" {
+		return nil, status.Error(codes.Aborted, "Starting token is not implemented")
+	}
+
 	vols, err := s.volumeService.All(ctx)
 
 	if err != nil {
 		return nil, status.Error(codes.Internal, err.Error())
 	}
 
-	resp := &proto.ListVolumesResponse{Entries: make([]*proto.ListVolumesResponse_Entry, 0, len(vols))}
+	resp := &proto.ListVolumesResponse{Entries: make([]*proto.ListVolumesResponse_Entry, len(vols))}
 	for i, volume := range vols {
 		resp.Entries[i] = &proto.ListVolumesResponse_Entry{
 			Volume: &proto.Volume{

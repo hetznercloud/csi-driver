@@ -70,7 +70,6 @@ func (s *NodeService) NodePublishVolume(ctx context.Context, req *proto.NodePubl
 		mount := req.VolumeCapability.GetMount()
 		opts = volumes.MountOpts{
 			FSType:               mount.FsType,
-			FSGroup:              mount.VolumeMountGroup,
 			Readonly:             req.Readonly,
 			Additional:           mount.MountFlags,
 			EncryptionPassphrase: req.Secrets[encryptionPassphraseKey],
@@ -159,13 +158,6 @@ func (s *NodeService) NodeGetCapabilities(ctx context.Context, req *proto.NodeGe
 				Type: &proto.NodeServiceCapability_Rpc{
 					Rpc: &proto.NodeServiceCapability_RPC{
 						Type: proto.NodeServiceCapability_RPC_GET_VOLUME_STATS,
-					},
-				},
-			},
-			{
-				Type: &proto.NodeServiceCapability_Rpc{
-					Rpc: &proto.NodeServiceCapability_RPC{
-						Type: proto.NodeServiceCapability_RPC_VOLUME_MOUNT_GROUP,
 					},
 				},
 			},
