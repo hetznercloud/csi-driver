@@ -11,6 +11,19 @@ enabling you to use ReadWriteOnce Volumes within Kubernetes. Please note that th
 
 2. Create a secret containing the token:
 
+   **(v1.x):**
+   ```
+   # secret.yml
+   apiVersion: v1
+   kind: Secret
+   metadata:
+     name: hcloud-csi
+     namespace: kube-system
+   stringData:
+     token: YOURTOKEN
+   ```
+
+   **(main branch):**
    ```
    # secret.yml
    apiVersion: v1
