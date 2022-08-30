@@ -132,11 +132,11 @@ related only to an unsupported version.
 
 | Kubernetes |    CSI Driver |                                                                                   Deployment File |
 |------------|--------------:|--------------------------------------------------------------------------------------------------:|
-| 1.24       |        master | https://raw.githubusercontent.com/hetznercloud/csi-driver/v1.6.0/deploy/kubernetes/hcloud-csi.yml |
-| 1.23       |        master | https://raw.githubusercontent.com/hetznercloud/csi-driver/v1.6.0/deploy/kubernetes/hcloud-csi.yml |
-| 1.22       | 1.6.0, master | https://raw.githubusercontent.com/hetznercloud/csi-driver/v1.6.0/deploy/kubernetes/hcloud-csi.yml |
-| 1.21       | 1.6.0, master | https://raw.githubusercontent.com/hetznercloud/csi-driver/v1.6.0/deploy/kubernetes/hcloud-csi.yml |
-| 1.20       | 1.6.0, master | https://raw.githubusercontent.com/hetznercloud/csi-driver/v1.6.0/deploy/kubernetes/hcloud-csi.yml |
+| 1.24       |        main   | https://raw.githubusercontent.com/hetznercloud/csi-driver/v1.6.0/deploy/kubernetes/hcloud-csi.yml |
+| 1.23       |        main   | https://raw.githubusercontent.com/hetznercloud/csi-driver/v1.6.0/deploy/kubernetes/hcloud-csi.yml |
+| 1.22       | 1.6.0, main   | https://raw.githubusercontent.com/hetznercloud/csi-driver/v1.6.0/deploy/kubernetes/hcloud-csi.yml |
+| 1.21       | 1.6.0, main   | https://raw.githubusercontent.com/hetznercloud/csi-driver/v1.6.0/deploy/kubernetes/hcloud-csi.yml |
+| 1.20       | 1.6.0, main   | https://raw.githubusercontent.com/hetznercloud/csi-driver/v1.6.0/deploy/kubernetes/hcloud-csi.yml |
 
 ## Integration Tests
 
