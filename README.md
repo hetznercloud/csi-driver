@@ -7,7 +7,7 @@ enabling you to use ReadWriteOnce Volumes within Kubernetes. Please note that th
 
 ## Getting Started
 
-1. Create an API token in the [Hetzner Cloud Console](https://console.hetzner.cloud/).
+1. Create a read+write API token in the [Hetzner Cloud Console](https://console.hetzner.cloud/).
 
 2. Create a secret containing the token:
 
