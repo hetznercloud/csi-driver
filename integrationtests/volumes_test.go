@@ -149,8 +149,8 @@ func TestVolumeResize(t *testing.T) {
 		initialSize int
 		finalSize   int
 	}{
-		{"plain", "", 26609, 57317},
-		{"encrypted", "passphrase", 27761, 58597},
+		{"plain", "", 25844, 56042},
+		{"encrypted", "passphrase", 27044, 57402},
 	}
 
 	for _, test := range tests {
