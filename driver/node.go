@@ -172,7 +172,12 @@ func (s *NodeService) NodeGetInfo(context.Context, *proto.NodeGetInfoRequest) (*
 		MaxVolumesPerNode: MaxVolumesPerNode,
 		AccessibleTopology: &proto.Topology{
 			Segments: map[string]string{
+				// need this topology key for k8s clusters without hcloud-cloud-controller-manager
+				// that handles this node label
 				TopologySegmentLocation: s.serverLocation,
+				// need this topology key for backward compatibility
+				// for PV created with older version this CSI driver
+				TopologySegmentLocationLegacy: s.serverLocation,
 			},
 		},
 	}
