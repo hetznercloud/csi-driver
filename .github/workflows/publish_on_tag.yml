@@ -18,10 +18,11 @@ jobs:
           OWNER: ${{ github.repository_owner }}
         run: |
           sed -i -e "s#: .*/hcloud-csi-driver:latest#: $OWNER/hcloud-csi-driver:$RELEASE_VERSION#" deploy/kubernetes/hcloud-csi.yml
+          sed -i -e "s/PluginVersion = \".*\"$/PluginVersion = \"$RELEASE_VERSION\"/g" driver/driver.go
           git config user.name github-actions
           git config user.email github-actions@github.com
           git add .
-          git commit -m "Update image tags in hcloud-csi.yml to $RELEASE_VERSION"
+          git commit -m "Update version tags to $RELEASE_VERSION"
           git tag -d v$RELEASE_VERSION
           git tag v$RELEASE_VERSION
           git push origin v$RELEASE_VERSION -f
