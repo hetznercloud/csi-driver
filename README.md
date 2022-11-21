@@ -3,7 +3,7 @@
 [![GitHub Actions status](https://github.com/hetznercloud/csi-driver/workflows/Run%20tests/badge.svg)](https://github.com/hetznercloud/csi-driver/actions)
 
 This is a [Container Storage Interface](https://github.com/container-storage-interface/spec) driver for Hetzner Cloud
-enabling you to use ReadWriteOnce Volumes within Kubernetes. Please note that this driver **requires Kubernetes 1.13 or newer**.
+enabling you to use ReadWriteOnce Volumes within Kubernetes. Please note that this driver **requires Kubernetes 1.19 or newer**.
 
 ## Getting Started
 
@@ -11,19 +11,7 @@ enabling you to use ReadWriteOnce Volumes within Kubernetes. Please note that th
 
 2. Create a secret containing the token:
 
-   **(v1.x):**
-   ```
-   # secret.yml
-   apiVersion: v1
-   kind: Secret
-   metadata:
-     name: hcloud-csi
-     namespace: kube-system
-   stringData:
-     token: YOURTOKEN
-   ```
-
-   **(main branch):**
+   **(v2.x):**
    ```
    # secret.yml
    apiVersion: v1
@@ -44,7 +32,7 @@ enabling you to use ReadWriteOnce Volumes within Kubernetes. Please note that th
 
     Have a look at our [Version Matrix](README.md#versioning-policy) to pick the correct deployment file.
    ```
-   kubectl apply -f https://raw.githubusercontent.com/hetznercloud/csi-driver/v1.6.0/deploy/kubernetes/hcloud-csi.yml
+   kubectl apply -f https://raw.githubusercontent.com/hetznercloud/csi-driver/v2.0.0/deploy/kubernetes/hcloud-csi.yml
    ```
 
 4. To verify everything is working, create a persistent volume claim and a pod
@@ -113,6 +101,75 @@ enabling you to use ReadWriteOnce Volumes within Kubernetes. Please note that th
      csi.storage.k8s.io/node-publish-secret-namespace: default
    ```
 
+## Upgrading
+
+To upgrade the csi-driver version, you just need to apply the new manifests to your cluster.
+
+In case of a new major version, there might be manual steps that you need to follow to upgrade the csi-driver. See the following section for a list of major updates and their required steps.
+
+### From v1 to v2
+
+There are two breaking changes between v1.6 and v2.0 that require user intervention. Please take care to follow these steps, as otherwise the update might fail.
+
+**Before the rollout**:
+
+1. The secret containing the API token was renamed from `hcloud-csi` to `hcloud`. This change was made so both the cloud-controller-manager and the csi-driver can use the same secret. Check that you have a secret `hcloud` in the namespace `kube-system`, and that the secret contains the API token, as described in the section [Getting Started](#getting-started):
+
+   ```shell
+   $ kubectl get secret -n kube-system hcloud
+   ```
+
+2. We added a new field to our `CSIDriver` resource to support [CSI volume fsGroup policy management](https://kubernetes.io/docs/tasks/configure-pod-container/security-context/#configure-volume-permission-and-ownership-change-policy-for-pods). This change requires a replacement of the `CSIDriver` object. You need to manually delete the old object:
+
+   ```shell
+   $ kubectl delete csidriver csi.hetzner.cloud
+   ```
+
+   The new `CSIDriver` will be installed when you apply the new manifests.
+
+3. Stop the old pods to make sure that only everything is replaced in order and no incompatible pods are running side-by-side:
+
+   ```shell
+   $ kubectl delete statefulset -n kube-system hcloud-csi-controller
+   $ kubectl delete daemonset -n kube-system hcloud-csi-node
+   ```
+
+**Rollout the new manifest**:
+
+```shell
+$ kubectl apply -f https://raw.githubusercontent.com/hetznercloud/csi-driver/v2.0.0/deploy/kubernetes/hcloud-csi.yml
+```
+
+**After the rollout**:
+
+1. Delete the now unused secret `hcloud-csi` in the namespace `kube-system`:
+
+   ```shell
+   $ kubectl delete secret -n kube-system hcloud-csi
+   ```
+
+2. Remove old resources that have been replaced:
+
+   ```shell
+   $ kubectl delete clusterrolebinding hcloud-csi
+   $ kubectl delete clusterrole hcloud-csi
+   $ kubectl delete serviceaccount -n kube-system hcloud-csi
+   ```
+
+#### Further actions
+
+There was a bug in the interaction between `hcloud-csi-driver` and the `cluster-autoscaler` where the autoscaler would fail to scale up when the pending pod had pre-existing `PersistentVolumes`. This was fixed in v2.0.0 for new `PersistentVolumes`. Unfortunately this fix does not work for `PersistentVolumes` created by `v1.x` of the driver. For details on this bug, see [PR #302](https://github.com/hetznercloud/csi-driver/pull/302).
+
+To check if your volume is affected by this, you can execute the following command for the `PersistentVolume` and verify the output:
+
+```bash
+$ kubectl get persistentvolume NAME_OF_THE_PV -o jsonpath="{.spec.nodeAffinity.required.nodeSelectorTerms[0].matchExpressions[0].key}}"
+```
+
+If the return value is `topology.kubernetes.io/region` then the volume was created with `v2.x+`.
+
+If it is `csi.hetzner.cloud/location` then the volume was created with `v1.x` and will not work properly with `cluster-autoscaler`. We are currently working on a fix in `cluster-autoscaler` for old volumes, see PR [kubernetes/autoscaler#5322](https://github.com/kubernetes/autoscaler/pull/5322) for details and current status.
+
 ## Integration with Root Servers
 
 Root servers can be part of the cluster, but the CSI plugin doesn't work there. Taint the root server as follows to skip that node for the daemonset.
@@ -130,14 +187,14 @@ CSI driver does not still work with this version. However, it means that
 we do not test that version anymore. Additionally, we will not fix bugs
 related only to an unsupported version.
 
-| Kubernetes |    CSI Driver |                                                                                   Deployment File |
-|------------|--------------:|--------------------------------------------------------------------------------------------------:|
-| 1.25       |        main   | https://raw.githubusercontent.com/hetznercloud/csi-driver/v1.6.0/deploy/kubernetes/hcloud-csi.yml |
-| 1.24       |        main   | https://raw.githubusercontent.com/hetznercloud/csi-driver/v1.6.0/deploy/kubernetes/hcloud-csi.yml |
-| 1.23       |        main   | https://raw.githubusercontent.com/hetznercloud/csi-driver/v1.6.0/deploy/kubernetes/hcloud-csi.yml |
-| 1.22       | 1.6.0, main   | https://raw.githubusercontent.com/hetznercloud/csi-driver/v1.6.0/deploy/kubernetes/hcloud-csi.yml |
-| 1.21       | 1.6.0, main   | https://raw.githubusercontent.com/hetznercloud/csi-driver/v1.6.0/deploy/kubernetes/hcloud-csi.yml |
-| 1.20       | 1.6.0, main   | https://raw.githubusercontent.com/hetznercloud/csi-driver/v1.6.0/deploy/kubernetes/hcloud-csi.yml |
+| Kubernetes | CSI Driver |                                                                                   Deployment File |
+| ---------- | ---------: | ------------------------------------------------------------------------------------------------: |
+| 1.25       |      2.0.0 | https://raw.githubusercontent.com/hetznercloud/csi-driver/v2.0.0/deploy/kubernetes/hcloud-csi.yml |
+| 1.24       |      2.0.0 | https://raw.githubusercontent.com/hetznercloud/csi-driver/v2.0.0/deploy/kubernetes/hcloud-csi.yml |
+| 1.23       |      2.0.0 | https://raw.githubusercontent.com/hetznercloud/csi-driver/v2.0.0/deploy/kubernetes/hcloud-csi.yml |
+| 1.22       |      1.6.0 | https://raw.githubusercontent.com/hetznercloud/csi-driver/v1.6.0/deploy/kubernetes/hcloud-csi.yml |
+| 1.21       |      1.6.0 | https://raw.githubusercontent.com/hetznercloud/csi-driver/v1.6.0/deploy/kubernetes/hcloud-csi.yml |
+| 1.20       |      1.6.0 | https://raw.githubusercontent.com/hetznercloud/csi-driver/v1.6.0/deploy/kubernetes/hcloud-csi.yml |
 
 ## Integration Tests
 
