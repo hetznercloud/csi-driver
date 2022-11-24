@@ -7,6 +7,8 @@ enabling you to use ReadWriteOnce Volumes within Kubernetes. Please note that th
 
 ## Getting Started
 
+### :stop_sign: There is a known bug in `v2.0.0` and we ask you to install `v1.6.0` instead for the moment.  You can find the  installation guide for `v1.6.0` [here](https://github.com/hetznercloud/csi-driver/tree/v1.6.0). Details about the bug can be found in issue [#330](https://github.com/hetznercloud/csi-driver/issues/333). :stop_sign: 
+
 1. Create a read+write API token in the [Hetzner Cloud Console](https://console.hetzner.cloud/).
 
 2. Create a secret containing the token:
