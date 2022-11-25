@@ -94,7 +94,7 @@ func (s *ControllerService) CreateVolume(ctx context.Context, req *proto.CreateV
 			AccessibleTopology: []*proto.Topology{
 				{
 					Segments: map[string]string{
-						TopologySegmentLocation: volume.Location,
+						TopologySegmentLocationLegacy: volume.Location,
 					},
 				},
 			},
