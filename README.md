@@ -7,7 +7,7 @@ enabling you to use ReadWriteOnce Volumes within Kubernetes. Please note that th
 
 ## Getting Started
 
-### :stop_sign: There is a known bug in `v2.0.0` and we ask you to install `v1.6.0` instead for the moment.  You can find the  installation guide for `v1.6.0` [here](https://github.com/hetznercloud/csi-driver/tree/v1.6.0). Details about the bug can be found in issue [#330](https://github.com/hetznercloud/csi-driver/issues/333). :stop_sign: 
+### :stop_sign: There is a known bug in `v2.0.0`, if you are using this version, please check out the issue [#330](https://github.com/hetznercloud/csi-driver/issues/333) to learn about the impact. :stop_sign: 
 
 1. Create a read+write API token in the [Hetzner Cloud Console](https://console.hetzner.cloud/).
 
@@ -34,7 +34,7 @@ enabling you to use ReadWriteOnce Volumes within Kubernetes. Please note that th
 
     Have a look at our [Version Matrix](README.md#versioning-policy) to pick the correct deployment file.
    ```
-   kubectl apply -f https://raw.githubusercontent.com/hetznercloud/csi-driver/v2.0.0/deploy/kubernetes/hcloud-csi.yml
+   kubectl apply -f https://raw.githubusercontent.com/hetznercloud/csi-driver/v2.1.0/deploy/kubernetes/hcloud-csi.yml
    ```
 
 4. To verify everything is working, create a persistent volume claim and a pod
@@ -139,7 +139,7 @@ There are two breaking changes between v1.6 and v2.0 that require user intervent
 **Rollout the new manifest**:
 
 ```shell
-$ kubectl apply -f https://raw.githubusercontent.com/hetznercloud/csi-driver/v2.0.0/deploy/kubernetes/hcloud-csi.yml
+$ kubectl apply -f https://raw.githubusercontent.com/hetznercloud/csi-driver/v2.1.0/deploy/kubernetes/hcloud-csi.yml
 ```
 
 **After the rollout**:
@@ -157,20 +157,6 @@ $ kubectl apply -f https://raw.githubusercontent.com/hetznercloud/csi-driver/v2.
    $ kubectl delete clusterrole hcloud-csi
    $ kubectl delete serviceaccount -n kube-system hcloud-csi
    ```
-
-#### Further actions
-
-There was a bug in the interaction between `hcloud-csi-driver` and the `cluster-autoscaler` where the autoscaler would fail to scale up when the pending pod had pre-existing `PersistentVolumes`. This was fixed in v2.0.0 for new `PersistentVolumes`. Unfortunately this fix does not work for `PersistentVolumes` created by `v1.x` of the driver. For details on this bug, see [PR #302](https://github.com/hetznercloud/csi-driver/pull/302).
-
-To check if your volume is affected by this, you can execute the following command for the `PersistentVolume` and verify the output:
-
-```bash
-$ kubectl get persistentvolume NAME_OF_THE_PV -o jsonpath="{.spec.nodeAffinity.required.nodeSelectorTerms[0].matchExpressions[0].key}}"
-```
-
-If the return value is `topology.kubernetes.io/region` then the volume was created with `v2.x+`.
-
-If it is `csi.hetzner.cloud/location` then the volume was created with `v1.x` and will not work properly with `cluster-autoscaler`. We are currently working on a fix in `cluster-autoscaler` for old volumes, see PR [kubernetes/autoscaler#5322](https://github.com/kubernetes/autoscaler/pull/5322) for details and current status.
 
 ## Integration with Root Servers
 
@@ -191,9 +177,9 @@ related only to an unsupported version.
 
 | Kubernetes | CSI Driver |                                                                                   Deployment File |
 | ---------- | ---------: | ------------------------------------------------------------------------------------------------: |
-| 1.25       |      2.0.0 | https://raw.githubusercontent.com/hetznercloud/csi-driver/v2.0.0/deploy/kubernetes/hcloud-csi.yml |
-| 1.24       |      2.0.0 | https://raw.githubusercontent.com/hetznercloud/csi-driver/v2.0.0/deploy/kubernetes/hcloud-csi.yml |
-| 1.23       |      2.0.0 | https://raw.githubusercontent.com/hetznercloud/csi-driver/v2.0.0/deploy/kubernetes/hcloud-csi.yml |
+| 1.25       |      2.1.0 | https://raw.githubusercontent.com/hetznercloud/csi-driver/v2.1.0/deploy/kubernetes/hcloud-csi.yml |
+| 1.24       |      2.1.0 | https://raw.githubusercontent.com/hetznercloud/csi-driver/v2.1.0/deploy/kubernetes/hcloud-csi.yml |
+| 1.23       |      2.1.0 | https://raw.githubusercontent.com/hetznercloud/csi-driver/v2.1.0/deploy/kubernetes/hcloud-csi.yml |
 | 1.22       |      1.6.0 | https://raw.githubusercontent.com/hetznercloud/csi-driver/v1.6.0/deploy/kubernetes/hcloud-csi.yml |
 | 1.21       |      1.6.0 | https://raw.githubusercontent.com/hetznercloud/csi-driver/v1.6.0/deploy/kubernetes/hcloud-csi.yml |
 | 1.20       |      1.6.0 | https://raw.githubusercontent.com/hetznercloud/csi-driver/v1.6.0/deploy/kubernetes/hcloud-csi.yml |
