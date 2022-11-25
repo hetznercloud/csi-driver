@@ -6,7 +6,7 @@ import (
 
 const (
 	PluginName    = "csi.hetzner.cloud"
-	PluginVersion = "1.6.0"
+	PluginVersion = "2.0.1"
 
 	MaxVolumesPerNode = 16
 	MinVolumeSize     = 10 // GB
