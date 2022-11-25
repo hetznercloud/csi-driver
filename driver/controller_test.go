@@ -91,7 +91,7 @@ func TestControllerServiceCreateVolume(t *testing.T) {
 	}
 	if len(resp.Volume.AccessibleTopology) == 1 {
 		top := resp.Volume.AccessibleTopology[0]
-		if loc := top.Segments[TopologySegmentLocation]; loc != "testloc" {
+		if loc := top.Segments[TopologySegmentLocationLegacy]; loc != "testloc" {
 			t.Errorf("unexpected location segment in topology: %s", loc)
 		}
 	} else {
@@ -146,7 +146,7 @@ func TestControllerServiceCreateVolumeWithLocation(t *testing.T) {
 	}
 	if len(resp.Volume.AccessibleTopology) == 1 {
 		top := resp.Volume.AccessibleTopology[0]
-		if loc := top.Segments[TopologySegmentLocation]; loc != "explicit" {
+		if loc := top.Segments[TopologySegmentLocationLegacy]; loc != "explicit" {
 			t.Errorf("unexpected location segment in topology: %s", loc)
 		}
 	} else {
