@@ -29,12 +29,13 @@ func main() {
 		os.Exit(1)
 	}
 
-	metadataClient := metadata.NewClient(metadata.WithInstrumentation(m.Registry()))
 	var location string
 
-	if s := os.Getenv("HCLOUD_SERVER_OVERRIDE_LOCATION_NAME"); s != "" {
+	if s := os.Getenv("HCLOUD_VOLUME_DEFAULT_LOCATION"); s != "" {
 		location = s
 	} else {
+		metadataClient := metadata.NewClient(metadata.WithInstrumentation(m.Registry()))
+
 		server, err := app.GetServer(logger, hcloudClient, metadataClient)
 		if err != nil {
 			level.Error(logger).Log(
