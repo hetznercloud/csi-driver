@@ -137,7 +137,7 @@ func (s *hcloudK8sSetup) createClusterWorker(ctx context.Context, additionalSSHK
 
 	err = s.transferDockerImage(srv)
 	if err != nil {
-		fmt.Printf("[%s] %s: transfer image on worker: %v", srv.Name, op, err)
+		fmt.Printf("[%s] %s: transfer image on worker: %v\n", srv.Name, op, err)
 		return
 	}
 
@@ -286,8 +286,9 @@ func scp(identityFile, src, dest string) error {
 	const op = "e2etests/scp"
 
 	err := runCmd(
-		"/usr/bin/scp",
+		"/usr/bin/env",
 		[]string{
+			"scp",
 			"-F", "/dev/null", // ignore $HOME/.ssh/config
 			"-i", identityFile,
 			"-o", "IdentitiesOnly=yes", // only use the identities passed on the command line
@@ -367,7 +368,7 @@ func (s *hcloudK8sSetup) transferDockerImage(server *hcloud.Server) error {
 			wg.Done()
 		}()
 
-		err = session.Run("/usr/bin/scp -t /root")
+		err = session.Run("/usr/bin/env scp -t /root")
 		if err != nil {
 			return fmt.Errorf("%s copy via scp: %s", op, err)
 		}
@@ -459,7 +460,7 @@ func (s *hcloudK8sSetup) getCloudInitConfig(isClusterServer bool) (string, error
 	return buf.String(), nil
 }
 
-//getSSHKey create and get the Hetzner Cloud SSH Key for the test
+// getSSHKey create and get the Hetzner Cloud SSH Key for the test
 func (s *hcloudK8sSetup) getSSHKey(ctx context.Context) error {
 	const op = "hcloudK8sSetup/getSSHKey"
 	pubKey, privKey, err := makeSSHKeyPair()
