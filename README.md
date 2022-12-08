@@ -99,9 +99,11 @@ enabling you to use ReadWriteOnce Volumes within Kubernetes. Please note that th
    volumeBindingMode: WaitForFirstConsumer
    allowVolumeExpansion: true
    parameters:
-     csi.storage.k8s.io/node-publish-secret-name: encryption
-     csi.storage.k8s.io/node-publish-secret-namespace: default
+     csi.storage.k8s.io/node-publish-secret-name: encryption-secret
+     csi.storage.k8s.io/node-publish-secret-namespace: kube-system
    ```
+
+Your nodes might need to have `cryptsetup` installed to mount the volumes with LUKS.
 
 ## Upgrading
 
