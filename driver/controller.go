@@ -182,6 +182,9 @@ func (s *ControllerService) ControllerPublishVolume(ctx context.Context, req *pr
 			return nil, status.Error(codes.Internal, fmt.Sprintf("failed to get volume: %s", err))
 		}
 	}
+	if !volume.IsMounted() || !volume.IsAttached() {
+		return nil, status.Error(codes.Internal, fmt.Sprintf("volume not yet attached: mounted=%t, attached=%t", volume.IsMounted(), volume.IsAttached()))
+	}
 
 	resp := &proto.ControllerPublishVolumeResponse{
 		PublishContext: map[string]string{
