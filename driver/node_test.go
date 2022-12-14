@@ -135,6 +135,9 @@ func TestNodeServiceNodePublishPublishError(t *testing.T) {
 				},
 			},
 		},
+		PublishContext: map[string]string{
+			"devicePath": "devpath",
+		},
 	})
 	if grpc.Code(err) != codes.Internal {
 		t.Fatalf("unexpected error: %v", err)
