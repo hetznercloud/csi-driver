@@ -58,6 +58,9 @@ func (s *NodeService) NodePublishVolume(ctx context.Context, req *proto.NodePubl
 	}
 
 	devicePath := req.GetPublishContext()["devicePath"]
+	if devicePath == "" {
+		return nil, status.Error(codes.InvalidArgument, "missing device path")
+	}
 
 	var opts volumes.MountOpts
 	switch {
