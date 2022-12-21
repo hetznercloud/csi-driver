@@ -6,32 +6,36 @@ kind: Kustomization
 resources:
   - ../deploy
 patches:
-  - target:
+  - patch: |-
       kind: DaemonSet
-      name: hcloud-csi-node
-    patch: |-
-      - op: add
-        path: /spec/template/spec/containers/1/env/-
-        value:
-          name: LOG_LEVEL
-          value: debug
-      - op: add
-        path: /spec/template/spec/containers/1/env/-
-        value:
-          name: HCLOUD_DEBUG
-          value: "true"
-          
-  - target:
+      apiVersion: apps/v1
+      metadata:
+        name: hcloud-csi-node
+        namespace: kube-system
+      spec:
+        template:
+          spec:
+            containers:
+            - name: hcloud-csi-driver
+              env:
+              - name: LOG_LEVEL
+                value: info
+              # - name: HCLOUD_DEBUG
+              #   value: "true"
+
+  - patch: |-
       kind: Deployment
-      name: hcloud-csi-controller
-    patch: |-
-      - op: add
-        path: /spec/template/spec/containers/3/env/-
-        value:
-          name: LOG_LEVEL
-          value: debug
-      - op: add
-        path: /spec/template/spec/containers/3/env/-
-        value:
-          name: HCLOUD_DEBUG
-          value: "true"
+      apiVersion: apps/v1
+      metadata:
+        name: hcloud-csi-controller
+        namespace: kube-system
+      spec:
+        template:
+          spec:
+            containers:
+            - name: hcloud-csi-driver
+              env:
+              - name: LOG_LEVEL
+                value: info
+              # - name: HCLOUD_DEBUG
+              #   value: "true"
