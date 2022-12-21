@@ -14,19 +14,24 @@ patches:
         path: /spec/template/spec/containers/1/env/-
         value:
           name: LOG_LEVEL
-          value: info
-#      - op: replace
-#        path: /spec/template/spec/containers/1/env/2/valueFrom/secretKeyRef/name
-#        value: hcloud_token
+          value: debug
+      - op: add
+        path: /spec/template/spec/containers/1/env/-
+        value:
+          name: HCLOUD_DEBUG
+          value: "true"
+          
   - target:
-      kind: StatefulSet
+      kind: Deployment
       name: hcloud-csi-controller
     patch: |-
       - op: add
         path: /spec/template/spec/containers/3/env/-
         value:
           name: LOG_LEVEL
-          value: info
-      - op: replace
-        path: /spec/template/spec/containers/3/env/3/valueFrom/secretKeyRef/name
-        value: hcloud
+          value: debug
+      - op: add
+        path: /spec/template/spec/containers/3/env/-
+        value:
+          name: HCLOUD_DEBUG
+          value: "true"
