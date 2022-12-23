@@ -179,6 +179,7 @@ related only to an unsupported version.
 
 | Kubernetes | CSI Driver |                                                                                   Deployment File |
 | ---------- | ---------: | ------------------------------------------------------------------------------------------------: |
+| 1.26       |      2.1.0 | https://raw.githubusercontent.com/hetznercloud/csi-driver/v2.1.0/deploy/kubernetes/hcloud-csi.yml |
 | 1.25       |      2.1.0 | https://raw.githubusercontent.com/hetznercloud/csi-driver/v2.1.0/deploy/kubernetes/hcloud-csi.yml |
 | 1.24       |      2.1.0 | https://raw.githubusercontent.com/hetznercloud/csi-driver/v2.1.0/deploy/kubernetes/hcloud-csi.yml |
 | 1.23       |      2.1.0 | https://raw.githubusercontent.com/hetznercloud/csi-driver/v2.1.0/deploy/kubernetes/hcloud-csi.yml |
