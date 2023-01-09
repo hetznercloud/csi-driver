@@ -25,13 +25,19 @@ func TestMain(m *testing.M) {
 
 func TestOfficialTestsuite(t *testing.T) {
 	t.Run("parallel tests", func(t *testing.T) {
-		err := RunCommandVisibleOnServer(testCluster.setup.privKey, testCluster.setup.MainNode, fmt.Sprintf("KUBECONFIG=/root/.kube/config ./ginkgo -nodes=6 -v -focus='External.Storage' -skip='\\[Feature:|\\[Disruptive\\]|\\[Serial\\]' ./e2e.test -- -storage.testdriver=test-driver.yml"))
+		err := RunCommandVisibleOnServer(testCluster.setup.privKey, testCluster.setup.MainNode, "KUBECONFIG=/root/.kube/config ./ginkgo -nodes=6 -v -focus='External.Storage' -skip='\\[Feature:|\\[Disruptive\\]|\\[Serial\\]' ./e2e.test -- -storage.testdriver=test-driver.yml")
 		if err != nil {
 			t.Error(err)
 		}
 	})
 	t.Run("serial tests", func(t *testing.T) {
-		err := RunCommandVisibleOnServer(testCluster.setup.privKey, testCluster.setup.MainNode, fmt.Sprintf("KUBECONFIG=/root/.kube/config ./ginkgo -v -focus='External.Storage.*(\\[Feature:|\\[Serial\\])' ./e2e.test -- -storage.testdriver=test-driver.yml"))
+		// Tests tagged as "Feature:SELinuxMountReadWriteOncePod" were added in
+		// Kubernetes v1.26, and fail for us because we do not support the
+		// SINGLE_NODE_MULTI_WRITER Capability (equivalent to ReadWriteOncePod
+		// Volume Access Mode in Kubernetes).
+		// This feature is being tracked in https://github.com/hetznercloud/csi-driver/issues/327
+		// and we should add the tests once we have implemented the capability.
+		err := RunCommandVisibleOnServer(testCluster.setup.privKey, testCluster.setup.MainNode, "KUBECONFIG=/root/.kube/config ./ginkgo -v -focus='External.Storage.*(\\[Feature:|\\[Serial\\])' -skip='\\[Feature:SELinuxMountReadWriteOncePod\\]' ./e2e.test -- -storage.testdriver=test-driver.yml")
 		if err != nil {
 			t.Error(err)
 		}

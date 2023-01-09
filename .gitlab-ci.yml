@@ -5,7 +5,7 @@ include:
 
 stages:
   - test
-  - E2E
+  - e2e-test
   - build
   - release
 
@@ -22,34 +22,15 @@ unit:
     - hc-bladerunner
 
 
-.k8se2e: &k8se2e
+e2e:
   image: docker:git
-  stage: E2E
-  variables:
-    K8S_VERSION: k8s-1.17.14
+  stage: e2e-test
+  parallel:
+    matrix:
+      - K8S_VERSION: [ k8s-1.23.15, k8s-1.24.9, k8s-1.25.5, k8s-1.26.0 ]
   before_script:
     - apk add --no-cache git make musl-dev go
   script:
     - go test $(go list ./... | grep e2etests) -v -timeout 60m
   tags:
     - hc-bladerunner-build
-
-k8s 1.22:
-  <<: *k8se2e
-  variables:
-    K8S_VERSION: k8s-1.22.15
-
-k8s 1.23:
-  <<: *k8se2e
-  variables:
-    K8S_VERSION: k8s-1.23.13
-
-k8s 1.24:
-  <<: *k8se2e
-  variables:
-    K8S_VERSION: k8s-1.24.7
-
-k8s 1.25:
-  <<: *k8se2e
-  variables:
-    K8S_VERSION: k8s-1.25.3
