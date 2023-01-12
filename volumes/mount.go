@@ -67,9 +67,6 @@ func (s *LinuxMountService) Publish(targetPath string, devicePath string, opts M
 	if !isNotMountPoint {
 		return nil
 	}
-	if opts.FSType == "" {
-		opts.FSType = DefaultFSType
-	}
 	targetPathPermissions := os.FileMode(0750)
 	if opts.BlockVolume {
 		mountOptions = append(mountOptions, "bind")
@@ -82,8 +79,15 @@ func (s *LinuxMountService) Publish(targetPath string, devicePath string, opts M
 		if err != nil {
 			return err
 		}
-		_ = mountFile.Close()
+		err = mountFile.Close()
+		if err != nil {
+			return err
+		}
 	} else {
+		if opts.FSType == "" {
+			// BlockVolume is created without file system, setting a default does not make sense
+			opts.FSType = DefaultFSType
+		}
 		if err := os.MkdirAll(targetPath, targetPathPermissions); err != nil {
 			return err
 		}
@@ -118,19 +122,24 @@ func (s *LinuxMountService) Publish(targetPath string, devicePath string, opts M
 		devicePath = luksDevicePath
 	}
 
-	existingFSType, err := s.DetectDiskFormat(devicePath)
-	if err != nil {
-		return fmt.Errorf("unable to detect existing disk format of %s: %w", devicePath, err)
-	}
-	if existingFSType == "" {
-		if opts.Readonly {
-			return fmt.Errorf("cannot publish unformatted disk %s in read-only mode", devicePath)
+	// Format disk if requested (/skip formatting for block devices)
+	if opts.FSType != "" {
+		existingFSType, err := s.DetectDiskFormat(devicePath)
+		if err != nil {
+			return fmt.Errorf("unable to detect existing disk format of %s: %w", devicePath, err)
 		}
-		if err = s.FormatDisk(devicePath, opts.FSType); err != nil {
-			return err
+
+		if existingFSType == "" {
+			if opts.Readonly {
+				return fmt.Errorf("cannot publish unformatted disk %s in read-only mode", devicePath)
+			}
+
+			if err = s.FormatDisk(devicePath, opts.FSType); err != nil {
+				return err
+			}
+		} else if existingFSType != opts.FSType {
+			return fmt.Errorf("requested %s volume, but disk %s already is formatted with %s", opts.FSType, devicePath, existingFSType)
 		}
-	} else if existingFSType != opts.FSType {
-		return fmt.Errorf("requested %s volume, but disk %s already is formatted with %s", opts.FSType, devicePath, existingFSType)
 	}
 
 	level.Info(s.logger).Log(
