@@ -27,6 +27,7 @@ type K8sDistribution string
 const (
 	K8sDistributionK8s K8sDistribution = "k8s"
 	K8sDistributionK3s K8sDistribution = "k3s"
+	TestDriverFilePath                 = "templates/testdrivers/1.23.yml"
 )
 
 var instanceType = "cpx21"
@@ -253,15 +254,15 @@ func (s *hcloudK8sSetup) PrepareK8s() (string, error) {
 	}
 
 	fmt.Printf("[%s] %s: Read test-driver.yml configuration file\n", s.MainNode.Name, op)
-	testDriverFile, err := ioutil.ReadFile("templates/testdrivers/1.18.yml")
+	testDriverFile, err := ioutil.ReadFile(TestDriverFilePath)
 	if err != nil {
-		return "", fmt.Errorf("%s read testdriverfile file: %s %v", op, "templates/testdrivers/1.18.yml", err)
+		return "", fmt.Errorf("%s read testdriverfile file: %s %v", op, TestDriverFilePath, err)
 	}
 
 	fmt.Printf("[%s] %s: Transfer test-driver.yml configuration file\n", s.MainNode.Name, op)
 	err = RunCommandOnServer(s.privKey, s.MainNode, fmt.Sprintf("echo '%s' >> test-driver.yml", testDriverFile))
 	if err != nil {
-		return "", fmt.Errorf("%s send testdriverfile file: %s %v", op, "templates/testdrivers/1.18.yml", err)
+		return "", fmt.Errorf("%s send testdriverfile file: %s %v", op, TestDriverFilePath, err)
 	}
 	fmt.Printf("[%s] %s: Download kubeconfig\n", s.MainNode.Name, op)
 	err = scp("ssh_key", fmt.Sprintf("root@%s:/root/.kube/config", s.MainNode.PublicNet.IPv4.IP.String()), "kubeconfig")
