@@ -5,6 +5,7 @@ import (
 	"io/ioutil"
 	"math"
 	"os"
+	"path"
 	"runtime"
 	"testing"
 
@@ -19,19 +20,20 @@ func TestVolumePublishUnpublish(t *testing.T) {
 
 	tests := []struct {
 		name          string
-		passphrase    string
+		mountOpts     volumes.MountOpts
 		prepare       func(svc volumes.MountService, cs *volumes.CryptSetup, device string) error
 		expectedError error
 	}{
+		// Block volume not formatted
 		{
 			"plain",
-			"",
+			volumes.MountOpts{},
 			nil,
 			nil,
 		},
 		{
 			"plain-correct-formatted",
-			"",
+			volumes.MountOpts{},
 			func(svc volumes.MountService, cs *volumes.CryptSetup, device string) error {
 				return svc.FormatDisk(device, "ext4")
 			},
@@ -39,21 +41,27 @@ func TestVolumePublishUnpublish(t *testing.T) {
 		},
 		{
 			"plain-wrong-formatted",
-			"",
+			volumes.MountOpts{},
 			func(svc volumes.MountService, cs *volumes.CryptSetup, device string) error {
 				return svc.FormatDisk(device, "xfs")
 			},
 			fmt.Errorf("requested ext4 volume, but disk /dev-fake-plain-wrong-formatted already is formatted with xfs"),
 		},
 		{
+			"block-volume",
+			volumes.MountOpts{BlockVolume: true},
+			nil,
+			nil,
+		},
+		{
 			"encrypted",
-			"passphrase",
+			volumes.MountOpts{EncryptionPassphrase: "passphrase"},
 			nil,
 			nil,
 		},
 		{
 			"encrypted-correct-formatted-1",
-			"passphrase",
+			volumes.MountOpts{EncryptionPassphrase: "passphrase"},
 			func(svc volumes.MountService, cs *volumes.CryptSetup, device string) error {
 				if err := cs.Format(device, "passphrase"); err != nil {
 					return err
@@ -64,7 +72,7 @@ func TestVolumePublishUnpublish(t *testing.T) {
 		},
 		{
 			"encrypted-correct-formatted-2",
-			"passphrase",
+			volumes.MountOpts{EncryptionPassphrase: "passphrase"},
 			func(svc volumes.MountService, cs *volumes.CryptSetup, device string) error {
 				if err := cs.Format(device, "passphrase"); err != nil {
 					return err
@@ -84,7 +92,7 @@ func TestVolumePublishUnpublish(t *testing.T) {
 		},
 		{
 			"encrypted-wrong-formatted-1",
-			"passphrase",
+			volumes.MountOpts{EncryptionPassphrase: "passphrase"},
 			func(svc volumes.MountService, cs *volumes.CryptSetup, device string) error {
 				return svc.FormatDisk(device, "ext4")
 			},
@@ -94,6 +102,7 @@ func TestVolumePublishUnpublish(t *testing.T) {
 
 	for _, test := range tests {
 		t.Run(test.name, func(t *testing.T) {
+
 			logger := log.NewLogfmtLogger(NewTestingWriter(t))
 			mountService := volumes.NewLinuxMountService(logger)
 			cryptSetup := volumes.NewCryptSetup(logger)
@@ -108,29 +117,70 @@ func TestVolumePublishUnpublish(t *testing.T) {
 				}
 			}
 
-			targetPath, err := ioutil.TempDir(os.TempDir(), "")
+			targetPath, err := ioutil.TempDir(os.TempDir(), "csi-driver")
 			if err != nil {
 				t.Fatal()
 			}
+			// Make sure that target path is non-existant
+			// Required as FS volumes require target dir, but block volumes require
+			// target file
+			targetPath = path.Join(targetPath, "target-path")
 
-			if err := mountService.Publish(targetPath, device, volumes.MountOpts{
-				EncryptionPassphrase: test.passphrase,
-			}); err != nil {
-				if test.expectedError == nil {
-					t.Fatal(err)
-				} else if test.expectedError.Error() != err.Error() {
-					t.Fatal(fmt.Errorf("expected error %q but got %q", test.expectedError.Error(), err.Error()))
+			publishErr := mountService.Publish(targetPath, device, test.mountOpts)
+			if test.expectedError != nil {
+				// We expected an error
+				if publishErr == nil {
+					t.Fatalf("expected error %q but got no error", test.expectedError.Error())
+				} else if test.expectedError.Error() != publishErr.Error() {
+					t.Fatal(fmt.Errorf("expected error %q but got %q", test.expectedError.Error(), publishErr.Error()))
+				}
+
+				// Makes no sense to continue verification if we got the error that we expected
+				_ = mountService.Unpublish(targetPath)
+				return
+			} else {
+				if err != nil {
+					t.Fatal(publishErr)
 				}
 			}
 			defer mountService.Unpublish(targetPath)
 
-			if _, err := ioutil.ReadDir(targetPath); err != nil {
+			// Verify target exists and is of expected type
+			fileInfo, err := os.Stat(targetPath)
+			if err != nil {
 				t.Fatal(err)
+			}
+			isDir := fileInfo.IsDir()
+
+			if test.mountOpts.BlockVolume && isDir {
+				t.Fatal("targetPath expected to be a file for block volumes, but is a directory")
 			}
 
-			if err := mountService.Unpublish(targetPath); err != nil {
-				t.Fatal(err)
+			if !test.mountOpts.BlockVolume && !isDir {
+				t.Fatal("targetPath expected to be a directory for fs volumes, but is a file")
 			}
+
+			if test.mountOpts.EncryptionPassphrase == "" {
+				// Verify device has expected fs type
+				// Encrypted volumes always have "crypto_LUKS"
+				fsType, err := mountService.DetectDiskFormat(device)
+				if err != nil {
+					t.Fatal(err)
+				}
+				expectedFSType := test.mountOpts.FSType
+				if expectedFSType == "" && !test.mountOpts.BlockVolume {
+					// ext4 is default fs type
+					expectedFSType = "ext4"
+				}
+				if fsType != expectedFSType {
+					t.Fatalf("expected device to have fs type '%s', but device is formatted with '%s'", expectedFSType, fsType)
+				}
+
+				if err := mountService.Unpublish(targetPath); err != nil {
+					t.Fatal(err)
+				}
+			}
+
 		})
 	}
 }
