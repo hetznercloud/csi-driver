@@ -41,6 +41,7 @@ jobs:
     - name: Run tests
       env:
         K8S_VERSION: ${{ matrix.k8s }}
+        CGO_ENABLED: "0"
       run: |
         go test $(go list ./... | grep e2etests) -v -timeout 60m
         ./script/delete-token.sh $HCLOUD_TOKEN
