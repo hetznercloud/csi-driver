@@ -18,6 +18,10 @@ jobs:
           key: ${{ runner.os }}-go-${{ hashFiles('**/go.sum') }}
           restore-keys: |
             ${{ runner.os }}-go-
+      - name: Verify manifests are up to date
+        run: |
+          kustomize build deploy/kubernetes > /tmp/hcloud-csi.yml
+          diff deploy/kubernetes/hcloud-csi.yml /tmp/hcloud-csi.yml
       - name: Run tests
         run: |
           go vet ./...
