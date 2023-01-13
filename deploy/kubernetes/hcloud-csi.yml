@@ -249,7 +249,6 @@ spec:
               key: token
               name: hcloud
         image: hetznercloud/hcloud-csi-driver:latest
-        imagePullPolicy: Always
         livenessProbe:
           failureThreshold: 5
           httpGet:
@@ -269,7 +268,6 @@ spec:
         - mountPath: /run/csi
           name: socket-dir
       - image: k8s.gcr.io/sig-storage/livenessprobe:v2.9.0
-        imagePullPolicy: Always
         name: liveness-probe
         volumeMounts:
         - mountPath: /run/csi
@@ -324,7 +322,6 @@ spec:
         - name: ENABLE_METRICS
           value: "true"
         image: hetznercloud/hcloud-csi-driver:latest
-        imagePullPolicy: Always
         livenessProbe:
           failureThreshold: 5
           httpGet:
@@ -351,7 +348,6 @@ spec:
         - mountPath: /dev
           name: device-dir
       - image: k8s.gcr.io/sig-storage/livenessprobe:v2.9.0
-        imagePullPolicy: Always
         name: liveness-probe
         volumeMounts:
         - mountPath: /run/csi

@@ -42,7 +42,6 @@ spec:
           mountPath: /registration
       - name: hcloud-csi-driver
         image: hetznercloud/hcloud-csi-driver:latest
-        imagePullPolicy: Always
         command: [/bin/hcloud-csi-driver-node]
         env:
         - name: CSI_ENDPOINT
@@ -76,7 +75,6 @@ spec:
           timeoutSeconds: 3
           periodSeconds: 2
       - name: liveness-probe
-        imagePullPolicy: Always
         image: k8s.gcr.io/sig-storage/livenessprobe:v2.9.0
         volumeMounts:
         - mountPath: /run/csi

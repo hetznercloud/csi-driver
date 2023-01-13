@@ -333,7 +333,6 @@ func (s *hcloudK8sSetup) prepareCSIDriverDeploymentFile() error {
 
 	fmt.Printf("[%s] %s: Prepare deployment file and transfer it\n", s.MainNode.Name, op)
 	deploymentFile = []byte(strings.ReplaceAll(string(deploymentFile), "hetznercloud/hcloud-csi-driver:latest", fmt.Sprintf("hcloud-csi:ci_%s", s.TestIdentifier)))
-	deploymentFile = []byte(strings.ReplaceAll(string(deploymentFile), " imagePullPolicy: Always", " imagePullPolicy: IfNotPresent"))
 
 	err = RunCommandOnServer(s.privKey, s.MainNode, fmt.Sprintf("echo '%s' >> csi-driver.yml", deploymentFile))
 	if err != nil {
