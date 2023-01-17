@@ -6,18 +6,25 @@ DriverInfo:
     Max: 15Gi
     Min: 10Gi
   Capabilities:
+    # Available capabilities are defined in the kubernetes repositories, make
+    # sure to select the corresponding k8s version:
+    # https://github.com/kubernetes/kubernetes/blob/release-1.23/test/e2e/storage/framework/testdriver.go#L150
     persistence: true
     block: true
     fsGroup: true
+    volumeMountGroup: false
     exec: false
     snapshotDataSource: false
     pvcDataSource: false
+    multipods: true
     RWX: false
-    multipods: false
     controllerExpansion: true
     nodeExpansion: true
+    onlineExpansion: false
     volumeLimits: false
     singleNodeVolume: true
+    topology: true
+    capacity: false
   SupportedFsType:
     ext4:
     xfs:
