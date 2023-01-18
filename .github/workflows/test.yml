@@ -21,6 +21,10 @@ jobs:
       - name: Verify manifests are up to date
         run: |
           kustomize build deploy/kubernetes > /tmp/hcloud-csi.yml
+          # Workaround for kustomize stripping all comments. This comment is
+          # needed to automatically bump the referenced container tag through
+          # release-please
+          sed -i '/hetznercloud\/hcloud-csi-driver/ s/$/ # x-release-please-version/' /tmp/hcloud-csi.yml
           diff deploy/kubernetes/hcloud-csi.yml /tmp/hcloud-csi.yml
       - name: Run tests
         run: |
