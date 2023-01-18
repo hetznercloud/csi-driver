@@ -4,7 +4,7 @@ Dockerfile
 .github/
 .gitlab-ci.yml
 .idea/
-CHANGES.md
+CHANGELOG.md
 LICENSE
 README.md
 e2etests/
