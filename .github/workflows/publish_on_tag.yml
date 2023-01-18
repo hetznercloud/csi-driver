@@ -12,20 +12,6 @@ jobs:
           fetch-depth: 0
       - id: release_version
         run: echo ::set-output name=value::${GITHUB_REF:11}
-      - name: update pushed tag
-        env:
-          RELEASE_VERSION: ${{ steps.release_version.outputs.value}}
-          OWNER: ${{ github.repository_owner }}
-        run: |
-          sed -i -e "s#: .*/hcloud-csi-driver:latest#: $OWNER/hcloud-csi-driver:$RELEASE_VERSION#" deploy/kubernetes/hcloud-csi.yml
-          sed -i -e "s/PluginVersion = \".*\"$/PluginVersion = \"$RELEASE_VERSION\"/g" driver/driver.go
-          git config user.name github-actions
-          git config user.email github-actions@github.com
-          git add .
-          git commit -m "Update version tags to $RELEASE_VERSION"
-          git tag -d v$RELEASE_VERSION
-          git tag v$RELEASE_VERSION
-          git push origin v$RELEASE_VERSION -f
       - name: Set up Docker Buildx
         uses: docker/setup-buildx-action@v1
       - name: Login to DockerHub
@@ -42,11 +28,3 @@ jobs:
           tags: ${{ github.repository_owner }}/hcloud-csi-driver:${{ steps.release_version.outputs.value}}
           cache-from: type=registry,ref=${{ github.repository_owner }}/hcloud-csi-driver:buildcache
           cache-to: type=registry,ref=${{ github.repository_owner }}/hcloud-csi-driver:buildcache,mode=max
-      - name: Run GoReleaser
-        uses: goreleaser/goreleaser-action@v2
-        with:
-          distribution: goreleaser
-          version: latest
-          args: release --rm-dist
-        env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
