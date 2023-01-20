@@ -11,8 +11,8 @@ require (
 	github.com/hetznercloud/hcloud-go v1.37.0
 	github.com/kubernetes-csi/csi-test/v4 v4.4.0
 	github.com/prometheus/client_golang v1.14.0
-	golang.org/x/crypto v0.2.0
-	golang.org/x/sys v0.2.0
+	golang.org/x/crypto v0.5.0
+	golang.org/x/sys v0.4.0
 	google.golang.org/grpc v1.50.1
 	k8s.io/api v0.24.0
 	k8s.io/apimachinery v0.24.0
@@ -55,10 +55,10 @@ require (
 	github.com/prometheus/common v0.37.0 // indirect
 	github.com/prometheus/procfs v0.8.0 // indirect
 	github.com/spf13/pflag v1.0.5 // indirect
-	golang.org/x/net v0.2.0 // indirect
+	golang.org/x/net v0.5.0 // indirect
 	golang.org/x/oauth2 v0.0.0-20220223155221-ee480838109b // indirect
-	golang.org/x/term v0.2.0 // indirect
-	golang.org/x/text v0.4.0 // indirect
+	golang.org/x/term v0.4.0 // indirect
+	golang.org/x/text v0.6.0 // indirect
 	golang.org/x/time v0.0.0-20220210224613-90d013bbcef8 // indirect
 	google.golang.org/appengine v1.6.7 // indirect
 	google.golang.org/genproto v0.0.0-20210917145530-b395a37504d4 // indirect
