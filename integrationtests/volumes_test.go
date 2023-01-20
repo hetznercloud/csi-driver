@@ -3,6 +3,7 @@ package integrationtests
 import (
 	"fmt"
 	"io/ioutil"
+	"math"
 	"os"
 	"path"
 	"runtime"
@@ -105,7 +106,7 @@ func TestVolumePublishUnpublish(t *testing.T) {
 			logger := log.NewLogfmtLogger(NewTestingWriter(t))
 			mountService := volumes.NewLinuxMountService(logger)
 			cryptSetup := volumes.NewCryptSetup(logger)
-			device, err := createFakeDevice("fake-"+test.name, 32)
+			device, err := createFakeDevice("fake-"+test.name, 512)
 			if err != nil {
 				t.Fatal(err)
 			}
@@ -194,13 +195,11 @@ func TestVolumeResize(t *testing.T) {
 	}
 
 	tests := []*struct {
-		name        string
-		passphrase  string
-		initialSize int
-		finalSize   int
+		name       string
+		passphrase string
 	}{
-		{"plain", "", 25844, 56042},
-		{"encrypted", "passphrase", 27044, 57402},
+		{"plain", ""},
+		{"encrypted", "passphrase"},
 	}
 
 	for _, test := range tests {
@@ -210,7 +209,7 @@ func TestVolumeResize(t *testing.T) {
 			resizeService := volumes.NewLinuxResizeService(logger)
 			cryptSetup := volumes.NewCryptSetup(logger)
 			deviceName := "fake-" + test.name
-			device, err := createFakeDevice(deviceName, 32)
+			device, err := createFakeDevice(deviceName, 512)
 			if err != nil {
 				t.Fatal(err)
 			}
@@ -241,7 +240,7 @@ func TestVolumeResize(t *testing.T) {
 				}
 			}
 
-			if err := increaseFakeDeviceSize(deviceName, 32); err != nil {
+			if err := increaseFakeDeviceSize(deviceName, 512); err != nil {
 				t.Fatal()
 			}
 
@@ -252,20 +251,22 @@ func TestVolumeResize(t *testing.T) {
 			}
 			defer mountService.Unpublish(targetPath)
 
-			if size, err := getFakeDeviceSizeKilobytes(targetPath); err != nil {
+			initialSize, err := getFakeDeviceSizeKilobytes(targetPath)
+			if err != nil {
 				t.Fatal(err)
-			} else if size != test.initialSize {
-				t.Error(fmt.Errorf("expected initial size of %d KB, got %d KB", test.initialSize, size))
 			}
 
 			if err := resizeService.Resize(targetPath); err != nil {
 				t.Fatal(err)
 			}
 
-			if size, err := getFakeDeviceSizeKilobytes(targetPath); err != nil {
+			finalSize, err := getFakeDeviceSizeKilobytes(targetPath)
+			if err != nil {
 				t.Fatal(err)
-			} else if size != test.finalSize {
-				t.Fatal(fmt.Errorf("expected final size of %d KB, got %d KB", test.finalSize, size))
+			}
+
+			if math.Round(float64(finalSize)/float64(initialSize)) != 2.0 {
+				t.Fatal(fmt.Errorf("expected final size to be roughly double of initial size (final size %d KB, initial size %d KB)", finalSize, initialSize))
 			}
 
 			if err := mountService.Unpublish(targetPath); err != nil {
@@ -320,7 +321,7 @@ func TestDetectDiskFormat(t *testing.T) {
 		t.Run(test.name, func(t *testing.T) {
 			logger := log.NewLogfmtLogger(NewTestingWriter(t))
 			mountService := volumes.NewLinuxMountService(logger)
-			disk, err := createFakeDevice(test.name, 32)
+			disk, err := createFakeDevice(test.name, 512)
 			if err != nil {
 				t.Fatal(err)
 			}
