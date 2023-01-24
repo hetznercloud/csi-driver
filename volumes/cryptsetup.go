@@ -55,7 +55,7 @@ func (cs *CryptSetup) Open(devicePath string, luksDeviceName string, passphrase 
 		"devicePath", devicePath,
 		"luksDeviceName", luksDeviceName,
 	)
-	output, _, err := commandWithStdin(passphrase, cryptsetupExecuable, "luksOpen", devicePath, luksDeviceName)
+	output, _, err := commandWithStdin(passphrase, cryptsetupExecuable, "luksOpen", "--allow-discards", devicePath, luksDeviceName)
 	if err != nil {
 		return fmt.Errorf("unable to open LUKS device %s: %s", devicePath, output)
 	}
