@@ -1,5 +1,5 @@
 # FIXME: change this
-PLUGIN_NAME = costela/docker-volume-hetzner-csi
+PLUGIN_NAME = hetznercloud/csi-driver-docker
 PLUGIN_TAG ?= $(shell git describe --tags --exact-match 2> /dev/null || echo dev)
 
 all: create

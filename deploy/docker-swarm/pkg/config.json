@@ -16,6 +16,12 @@
       "description": "the CSI endpoint to listen to internally",
       "settable": [],
       "value": "unix:///run/docker/plugins/hetzner-csi.sock"
+    },
+    {
+      "name": "LOG_LEVEL",
+      "description": "the log level to use",
+      "settable": ["value"],
+      "value": "debug"
     }
   ],
   "interface": {
