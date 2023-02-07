@@ -45,5 +45,5 @@
   "network": {
     "type": "host"
   },
-  "propagatedmount": "/mnt"
+  "propagatedmount": "/data/published"
 }
