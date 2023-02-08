@@ -113,7 +113,7 @@ In case of a new major version, there might be manual steps that you need to fol
 
 ### From v1 to v2
 
-There are two breaking changes between v1.6 and v2.0 that require user intervention. Please take care to follow these steps, as otherwise the update might fail.
+There are three breaking changes between v1.6 and v2.0 that require user intervention. Please take care to follow these steps, as otherwise the update might fail.
 
 **Before the rollout**:
 
@@ -136,6 +136,15 @@ There are two breaking changes between v1.6 and v2.0 that require user intervent
    ```shell
    $ kubectl delete statefulset -n kube-system hcloud-csi-controller
    $ kubectl delete daemonset -n kube-system hcloud-csi-node
+   ```
+
+4. We changed the way the device path of mounted volumes is communicated to the node service. This requires changes to the `VolumeAttachment` objects, where we need to add information to the `status.attachmentMetadata` field. Execute the linked script to automatically add the required information. This requires `kubectl` version `v1.24+`, even if your cluster is running v1.23.
+
+   ```shell
+   $ kubectl version
+   $ curl https://raw.githubusercontent.com/hetznercloud/csi-driver/main/docs/v2-fix-volumeattachments/fix-volumeattachments.sh ./fix-volumeattachments.sh
+   $ chmod +x ./fix-volumeattachments.sh
+   $ ./fix-volumeattachments.sh
    ```
 
 **Rollout the new manifest**:
