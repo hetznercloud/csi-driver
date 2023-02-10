@@ -1,0 +1,33 @@
+apiVersion: monitoring.coreos.com/v1
+kind: ServiceMonitor
+metadata:
+  name: hcloud-csi-controller
+  namespace: kube-system
+  labels:
+    release: YOUR_RELEASE
+spec:
+  endpoints:
+  - port: metrics
+    scheme: http
+  jobLabel: app
+  selector:
+    matchLabels:
+      app: hcloud-csi-controller
+
+---
+
+apiVersion: monitoring.coreos.com/v1
+kind: ServiceMonitor
+metadata:
+  name: hcloud-csi-node
+  namespace: kube-system
+  labels:
+    release: YOUR_RELEASE
+spec:
+  endpoints:
+  - port: metrics
+    scheme: http
+  jobLabel: app
+  selector:
+    matchLabels:
+      app: hcloud-csi
