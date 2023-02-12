@@ -42,11 +42,13 @@ func NewNodeService(
 const encryptionPassphraseKey = "encryption-passphrase"
 
 func (s *NodeService) NodeStageVolume(ctx context.Context, req *proto.NodeStageVolumeRequest) (*proto.NodeStageVolumeResponse, error) {
-	return nil, status.Error(codes.Unimplemented, "not supported")
+	// while we dont do anything here, Swarm 23.0.1 might require this
+	return &proto.NodeStageVolumeResponse{}, nil
 }
 
 func (s *NodeService) NodeUnstageVolume(ctx context.Context, req *proto.NodeUnstageVolumeRequest) (*proto.NodeUnstageVolumeResponse, error) {
-	return nil, status.Error(codes.Unimplemented, "not supported")
+	// while we dont do anything here, Swarm 23.0.1 might require this
+	return &proto.NodeUnstageVolumeResponse{}, nil
 }
 
 func (s *NodeService) NodePublishVolume(ctx context.Context, req *proto.NodePublishVolumeRequest) (*proto.NodePublishVolumeResponse, error) {
@@ -161,6 +163,13 @@ func (s *NodeService) NodeGetCapabilities(ctx context.Context, req *proto.NodeGe
 				Type: &proto.NodeServiceCapability_Rpc{
 					Rpc: &proto.NodeServiceCapability_RPC{
 						Type: proto.NodeServiceCapability_RPC_GET_VOLUME_STATS,
+					},
+				},
+			},
+			{
+				Type: &proto.NodeServiceCapability_Rpc{
+					Rpc: &proto.NodeServiceCapability_RPC{
+						Type: proto.NodeServiceCapability_RPC_STAGE_UNSTAGE_VOLUME,
 					},
 				},
 			},
