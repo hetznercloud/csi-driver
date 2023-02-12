@@ -13,25 +13,20 @@ docker volume update <volume-name> --availability drain
 
 This way, we ensure that all services stop using the volume.
 
-2. Go to the Hetzner Cloud UI, and rename the volume to `tmp-<volume-name>`
-
-This way, the link to the cluster is broken
-
-3. Force remove volume on cluster
+2. Force remove volume on cluster
 
 ```
 docker volume rm -f <volume-name>
 ```
 
 4. Resize Volume in Hetzner UI
-5. Rename Volume to original name
-6. Recreate Volume with new size to make it known to Swarm again
+5. Recreate Volume with new size to make it known to Swarm again
 
 ```
 docker volume create   --driver hetznercloud/csi-driver-docker:dev --required-bytes <new-size>  --type mount   --sharing onewriter   --scope single <volume-name>
 ```
 
-7. Verify that volume exists again:
+6. Verify that volume exists again:
 
 ```
 docker volume ls --cluster
