@@ -26,3 +26,8 @@ jobs:
           tags: ${{ github.repository_owner }}/hcloud-csi-driver:latest
           cache-from: type=registry,ref=${{ github.repository_owner }}/hcloud-csi-driver:buildcache
           cache-to: type=registry,ref=${{ github.repository_owner }}/hcloud-csi-driver:buildcache,mode=max
+      - name: "make docker plugin"
+        RELEASE_VERSION: ${{ steps.release_version.outputs.value}}
+        run: |
+          cd deploy/docker-swarm/pkg
+          make push PLUGIN_NAME=hetznercloud/csi-driver-docker PLUGIN_TAG=latest
