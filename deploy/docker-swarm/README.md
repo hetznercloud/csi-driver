@@ -8,19 +8,21 @@ for cluster volumes (=CSI) support at https://github.com/moby/moby/blob/master/d
 Run the following steps on all nodes (especially master nodes).
 The simplest way to achieve this
 
-1. Install the plugin 
+1. Create a read+write API token in the [Hetzner Cloud Console](https://console.hetzner.cloud/).
+
+2. Install the plugin 
 
 ```bash
 docker plugin install --disable --alias hetznercloud/csi-driver-docker --grant-all-permissions hetznercloud/csi-driver-docker
 ```
 
-2. Set HCLOUD_TOKEN
+3. Set HCLOUD_TOKEN
 
 ```bash
 docker plugin set hetznercloud/csi-driver-docker HCLOUD_TOKEN=<your token>
 ```
 
-3. Enable plugin
+4. Enable plugin
 
 ```bash
 docker plugin enable hetznercloud/csi-driver-docker
@@ -86,7 +88,7 @@ docker volume rm -f <volume-name>
 8. Recreate Volume with new size to make it known to Swarm again
 
 ```
-docker volume create   --driver hetznercloud/csi-driver-docker:dev --required-bytes <new-size>  --type mount   --sharing onewriter   --scope single <volume-name>
+docker volume create --driver hetznercloud/csi-driver-docker --required-bytes <new-size>  --type mount   --sharing onewriter   --scope single <volume-name>
 ```
 
 9. Verify that volume exists again:
