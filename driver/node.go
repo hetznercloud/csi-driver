@@ -3,6 +3,7 @@ package driver
 import (
 	"context"
 	"fmt"
+	"os"
 
 	proto "github.com/container-storage-interface/spec/lib/go/csi"
 	"github.com/go-kit/kit/log"
@@ -19,6 +20,11 @@ type NodeService struct {
 	volumeMountService  volumes.MountService
 	volumeResizeService volumes.ResizeService
 	volumeStatsService  volumes.StatsService
+	// enable volume staging api to workaround
+	// docker CSI support not working properly
+	// if a plugin does not support staging
+	// see https://github.com/moby/swarmkit/pull/3116
+	forceVolumeStaging bool
 }
 
 func NewNodeService(
@@ -36,6 +42,7 @@ func NewNodeService(
 		volumeMountService:  volumeMountService,
 		volumeResizeService: volumeResizeService,
 		volumeStatsService:  volumeStatsService,
+		forceVolumeStaging:  os.Getenv("FORCE_STAGING_SUPPORT") == "",
 	}
 }
 
@@ -150,31 +157,37 @@ func (s *NodeService) NodeGetVolumeStats(ctx context.Context, req *proto.NodeGet
 }
 
 func (s *NodeService) NodeGetCapabilities(ctx context.Context, req *proto.NodeGetCapabilitiesRequest) (*proto.NodeGetCapabilitiesResponse, error) {
-	resp := &proto.NodeGetCapabilitiesResponse{
-		Capabilities: []*proto.NodeServiceCapability{
-			{
-				Type: &proto.NodeServiceCapability_Rpc{
-					Rpc: &proto.NodeServiceCapability_RPC{
-						Type: proto.NodeServiceCapability_RPC_EXPAND_VOLUME,
-					},
+	capabilities := []*proto.NodeServiceCapability{
+		{
+			Type: &proto.NodeServiceCapability_Rpc{
+				Rpc: &proto.NodeServiceCapability_RPC{
+					Type: proto.NodeServiceCapability_RPC_EXPAND_VOLUME,
 				},
 			},
-			{
-				Type: &proto.NodeServiceCapability_Rpc{
-					Rpc: &proto.NodeServiceCapability_RPC{
-						Type: proto.NodeServiceCapability_RPC_GET_VOLUME_STATS,
-					},
-				},
-			},
-			{
-				Type: &proto.NodeServiceCapability_Rpc{
-					Rpc: &proto.NodeServiceCapability_RPC{
-						Type: proto.NodeServiceCapability_RPC_STAGE_UNSTAGE_VOLUME,
-					},
+		},
+		{
+			Type: &proto.NodeServiceCapability_Rpc{
+				Rpc: &proto.NodeServiceCapability_RPC{
+					Type: proto.NodeServiceCapability_RPC_GET_VOLUME_STATS,
 				},
 			},
 		},
 	}
+
+	if s.forceVolumeStaging {
+		capabilities = append(capabilities, &proto.NodeServiceCapability{
+			Type: &proto.NodeServiceCapability_Rpc{
+				Rpc: &proto.NodeServiceCapability_RPC{
+					Type: proto.NodeServiceCapability_RPC_STAGE_UNSTAGE_VOLUME,
+				},
+			},
+		})
+	}
+
+	resp := &proto.NodeGetCapabilitiesResponse{
+		Capabilities: capabilities,
+	}
+
 	return resp, nil
 }
 
