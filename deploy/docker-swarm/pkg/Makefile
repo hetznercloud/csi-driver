@@ -1,4 +1,4 @@
-PLUGIN_NAME = hetznercloud/csi-driver
+PLUGIN_NAME = hetznercloud/hcloud-csi-driver
 PLUGIN_TAG ?= $(shell git describe --tags --exact-match 2> /dev/null || echo dev)-swarm
 
 all: create
