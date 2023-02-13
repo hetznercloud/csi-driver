@@ -13,19 +13,19 @@ The simplest way to achieve this
 2. Install the plugin 
 
 ```bash
-docker plugin install --disable --alias hetznercloud/csi-driver-docker --grant-all-permissions hetznercloud/csi-driver-docker
+docker plugin install --disable --alias hetznercloud/hcloud-csi-driver --grant-all-permissions hetznercloud/hcloud-csi-driver:<version>-swarm
 ```
 
 3. Set HCLOUD_TOKEN
 
 ```bash
-docker plugin set hetznercloud/csi-driver-docker HCLOUD_TOKEN=<your token>
+docker plugin set hetznercloud/hcloud-csi-driver HCLOUD_TOKEN=<your token>
 ```
 
 4. Enable plugin
 
 ```bash
-docker plugin enable hetznercloud/csi-driver-docker
+docker plugin enable hetznercloud/hcloud-csi-driver
 ```
 
 ## How to create a volume
@@ -33,7 +33,7 @@ docker plugin enable hetznercloud/csi-driver-docker
 Example: Create a volume wih size 50G in Nuremberg:
 
 ```bash
-docker volume create --driver hetznercloud/csi-driver-docker --required-bytes 50G --type mount --sharing onewriter --scope single hcloud-debug1 --topology-required nbg1
+docker volume create --driver hetznercloud/hcloud-csi-driver --required-bytes 50G --type mount --sharing onewriter --scope single hcloud-debug1 --topology-required nbg1
 ```
 
 We can now use this in a service:
@@ -47,7 +47,7 @@ Note that only scope `single` is supported as Hetzner Cloud volumes can only be 
 We can however share the volume on multiple containers on the same host:
 
 ```bash
-docker volume create --driver hetznercloud/csi-driver-docker --required-bytes 50G --type mount --sharing all --scope single hcloud-debug1 --topology-required nbg1
+docker volume create --driver hetznercloud/hcloud-csi-driver --required-bytes 50G --type mount --sharing all --scope single hcloud-debug1 --topology-required nbg1
 ```
 
 After creation we can now use this volume with `--sharing all` in more than one replica:
@@ -88,7 +88,7 @@ docker volume rm -f <volume-name>
 8. Recreate Volume with new size to make it known to Swarm again
 
 ```
-docker volume create --driver hetznercloud/csi-driver-docker --required-bytes <new-size>  --type mount   --sharing onewriter   --scope single <volume-name>
+docker volume create --driver hetznercloud/hcloud-csi-driver --required-bytes <new-size>  --type mount   --sharing onewriter   --scope single <volume-name>
 ```
 
 9. Verify that volume exists again:
