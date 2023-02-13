@@ -42,7 +42,7 @@ func NewNodeService(
 		volumeMountService:  volumeMountService,
 		volumeResizeService: volumeResizeService,
 		volumeStatsService:  volumeStatsService,
-		forceVolumeStaging:  os.Getenv("FORCE_STAGING_SUPPORT") == "",
+		forceVolumeStaging:  os.Getenv("FORCE_STAGING_SUPPORT") == "true",
 	}
 }
 
