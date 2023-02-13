@@ -34,15 +34,6 @@ func main() {
 
 	metadataClient := metadata.NewClient(metadata.WithInstrumentation(m.Registry()))
 
-	server, err := app.GetServer(logger, hcloudClient, metadataClient)
-	if err != nil {
-		level.Error(logger).Log(
-			"msg", "failed to fetch server",
-			"err", err,
-		)
-		os.Exit(1)
-	}
-
 	// node
 	serverID, err := metadataClient.InstanceID()
 	if err != nil {
@@ -93,7 +84,7 @@ func main() {
 	controllerService := driver.NewControllerService(
 		log.With(logger, "component", "driver-controller-service"),
 		volumeService,
-		server.Datacenter.Location.Name,
+		serverLocation,
 	)
 
 	// common
