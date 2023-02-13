@@ -8,7 +8,9 @@
     {
       "name": "HCLOUD_TOKEN",
       "description": "authentication token to use when accessing the Hetzner Cloud API",
-      "settable": ["value"],
+      "settable": [
+        "value"
+      ],
       "value": ""
     },
     {
@@ -20,16 +22,18 @@
     {
       "name": "LOG_LEVEL",
       "description": "the log level to use",
-      "settable": ["value"],
+      "settable": [
+        "value"
+      ],
       "value": "debug"
     }
   ],
   "interface": {
     "socket": "hetzner-csi.sock",
-		"types": [
-			"docker.csicontroller/1.0",
-			"docker.csinode/1.0"
-		]
+    "types": [
+      "docker.csicontroller/1.0",
+      "docker.csinode/1.0"
+    ]
   },
   "linux": {
     "allowAllDevices": true,
@@ -42,7 +46,10 @@
     {
       "description": "used to access the dynamically attached block devices",
       "destination": "/dev",
-      "options": ["rbind","rshared"],
+      "options": [
+        "rbind",
+        "rshared"
+      ],
       "name": "dev",
       "source": "/dev/",
       "type": "bind"
