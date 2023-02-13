@@ -59,7 +59,7 @@ docker service scale hcloud-debug-serv2=2
 
 ## How to resize a docker swarm Hetzner CSI volume
 
-Currently, the Docker Swarm CSI support does not come with support for volume resizing.
+Currently, the Docker Swarm CSI support does not come with support for volume resizing. See [this ticket](https://github.com/moby/moby/issues/44985) for the current state on the Docker side.
 The following explains a step by step guide on how to do this manually instead.
 
 Please test the following on a Swarm with the same version as your target cluster
