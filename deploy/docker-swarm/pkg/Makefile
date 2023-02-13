@@ -26,6 +26,6 @@ push: create
 	docker plugin push ${PLUGIN_NAME}:${PLUGIN_TAG}
 
 push_latest: create
-	docker plugin push ${PLUGIN_NAME}:latest
+	docker plugin push ${PLUGIN_NAME}:latest-swarm
 
 .PHONY: clean rootfs create enable push
