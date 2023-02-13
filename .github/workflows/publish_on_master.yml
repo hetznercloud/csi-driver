@@ -29,4 +29,4 @@ jobs:
       - name: "make docker plugin"
         run: |
           cd deploy/docker-swarm/pkg
-          make push PLUGIN_NAME=hetznercloud/csi-driver PLUGIN_TAG=latest-swarm
+          make push PLUGIN_NAME=${{ github.repository_owner }}/hcloud-csi-driver PLUGIN_TAG=latest-swarm

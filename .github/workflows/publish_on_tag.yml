@@ -47,7 +47,7 @@ jobs:
           RELEASE_VERSION: ${{ steps.release_version.outputs.value}}
         run: |
           cd deploy/docker-swarm/pkg
-          make push PLUGIN_NAME=hetznercloud/csi-driver PLUGIN_TAG=$RELEASE_VERSION-swarm
+          make push PLUGIN_NAME=${{ github.repository_owner }}/hcloud-csi-driver PLUGIN_TAG=$RELEASE_VERSION-swarm
       - name: Run GoReleaser
         uses: goreleaser/goreleaser-action@v2
         with:
