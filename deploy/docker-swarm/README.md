@@ -33,7 +33,7 @@ docker plugin enable hetznercloud/hcloud-csi-driver
 Example: Create a volume wih size 50G in Nuremberg:
 
 ```bash
-docker volume create --driver hetznercloud/hcloud-csi-driver --required-bytes 50G --type mount --sharing onewriter --scope single hcloud-debug1 --topology-required nbg1
+docker volume create --driver hetznercloud/hcloud-csi-driver --required-bytes 50G --type mount --sharing onewriter --scope single hcloud-debug1 --topology-required csi.hetzner.cloud/location=nbg1
 ```
 
 We can now use this in a service:
@@ -47,7 +47,7 @@ Note that only scope `single` is supported as Hetzner Cloud volumes can only be 
 We can however share the volume on multiple containers on the same host:
 
 ```bash
-docker volume create --driver hetznercloud/hcloud-csi-driver --required-bytes 50G --type mount --sharing all --scope single hcloud-debug1 --topology-required nbg1
+docker volume create --driver hetznercloud/hcloud-csi-driver --required-bytes 50G --type mount --sharing all --scope single hcloud-debug1 --topology-required csi.hetzner.cloud/location=nbg1
 ```
 
 After creation we can now use this volume with `--sharing all` in more than one replica:
