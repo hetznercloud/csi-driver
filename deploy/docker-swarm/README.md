@@ -3,6 +3,8 @@
 Currently in Beta. Please consult the Docker Swarm documentation
 for cluster volumes (=CSI) support at https://github.com/moby/moby/blob/master/docs/cluster_volumes.md
 
+The community is tracking the state of support for CSI in Docker Swarm over at https://github.com/olljanat/csi-plugins-for-docker-swarm
+
 ## How to install the plugin
 
 Run the following steps on all nodes (especially master nodes).
@@ -12,20 +14,23 @@ The simplest way to achieve this
 
 2. Install the plugin 
 
+Note that docker plugins without a tag in the alias currently get `:latest` appended. To prevent this from happening, we will use
+the fake tag `:swarm` instead.
+
 ```bash
-docker plugin install --disable --alias hetznercloud/hcloud-csi-driver --grant-all-permissions hetznercloud/hcloud-csi-driver:<version>-swarm
+docker plugin install --disable --alias hetznercloud/hcloud-csi-driver:swarm --grant-all-permissions hetznercloud/hcloud-csi-driver:<version>-swarm
 ```
 
 3. Set HCLOUD_TOKEN
 
 ```bash
-docker plugin set hetznercloud/hcloud-csi-driver HCLOUD_TOKEN=<your token>
+docker plugin set hetznercloud/hcloud-csi-driver:swarm HCLOUD_TOKEN=<your token>
 ```
 
 4. Enable plugin
 
 ```bash
-docker plugin enable hetznercloud/hcloud-csi-driver
+docker plugin enable hetznercloud/hcloud-csi-driver:swarm
 ```
 
 ## How to create a volume
@@ -33,7 +38,7 @@ docker plugin enable hetznercloud/hcloud-csi-driver
 Example: Create a volume wih size 50G in Nuremberg:
 
 ```bash
-docker volume create --driver hetznercloud/hcloud-csi-driver --required-bytes 50G --type mount --sharing onewriter --scope single hcloud-debug1 --topology-required csi.hetzner.cloud/location=nbg1
+docker volume create --driver hetznercloud/hcloud-csi-driver:swarm --required-bytes 50G --type mount --sharing onewriter --scope single hcloud-debug1 --topology-required csi.hetzner.cloud/location=nbg1
 ```
 
 We can now use this in a service:
@@ -47,7 +52,7 @@ Note that only scope `single` is supported as Hetzner Cloud volumes can only be 
 We can however share the volume on multiple containers on the same host:
 
 ```bash
-docker volume create --driver hetznercloud/hcloud-csi-driver --required-bytes 50G --type mount --sharing all --scope single hcloud-debug1 --topology-required csi.hetzner.cloud/location=nbg1
+docker volume create --driver hetznercloud/hcloud-csi-driver:swarm --required-bytes 50G --type mount --sharing all --scope single hcloud-debug1 --topology-required csi.hetzner.cloud/location=nbg1
 ```
 
 After creation we can now use this volume with `--sharing all` in more than one replica:
@@ -88,7 +93,7 @@ docker volume rm -f <volume-name>
 8. Recreate Volume with new size to make it known to Swarm again
 
 ```
-docker volume create --driver hetznercloud/hcloud-csi-driver --required-bytes <new-size>  --type mount   --sharing onewriter   --scope single <volume-name>
+docker volume create --driver hetznercloud/hcloud-csi-driver:swarm --required-bytes <new-size>  --type mount   --sharing onewriter   --scope single <volume-name>
 ```
 
 9. Verify that volume exists again:
