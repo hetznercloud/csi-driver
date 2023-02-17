@@ -1,0 +1,68 @@
+{
+  "description": "Hetzner csi-driver plugin for Docker",
+  "documentation": "https://github.com/hetznercloud/csi-driver",
+  "entrypoint": [
+    "/plugin/aio.bin"
+  ],
+  "env": [
+    {
+      "name": "HCLOUD_TOKEN",
+      "description": "authentication token to use when accessing the Hetzner Cloud API",
+      "settable": [
+        "value"
+      ],
+      "value": ""
+    },
+    {
+      "name": "CSI_ENDPOINT",
+      "description": "the CSI endpoint to listen to internally",
+      "settable": [],
+      "value": "unix:///run/docker/plugins/hetzner-csi.sock"
+    },
+    {
+      "name": "LOG_LEVEL",
+      "description": "the log level to use",
+      "settable": [
+        "value"
+      ],
+      "value": "debug"
+    },
+    {
+      "name": "FORCE_STAGING_SUPPORT",
+      "description": "workaround: force staging support to make Docker 23.0.0 work without https://github.com/moby/swarmkit/pull/3116",
+      "settable": ["value"],
+      "value": "true"
+    }
+  ],
+  "interface": {
+    "socket": "hetzner-csi.sock",
+    "types": [
+      "docker.csicontroller/1.0",
+      "docker.csinode/1.0"
+    ]
+  },
+  "linux": {
+    "allowAllDevices": true,
+    "capabilities": [
+      "CAP_SYS_ADMIN",
+      "CAP_CHOWN"
+    ]
+  },
+  "mounts": [
+    {
+      "description": "used to access the dynamically attached block devices",
+      "destination": "/dev",
+      "options": [
+        "rbind",
+        "rshared"
+      ],
+      "name": "dev",
+      "source": "/dev/",
+      "type": "bind"
+    }
+  ],
+  "network": {
+    "type": "host"
+  },
+  "propagatedmount": "/data/published"
+}
