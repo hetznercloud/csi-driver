@@ -8,7 +8,7 @@ require (
 	github.com/golang/protobuf v1.5.2
 	github.com/grpc-ecosystem/go-grpc-middleware v1.3.0
 	github.com/grpc-ecosystem/go-grpc-prometheus v1.2.0
-	github.com/hetznercloud/hcloud-go v1.39.0
+	github.com/hetznercloud/hcloud-go v1.40.0
 	github.com/kubernetes-csi/csi-test/v4 v4.4.0
 	github.com/prometheus/client_golang v1.14.0
 	golang.org/x/crypto v0.5.0
