@@ -4,7 +4,7 @@ metadata:
   name: hcloud-csi-controller-metrics
   namespace: kube-system
   labels:
-    app: hcloud-csi
+    app: hcloud-csi-controller
 spec:
   selector:
     app: hcloud-csi-controller
