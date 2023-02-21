@@ -5,6 +5,9 @@ jobs:
   test:
     runs-on: self-hosted
     strategy:
+      # The e2e tests are flaky and often one of the jobs fails. The default setting
+      # causes all other currently running jobs to abort and all need to be restarted.
+      fail-fast: false
       matrix:
         k8s: [ k8s-1.23.15, k8s-1.24.9, k8s-1.25.5, k8s-1.26.0 ]
     name: k8s ${{ matrix.k8s }}
