@@ -101,15 +101,29 @@ func (s *hcloudK8sSetup) PrepareTestEnv(ctx context.Context, additionalSSHKeys [
 
 	var workers = 3 // Change this value if you want to have more workers for the test
 	var wg sync.WaitGroup
+	errs := make(chan error, workers)
 	for worker := 1; worker <= workers; worker++ {
 		wg.Add(1)
-		go s.createClusterWorker(ctx, additionalSSHKeys, &wg, worker)
+		go func(worker int) {
+			err = s.createClusterWorker(ctx, additionalSSHKeys, &wg, worker)
+			if err != nil {
+				errs <- err
+			}
+		}(worker)
 	}
 	wg.Wait()
+	close(errs)
+
+	// Return first error that happened
+	err = <-errs
+	if err != nil {
+		return err
+	}
+
 	return nil
 }
 
-func (s *hcloudK8sSetup) createClusterWorker(ctx context.Context, additionalSSHKeys []*hcloud.SSHKey, wg *sync.WaitGroup, worker int) {
+func (s *hcloudK8sSetup) createClusterWorker(ctx context.Context, additionalSSHKeys []*hcloud.SSHKey, wg *sync.WaitGroup, worker int) error {
 	const op = "hcloudK8sSetup/createClusterWorker"
 	defer wg.Done()
 
@@ -118,13 +132,11 @@ func (s *hcloudK8sSetup) createClusterWorker(ctx context.Context, additionalSSHK
 
 	userData, err := s.getCloudInitConfig(false)
 	if err != nil {
-		fmt.Printf("[%s] %s getCloudInitConfig: %s", workerName, op, err)
-		return
+		return fmt.Errorf("[%s] %s getCloudInitConfig: %w", workerName, op, err)
 	}
 	srv, err := s.createServer(ctx, workerName, instanceType, additionalSSHKeys, err, userData)
 	if err != nil {
-		fmt.Printf("[%s] %s createServer: %s", workerName, op, err)
-		return
+		return fmt.Errorf("[%s] %s createServer: %w", workerName, op, err)
 	}
 	s.WorkerNodes = append(s.WorkerNodes, srv)
 
@@ -132,14 +144,12 @@ func (s *hcloudK8sSetup) createClusterWorker(ctx context.Context, additionalSSHK
 
 	err = s.waitForCloudInit(srv)
 	if err != nil {
-		fmt.Printf("[%s] %s: wait for cloud init on worker: %v", srv.Name, op, err)
-		return
+		return fmt.Errorf("[%s] %s: wait for cloud init on worker: %w", srv.Name, op, err)
 	}
 
 	err = s.transferDockerImage(srv)
 	if err != nil {
-		fmt.Printf("[%s] %s: transfer image on worker: %v\n", srv.Name, op, err)
-		return
+		return fmt.Errorf("[%s] %s: transfer image on worker: %w", srv.Name, op, err)
 	}
 
 	fmt.Printf("[%s] %s Load Image\n", srv.Name, op)
@@ -148,9 +158,10 @@ func (s *hcloudK8sSetup) createClusterWorker(ctx context.Context, additionalSSHK
 
 	err = RunCommandOnServer(s.privKey, srv, transferCmd)
 	if err != nil {
-		fmt.Printf("[%s] %s: load image on worker: %v", srv.Name, op, err)
-		return
+		return fmt.Errorf("[%s] %s: load image on worker: %w", srv.Name, op, err)
 	}
+
+	return nil
 }
 
 func (s *hcloudK8sSetup) waitUntilSSHable(server *hcloud.Server) {
