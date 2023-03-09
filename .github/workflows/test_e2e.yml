@@ -3,7 +3,7 @@ on: [pull_request]
 concurrency: ci-${{ github.ref }}
 jobs:
   test:
-    runs-on: self-hosted
+    runs-on: ubuntu-latest
     strategy:
       # The e2e tests are flaky and often one of the jobs fails. The default setting
       # causes all other currently running jobs to abort and all need to be restarted.
@@ -21,6 +21,7 @@ jobs:
     - name: HCLOUD_TOKEN
       env:
         HCLOUD_TOKEN: ${{ secrets.HCLOUD_TOKEN }}
+        TTS_TOKEN: ${{ secrets.TTS_TOKEN }}
       run: |
         set -ueo pipefail
         if [[ "${HCLOUD_TOKEN:-}" != "" ]]; then
