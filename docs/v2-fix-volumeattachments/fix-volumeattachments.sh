@@ -42,7 +42,7 @@ if [[ -z "$VOLUME_ATTACHMENTS" ]]; then
   exit 0
 fi
 
-for VOLUME_ATTACHMENT in "$VOLUME_ATTACHMENTS"; do
+for VOLUME_ATTACHMENT in $VOLUME_ATTACHMENTS; do
   write_log "[INFO] Processing VolumeAttachment $VOLUME_ATTACHMENT"
 
 
