@@ -30,19 +30,19 @@ verify_installed() {
 verify_installed kubectl
 verify_installed grep
 
-VOLUME_ATTACHMENTS=$(
+VOLUME_ATTACHMENTS=($(
   kubectl get volumeattachment \
     -o custom-columns=NAME:.metadata.name,ATTACHER:.spec.attacher,DEVICEPATH:.status.attachmentMetadata.devicePath \
   | { grep -E 'csi\.hetzner\.cloud.*<none>' --color=never || true; } \
   | cut -f 1 -d ' '
-)
+))
 
 if [[ -z "$VOLUME_ATTACHMENTS" ]]; then
   write_log "[INFO] No affected VolumeAttachments found, exiting."
   exit 0
 fi
 
-for VOLUME_ATTACHMENT in $VOLUME_ATTACHMENTS; do
+for VOLUME_ATTACHMENT in "${VOLUME_ATTACHMENTS[@]}"; do
   write_log "[INFO] Processing VolumeAttachment $VOLUME_ATTACHMENT"
 
 
