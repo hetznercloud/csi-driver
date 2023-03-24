@@ -139,7 +139,7 @@ There are three breaking changes between v1.6 and v2.0 that require user interve
 
    ```shell
    $ kubectl version
-   $ curl https://raw.githubusercontent.com/hetznercloud/csi-driver/main/docs/v2-fix-volumeattachments/fix-volumeattachments.sh ./fix-volumeattachments.sh
+   $ curl -O https://raw.githubusercontent.com/hetznercloud/csi-driver/main/docs/v2-fix-volumeattachments/fix-volumeattachments.sh
    $ chmod +x ./fix-volumeattachments.sh
    $ ./fix-volumeattachments.sh
    ```
