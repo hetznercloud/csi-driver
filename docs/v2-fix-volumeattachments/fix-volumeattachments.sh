@@ -8,7 +8,7 @@ fi
 
 DIR="./hcloud-csi-fix-volumeattachments"
 echo "[INFO] Creating a new directory to write logs: ${DIR}"
-mkdir --parents "${DIR}"
+mkdir -p "${DIR}"
 
 # Logging utility
 LOG_FILE="${DIR}/logs.txt"
@@ -34,7 +34,7 @@ VOLUME_ATTACHMENTS=$(
   kubectl get volumeattachment \
     -o custom-columns=NAME:.metadata.name,ATTACHER:.spec.attacher,DEVICEPATH:.status.attachmentMetadata.devicePath \
   | { grep -E 'csi\.hetzner\.cloud.*<none>' --color=never || true; } \
-  | cut --fields=1 --delimiter=' '
+  | cut -f 1 -d ' '
 )
 
 if [[ -z "$VOLUME_ATTACHMENTS" ]]; then
