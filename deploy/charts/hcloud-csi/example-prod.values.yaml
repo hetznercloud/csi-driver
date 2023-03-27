@@ -1,0 +1,97 @@
+fullnameOverride: "csi"
+
+storageClasses:
+- name: standard
+  defaultStorageClass: true
+  reclaimPolicy: Retain
+  allowVolumeExpansion: true
+
+controller:
+  hcloudVolumeDefaultLocation: nbg1
+  priorityClassName: "system-cluster-critical"
+  resources:
+    csiAttacher:
+      limits:
+        memory: 80Mi
+        cpu: 50m
+      requests: 
+        memory: 20Mi
+        cpu: 10m
+    csiResizer:
+      limits:
+        memory: 80Mi
+        cpu: 50m
+      requests: 
+        memory: 20Mi
+        cpu: 10m
+    csiProvisioner:
+      limits:
+        memory: 80Mi
+        cpu: 50m
+      requests: 
+        memory: 20Mi
+        cpu: 10m
+    livenessProbe:
+      limits:
+        memory: 80Mi
+        cpu: 50m
+      requests: 
+        memory: 20Mi
+        cpu: 10m
+    hcloudCSIDriver:
+      limits:
+        memory: 80Mi
+        cpu: 100m
+      requests: 
+        memory: 40Mi
+        cpu: 10m
+  affinity:
+    podAntiAffinity:
+      requiredDuringSchedulingIgnoredDuringExecution:
+      - labelSelector:
+          matchExpressions:
+          - key: csi-hcloud
+            operator: In
+            values:
+            - controller
+        topologyKey: "kubernetes.io/hostname"
+
+node:
+  priorityClassName: "system-node-critical"
+  resources:
+    CSINodeDriverRegistrar:
+      limits: 
+        memory: 40Mi
+        cpu: 50m
+      requests: 
+        memory: 20Mi
+        cpu: 10m
+    livenessProbe:
+      limits: 
+        memory: 40Mi
+        cpu: 50m
+      requests: 
+        memory: 20Mi
+        cpu: 10m
+    hcloudCSIDriver:
+      limits:
+        memory: 80Mi
+        cpu: 100m
+      requests: 
+        memory: 40Mi
+        cpu: 10m
+  hostNetwork: true
+  affinity:
+    nodeAffinity:
+      requiredDuringSchedulingIgnoredDuringExecution:
+        nodeSelectorTerms:
+        - matchExpressions:
+          - key: "node-role.kubernetes.io/control-plane"
+            operator: NotIn
+            values:
+            - ""
+          - key: "instance.hetzner.cloud/is-root-server"
+            operator: NotIn
+            values:
+            - "true"
+

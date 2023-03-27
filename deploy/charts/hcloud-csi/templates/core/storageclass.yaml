@@ -1,0 +1,15 @@
+{{- if .Values.storageClasses }}
+{{- range $key, $val := .Values.storageClasses }}
+kind: StorageClass
+apiVersion: storage.k8s.io/v1
+metadata:
+  name: {{ $val.name }}
+  annotations:
+    storageclass.kubernetes.io/is-default-class: {{ $val.defaultStorageClass | default "false" | quote }}
+provisioner: csi.hetzner.cloud
+volumeBindingMode: WaitForFirstConsumer
+allowVolumeExpansion: true
+reclaimPolicy: {{ $val.reclaimPolicy | quote }}
+---
+{{- end }}
+{{- end }}

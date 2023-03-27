@@ -1,0 +1,11 @@
+apiVersion: v2
+name: csi-hcloud
+description: Helm Chart for the CSI Driver on Hetzner Cloud
+type: application
+home: https://github.com/syself/charts/tree/main/charts/csi-hcloud
+maintainers:
+  - name: Syself
+    email: info@syself.com
+    url: https://github.com/syself
+version: 1.0.0
+appVersion: 2.1.0

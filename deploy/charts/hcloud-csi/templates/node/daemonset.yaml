@@ -1,0 +1,162 @@
+apiVersion: apps/v1
+kind: DaemonSet
+metadata:
+  name: {{ template "common.names.fullname" . }}-node
+  namespace: {{ include "common.names.namespace" . | quote }}
+  labels: {{- include "common.labels.standard" . | nindent 4 }}
+    app.kubernetes.io/component: node
+    {{- if .Values.commonLabels }}
+    {{- include "common.tplvalues.render" ( dict "value" .Values.commonLabels "context" $ ) | nindent 4 }}
+    {{- end }}
+  {{- if .Values.commonAnnotations }}
+  annotations: {{- include "common.tplvalues.render" ( dict "value" .Values.commonAnnotations "context" $ ) | nindent 4 }}
+  {{- end }}
+spec:
+  {{- if .Values.node.updateStrategy }}
+  updateStrategy: {{- toYaml .Values.node.updateStrategy | nindent 4 }}
+  {{- end }}
+  selector:
+    matchLabels: {{- include "common.labels.matchLabels" . | nindent 6 }}
+      app.kubernetes.io/component: node
+  template:
+    metadata:
+      {{- if .Values.node.podAnnotations }}
+      annotations: {{- include "common.tplvalues.render" (dict "value" .Values.node.podAnnotations "context" $) | nindent 8 }}
+      {{- end }}
+      labels: {{- include "common.labels.standard" . | nindent 8 }}
+        app.kubernetes.io/component: node
+        {{- if .Values.node.podLabels }}
+        {{- include "common.tplvalues.render" (dict "value" .Values.node.podLabels "context" $) | nindent 8 }}
+        {{- end }}
+        {{- if .Values.commonLabels }}
+        {{- include "common.tplvalues.render" ( dict "value" .Values.commonLabels "context" $ ) | nindent 8 }}
+        {{- end }}
+    spec:
+      {{- include "common.images.pullSecrets" (dict "images" (list .Values.node.image ) "global" .Values.global) | nindent 6 }}
+      {{- if .Values.node.hostNetwork }}
+      hostNetwork: true
+      {{- end }}
+      {{- if .Values.node.affinity }}
+      affinity: {{- include "common.tplvalues.render" ( dict "value" .Values.node.affinity "context" $) | nindent 8 }}
+      {{- end }}
+      {{- if .Values.node.nodeSelector }}
+      nodeSelector: {{- include "common.tplvalues.render" ( dict "value" .Values.node.nodeSelector "context" $) | nindent 8 }}
+      {{- end }}
+      {{- if .Values.node.tolerations }}
+      tolerations: {{- include "common.tplvalues.render" (dict "value" .Values.node.tolerations "context" .) | nindent 8 }}
+      {{- else }}
+      tolerations:
+        - effect: NoExecute
+          operator: Exists
+        - effect: NoSchedule
+          operator: Exists
+        - key: CriticalAddonsOnly
+          operator: Exists
+      {{- end }}
+      {{- if .Values.node.priorityClassName }}
+      priorityClassName: {{ .Values.node.priorityClassName | quote }}
+      {{- end }}
+      {{- if .Values.node.podSecurityContext.enabled }}
+      securityContext: {{- omit .Values.node.podSecurityContext "enabled" | toYaml | nindent 8 }}
+      {{- end }}
+      {{- if .Values.node.terminationGracePeriodSeconds }}
+      terminationGracePeriodSeconds: {{ .Values.node.terminationGracePeriodSeconds }}
+      {{- end }}
+      initContainers:
+        {{- if .Values.node.initContainers }}
+          {{- include "common.tplvalues.render" (dict "value" .Values.node.initContainers "context" $) | nindent 8 }}
+        {{- end }}
+      containers:
+        - name: csi-node-driver-registrar
+          image: {{ include "common.images.image" (dict "imageRoot" .Values.node.image.CSINodeDriverRegistrar "global" .Values.global) }}
+          imagePullPolicy: {{ .Values.node.image.CSINodeDriverRegistrar.pullPolicy }}
+          args:
+            - --kubelet-registration-path=/var/lib/kubelet/plugins/csi.hetzner.cloud/socket
+          volumeMounts:
+            - name: plugin-dir
+              mountPath: /run/csi
+            - name: registration-dir
+              mountPath: /registration
+          {{- if .Values.node.resources.CSINodeDriverRegistrar }}
+          resources: {{- toYaml .Values.node.resources.CSINodeDriverRegistrar | nindent 12 }}
+          {{- end }}
+        - name: liveness-probe
+          image: {{ include "common.images.image" (dict "imageRoot" .Values.node.image.livenessProbe "global" .Values.global) }}
+          imagePullPolicy: {{ .Values.node.image.livenessProbe.pullPolicy }}
+          volumeMounts:
+          - mountPath: /run/csi
+            name: plugin-dir
+          {{- if .Values.node.resources.livenessProbe }}
+          resources: {{- toYaml .Values.node.resources.livenessProbe | nindent 12 }}
+          {{- end }}
+        - name: hcloud-csi-driver
+          image: {{ include "common.images.image" (dict "imageRoot" .Values.node.image.hcloudCSIDriver "global" .Values.global) }}
+          imagePullPolicy: {{ .Values.node.image.pullPolicy }}
+          command: [/bin/hcloud-csi-driver-node]
+          volumeMounts:
+            - name: kubelet-dir
+              mountPath: /var/lib/kubelet
+              mountPropagation: "Bidirectional"
+            - name: plugin-dir
+              mountPath: /run/csi
+            - name: device-dir
+              mountPath: /dev
+          securityContext:
+            privileged: true
+          env:
+            - name: CSI_ENDPOINT
+              value: unix:///run/csi/socket
+            {{- if .Values.metrics.enabled }}
+            - name: METRICS_ENDPOINT
+              value: 0.0.0.0:{{ .Values.node.containerPorts.metrics }}
+            {{- end }}
+            - name: ENABLE_METRICS
+              value: {{if .Values.metrics.enabled}}"true"{{ else }}"false"{{end}}
+          ports:
+            {{- if .Values.metrics.enabled }}
+            - containerPort: {{ .Values.node.containerPorts.metrics }}
+              name: metrics
+            {{- end }}
+            - name: healthz
+              protocol: TCP
+              containerPort: {{ .Values.node.containerPorts.healthz }}
+          {{- if .Values.node.resources.hcloudCSIDriver }}
+          resources: {{- toYaml .Values.node.resources.hcloudCSIDriver | nindent 12 }}
+          {{- end }}
+          {{- if .Values.node.customLivenessProbe }}
+          livenessProbe: {{- include "common.tplvalues.render" (dict "value" .Values.node.customLivenessProbe "context" $) | nindent 12 }}
+          {{- else if .Values.node.livenessProbe.enabled }}
+          livenessProbe: {{- include "common.tplvalues.render" (dict "value" (omit .Values.node.livenessProbe "enabled") "context" $) | nindent 12 }}
+            httpGet:
+              path: /healthz
+              port: healthz
+          {{- end }}
+          {{- if .Values.node.customReadinessProbe }}
+          readinessProbe: {{- include "common.tplvalues.render" (dict "value" .Values.node.customReadinessProbe "context" $) | nindent 12 }}
+          {{- end }}
+          {{- if .Values.node.lifecycleHooks }}
+          lifecycle: {{- include "common.tplvalues.render" (dict "value" .Values.node.lifecycleHooks "context" $) | nindent 12 }}
+          {{- end }}
+        {{- if .Values.node.sidecars }}
+        {{- include "common.tplvalues.render" ( dict "value" .Values.node.sidecars "context" $) | nindent 8 }}
+        {{- end }}
+      volumes:
+        - name: kubelet-dir
+          hostPath:
+            path: /var/lib/kubelet
+            type: Directory
+        - name: plugin-dir
+          hostPath:
+            path: /var/lib/kubelet/plugins/csi.hetzner.cloud/
+            type: DirectoryOrCreate
+        - name: registration-dir
+          hostPath:
+            path: /var/lib/kubelet/plugins_registry/
+            type: Directory
+        - name: device-dir
+          hostPath:
+            path: /dev
+            type: Directory
+        {{- if .Values.node.extraVolumes }}
+        {{- include "common.tplvalues.render" (dict "value" .Values.node.extraVolumes "context" $) | nindent 8 }}
+        {{- end }}

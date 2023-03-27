@@ -1,0 +1,754 @@
+## @section Global parameters
+## Global Docker image parameters
+## Please, note that this will override the image parameters, including dependencies, configured to use the global value
+## Current available global Docker image parameters: imageRegistry, imagePullSecrets and storageClass
+##
+
+## @param global.imageRegistry Global Docker image registry
+## @param global.imagePullSecrets Global Docker registry secret names as an array
+## @param global.storageClass Global StorageClass for Persistent Volume(s)
+##
+global:
+  imageRegistry: ""
+  ## E.g.
+  ## imagePullSecrets:
+  ##   - myRegistryKeySecretName
+  ##
+  imagePullSecrets: []
+  storageClass: ""
+
+## @section Common parameters
+##
+
+## @param nameOverride String to partially override common.names.name
+##
+nameOverride: ""
+## @param fullnameOverride String to fully override common.names.fullname
+##
+fullnameOverride: ""
+## @param namespaceOverride String to fully override common.names.namespace
+##
+namespaceOverride: ""
+## @param commonLabels Labels to add to all deployed objects
+##
+commonLabels: {}
+## @param commonAnnotations Annotations to add to all deployed objects
+##
+commonAnnotations: {}
+
+## @param extraDeploy Array of extra objects to deploy with the release
+##
+extraDeploy: []
+
+## @section Controller Parameters
+##
+
+## Controller
+##
+controller:
+  ## @param controller.image.csiAttacher.registry csi-attacher image registry
+  ## @param controller.image.csiAttacher.repository csi-attacher image repository
+  ## @param controller.image.csiAttacher.tag csi-attacher image tag (immutable tags are recommended)
+  ## @param controller.image.csiAttacher.digest csi-attacher image digest in the way sha256:aa.... Please note this parameter, if set, will override the tag image tag (immutable tags are recommended)
+  ## @param controller.image.csiAttacher.pullPolicy csi-attacher image pull policy
+  ## @param controller.image.csiAttacher.pullSecrets csi-attacher image pull secrets
+  ## @param controller.image.csiResizer.registry csi-resizer image registry
+  ## @param controller.image.csiResizer.repository csi-resizer image repository
+  ## @param controller.image.csiResizer.tag csi-resizer image tag (immutable tags are recommended)
+  ## @param controller.image.csiResizer.digest csi-resizer image digest in the way sha256:aa.... Please note this parameter, if set, will override the tag image tag (immutable tags are recommended)
+  ## @param controller.image.csiResizer.pullPolicy csi-resizer image pull policy
+  ## @param controller.image.csiResizer.pullSecrets csi-resizer image pull secrets
+  ## @param controller.image.csiProvisioner.registry csi-provisioner image registry
+  ## @param controller.image.csiProvisioner.repository csi-provisioner image repository
+  ## @param controller.image.csiProvisioner.tag csi-provisioner image tag (immutable tags are recommended)
+  ## @param controller.image.csiProvisioner.digest csi-provisioner image digest in the way sha256:aa.... Please note this parameter, if set, will override the tag image tag (immutable tags are recommended)
+  ## @param controller.image.csiProvisioner.pullPolicy csi-provisioner image pull policy
+  ## @param controller.image.csiProvisioner.pullSecrets csi-provisioner image pull secrets
+  ## @param controller.image.livenessProbe.registry liveness-probe image registry
+  ## @param controller.image.livenessProbe.repository liveness-probe image repository
+  ## @param controller.image.livenessProbe.tag liveness-probe image tag (immutable tags are recommended)
+  ## @param controller.image.livenessProbe.digest liveness-probe image digest in the way sha256:aa.... Please note this parameter, if set, will override the tag image tag (immutable tags are recommended)
+  ## @param controller.image.livenessProbe.pullPolicy liveness-probe image pull policy
+  ## @param controller.image.livenessProbe.pullSecrets liveness-probe image pull secrets
+  ## @param controller.image.hcloudCSIDriver.registry hcloud-csi-driver image registry
+  ## @param controller.image.hcloudCSIDriver.repository hcloud-csi-driver image repository
+  ## @param controller.image.hcloudCSIDriver.tag hcloud-csi-driver image tag (immutable tags are recommended)
+  ## @param controller.image.hcloudCSIDriver.digest hcloud-csi-driver image digest in the way sha256:aa.... Please note this parameter, if set, will override the tag image tag (immutable tags are recommended)
+  ## @param controller.image.hcloudCSIDriver.pullPolicy hcloud-csi-driver image pull policy
+  ## @param controller.image.hcloudCSIDriver.pullSecrets hcloud-csi-driver image pull secrets
+  ##
+  image:
+    csiAttacher:
+      registry: registry.k8s.io
+      repository: sig-storage/csi-attacher
+      tag: v4.1.0
+      digest: ""
+      ## Specify a imagePullPolicy
+      ## Defaults to 'Always' if image tag is 'latest', else set to 'IfNotPresent'
+      ## ref: http://kubernetes.io/docs/user-guide/images/#pre-pulling-images
+      ##
+      pullPolicy: IfNotPresent
+      ## Optionally specify an array of imagePullSecrets.
+      ## Secrets must be manually created in the namespace.
+      ## ref: https://kubernetes.io/docs/tasks/configure-pod-container/pull-image-private-registry/
+      ## e.g:
+      ## pullSecrets:
+      ##   - myRegistryKeySecretName
+      ##
+      pullSecrets: []
+
+    csiResizer:
+      registry: registry.k8s.io
+      repository: sig-storage/csi-resizer
+      tag: v1.7.0
+      digest: ""
+      ## Specify a imagePullPolicy
+      ## Defaults to 'Always' if image tag is 'latest', else set to 'IfNotPresent'
+      ## ref: http://kubernetes.io/docs/user-guide/images/#pre-pulling-images
+      ##
+      pullPolicy: IfNotPresent
+      ## Optionally specify an array of imagePullSecrets.
+      ## Secrets must be manually created in the namespace.
+      ## ref: https://kubernetes.io/docs/tasks/configure-pod-container/pull-image-private-registry/
+      ## e.g:
+      ## pullSecrets:
+      ##   - myRegistryKeySecretName
+      ##
+      pullSecrets: []
+
+    csiProvisioner:
+      registry: registry.k8s.io
+      repository: sig-storage/csi-provisioner
+      tag: v3.4.0
+      digest: ""
+      ## Specify a imagePullPolicy
+      ## Defaults to 'Always' if image tag is 'latest', else set to 'IfNotPresent'
+      ## ref: http://kubernetes.io/docs/user-guide/images/#pre-pulling-images
+      ##
+      pullPolicy: IfNotPresent
+      ## Optionally specify an array of imagePullSecrets.
+      ## Secrets must be manually created in the namespace.
+      ## ref: https://kubernetes.io/docs/tasks/configure-pod-container/pull-image-private-registry/
+      ## e.g:
+      ## pullSecrets:
+      ##   - myRegistryKeySecretName
+      ##
+      pullSecrets: []
+    
+    livenessProbe:
+      registry: registry.k8s.io
+      repository: sig-storage/livenessprobe
+      tag: v2.9.0
+      digest: ""
+      ## Specify a imagePullPolicy
+      ## Defaults to 'Always' if image tag is 'latest', else set to 'IfNotPresent'
+      ## ref: http://kubernetes.io/docs/user-guide/images/#pre-pulling-images
+      ##
+      pullPolicy: IfNotPresent
+      ## Optionally specify an array of imagePullSecrets.
+      ## Secrets must be manually created in the namespace.
+      ## ref: https://kubernetes.io/docs/tasks/configure-pod-container/pull-image-private-registry/
+      ## e.g:
+      ## pullSecrets:
+      ##   - myRegistryKeySecretName
+      ##
+      pullSecrets: []
+
+    hcloudCSIDriver:
+      registry: docker.io
+      repository: hetznercloud/hcloud-csi-driver
+      tag: 2.2.0
+      digest: ""
+      ## Specify a imagePullPolicy
+      ## Defaults to 'Always' if image tag is 'latest', else set to 'IfNotPresent'
+      ## ref: http://kubernetes.io/docs/user-guide/images/#pre-pulling-images
+      ##
+      pullPolicy: IfNotPresent
+      ## Optionally specify an array of imagePullSecrets.
+      ## Secrets must be manually created in the namespace.
+      ## ref: https://kubernetes.io/docs/tasks/configure-pod-container/pull-image-private-registry/
+      ## e.g:
+      ## pullSecrets:
+      ##   - myRegistryKeySecretName
+      ##
+      pullSecrets: []
+
+  ## @param controller.replicaCount Number of controller replicas to deploy
+  ##
+  replicaCount: 2
+
+  ## @param controller.hcloudToken.value  Specifies the value for the hcloudToken. Creates a secret from that value. If you have already a hcloud token secret leave this empty.
+  ## @param controller.hcloudToken.extistingSecret.name Specifies the name of an existing Secret for the hcloud Token
+  ## @param controller.hcloudToken.extistingSecret.key Specifies the key of an existing Secret for the hcloud Token
+  ##
+  hcloudToken:
+    value: ""
+    extistingSecret:
+      name: hcloud
+      key: token
+
+  ## @param controller.hcloudVolumeDefaultLocation  Set this to the location of your cluster. If set the controller could run anywhere. If leave empty the controller needs to run on a hcloud node.
+  ##
+  hcloudVolumeDefaultLocation: ""
+
+  ## @param controller.containerPorts.metrics controller metrics container port
+  ## @param controller.containerPorts.healthz controller healthz container port
+  ##
+  containerPorts:
+    metrics: 9189
+    healthz: 9808
+
+  ## controller service parameters
+  ##
+  service:
+    ## @param controller.service.ports.metrics controller service metrics port
+    ports:
+      metrics: 9189
+    
+    ## @param controller.service.annotations Additional custom annotations for controller service
+    annotations: {}
+
+  ## RBAC configuration
+  ##
+  rbac:
+    ## @param controller.rbac.create Specifies whether RBAC resources should be created
+    ##
+    create: true
+    ## @param controller.rbac.rules Custom RBAC rules to set
+    ## e.g:
+    ## rules:
+    ##   - apiGroups:
+    ##       - ""
+    ##     resources:
+    ##       - pods
+    ##     verbs:
+    ##       - get
+    ##       - list
+    ##
+    rules: []
+
+  ## Configure extra options for controller containers' liveness and readiness probes
+  ## ref: https://kubernetes.io/docs/tasks/configure-pod-container/configure-liveness-readiness-probes/#configure-probes
+  ## @param controller.livenessProbe.enabled Enable livenessProbe on controller containers
+  ## @param controller.livenessProbe.initialDelaySeconds Initial delay seconds for livenessProbe
+  ## @param controller.livenessProbe.periodSeconds Period seconds for livenessProbe
+  ## @param controller.livenessProbe.timeoutSeconds Timeout seconds for livenessProbe
+  ## @param controller.livenessProbe.failureThreshold Failure threshold for livenessProbe
+  ## @param controller.livenessProbe.successThreshold Success threshold for livenessProbe
+  ##
+  livenessProbe:
+    enabled: true
+    initialDelaySeconds: 10
+    periodSeconds: 2
+    timeoutSeconds: 3
+    failureThreshold: 5
+    successThreshold: 1
+
+  ## @param controller.customLivenessProbe Custom livenessProbe that overrides the default one
+  ##
+  customLivenessProbe: {}
+  ## @param controller.customReadinessProbe Custom readinessProbe that overrides the default one
+  ##
+  customReadinessProbe: {}
+  ## @param controller.customStartupProbe Custom startupProbe that overrides the default one
+  ##
+  customStartupProbe: {}
+  ## controller resource requests and limits
+  ## ref: http://kubernetes.io/docs/user-guide/compute-resources/
+  ## @param controller.resources.csiAttacher.limits The resources limits for the csiAttacher containers
+  ## @param controller.resources.csiAttacher.requests The requested resources for the csiAttacher containers
+  ## @param controller.resources.csiResizer.limits The resources limits for the csiResizer containers
+  ## @param controller.resources.csiResizer.requests The requested resources for the csiResizer containers
+  ## @param controller.resources.csiProvisioner.limits The resources limits for the csiProvisioner containers
+  ## @param controller.resources.csiProvisioner.requests The requested resources for the csiProvisioner containers
+  ## @param controller.resources.livenessProbe.limits The resources limits for the livenessProbe containers
+  ## @param controller.resources.livenessProbe.requests The requested resources for the livenessProbe containers
+  ## @param controller.resources.hcloudCSIDriver.limits The resources limits for the hcloudCSIDriver containers
+  ## @param controller.resources.hcloudCSIDriver.requests The requested resources for the hcloudCSIDriver containers
+  ##
+  resources:
+    csiAttacher:
+      limits: {}
+      requests: {}
+    csiResizer:
+      limits: {}
+      requests: {}
+    csiProvisioner:
+      limits: {}
+      requests: {}
+    livenessProbe:
+      limits: {}
+      requests: {}
+    hcloudCSIDriver:
+      limits: {}
+      requests: {}
+
+  ## Configure Pods Security Context
+  ## ref: https://kubernetes.io/docs/tasks/configure-pod-container/security-context/#set-the-security-context-for-a-pod
+  ## @param controller.podSecurityContext.enabled Enabled controller pods' Security Context
+  ## @param controller.podSecurityContext.fsGroup Set controller pod's Security Context fsGroup
+  ##
+  podSecurityContext:
+    enabled: true
+    fsGroup: 1001
+
+  ## @param controller.podLabels Extra labels for controller pods
+  ## ref: https://kubernetes.io/docs/concepts/overview/working-with-objects/labels/
+  ##
+  podLabels: {}
+
+  ## @param controller.podAnnotations Annotations for controller pods
+  ## ref: https://kubernetes.io/docs/concepts/overview/working-with-objects/annotations/
+  ##
+  podAnnotations: {}
+
+  ## @param controller.pdb.create Enable PodDisruptionBudged for controller pods
+  ## @param controller.pdb.minAvailable Set minAvailable for controller pods
+  ## @param controller.pdb.maxUnavailable Set maxUnavailable for controller pods
+  ##
+  pdb:
+    create: true
+    minAvailable: 1
+    maxUnavailable: ""
+
+  ## Autoscaling configuration
+  ## ref: https://kubernetes.io/docs/tasks/run-application/horizontal-pod-autoscale/
+  ## @param controller.autoscaling.enabled Enable autoscaling for controller
+  ## @param controller.autoscaling.minReplicas Minimum number of controller replicas
+  ## @param controller.autoscaling.maxReplicas Maximum number of controller replicas
+  ## @param controller.autoscaling.targetCPU Target CPU utilization percentage
+  ## @param controller.autoscaling.targetMemory Target Memory utilization percentage
+  ##
+  autoscaling:
+    enabled: false
+    minReplicas: ""
+    maxReplicas: ""
+    targetCPU: ""
+    targetMemory: ""
+
+  ## @param controller.affinity Affinity for controller pods assignment
+  ## ref: https://kubernetes.io/docs/concepts/configuration/assign-pod-node/#affinity-and-anti-affinity
+  ##
+  affinity: {}
+
+  ## @param controller.nodeSelector Node labels for controller pods assignment
+  ## ref: https://kubernetes.io/docs/user-guide/node-selection/
+  ##
+  nodeSelector: {}
+
+  ## @param controller.tolerations Tolerations for controller pods assignment
+  ## ref: https://kubernetes.io/docs/concepts/configuration/taint-and-toleration/
+  ##
+  tolerations: []
+
+  ## @param controller.updateStrategy.type controller statefulset strategy type
+  ## ref: https://kubernetes.io/docs/concepts/workloads/controllers/statefulset/#update-strategies
+  ##
+  updateStrategy:
+    ## StrategyType
+    ## Can be set to RollingUpdate or OnDelete
+    ##
+    type: RollingUpdate
+
+  ## @param controller.priorityClassName controller pods' priorityClassName
+  ##
+  priorityClassName: ""
+
+  ## @param controller.topologySpreadConstraints Topology Spread Constraints for pod assignment spread across your cluster among failure-domains. Evaluated as a template
+  ## Ref: https://kubernetes.io/docs/concepts/workloads/pods/pod-topology-spread-constraints/#spread-constraints-for-pods
+  ##
+  topologySpreadConstraints: []
+
+  ## @param controller.schedulerName Name of the k8s scheduler (other than default) for controller pods
+  ## ref: https://kubernetes.io/docs/tasks/administer-cluster/configure-multiple-schedulers/
+  ##
+  schedulerName: ""
+
+  ## @param controller.terminationGracePeriodSeconds Seconds Redmine pod needs to terminate gracefully
+  ## ref: https://kubernetes.io/docs/concepts/workloads/pods/pod/#termination-of-pods
+  ##
+  terminationGracePeriodSeconds: ""
+
+  ## @param controller.lifecycleHooks for the controller container(s) to automate configuration before or after startup
+  ##
+  lifecycleHooks: {}
+
+  ## @param controller.extraEnvVars Array with extra environment variables to add to controller nodes
+  ## e.g:
+  ## extraEnvVars:
+  ##   - name: FOO
+  ##     value: "bar"
+  ##
+  extraEnvVars: []
+
+  ## @param controller.extraVolumes Extra Volumes for controller pods
+  extraVolumes: []
+
+  ## @param controller.extraVolumeMounts Optionally specify extra list of additional volumeMounts for the controller container(s)
+  ##
+  extraVolumeMounts: []
+
+  ## @param controller.sidecars Add additional sidecar containers to the controller pod(s)
+  ## e.g:
+  ## sidecars:
+  ##   - name: your-image-name
+  ##     image: your-image
+  ##     imagePullPolicy: Always
+  ##     ports:
+  ##       - name: portname
+  ##         containerPort: 1234
+  ##
+  sidecars: []
+
+  ## @param controller.initContainers Add additional init containers to the controller pod(s)
+  ## ref: https://kubernetes.io/docs/concepts/workloads/pods/init-containers/
+  ## e.g:
+  ## initContainers:
+  ##  - name: your-image-name
+  ##    image: your-image
+  ##    imagePullPolicy: Always
+  ##    command: ['sh', '-c', 'echo "hello world"']
+  ##
+  initContainers: []
+
+## @section Node Parameters
+##
+
+## Node
+##
+node:
+  ## @param node.image.CSINodeDriverRegistrar.registry csi-node-driver-registrar image registry
+  ## @param node.image.CSINodeDriverRegistrar.repository csi-node-driver-registrar image repository
+  ## @param node.image.CSINodeDriverRegistrar.tag csi-node-driver-registrar image tag (immutable tags are recommended)
+  ## @param node.image.CSINodeDriverRegistrar.digest csi-node-driver-registrar image digest in the way sha256:aa.... Please note this parameter, if set, will override the tag image tag (immutable tags are recommended)
+  ## @param node.image.CSINodeDriverRegistrar.pullPolicy csi-node-driver-registrar image pull policy
+  ## @param node.image.CSINodeDriverRegistrar.pullSecrets csi-node-driver-registrar image pull secrets
+  ## @param node.image.livenessProbe.registry liveness-probe image registry
+  ## @param node.image.livenessProbe.repository liveness-probe image repository
+  ## @param node.image.livenessProbe.tag liveness-probe image tag (immutable tags are recommended)
+  ## @param node.image.livenessProbe.digest liveness-probe image digest in the way sha256:aa.... Please note this parameter, if set, will override the tag image tag (immutable tags are recommended)
+  ## @param node.image.livenessProbe.pullPolicy liveness-probe image pull policy
+  ## @param node.image.livenessProbe.pullSecrets liveness-probe image pull secrets
+  ## @param node.image.hcloudCSIDriver.registry hcloud-csi-driver image registry
+  ## @param node.image.hcloudCSIDriver.repository hcloud-csi-driver image repository
+  ## @param node.image.hcloudCSIDriver.tag hcloud-csi-driver image tag (immutable tags are recommended)
+  ## @param node.image.hcloudCSIDriver.digest hcloud-csi-driver image digest in the way sha256:aa.... Please note this parameter, if set, will override the tag image tag (immutable tags are recommended)
+  ## @param node.image.hcloudCSIDriver.pullPolicy hcloud-csi-driver image pull policy
+  ## @param node.image.hcloudCSIDriver.pullSecrets hcloud-csi-driver image pull secrets
+  ##
+  image:
+    CSINodeDriverRegistrar:
+      registry: registry.k8s.io
+      repository: sig-storage/csi-node-driver-registrar
+      tag: v2.7.0
+      digest: ""
+      ## Specify a imagePullPolicy
+      ## Defaults to 'Always' if image tag is 'latest', else set to 'IfNotPresent'
+      ## ref: http://kubernetes.io/docs/user-guide/images/#pre-pulling-images
+      ##
+      pullPolicy: IfNotPresent
+      ## Optionally specify an array of imagePullSecrets.
+      ## Secrets must be manually created in the namespace.
+      ## ref: https://kubernetes.io/docs/tasks/configure-pod-container/pull-image-private-registry/
+      ## e.g:
+      ## pullSecrets:
+      ##   - myRegistryKeySecretName
+      ##
+      pullSecrets: []
+    
+    livenessProbe:
+      registry: registry.k8s.io
+      repository: sig-storage/livenessprobe
+      tag: v2.9.0
+      digest: ""
+      ## Specify a imagePullPolicy
+      ## Defaults to 'Always' if image tag is 'latest', else set to 'IfNotPresent'
+      ## ref: http://kubernetes.io/docs/user-guide/images/#pre-pulling-images
+      ##
+      pullPolicy: IfNotPresent
+      ## Optionally specify an array of imagePullSecrets.
+      ## Secrets must be manually created in the namespace.
+      ## ref: https://kubernetes.io/docs/tasks/configure-pod-container/pull-image-private-registry/
+      ## e.g:
+      ## pullSecrets:
+      ##   - myRegistryKeySecretName
+      ##
+      pullSecrets: []
+
+    hcloudCSIDriver:
+      registry: docker.io
+      repository: hetznercloud/hcloud-csi-driver
+      tag: 2.2.0
+      digest: ""
+      ## Specify a imagePullPolicy
+      ## Defaults to 'Always' if image tag is 'latest', else set to 'IfNotPresent'
+      ## ref: http://kubernetes.io/docs/user-guide/images/#pre-pulling-images
+      ##
+      pullPolicy: IfNotPresent
+      ## Optionally specify an array of imagePullSecrets.
+      ## Secrets must be manually created in the namespace.
+      ## ref: https://kubernetes.io/docs/tasks/configure-pod-container/pull-image-private-registry/
+      ## e.g:
+      ## pullSecrets:
+      ##   - myRegistryKeySecretName
+      ##
+      pullSecrets: []
+
+
+  ## @param node.containerPorts.metrics node Metrics container port
+  ## @param node.containerPorts.healthz node Health container port
+  ##
+  containerPorts:
+    metrics: 9189
+    healthz: 9808
+
+  ## node service parameters
+  ##
+  service:
+    ## @param node.service.ports.metrics node service Metrics port
+    ##
+    ports:
+      metrics: 9189
+    
+    ## @param node.service.annotations Additional custom annotations for node service
+    ##
+    annotations: {}
+
+
+  ## Configure extra options for node containers' liveness and readiness probes
+  ## ref: https://kubernetes.io/docs/tasks/configure-pod-container/configure-liveness-readiness-probes/#configure-probes
+  ## @param node.livenessProbe.enabled Enable livenessProbe on node containers
+  ## @param node.livenessProbe.initialDelaySeconds Initial delay seconds for livenessProbe
+  ## @param node.livenessProbe.periodSeconds Period seconds for livenessProbe
+  ## @param node.livenessProbe.timeoutSeconds Timeout seconds for livenessProbe
+  ## @param node.livenessProbe.failureThreshold Failure threshold for livenessProbe
+  ## @param node.livenessProbe.successThreshold Success threshold for livenessProbe
+  ##
+  livenessProbe:
+    enabled: true
+    initialDelaySeconds: 10
+    periodSeconds: 2
+    timeoutSeconds: 3
+    failureThreshold: 5
+    successThreshold: 1
+
+  ## @param node.customLivenessProbe Custom livenessProbe that overrides the default one
+  ##
+  customLivenessProbe: {}
+
+  ## @param node.customReadinessProbe Custom readinessProbe that overrides the default one
+  ##
+  customReadinessProbe: {}
+
+  ## @param node.customStartupProbe Custom startupProbe that overrides the default one
+  ##
+  customStartupProbe: {}
+
+  ## node resource requests and limits
+  ## ref: http://kubernetes.io/docs/user-guide/compute-resources/
+  ## @param node.resources.CSINodeDriverRegistrar.limits The resources limits for the CSINodeDriverRegistrar containers
+  ## @param node.resources.CSINodeDriverRegistrar.requests The requested resources for the CSINodeDriverRegistrar containers
+  ## @param node.resources.livenessProbe.limits The resources limits for the livenessProbe containers
+  ## @param node.resources.livenessProbe.requests The requested resources for the livenessProbe containers
+  ## @param node.resources.hcloudCSIDriver.limits The resources limits for the hcloudCSIDriver containers
+  ## @param node.resources.hcloudCSIDriver.requests The requested resources for the hcloudCSIDriver containers
+  ##
+  resources:
+    CSINodeDriverRegistrar:
+      limits: {}
+      requests: {}
+    livenessProbe:
+      limits: {}
+      requests: {}
+    hcloudCSIDriver:
+      limits: {}
+      requests: {}
+
+  ## Configure Pods Security Context
+  ## ref: https://kubernetes.io/docs/tasks/configure-pod-container/security-context/#set-the-security-context-for-a-pod
+  ## @param node.podSecurityContext.enabled Enabled node pods' Security Context
+  ## @param node.podSecurityContext.fsGroup Set node pod's Security Context fsGroup
+  ##
+  podSecurityContext:
+    enabled: true
+    fsGroup: 1001
+
+  ## @param node.hostNetwork Enables the hostNetwork
+  ##
+  hostNetwork: false
+
+  ## @param node.podLabels Extra labels for node pods
+  ## ref: https://kubernetes.io/docs/concepts/overview/working-with-objects/labels/
+  ##
+  podLabels: {}
+
+  ## @param node.podAnnotations Annotations for node pods
+  ## ref: https://kubernetes.io/docs/concepts/overview/working-with-objects/annotations/
+  ##
+  podAnnotations: {}
+
+  ## @param node.affinity Affinity for node pods assignment
+  ## ref: https://kubernetes.io/docs/concepts/configuration/assign-pod-node/#affinity-and-anti-affinity
+  ##
+  affinity: {}
+    # nodeAffinity:
+    #   requiredDuringSchedulingIgnoredDuringExecution:
+    #     nodeSelectorTerms:
+    #     - matchExpressions:
+    #       - key: "instance.hetzner.cloud/is-root-server"
+    #         operator: NotIn
+    #         values:
+    #         - "true"
+
+  ## @param node.nodeSelector Node labels for node pods assignment
+  ## ref: https://kubernetes.io/docs/user-guide/node-selection/
+  ##
+  nodeSelector: {}
+
+  ## @param node.tolerations Tolerations for node pods assignment
+  ## ref: https://kubernetes.io/docs/concepts/configuration/taint-and-toleration/
+  ##
+  tolerations: {}
+    # - effect: NoExecute
+    #   operator: Exists
+    # - effect: NoSchedule
+    #   operator: Exists
+    # - key: CriticalAddonsOnly
+    #   operator: Exists
+
+  ## @param node.updateStrategy.type node statefulset strategy type
+  ## ref: https://kubernetes.io/docs/concepts/workloads/nodes/statefulset/#update-strategies
+  ##
+  updateStrategy:
+    ## StrategyType
+    ## Can be set to RollingUpdate or OnDelete
+    ##
+    type: RollingUpdate
+
+  ## @param node.priorityClassName node pods' priorityClassName
+  ##
+  priorityClassName: ""
+
+  ## @param node.schedulerName Name of the k8s scheduler (other than default) for node pods
+  ## ref: https://kubernetes.io/docs/tasks/administer-cluster/configure-multiple-schedulers/
+  ##
+  schedulerName: ""
+
+  ## @param node.terminationGracePeriodSeconds Seconds Redmine pod needs to terminate gracefully
+  ## ref: https://kubernetes.io/docs/concepts/workloads/pods/pod/#termination-of-pods
+  ##
+  terminationGracePeriodSeconds: ""
+
+  ## @param node.lifecycleHooks for the node container(s) to automate configuration before or after startup
+  ##
+  lifecycleHooks: {}
+
+  ## @param node.extraVolumes Extra Volumes for controller pods
+  ##
+  extraVolumes: []
+
+  ## @param node.extraVolumeMounts Optionally specify extra list of additional volumeMounts for the node container(s)
+  ##
+  extraVolumeMounts: []
+
+  ## @param node.sidecars Add additional sidecar containers to the node pod(s)
+  ## e.g:
+  ## sidecars:
+  ##   - name: your-image-name
+  ##     image: your-image
+  ##     imagePullPolicy: Always
+  ##     ports:
+  ##       - name: portname
+  ##         containerPort: 1234
+  ##
+  sidecars: []
+
+  ## @param node.initContainers Add additional init containers to the node pod(s)
+  ## ref: https://kubernetes.io/docs/concepts/workloads/pods/init-containers/
+  ## e.g:
+  ## initContainers:
+  ##  - name: your-image-name
+  ##    image: your-image
+  ##    imagePullPolicy: Always
+  ##    command: ['sh', '-c', 'echo "hello world"']
+  ##
+  initContainers: []
+
+## @section Other Parameters
+##
+
+## ServiceAccount configuration
+##
+serviceAccount:
+  ## @param serviceAccount.create Specifies whether a ServiceAccount should be created
+  ##
+  create: true
+  ## @param serviceAccount.name The name of the ServiceAccount to use.
+  ## If not set and create is true, a name is generated using the common.names.fullname template
+  ##
+  name: ""
+  ## @param serviceAccount.annotations Additional Service Account annotations (evaluated as a template)
+  ##
+  annotations: {}
+  ## @param serviceAccount.automountServiceAccountToken Automount service account token for the server service account
+  ##
+  automountServiceAccountToken: true
+
+## Prometheus metrics
+##
+metrics:
+  ## @param metrics.enabled Enable the export of Prometheus metrics
+  ##
+  enabled: false
+  ## Prometheus Operator ServiceMonitor configuration
+  ##
+  serviceMonitor:
+    ## @param metrics.serviceMonitor.enabled if `true`, creates a Prometheus Operator ServiceMonitor (also requires `metrics.enabled` to be `true`)
+    ##
+    enabled: false
+    ## @param metrics.serviceMonitor.namespace Namespace in which Prometheus is running
+    ##
+    namespace: ""
+    ## @param metrics.serviceMonitor.annotations Additional custom annotations for the ServiceMonitor
+    ##
+    annotations: {}
+    ## @param metrics.serviceMonitor.labels Extra labels for the ServiceMonitor
+    ##
+    labels: {}
+    ## @param metrics.serviceMonitor.jobLabel The name of the label on the target service to use as the job name in Prometheus
+    ##
+    jobLabel: ""
+    ## @param metrics.serviceMonitor.honorLabels honorLabels chooses the metric's labels on collisions with target labels
+    ##
+    honorLabels: false
+    ## @param metrics.serviceMonitor.interval Interval at which metrics should be scraped.
+    ## ref: https://github.com/coreos/prometheus-operator/blob/master/Documentation/api.md#endpoint
+    ## e.g:
+    ## interval: 10s
+    ##
+    interval: ""
+    ## @param metrics.serviceMonitor.scrapeTimeout Timeout after which the scrape is ended
+    ## ref: https://github.com/coreos/prometheus-operator/blob/master/Documentation/api.md#endpoint
+    ## e.g:
+    ## scrapeTimeout: 10s
+    ##
+    scrapeTimeout: ""
+    ## @param metrics.serviceMonitor.metricRelabelings Specify additional relabeling of metrics
+    ##
+    metricRelabelings: []
+    ## @param metrics.serviceMonitor.relabelings Specify general relabeling
+    ##
+    relabelings: []
+    ## @param metrics.serviceMonitor.selector Prometheus instance selector labels
+    ## ref: https://github.com/syself/charts/tree/main/syself/prometheus-operator#prometheus-configuration
+    ## selector:
+    ##   prometheus: my-prometheus
+    ##
+    selector: {}
+
+## @param storageClasses Creates one or more storageClasses
+##
+storageClasses: {}
+# - name: standard
+#   defaultStorageClass: true
+#   reclaimPolicy: Retain

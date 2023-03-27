@@ -1,0 +1,190 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: {{ template "common.names.fullname" . }}-controller
+  namespace: {{ include "common.names.namespace" . | quote }}
+  labels: {{- include "common.labels.standard" . | nindent 4 }}
+    app.kubernetes.io/component: controller
+    {{- if .Values.commonLabels }}
+    {{- include "common.tplvalues.render" ( dict "value" .Values.commonLabels "context" $ ) | nindent 4 }}
+    {{- end }}
+  {{- if .Values.commonAnnotations }}
+  annotations: {{- include "common.tplvalues.render" ( dict "value" .Values.commonAnnotations "context" $ ) | nindent 4 }}
+  {{- end }}
+spec:
+  {{- if not .Values.controller.autoscaling.enabled }}
+  replicas: {{ .Values.controller.replicaCount }}
+  {{- end }}
+  {{- if .Values.controller.updateStrategy }}
+  strategy: {{- toYaml .Values.controller.updateStrategy | nindent 4 }}
+  {{- end }}
+  selector:
+    matchLabels: {{- include "common.labels.matchLabels" . | nindent 6 }}
+      app.kubernetes.io/component: controller
+  template:
+    metadata:
+      {{- if .Values.controller.podAnnotations }}
+      annotations: {{- include "common.tplvalues.render" (dict "value" .Values.controller.podAnnotations "context" $) | nindent 8 }}
+      {{- end }}
+      labels: {{- include "common.labels.standard" . | nindent 8 }}
+        app.kubernetes.io/component: controller
+        {{- if .Values.controller.podLabels }}
+        {{- include "common.tplvalues.render" (dict "value" .Values.controller.podLabels "context" $) | nindent 8 }}
+        {{- end }}
+        {{- if .Values.commonLabels }}
+        {{- include "common.tplvalues.render" ( dict "value" .Values.commonLabels "context" $ ) | nindent 8 }}
+        {{- end }}
+    spec:
+      serviceAccountName: {{ template "common.names.serviceAccountName" . }}-controller
+      {{- include "common.images.pullSecrets" (dict "images" (list .Values.controller.image) "global" .Values.global) | nindent 6 }}
+      {{- if .Values.controller.affinity }}
+      affinity: {{- include "common.tplvalues.render" ( dict "value" .Values.controller.affinity "context" $) | nindent 8 }}
+      {{- end }}
+      {{- if .Values.controller.nodeSelector }}
+      nodeSelector: {{- include "common.tplvalues.render" ( dict "value" .Values.controller.nodeSelector "context" $) | nindent 8 }}
+      {{- end }}
+      {{- if .Values.controller.tolerations }}
+      tolerations: {{- include "common.tplvalues.render" (dict "value" .Values.controller.tolerations "context" .) | nindent 8 }}
+      {{- end }}
+      {{- if .Values.controller.priorityClassName }}
+      priorityClassName: {{ .Values.controller.priorityClassName | quote }}
+      {{- end }}
+      {{- if .Values.controller.schedulerName }}
+      schedulerName: {{ .Values.controller.schedulerName | quote }}
+      {{- end }}
+      {{- if .Values.controller.topologySpreadConstraints }}
+      topologySpreadConstraints: {{- include "common.tplvalues.render" (dict "value" .Values.controller.topologySpreadConstraints "context" .) | nindent 8 }}
+      {{- end }}
+      {{- if .Values.controller.podSecurityContext.enabled }}
+      securityContext: {{- omit .Values.controller.podSecurityContext "enabled" | toYaml | nindent 8 }}
+      {{- end }}
+      {{- if .Values.controller.terminationGracePeriodSeconds }}
+      terminationGracePeriodSeconds: {{ .Values.controller.terminationGracePeriodSeconds }}
+      {{- end }}
+      initContainers:
+        {{- if .Values.controller.initContainers }}
+          {{- include "common.tplvalues.render" (dict "value" .Values.controller.initContainers "context" $) | nindent 8 }}
+        {{- end }}
+      containers:
+        - name: csi-attacher
+          image: {{ include "common.images.image" (dict "imageRoot" .Values.controller.image.csiAttacher "global" .Values.global) }}
+          imagePullPolicy: {{ .Values.controller.image.csiAttacher.pullPolicy }}
+          {{- if .Values.controller.resources.csiAttacher }}
+          resources: {{- toYaml .Values.controller.resources.csiAttacher | nindent 12 }}
+          {{- end }}
+          args:
+          - --default-fstype=ext4
+          volumeMounts:
+          - name: socket-dir
+            mountPath: /run/csi
+        - name: csi-resizer
+          image: {{ include "common.images.image" (dict "imageRoot" .Values.controller.image.csiResizer "global" .Values.global) }}
+          imagePullPolicy: {{ .Values.controller.image.csiResizer.pullPolicy }}
+          {{- if .Values.controller.resources.csiResizer }}
+          resources: {{- toYaml .Values.controller.resources.csiResizer | nindent 12 }}
+          {{- end }}
+          volumeMounts:
+          - name: socket-dir
+            mountPath: /run/csi
+        - name: csi-provisioner
+          image: {{ include "common.images.image" (dict "imageRoot" .Values.controller.image.csiProvisioner "global" .Values.global) }}
+          imagePullPolicy: {{ .Values.controller.image.csiProvisioner.pullPolicy }}
+          {{- if .Values.controller.resources.csiProvisioner }}
+          resources: {{- toYaml .Values.controller.resources.csiProvisioner | nindent 12 }}
+          {{- end }}
+          args:
+          - --feature-gates=Topology=true
+          - --default-fstype=ext4
+          volumeMounts:
+          - name: socket-dir
+            mountPath: /run/csi
+        - name: liveness-probe
+          image: {{ include "common.images.image" (dict "imageRoot" .Values.controller.image.livenessProbe "global" .Values.global) }}
+          imagePullPolicy: {{ .Values.controller.image.livenessProbe.pullPolicy }}
+          {{- if .Values.controller.resources.livenessProbe }}
+          resources: {{- toYaml .Values.controller.resources.livenessProbe | nindent 12 }}
+          {{- end }}
+          volumeMounts:
+          - mountPath: /run/csi
+            name: socket-dir
+        - name: hcloud-csi-driver
+          image: {{ include "common.images.image" (dict "imageRoot" .Values.controller.image.hcloudCSIDriver "global" .Values.global) }}
+          imagePullPolicy: {{ .Values.controller.image.hcloudCSIDriver.pullPolicy }}
+          command: [/bin/hcloud-csi-driver-controller]
+          volumeMounts:
+            - name: socket-dir
+              mountPath: /run/csi
+          env:
+            - name: CSI_ENDPOINT
+              value: unix:///run/csi/socket
+            {{- if .Values.controller.hcloudVolumeDefaultLocation }}
+            - name: HCLOUD_VOLUME_DEFAULT_LOCATION
+              value: {{ .Values.controller.hcloudVolumeDefaultLocation | quote }}
+            {{- end }}
+            {{- if .Values.metrics.enabled }}
+            - name: METRICS_ENDPOINT
+              value: 0.0.0.0:{{ .Values.controller.containerPorts.metrics }}
+            {{- end }}
+            - name: ENABLE_METRICS
+              value: {{if .Values.metrics.enabled}}"true"{{ else }}"false"{{end}}
+            - name: KUBE_NODE_NAME
+              valueFrom:
+                fieldRef:
+                  apiVersion: v1
+                  fieldPath: spec.nodeName
+            - name: HCLOUD_TOKEN
+              valueFrom:
+                secretKeyRef:
+                  {{- if .Values.controller.hcloudToken.value }}
+                  name: {{ template "common.names.fullname" . }}-hcloud-token
+                  key: token
+                  {{- else }}
+                  name: {{ .Values.controller.hcloudToken.extistingSecret.name }}
+                  key: {{ .Values.controller.hcloudToken.extistingSecret.key }}
+                  {{- end }}
+            {{- if .Values.controller.extraEnvVars }}
+            {{- include "common.tplvalues.render" (dict "value" .Values.controller.extraEnvVars "context" $) | nindent 12 }}
+            {{- end }}
+          {{- if .Values.controller.resources.hcloudCSIDriver }}
+          resources: {{- toYaml .Values.controller.resources.hcloudCSIDriver | nindent 12 }}
+          {{- end }}
+          ports:
+            {{- if .Values.metrics.enabled }}
+            - name: metrics
+              containerPort: {{ .Values.controller.containerPorts.metrics }}
+            {{- end }}
+            - name: healthz
+              protocol: TCP
+              containerPort: {{ .Values.controller.containerPorts.healthz }}
+          {{- if .Values.controller.customLivenessProbe }}
+          livenessProbe: {{- include "common.tplvalues.render" (dict "value" .Values.controller.customLivenessProbe "context" $) | nindent 12 }}
+          {{- else if .Values.controller.livenessProbe.enabled }}
+          livenessProbe: {{- include "common.tplvalues.render" (dict "value" (omit .Values.controller.livenessProbe "enabled") "context" $) | nindent 12 }}
+            httpGet:
+              path: /healthz
+              port: healthz
+          {{- end }}
+          {{- if .Values.controller.customReadinessProbe }}
+          readinessProbe: {{- include "common.tplvalues.render" (dict "value" .Values.controller.customReadinessProbe "context" $) | nindent 12 }}
+          {{- end }}
+          {{- if .Values.controller.customStartupProbe }}
+          startupProbe: {{- include "common.tplvalues.render" (dict "value" .Values.controller.customStartupProbe "context" $) | nindent 12 }}
+          {{- end }}
+          {{- if .Values.controller.lifecycleHooks }}
+          lifecycle: {{- include "common.tplvalues.render" (dict "value" .Values.controller.lifecycleHooks "context" $) | nindent 12 }}
+          {{- end }}
+          volumeMounts:
+            - name: socket-dir
+              mountPath: /run/csi
+          {{- if .Values.controller.extraVolumeMounts }}
+          {{- include "common.tplvalues.render" (dict "value" .Values.controller.extraVolumeMounts "context" $) | nindent 12 }}
+          {{- end }}
+        {{- if .Values.controller.sidecars }}
+        {{- include "common.tplvalues.render" ( dict "value" .Values.controller.sidecars "context" $) | nindent 8 }}
+        {{- end }}
+      volumes:
+        - name: socket-dir
+          emptyDir: {}
+        {{- if .Values.controller.extraVolumes }}
+        {{- include "common.tplvalues.render" (dict "value" .Values.controller.extraVolumes "context" $) | nindent 8 }}
+        {{- end }}
