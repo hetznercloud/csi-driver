@@ -23,3 +23,5 @@ jobs:
             deploy/kubernetes/hcloud-csi.yml
             deploy/kubernetes/controller/deployment.yaml
             deploy/kubernetes/node/daemonset.yaml
+            chart/Chart.yaml
+            chart/values.yaml

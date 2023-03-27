@@ -1,0 +1,10 @@
+apiVersion: v2
+name: hcloud-csi
+description: Helm Chart for the CSI Driver on Hetzner Cloud
+type: application
+home: https://github.com/hetznercloud/csi-driver
+maintainers:
+  - name: Hetzner Cloud
+    email: support@hetzner.com
+    url: https://github.com/hetznercloud
+version: 2.4.0 # // x-release-please-version

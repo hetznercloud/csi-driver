@@ -1,0 +1,67 @@
+{{ if .Values.controller.rbac.create }}
+kind: ClusterRole
+apiVersion: rbac.authorization.k8s.io/v1
+metadata:
+  name: {{ include "common.names.fullname" . }}-controller
+  labels: {{- include "common.labels.standard" . | nindent 4 }}
+    app.kubernetes.io/component: controller
+    {{- if .Values.commonLabels }}
+    {{- include "common.tplvalues.render" ( dict "value" .Values.commonLabels "context" $ ) | nindent 4 }}
+    {{- end }}
+  {{- if .Values.commonAnnotations }}
+  annotations: {{- include "common.tplvalues.render" ( dict "value" .Values.commonAnnotations "context" $ ) | nindent 4 }}
+  {{- end }}
+rules:
+# attacher
+- apiGroups: [""]
+  resources: [persistentvolumes]
+  verbs: [get, list, watch, update, patch]
+- apiGroups: [""]
+  resources: [nodes]
+  verbs: [get, list, watch]
+- apiGroups: [csi.storage.k8s.io]
+  resources: [csinodeinfos]
+  verbs: [get, list, watch]
+- apiGroups: [storage.k8s.io]
+  resources: [csinodes]
+  verbs: [get, list, watch]
+- apiGroups: [storage.k8s.io]
+  resources: [volumeattachments]
+  verbs: [get, list, watch, update, patch]
+- apiGroups: [storage.k8s.io]
+  resources: [volumeattachments/status]
+  verbs: [patch]
+# provisioner
+- apiGroups: [""]
+  resources: [secrets]
+  verbs: [get, list]
+- apiGroups: [""]
+  resources: [persistentvolumes]
+  verbs: [get, list, watch, create, delete, patch]
+- apiGroups: [""]
+  resources: [persistentvolumeclaims, persistentvolumeclaims/status]
+  verbs: [get, list, watch, update, patch]
+- apiGroups: [storage.k8s.io]
+  resources: [storageclasses]
+  verbs: [get, list, watch]
+- apiGroups: [""]
+  resources: [events]
+  verbs: [list, watch, create, update, patch]
+- apiGroups: [snapshot.storage.k8s.io]
+  resources: [volumesnapshots]
+  verbs: [get, list]
+- apiGroups: [snapshot.storage.k8s.io]
+  resources: [volumesnapshotcontents]
+  verbs: [get, list]
+# resizer
+- apiGroups: [""]
+  resources: [pods]
+  verbs: [get, list, watch]
+# node
+- apiGroups: [""]
+  resources: [events]
+  verbs: [get, list, watch, create, update, patch]
+  {{- if .Values.controller.rbac.rules }}
+  {{- include "common.tplvalues.render" ( dict "value" .Values.controller.rbac.rules "context" $ ) | nindent 2 }}
+  {{- end }}
+{{- end }}
