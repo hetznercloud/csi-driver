@@ -9,8 +9,14 @@ jobs:
       # causes all other currently running jobs to abort and all need to be restarted.
       fail-fast: false
       matrix:
-        k8s: [ k8s-1.23.15, k8s-1.24.9, k8s-1.25.5, k8s-1.26.0 ]
-    name: k8s ${{ matrix.k8s }}
+        include:
+          - k3s: v1.24
+            k8s-test: v1.24.12
+          - k3s: v1.25
+            k8s-test: v1.25.8
+          - k3s: v1.26
+            k8s-test: v1.26.3
+    name: k3s ${{ matrix.k3s }}
     steps:
     - uses: actions/setup-go@v2
       with:
@@ -34,17 +40,31 @@ jobs:
           echo "::error ::Couldn't determine HCLOUD_TOKEN. Check that repository secrets are setup correctly."
           exit 1
         fi
-    - uses: actions/cache@v2
+
+    - uses: 3bit/setup-hcloud@v2
+    - uses: yokawasa/action-setup-kube-tools@v0.9.2
       with:
-        path: |
-          ~/go/pkg/mod
-          ~/.cache/go-build
-        key: ${{ runner.os }}-go-${{ hashFiles('**/go.sum') }}
-        restore-keys: |
-          ${{ runner.os }}-go-
+        setup-tools: |
+          helm
+          kubectl
+          skaffold
+        helm: v3.11.2
+        kubectl: v1.26.3
+        skaffold: v2.3.0
+
     - name: Run tests
       env:
-        K8S_VERSION: ${{ matrix.k8s }}
+        K3S_CHANNEL: ${{ matrix.k3s }}
+        K8S_TEST_VERSION: ${{ matrix.k8s-test }}
+        SCOPE: gha-${{ github.run_id }}-${{ github.run_attempt }}-${{ matrix.k3s }}
       run: |
-        go test $(go list ./... | grep e2etests) -v -timeout 60m
-        ./script/delete-token.sh $HCLOUD_TOKEN
+        curl -sLS https://get.k3sup.dev | sh
+
+        trap "hack/dev-down.sh; ./script/delete-token.sh $HCLOUD_TOKEN" EXIT
+        source <(hack/dev-up.sh)
+
+        skaffold build --tag="e2e-${GITHUB_RUN_ID}-${GITHUB_RUN_NUMBER}"
+        tag=$(skaffold build --tag="e2e-${GITHUB_RUN_ID}-${GITHUB_RUN_NUMBER}" --quiet --output="{{ (index .Builds 0).Tag }}")
+        skaffold deploy --images=hetznercloud/hcloud-csi-driver=$tag
+
+        e2etests/run-e2e-tests.sh

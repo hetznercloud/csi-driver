@@ -1,0 +1,3 @@
+# rootfs for docker plugin
+deploy/docker-swarm/pkg/plugin
+hack/.*

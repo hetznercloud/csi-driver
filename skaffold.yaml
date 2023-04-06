@@ -1,4 +1,4 @@
-apiVersion: skaffold/v2beta19
+apiVersion: skaffold/v4beta3
 kind: Config
 metadata:
   name: csi-driver
@@ -11,6 +11,8 @@ build:
           - hetznercloud/hcloud-csi-driver:buildcache
   local:
     useBuildkit: true
-deploy:
+  insecureRegistries:
+    - localhost:30666
+manifests:
   kustomize:
     paths: [hack/]
