@@ -6,7 +6,7 @@ build:
   artifacts:
     - image: hetznercloud/hcloud-csi-driver
       docker:
-        dockerfile: Dockerfile
+        dockerfile: hack/Dockerfile
         cacheFrom:
           - hetznercloud/hcloud-csi-driver:buildcache
   local:

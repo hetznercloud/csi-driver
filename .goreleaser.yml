@@ -1,8 +1,32 @@
 builds:
-  - skip: true
-changelog:
-  sort: asc
-  filters:
-    exclude:
-      - '^docs:'
-      - '^test:'
+  - id: controller
+    main: ./cmd/controller
+    env:
+      - CGO_ENABLED=0
+    goos:
+      - linux
+    goarch:
+      - amd64
+    binary: controller.bin
+  - id: node
+    main: ./cmd/node
+    env:
+      - CGO_ENABLED=0
+    goos:
+      - linux
+    goarch:
+      - amd64
+    binary: node.bin
+
+dockers:
+  - build_flag_templates: [--platform=linux/amd64]
+    dockerfile: Dockerfile
+    goarch: amd64
+    image_templates: ["hetznercloud/hcloud-csi-driver:{{ if not .IsSnapshot }}v{{ end }}{{ .Version }}-amd64"]
+    use: buildx
+
+docker_manifests:
+  - name_template: hetznercloud/hcloud-csi-driver:{{ if not .IsSnapshot }}v{{ end }}{{ .Version }}
+    image_templates:
+      - hetznercloud/hcloud-csi-driver:{{ if not .IsSnapshot }}v{{ end }}{{ .Version }}-amd64
+

@@ -10,8 +10,15 @@ jobs:
       - uses: actions/checkout@v2
         with:
           fetch-depth: 0
+
+      - name: Set up Go
+        uses: actions/setup-go@v4
+        with:
+          go-version: 1.19
+
       - id: release_version
         run: echo ::set-output name=value::${GITHUB_REF:11}
+
       - name: update pushed tag
         env:
           RELEASE_VERSION: ${{ steps.release_version.outputs.value}}
@@ -26,28 +33,23 @@ jobs:
           git tag -d v$RELEASE_VERSION
           git tag v$RELEASE_VERSION
           git push origin v$RELEASE_VERSION -f
+
       - name: Set up Docker Buildx
         uses: docker/setup-buildx-action@v1
+
       - name: Login to DockerHub
         uses: docker/login-action@v1
         with:
           username: ${{ secrets.DOCKER_USER }}
           password: ${{ secrets.DOCKER_PASSWORD }}
-      - name: Build and push
-        id: docker_build
-        uses: docker/build-push-action@v2
-        with:
-          context: .
-          push: true
-          tags: ${{ github.repository_owner }}/hcloud-csi-driver:${{ steps.release_version.outputs.value}}
-          cache-from: type=registry,ref=${{ github.repository_owner }}/hcloud-csi-driver:buildcache
-          cache-to: type=registry,ref=${{ github.repository_owner }}/hcloud-csi-driver:buildcache,mode=max
+
       - name: "make docker plugin"
         env:
           RELEASE_VERSION: ${{ steps.release_version.outputs.value}}
         run: |
           cd deploy/docker-swarm/pkg
           make push PLUGIN_NAME=${{ github.repository_owner }}/hcloud-csi-driver PLUGIN_TAG=$RELEASE_VERSION-swarm
+
       - name: Run GoReleaser
         uses: goreleaser/goreleaser-action@v2
         with:
