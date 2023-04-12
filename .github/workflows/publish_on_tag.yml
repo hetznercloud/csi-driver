@@ -24,7 +24,7 @@ jobs:
           RELEASE_VERSION: ${{ steps.release_version.outputs.value}}
           OWNER: ${{ github.repository_owner }}
         run: |
-          sed -i -e "s#: .*/hcloud-csi-driver:latest#: $OWNER/hcloud-csi-driver:$RELEASE_VERSION#" deploy/kubernetes/hcloud-csi.yml
+          sed -i -e "s#: .*/hcloud-csi-driver:latest#: $OWNER/hcloud-csi-driver:v$RELEASE_VERSION#" deploy/kubernetes/hcloud-csi.yml
           sed -i -e "s/PluginVersion = \".*\"$/PluginVersion = \"$RELEASE_VERSION\"/g" driver/driver.go
           git config user.name github-actions
           git config user.email github-actions@github.com
