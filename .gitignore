@@ -1,4 +1,11 @@
 # rootfs for docker plugin
 deploy/docker-swarm/pkg/plugin
+
+# Tmp files for dev env
 hack/.*
+
+# Build output
 dist/
+
+# Test binary for integration tests
+test/integration/integration.tests

@@ -1,4 +1,4 @@
-package integrationtests
+package integration
 
 import (
 	"fmt"
@@ -26,7 +26,7 @@ func prepareDockerImage() error {
 	defer os.Unsetenv("GOARCH")
 	os.Setenv("CGO_ENABLED", "0")
 	defer os.Unsetenv("CGO_ENABLED")
-	if output, err := runCmd("go", "test", "-c", "-o", "integrationtests.tests"); err != nil {
+	if output, err := runCmd("go", "test", "-c", "-o", "integration.tests"); err != nil {
 		fmt.Printf("Error compiling test binary: %v\n%s\n", err, output)
 		os.Exit(1)
 	}

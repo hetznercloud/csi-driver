@@ -4,5 +4,5 @@ RUN apk add --no-cache ca-certificates e2fsprogs xfsprogs blkid xfsprogs-extra e
 RUN apk add --no-cache coreutils
 
 WORKDIR /test
-COPY integrationtests.tests /test/integrationtests.tests
-ENTRYPOINT ["/test/integrationtests.tests"]
+COPY integration.tests /test/integration.tests
+ENTRYPOINT ["/test/integration.tests"]

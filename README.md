@@ -200,10 +200,14 @@ related only to an unsupported version.
 The core operations like publishing and resizing can be tested locally with Docker.
 
 ```bash
-go test $(go list ./... | grep integrationtests) -v
+go test $(go list ./... | grep integration) -v
 ```
 
 ## E2E Tests
+
+> ⚠️ Kubernetes E2E Tests were recently refactored and the docs are now outdated.
+> See the [GitHub Actions workflow](.github/workflows/test_e2e.yml) for an
+> up-to-date script to run the e2e tests.
 
 The Hetzner Cloud CSI Driver was tested against the official k8s e2e
 tests for a specific version. You can run the tests with the following
@@ -224,14 +228,19 @@ will create volumes that will be billed.
    ```
 2. Run the tests
    ```bash
-   go test $(go list ./... | grep e2etests) -v -timeout 60m
+   go test $(go list ./... | grep e2e) -v -timeout 60m
    ```
 
 The tests will now run, this will take a while (~30 min).
 
 **If the tests fail, make sure to clean up the project with the Hetzner Cloud Console or the hcloud cli.**
 
-## Local test setup
+## Local test setup  
+
+> ⚠️ Local Kubernetes Dev Setup was recently refactored and the docs are now
+> outdated. Check out the scripts [dev-up.sh](hack/dev-up.sh) &
+> [dev-down.sh](hack/dev-down.sh) for an automatic dev setup.
+
 This repository provides [skaffold](https://skaffold.dev/) to easily deploy / debug this driver on demand
 
 ### Requirements
@@ -241,7 +250,9 @@ This repository provides [skaffold](https://skaffold.dev/) to easily deploy / de
 4. Install [docker](https://www.docker.com/)
 
 You will also need to set a `HCLOUD_TOKEN` in your shell session
+
 ### Manual Installation guide
+
 1. Create an SSH key
 
 Assuming you already have created an ssh key via `ssh-keygen`
