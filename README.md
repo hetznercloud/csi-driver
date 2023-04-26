@@ -3,197 +3,22 @@
 [![GitHub Actions status](https://github.com/hetznercloud/csi-driver/workflows/Run%20tests/badge.svg)](https://github.com/hetznercloud/csi-driver/actions)
 
 This is a [Container Storage Interface](https://github.com/container-storage-interface/spec) driver for Hetzner Cloud
-enabling you to use ReadWriteOnce Volumes within Kubernetes. Please note that this driver **requires Kubernetes 1.19 or newer**.
+enabling you to use ReadWriteOnce Volumes within Kubernetes & other Container
+Orchestrators. Please note that this driver **requires Kubernetes 1.19 or newer**.
 
 ## Getting Started
 
-1. Create a read+write API token in the [Hetzner Cloud Console](https://console.hetzner.cloud/).
+Depending on your Container Orchestrator you need to follow different steps to
+get started with the Hetzner Cloud csi-driver. You can also find other docs
+relevant to that Container Orchestrator behind the link:
 
-2. Create a secret containing the token:
+### [Kubernetes](./docs/kubernetes/README.md#getting-started)
 
-   ```
-   # secret.yml
-   apiVersion: v1
-   kind: Secret
-   metadata:
-     name: hcloud
-     namespace: kube-system
-   stringData:
-     token: YOURTOKEN
-   ```
+### [Docker Swarm](./docs/docker-swarm/README.md)️ _⚠ Not officially supported_
 
-   and apply it:
-   ```
-   kubectl apply -f <secret.yml>
-   ```
+## Tests
 
-3. Deploy the CSI driver and wait until everything is up and running:
-
-    Have a look at our [Version Matrix](README.md#versioning-policy) to pick the correct deployment file.
-   ```
-   kubectl apply -f https://raw.githubusercontent.com/hetznercloud/csi-driver/v2.2.0/deploy/kubernetes/hcloud-csi.yml
-   ```
-
-4. To verify everything is working, create a persistent volume claim and a pod
-   which uses that volume:
-
-   ```
-   apiVersion: v1
-   kind: PersistentVolumeClaim
-   metadata:
-     name: csi-pvc
-   spec:
-     accessModes:
-     - ReadWriteOnce
-     resources:
-       requests:
-         storage: 10Gi
-     storageClassName: hcloud-volumes
-   ---
-   kind: Pod
-   apiVersion: v1
-   metadata:
-     name: my-csi-app
-   spec:
-     containers:
-       - name: my-frontend
-         image: busybox
-         volumeMounts:
-         - mountPath: "/data"
-           name: my-csi-volume
-         command: [ "sleep", "1000000" ]
-     volumes:
-       - name: my-csi-volume
-         persistentVolumeClaim:
-           claimName: csi-pvc
-   ```
-
-   Once the pod is ready, exec a shell and check that your volume is mounted at `/data`.
-
-   ```
-   kubectl exec -it my-csi-app -- /bin/sh
-   ```
-
-5. To add encryption with LUKS you have to create a dedicate secret containing an encryption passphrase and duplicate the default `hcloud-volumes` storage class with added parameters referencing this secret:
-
-   ```
-   apiVersion: v1
-   kind: Secret
-   metadata:
-     name: encryption-secret
-     namespace: kube-system
-   stringData:
-     encryption-passphrase: foobar
-
-   --- 
-
-   apiVersion: storage.k8s.io/v1
-   kind: StorageClass
-   metadata:
-     name: hcloud-volumes-encrypted
-   provisioner: csi.hetzner.cloud
-   reclaimPolicy: Delete
-   volumeBindingMode: WaitForFirstConsumer
-   allowVolumeExpansion: true
-   parameters:
-     csi.storage.k8s.io/node-publish-secret-name: encryption-secret
-     csi.storage.k8s.io/node-publish-secret-namespace: kube-system
-   ```
-
-Your nodes might need to have `cryptsetup` installed to mount the volumes with LUKS.
-
-## Upgrading
-
-To upgrade the csi-driver version, you just need to apply the new manifests to your cluster.
-
-In case of a new major version, there might be manual steps that you need to follow to upgrade the csi-driver. See the following section for a list of major updates and their required steps.
-
-### From v1 to v2
-
-There are three breaking changes between v1.6 and v2.0 that require user intervention. Please take care to follow these steps, as otherwise the update might fail.
-
-**Before the rollout**:
-
-1. The secret containing the API token was renamed from `hcloud-csi` to `hcloud`. This change was made so both the cloud-controller-manager and the csi-driver can use the same secret. Check that you have a secret `hcloud` in the namespace `kube-system`, and that the secret contains the API token, as described in the section [Getting Started](#getting-started):
-
-   ```shell
-   $ kubectl get secret -n kube-system hcloud
-   ```
-
-2. We added a new field to our `CSIDriver` resource to support [CSI volume fsGroup policy management](https://kubernetes.io/docs/tasks/configure-pod-container/security-context/#configure-volume-permission-and-ownership-change-policy-for-pods). This change requires a replacement of the `CSIDriver` object. You need to manually delete the old object:
-
-   ```shell
-   $ kubectl delete csidriver csi.hetzner.cloud
-   ```
-
-   The new `CSIDriver` will be installed when you apply the new manifests.
-
-3. Stop the old pods to make sure that only everything is replaced in order and no incompatible pods are running side-by-side:
-
-   ```shell
-   $ kubectl delete statefulset -n kube-system hcloud-csi-controller
-   $ kubectl delete daemonset -n kube-system hcloud-csi-node
-   ```
-
-4. We changed the way the device path of mounted volumes is communicated to the node service. This requires changes to the `VolumeAttachment` objects, where we need to add information to the `status.attachmentMetadata` field. Execute the linked script to automatically add the required information. This requires `kubectl` version `v1.24+`, even if your cluster is running v1.23.
-
-   ```shell
-   $ kubectl version
-   $ curl -O https://raw.githubusercontent.com/hetznercloud/csi-driver/main/docs/v2-fix-volumeattachments/fix-volumeattachments.sh
-   $ chmod +x ./fix-volumeattachments.sh
-   $ ./fix-volumeattachments.sh
-   ```
-
-**Rollout the new manifest**:
-
-```shell
-$ kubectl apply -f https://raw.githubusercontent.com/hetznercloud/csi-driver/v2.2.0/deploy/kubernetes/hcloud-csi.yml
-```
-
-**After the rollout**:
-
-1. Delete the now unused secret `hcloud-csi` in the namespace `kube-system`:
-
-   ```shell
-   $ kubectl delete secret -n kube-system hcloud-csi
-   ```
-
-2. Remove old resources that have been replaced:
-
-   ```shell
-   $ kubectl delete clusterrolebinding hcloud-csi
-   $ kubectl delete clusterrole hcloud-csi
-   $ kubectl delete serviceaccount -n kube-system hcloud-csi
-   ```
-
-## Integration with Root Servers
-
-Root servers can be part of the cluster, but the CSI plugin doesn't work there. Taint the root server as follows to skip that node for the daemonset.
-
-```bash
-kubectl label nodes <node name> instance.hetzner.cloud/is-root-server=true
-```
-
-## Versioning policy
-
-We aim to support the latest three versions of Kubernetes. After a new
-Kubernetes version has been released we will stop supporting the oldest
-previously supported version. This does not necessarily mean that the
-CSI driver does not still work with this version. However, it means that
-we do not test that version anymore. Additionally, we will not fix bugs
-related only to an unsupported version.
-
-| Kubernetes | CSI Driver |                                                                                   Deployment File |
-| ---------- | ---------: | ------------------------------------------------------------------------------------------------: |
-| 1.26       |      2.2.0 | https://raw.githubusercontent.com/hetznercloud/csi-driver/v2.2.0/deploy/kubernetes/hcloud-csi.yml |
-| 1.25       |      2.2.0 | https://raw.githubusercontent.com/hetznercloud/csi-driver/v2.2.0/deploy/kubernetes/hcloud-csi.yml |
-| 1.24       |      2.2.0 | https://raw.githubusercontent.com/hetznercloud/csi-driver/v2.2.0/deploy/kubernetes/hcloud-csi.yml |
-| 1.23       |      2.2.0 | https://raw.githubusercontent.com/hetznercloud/csi-driver/v2.2.0/deploy/kubernetes/hcloud-csi.yml |
-| 1.22       |      1.6.0 | https://raw.githubusercontent.com/hetznercloud/csi-driver/v1.6.0/deploy/kubernetes/hcloud-csi.yml |
-| 1.21       |      1.6.0 | https://raw.githubusercontent.com/hetznercloud/csi-driver/v1.6.0/deploy/kubernetes/hcloud-csi.yml |
-| 1.20       |      1.6.0 | https://raw.githubusercontent.com/hetznercloud/csi-driver/v1.6.0/deploy/kubernetes/hcloud-csi.yml |
-
-## Integration Tests
+### Integration Tests
 
 **Requirements: Docker**
 
@@ -203,7 +28,7 @@ The core operations like publishing and resizing can be tested locally with Dock
 go test $(go list ./... | grep integration) -v
 ```
 
-## E2E Tests
+### E2E Tests
 
 > ⚠️ Kubernetes E2E Tests were recently refactored and the docs are now outdated.
 > See the [GitHub Actions workflow](.github/workflows/test_e2e.yml) for an
@@ -224,7 +49,7 @@ will create volumes that will be billed.
    ```bash
    export HCLOUD_TOKEN=<specifiy a project token>
    export K8S_VERSION=1.21.0 # The specific (latest) version is needed here
-   export USE_SSH_KEYS=key1,key2 # Name or IDs of your SSH Keys within the Hetzner Cloud, the servers will be accessable with that keys
+   export USE_SSH_KEYS=key1,key2 # Name or IDs of your SSH Keys within the Hetzner Cloud, the servers will be accessible with that keys
    ```
 2. Run the tests
    ```bash
@@ -235,7 +60,7 @@ The tests will now run, this will take a while (~30 min).
 
 **If the tests fail, make sure to clean up the project with the Hetzner Cloud Console or the hcloud cli.**
 
-## Local test setup  
+### Local test setup  
 
 > ⚠️ Local Kubernetes Dev Setup was recently refactored and the docs are now
 > outdated. Check out the scripts [dev-up.sh](hack/dev-up.sh) &
@@ -243,7 +68,7 @@ The tests will now run, this will take a while (~30 min).
 
 This repository provides [skaffold](https://skaffold.dev/) to easily deploy / debug this driver on demand
 
-### Requirements
+#### Requirements
 1. Install [hcloud-cli](https://github.com/hetznercloud/cli)
 2. Install [k3sup](https://github.com/alexellis/k3sup)
 3. Install [cilium](https://github.com/cilium/cilium-cli)
@@ -251,7 +76,7 @@ This repository provides [skaffold](https://skaffold.dev/) to easily deploy / de
 
 You will also need to set a `HCLOUD_TOKEN` in your shell session
 
-### Manual Installation guide
+#### Manual Installation guide
 
 1. Create an SSH key
 
