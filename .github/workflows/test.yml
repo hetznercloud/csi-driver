@@ -25,4 +25,4 @@ jobs:
       - name: Run tests
         run: |
           go vet ./...
-          go test $(go list ./... | grep -v e2etests) -v
+          go test $(go list ./... | grep -v e2e) -v

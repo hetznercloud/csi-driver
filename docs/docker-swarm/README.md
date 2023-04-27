@@ -1,4 +1,4 @@
-# Docker Swarm Hetzner CSI plugin
+# Docker Swarm Hetzner Cloud CSI plugin
 
 Currently in Beta. Please consult the Docker Swarm documentation
 for cluster volumes (=CSI) support at https://github.com/moby/moby/blob/master/docs/cluster_volumes.md

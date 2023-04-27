@@ -4,7 +4,7 @@ This guide is intended for Kubernetes Cluster operators that installed the hclou
 
 The affected `PersistentVolumes` reference a wrong label in the `spec.nodeAffinity.required` fields. The volumes work as they should, but for consistency and future compatibility we recommend that the `PersistentVolumes` should be fixed.
 
-Unfortunatly the affected field is immutable, so we need to recreate the `PersistentVolume` in Kubernetes, the actual Volume with the data will not be touched, no data loss is expected.
+Unfortunately the affected field is immutable, so we need to recreate the `PersistentVolume` in Kubernetes, the actual Volume with the data will not be touched, no data loss is expected.
 This is only possible if it is not attached to a node, so any workload using the `PersistentVolume` needs to be paused for this.
 
 ## Pre-requisites

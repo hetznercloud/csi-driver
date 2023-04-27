@@ -1,4 +1,4 @@
-package integrationtests
+package integration
 
 import (
 	"os"
