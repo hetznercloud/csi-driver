@@ -29,21 +29,9 @@ jobs:
       with:
         fetch-depth: 0
 
-    - name: HCLOUD_TOKEN
-      env:
-        HCLOUD_TOKEN: ${{ secrets.HCLOUD_TOKEN }}
-      run: |
-        echo "HCLOUD_TOKEN=$HCLOUD_TOKEN" >> "$GITHUB_ENV"
-
     - uses: hetznercloud/tps-action@main
-      if: ${{ vars.USE_TPS }}
-
-    - name: check HCLOUD_TOKEN
-      run: |
-        if [[ "${HCLOUD_TOKEN:-}" == "" ]]; then
-          echo "::error ::Couldn't determine HCLOUD_TOKEN. Are repository secrets correctly set?"
-          exit 1
-        fi
+      with:
+        token: ${{ secrets.HCLOUD_TOKEN  }}
 
     - uses: 3bit/setup-hcloud@v2
     - uses: yokawasa/action-setup-kube-tools@v0.9.2
