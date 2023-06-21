@@ -28,3 +28,4 @@ DriverInfo:
   SupportedFsType:
     ext4:
     xfs:
+    btrfs:

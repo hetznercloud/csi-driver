@@ -212,6 +212,9 @@ func (s *LinuxMountService) FormatDisk(disk string, fstype string) error {
 	case "xfs":
 		_, _, err := command("mkfs.xfs", disk)
 		return err
+	case "btrfs":
+		_, _, err := command("mkfs.btrfs", disk)
+		return err
 	default:
 		return fmt.Errorf("unsupported disk format %s", fstype)
 	}
