@@ -16,15 +16,12 @@ jobs:
         with:
           go-version: 1.19
 
-      - id: release_version
-        run: echo ::set-output name=value::${GITHUB_REF:11}
+      - id: Export RELEASE_VERSION
+        run: echo "RELEASE_VERSION=${GITHUB_REF:11}" >> $GITHUB_ENV
 
       - name: update pushed tag
-        env:
-          RELEASE_VERSION: ${{ steps.release_version.outputs.value}}
-          OWNER: ${{ github.repository_owner }}
         run: |
-          sed -i -e "s#: .*/hcloud-csi-driver:latest#: $OWNER/hcloud-csi-driver:v$RELEASE_VERSION#" deploy/kubernetes/hcloud-csi.yml
+          sed -i -e "s#: .*/hcloud-csi-driver:latest#: ${{ github.repository_owner }}/hcloud-csi-driver:v$RELEASE_VERSION#" deploy/kubernetes/hcloud-csi.yml
           sed -i -e "s/PluginVersion = \".*\"$/PluginVersion = \"$RELEASE_VERSION\"/g" driver/driver.go
           git config user.name github-actions
           git config user.email github-actions@github.com
@@ -47,8 +44,6 @@ jobs:
           password: ${{ secrets.DOCKER_PASSWORD }}
 
       - name: "make docker plugin"
-        env:
-          RELEASE_VERSION: ${{ steps.release_version.outputs.value}}
         run: |
           cd deploy/docker-swarm/pkg
           make push PLUGIN_NAME=${{ github.repository_owner }}/hcloud-csi-driver PLUGIN_TAG=$RELEASE_VERSION-swarm
