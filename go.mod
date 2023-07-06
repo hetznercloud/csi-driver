@@ -95,7 +95,7 @@ replace k8s.io/code-generator => k8s.io/code-generator v0.27.3
 
 replace k8s.io/component-base => k8s.io/component-base v0.27.3
 
-replace k8s.io/component-helpers => k8s.io/component-helpers v0.24.0
+replace k8s.io/component-helpers => k8s.io/component-helpers v0.27.3
 
 replace k8s.io/controller-manager => k8s.io/controller-manager v0.27.3
 
