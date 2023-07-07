@@ -2,7 +2,7 @@ name: Push tagged version
 on:
   push:
     tags:
-      - 'v*.*.*'
+      - "v*.*.*"
 jobs:
   publish:
     runs-on: ubuntu-latest
@@ -49,10 +49,10 @@ jobs:
           make push PLUGIN_NAME=${{ github.repository_owner }}/hcloud-csi-driver PLUGIN_TAG=$RELEASE_VERSION-swarm
 
       - name: Run GoReleaser
-        uses: goreleaser/goreleaser-action@v2
+        uses: goreleaser/goreleaser-action@v4
         with:
           distribution: goreleaser
           version: latest
-          args: release --rm-dist
+          args: release --clean
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
