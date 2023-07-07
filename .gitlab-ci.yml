@@ -1,7 +1,10 @@
 ---
 include:
-  - project: "cloud/operations/ci"
-    file: "k8s/release.yml"
+  - project: cloud/operations/ci
+    file: k8s/release.yml
+  - project: cloud/integrations/ci
+    file:
+      - default.yml
 
 stages:
   - test
@@ -18,19 +21,14 @@ unit:
   stage: test
   script:
     - go test $(go list ./... | grep -v e2etests | grep -v integrationtests) -v
-  tags:
-    - hc-bladerunner
-
 
 e2e:
   image: docker:git
   stage: e2e-test
   parallel:
     matrix:
-      - K8S_VERSION: [ k8s-1.23.15, k8s-1.24.9, k8s-1.25.5, k8s-1.26.0 ]
+      - K8S_VERSION: [k8s-1.23.15, k8s-1.24.9, k8s-1.25.5, k8s-1.26.0]
   before_script:
     - apk add --no-cache git make musl-dev go
   script:
     - go test $(go list ./... | grep e2etests) -v -timeout 60m
-  tags:
-    - hc-bladerunner-build
