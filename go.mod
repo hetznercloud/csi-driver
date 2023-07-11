@@ -14,7 +14,7 @@ require (
 	github.com/prometheus/client_golang v1.14.0
 	golang.org/x/crypto v0.5.0
 	golang.org/x/sys v0.7.0
-	google.golang.org/grpc v1.56.1
+	google.golang.org/grpc v1.56.2
 	k8s.io/api v0.27.3
 	k8s.io/apimachinery v0.27.3
 	k8s.io/client-go v0.27.3
