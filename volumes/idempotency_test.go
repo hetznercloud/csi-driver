@@ -286,7 +286,7 @@ func TestIdempotentServiceAttachAlreadyAttachedSameServer(t *testing.T) {
 		AttachFunc: func(ctx context.Context, volume *csi.Volume, server *csi.Server) error {
 			return volumes.ErrAttached
 		},
-		GetByIDFunc: func(ctx context.Context, id uint64) (*csi.Volume, error) {
+		GetByIDFunc: func(ctx context.Context, id int64) (*csi.Volume, error) {
 			return &csi.Volume{
 				ID: id,
 				Server: &csi.Server{
@@ -309,7 +309,7 @@ func TestIdempotentServiceAttachAlreadyAttachedDifferentServer(t *testing.T) {
 		AttachFunc: func(ctx context.Context, volume *csi.Volume, server *csi.Server) error {
 			return volumes.ErrAttached
 		},
-		GetByIDFunc: func(ctx context.Context, id uint64) (*csi.Volume, error) {
+		GetByIDFunc: func(ctx context.Context, id int64) (*csi.Volume, error) {
 			return &csi.Volume{
 				ID: id,
 				Server: &csi.Server{

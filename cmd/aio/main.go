@@ -13,7 +13,7 @@ import (
 	"github.com/hetznercloud/csi-driver/app"
 	"github.com/hetznercloud/csi-driver/driver"
 	"github.com/hetznercloud/csi-driver/volumes"
-	"github.com/hetznercloud/hcloud-go/hcloud/metadata"
+	"github.com/hetznercloud/hcloud-go/v2/hcloud/metadata"
 )
 
 var logger log.Logger
@@ -66,7 +66,7 @@ func main() {
 	)
 	nodeService := driver.NewNodeService(
 		log.With(logger, "component", "driver-node-service"),
-		strconv.Itoa(serverID),
+		strconv.FormatInt(serverID, 10),
 		serverLocation,
 		volumeMountService,
 		volumeResizeService,

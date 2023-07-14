@@ -7,8 +7,8 @@ import (
 	proto "github.com/container-storage-interface/spec/lib/go/csi"
 )
 
-func parseVolumeID(id string) (uint64, error) { return strconv.ParseUint(id, 10, 64) }
-func parseNodeID(id string) (uint64, error)   { return strconv.ParseUint(id, 10, 64) }
+func parseVolumeID(id string) (int64, error) { return strconv.ParseInt(id, 10, 64) }
+func parseNodeID(id string) (int64, error)   { return strconv.ParseInt(id, 10, 64) }
 
 func volumeSizeFromCapacityRange(cr *proto.CapacityRange) (int, int, bool) {
 	if cr == nil {

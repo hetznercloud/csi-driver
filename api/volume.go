@@ -6,7 +6,7 @@ import (
 
 	"github.com/go-kit/kit/log"
 	"github.com/go-kit/kit/log/level"
-	"github.com/hetznercloud/hcloud-go/hcloud"
+	"github.com/hetznercloud/hcloud-go/v2/hcloud"
 
 	"github.com/hetznercloud/csi-driver/csi"
 	"github.com/hetznercloud/csi-driver/volumes"
@@ -80,8 +80,8 @@ func (s *VolumeService) Create(ctx context.Context, opts volumes.CreateOpts) (*c
 	return toDomainVolume(result.Volume), nil
 }
 
-func (s *VolumeService) GetByID(ctx context.Context, id uint64) (*csi.Volume, error) {
-	hcloudVolume, _, err := s.client.Volume.GetByID(ctx, int(id))
+func (s *VolumeService) GetByID(ctx context.Context, id int64) (*csi.Volume, error) {
+	hcloudVolume, _, err := s.client.Volume.GetByID(ctx, id)
 	if err != nil {
 		level.Info(s.logger).Log(
 			"msg", "failed to get volume",
@@ -126,7 +126,7 @@ func (s *VolumeService) Delete(ctx context.Context, volume *csi.Volume) error {
 		"volume-id", volume.ID,
 	)
 
-	hcloudVolume, _, err := s.client.Volume.GetByID(ctx, int(volume.ID))
+	hcloudVolume, _, err := s.client.Volume.GetByID(ctx, volume.ID)
 	if err != nil {
 		level.Info(s.logger).Log(
 			"msg", "failed to get volume",
@@ -177,7 +177,7 @@ func (s *VolumeService) Attach(ctx context.Context, volume *csi.Volume, server *
 		"server-id", server.ID,
 	)
 
-	hcloudVolume, _, err := s.client.Volume.GetByID(ctx, int(volume.ID))
+	hcloudVolume, _, err := s.client.Volume.GetByID(ctx, volume.ID)
 	if err != nil {
 		level.Info(s.logger).Log(
 			"msg", "failed to get volume",
@@ -194,7 +194,7 @@ func (s *VolumeService) Attach(ctx context.Context, volume *csi.Volume, server *
 		return volumes.ErrVolumeNotFound
 	}
 
-	hcloudServer, _, err := s.client.Server.GetByID(ctx, int(server.ID))
+	hcloudServer, _, err := s.client.Server.GetByID(ctx, server.ID)
 	if err != nil {
 		level.Info(s.logger).Log(
 			"msg", "failed to get server",
@@ -277,7 +277,7 @@ func (s *VolumeService) Detach(ctx context.Context, volume *csi.Volume, server *
 		)
 	}
 
-	hcloudVolume, _, err := s.client.Volume.GetByID(ctx, int(volume.ID))
+	hcloudVolume, _, err := s.client.Volume.GetByID(ctx, volume.ID)
 	if err != nil {
 		if hcloud.IsError(err, hcloud.ErrorCodeNotFound) {
 			level.Info(s.logger).Log(
@@ -312,7 +312,7 @@ func (s *VolumeService) Detach(ctx context.Context, volume *csi.Volume, server *
 
 	// If a server is provided, only detach if the volume is actually attached
 	// to that server.
-	if server != nil && hcloudVolume.Server.ID != int(server.ID) {
+	if server != nil && hcloudVolume.Server.ID != server.ID {
 		level.Info(s.logger).Log(
 			"msg", "volume not attached to provided server",
 			"volume-id", volume.ID,
@@ -354,7 +354,7 @@ func (s *VolumeService) Resize(ctx context.Context, volume *csi.Volume, size int
 		"requested-size", size,
 	)
 
-	hcloudVolume, _, err := s.client.Volume.GetByID(ctx, int(volume.ID))
+	hcloudVolume, _, err := s.client.Volume.GetByID(ctx, volume.ID)
 	if err != nil {
 		level.Info(s.logger).Log(
 			"msg", "failed to get volume",

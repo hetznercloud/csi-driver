@@ -391,7 +391,7 @@ func TestControllerServiceDeleteVolumeInternalError(t *testing.T) {
 func TestControllerServicePublishVolume(t *testing.T) {
 	env := newControllerServiceTestEnv()
 
-	env.volumeService.GetByIDFunc = func(ctx context.Context, id uint64) (*csi.Volume, error) {
+	env.volumeService.GetByIDFunc = func(ctx context.Context, id int64) (*csi.Volume, error) {
 		if id != 1 {
 			t.Errorf("unexpected volume id passed to volume service: %d", id)
 		}
@@ -737,7 +737,7 @@ func TestControllerServiceControllerGetCapabilities(t *testing.T) {
 func TestControllerServiceValidateVolumeCapabilities(t *testing.T) {
 	env := newControllerServiceTestEnv()
 
-	env.volumeService.GetByIDFunc = func(ctx context.Context, id uint64) (*csi.Volume, error) {
+	env.volumeService.GetByIDFunc = func(ctx context.Context, id int64) (*csi.Volume, error) {
 		return &csi.Volume{ID: id}, nil
 	}
 
@@ -821,7 +821,7 @@ func TestControllerServiceValidateVolumeCapabilitiesInputErrors(t *testing.T) {
 func TestControllerServiceValidateVolumeCapabilitiesVolumeNotFound(t *testing.T) {
 	env := newControllerServiceTestEnv()
 
-	env.volumeService.GetByIDFunc = func(ctx context.Context, id uint64) (*csi.Volume, error) {
+	env.volumeService.GetByIDFunc = func(ctx context.Context, id int64) (*csi.Volume, error) {
 		return nil, nil
 	}
 
@@ -844,7 +844,7 @@ func TestControllerServiceValidateVolumeCapabilitiesVolumeNotFound(t *testing.T)
 func TestControllerServiceValidateVolumeCapabilitiesInternalError(t *testing.T) {
 	env := newControllerServiceTestEnv()
 
-	env.volumeService.GetByIDFunc = func(ctx context.Context, id uint64) (*csi.Volume, error) {
+	env.volumeService.GetByIDFunc = func(ctx context.Context, id int64) (*csi.Volume, error) {
 		return nil, io.EOF
 	}
 
@@ -867,7 +867,7 @@ func TestControllerServiceValidateVolumeCapabilitiesInternalError(t *testing.T) 
 func TestControllerServiceValidateVolumeCapabilitiesUnsupportedCapability(t *testing.T) {
 	env := newControllerServiceTestEnv()
 
-	env.volumeService.GetByIDFunc = func(ctx context.Context, id uint64) (*csi.Volume, error) {
+	env.volumeService.GetByIDFunc = func(ctx context.Context, id int64) (*csi.Volume, error) {
 		return &csi.Volume{ID: id}, nil
 	}
 
