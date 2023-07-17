@@ -114,7 +114,7 @@ func (s *sanityVolumeService) Create(ctx context.Context, opts volumes.CreateOpt
 	}
 
 	volume := &csi.Volume{
-		ID:          uint64(s.volumes.Len() + 1),
+		ID:          int64(s.volumes.Len() + 1),
 		Name:        opts.Name,
 		Size:        opts.MinSize,
 		Location:    opts.Location,
@@ -125,7 +125,7 @@ func (s *sanityVolumeService) Create(ctx context.Context, opts volumes.CreateOpt
 	return volume, nil
 }
 
-func (s *sanityVolumeService) GetByID(ctx context.Context, id uint64) (*csi.Volume, error) {
+func (s *sanityVolumeService) GetByID(ctx context.Context, id int64) (*csi.Volume, error) {
 	s.mu.Lock()
 	defer s.mu.Unlock()
 

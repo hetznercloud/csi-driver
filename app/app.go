@@ -15,8 +15,8 @@ import (
 	grpc_middleware "github.com/grpc-ecosystem/go-grpc-middleware"
 	"github.com/hetznercloud/csi-driver/driver"
 	"github.com/hetznercloud/csi-driver/metrics"
-	"github.com/hetznercloud/hcloud-go/hcloud"
-	"github.com/hetznercloud/hcloud-go/hcloud/metadata"
+	"github.com/hetznercloud/hcloud-go/v2/hcloud"
+	"github.com/hetznercloud/hcloud-go/v2/hcloud/metadata"
 	"github.com/prometheus/client_golang/prometheus"
 	"google.golang.org/grpc"
 )
@@ -163,9 +163,9 @@ func GetServer(logger log.Logger, hcloudClient *hcloud.Client, metadataClient *m
 	return server, nil
 }
 
-func getServerID(logger log.Logger, hcloudClient *hcloud.Client, metadataClient *metadata.Client) (int, error) {
+func getServerID(logger log.Logger, hcloudClient *hcloud.Client, metadataClient *metadata.Client) (int64, error) {
 	if s := os.Getenv("HCLOUD_SERVER_ID"); s != "" {
-		id, err := strconv.Atoi(s)
+		id, err := strconv.ParseInt(s, 10, 64)
 		if err != nil {
 			return 0, errors.New(fmt.Sprintf("invalid server id in HCLOUD_SERVER_ID env var: %s", err))
 		}

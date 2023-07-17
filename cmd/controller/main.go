@@ -10,7 +10,7 @@ import (
 	"github.com/hetznercloud/csi-driver/app"
 	"github.com/hetznercloud/csi-driver/driver"
 	"github.com/hetznercloud/csi-driver/volumes"
-	"github.com/hetznercloud/hcloud-go/hcloud/metadata"
+	"github.com/hetznercloud/hcloud-go/v2/hcloud/metadata"
 )
 
 var logger log.Logger

@@ -19,7 +19,7 @@ var (
 
 type Service interface {
 	Create(ctx context.Context, opts CreateOpts) (*csi.Volume, error)
-	GetByID(ctx context.Context, id uint64) (*csi.Volume, error)
+	GetByID(ctx context.Context, id int64) (*csi.Volume, error)
 	GetByName(ctx context.Context, name string) (*csi.Volume, error)
 	Delete(ctx context.Context, volume *csi.Volume) error
 	Attach(ctx context.Context, volume *csi.Volume, server *csi.Server) error

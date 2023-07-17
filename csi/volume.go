@@ -2,7 +2,7 @@ package csi
 
 // Volume represents a volume in the CSI driver domain.
 type Volume struct {
-	ID          uint64
+	ID          int64
 	Name        string
 	Size        int // GB
 	Location    string

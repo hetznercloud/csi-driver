@@ -89,7 +89,7 @@ func (s *ControllerService) CreateVolume(ctx context.Context, req *proto.CreateV
 
 	resp := &proto.CreateVolumeResponse{
 		Volume: &proto.Volume{
-			VolumeId:      strconv.FormatUint(volume.ID, 10),
+			VolumeId:      strconv.FormatInt(volume.ID, 10),
 			CapacityBytes: volume.SizeBytes(),
 			AccessibleTopology: []*proto.Topology{
 				{
@@ -282,7 +282,7 @@ func (s *ControllerService) ListVolumes(ctx context.Context, req *proto.ListVolu
 	for i, volume := range vols {
 		resp.Entries[i] = &proto.ListVolumesResponse_Entry{
 			Volume: &proto.Volume{
-				VolumeId:      strconv.FormatUint(volume.ID, 10),
+				VolumeId:      strconv.FormatInt(volume.ID, 10),
 				CapacityBytes: volume.SizeBytes(),
 				AccessibleTopology: []*proto.Topology{
 					{
