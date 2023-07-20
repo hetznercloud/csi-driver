@@ -24,6 +24,10 @@ func main() {
 
 	metadataClient := metadata.NewClient(metadata.WithInstrumentation(m.Registry()))
 
+	if !metadataClient.IsHcloudServer() {
+		level.Warn(logger).Log("msg", "unable to connect to metadata service, are you sure this is running on a Hetzner Cloud server?")
+	}
+
 	serverID, err := metadataClient.InstanceID()
 	if err != nil {
 		level.Error(logger).Log("msg", "failed to fetch server ID from metadata service", "err", err)

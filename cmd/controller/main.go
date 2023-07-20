@@ -36,6 +36,12 @@ func main() {
 	} else {
 		metadataClient := metadata.NewClient(metadata.WithInstrumentation(m.Registry()))
 
+		if !metadataClient.IsHcloudServer() {
+			level.Warn(logger).Log("msg", "Unable to connect to metadata service. "+
+				"In the current configuration the controller is required to run on a Hetzner Cloud server. "+
+				"You can set HCLOUD_VOLUME_DEFAULT_LOCATION if you want to run it somewhere else.")
+		}
+
 		server, err := app.GetServer(logger, hcloudClient, metadataClient)
 		if err != nil {
 			level.Error(logger).Log(
