@@ -1,7 +1,6 @@
 package volumes
 
 import (
-	"errors"
 	"fmt"
 
 	"github.com/go-kit/kit/log"
@@ -36,7 +35,7 @@ func NewLinuxResizeService(logger log.Logger) *LinuxResizeService {
 func (l *LinuxResizeService) Resize(volumePath string) error {
 	devicePath, _, err := mount.GetDeviceNameFromMount(mount.New(""), volumePath)
 	if err != nil {
-		return errors.New(fmt.Sprintf("failed to determine mount path for %s: %s", volumePath, err))
+		return fmt.Errorf("failed to determine mount path for %s: %s", volumePath, err)
 	}
 
 	level.Info(l.logger).Log(

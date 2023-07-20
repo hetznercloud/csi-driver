@@ -55,7 +55,7 @@ func CreateListener() (net.Listener, error) {
 	endpoint = endpoint[7:] // strip unix://
 
 	if err := os.Remove(endpoint); err != nil && !os.IsNotExist(err) {
-		return nil, errors.New(fmt.Sprintf("failed to remove socket file at %s: %s", endpoint, err))
+		return nil, fmt.Errorf("failed to remove socket file at %s: %s", endpoint, err)
 	}
 
 	return net.Listen("unix", endpoint)
@@ -170,7 +170,7 @@ func getServerID(logger log.Logger, hcloudClient *hcloud.Client, metadataClient 
 	if s := os.Getenv("HCLOUD_SERVER_ID"); s != "" {
 		id, err := strconv.ParseInt(s, 10, 64)
 		if err != nil {
-			return 0, errors.New(fmt.Sprintf("invalid server id in HCLOUD_SERVER_ID env var: %s", err))
+			return 0, fmt.Errorf("invalid server id in HCLOUD_SERVER_ID env var: %s", err)
 		}
 		level.Debug(logger).Log(
 			"msg", "using server id from HCLOUD_SERVER_ID env var",
@@ -182,7 +182,7 @@ func getServerID(logger log.Logger, hcloudClient *hcloud.Client, metadataClient 
 	if s := os.Getenv("KUBE_NODE_NAME"); s != "" {
 		server, _, err := hcloudClient.Server.GetByName(context.Background(), s)
 		if err != nil {
-			return 0, errors.New(fmt.Sprintf("error while getting server through node name: %s", err))
+			return 0, fmt.Errorf("error while getting server through node name: %s", err)
 		}
 		if server != nil {
 			level.Debug(logger).Log(
@@ -202,7 +202,7 @@ func getServerID(logger log.Logger, hcloudClient *hcloud.Client, metadataClient 
 	)
 	id, err := metadataClient.InstanceID()
 	if err != nil {
-		return 0, errors.New(fmt.Sprintf("failed to get instance id from metadata service: %s", err))
+		return 0, fmt.Errorf("failed to get instance id from metadata service: %s", err)
 	}
 	return id, nil
 }
