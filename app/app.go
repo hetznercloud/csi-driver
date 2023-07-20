@@ -145,6 +145,9 @@ func CreateHcloudClient(metricsRegistry *prometheus.Registry, logger log.Logger)
 // GetServer retrieves the hcloud server the application is running on.
 func GetServer(logger log.Logger, hcloudClient *hcloud.Client, metadataClient *metadata.Client) (*hcloud.Server, error) {
 	hcloudServerID, err := getServerID(logger, hcloudClient, metadataClient)
+	if err != nil {
+		return nil, err
+	}
 	level.Debug(logger).Log("msg", "fetching server")
 	server, _, err := hcloudClient.Server.GetByID(context.Background(), hcloudServerID)
 	if err != nil {
