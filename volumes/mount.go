@@ -1,7 +1,6 @@
 package volumes
 
 import (
-	"errors"
 	"fmt"
 	"os"
 	"path/filepath"
@@ -163,7 +162,7 @@ func (s *LinuxMountService) Publish(targetPath string, devicePath string, opts M
 func (s *LinuxMountService) Unpublish(targetPath string) error {
 	devicePath, _, err := mount.GetDeviceNameFromMount(mount.New(""), targetPath)
 	if err != nil {
-		return errors.New(fmt.Sprintf("failed to determine mount path for %s: %s", targetPath, err))
+		return fmt.Errorf("failed to determine mount path for %s: %s", targetPath, err)
 	}
 
 	level.Info(s.logger).Log(
