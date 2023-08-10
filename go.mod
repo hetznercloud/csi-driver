@@ -11,7 +11,7 @@ require (
 	github.com/hetznercloud/hcloud-go/v2 v2.0.0
 	github.com/kubernetes-csi/csi-test/v4 v4.4.0
 	github.com/prometheus/client_golang v1.16.0
-	golang.org/x/sys v0.10.0
+	golang.org/x/sys v0.11.0
 	google.golang.org/grpc v1.57.0
 	k8s.io/mount-utils v0.27.4
 	k8s.io/utils v0.0.0-20230711102312-30195339c3c7
