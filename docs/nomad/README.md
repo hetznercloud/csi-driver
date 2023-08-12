@@ -7,6 +7,8 @@
 
 ## Getting Started
 
+### CSI Setup
+
 1. Create a read+write API token in the [Hetzner Cloud Console](https://console.hetzner.cloud/).
 
 2. Create a Nomad Variable for the HCLOUD token:
@@ -22,7 +24,7 @@ nomad var put secrets/hcloud hcloud_token=$HCLOUD_TOKEN
 3. Create a CSI Controller Job
 
 ```hcl
-# hcloud-csi-controller.hcl
+# file: hcloud-csi-controller.hcl
 
 job "hcloud-csi-controller" {
   datacenters = ["dc1"]
@@ -85,7 +87,7 @@ EOH
 4. Create a CSI Node Job
 
 ```hcl
-# hcloud-csi-node.hcl
+# file: hcloud-csi-node.hcl
 job "hcloud-csi-node" {
   datacenters = ["dc1"]
   namespace   = "default"
@@ -132,7 +134,7 @@ EOH
 
 5. Deploy Jobs
 
-```
+```sh
 nomad job run hcloud-csi-controller.hcl
 nomad job run hcloud-csi-node.hcl
 
@@ -140,16 +142,18 @@ nomad job run hcloud-csi-node.hcl
 nomad plugin status
 ```
 
-6. Define a Volume
+### Volumes Setup
 
-Create a file `vol.hcl` for the volume resource:
+1. Define a Volume
+
+Create a file `db-vol.hcl` for the volume resource:
 
 ```
-# vol.hcl
+# file: vol.hcl
 
 type      = "csi"
-id        = "my-vol"
-name      = "my-vol"
+id        = "db-vol"
+name      = "db-vol"
 namespace = "default"
 plugin_id = "csi.hetzner.cloud"
 
@@ -164,8 +168,83 @@ mount_options {
 }
 ```
 
-and run it:
+2. Create a Volume
 
 ```sh
-nomad volume create vol.hcl
+nomad volume create db-vol.hcl
+```
+
+> [!HINT]
+>  The hcloud cli is a convient way to verify if the volume was created: `hcloud volume list`.
+
+### Make use of the Volume
+
+1. Create a Job definition
+
+In the following exmaple is shown, how we can mount the volume in a Docker Nomad job definition:
+
+```hcl
+# file: mariadb.nomad
+
+job "mariadb" {
+  datacenters = ["dc1"]
+  namespace   = "default"
+  type        = "service"
+
+  group "mariadb" {
+    network {
+      port "mariadb" {
+        to           = 3306
+      }
+    }
+
+    volume "db-volume" {
+      type            = "csi"
+      read_only       = false
+      source          = "db-vol"
+      attachment_mode = "file-system"
+      access_mode     = "single-node-writer"
+      per_alloc       = false
+    }
+
+    task "mariadb" {
+      driver = "docker"
+      config {
+        image = "mariadb:10.11"
+        ports = [
+          "mariadb",
+        ]
+      }
+
+      volume_mount {
+        volume      = "db-volume"
+        destination = "/var/lib/mysql"
+      }
+
+      env {
+        MARIADB_ROOT_PASSWORD = "<...>"
+        MARIADB_DATABASE      = "<...>"
+        MARIADB_USER          = "<...>"
+        MARIADB_PASSWORD      = "<...>"
+      }
+
+      service {
+        name = "db"
+        port = "mariadb"
+      }
+
+      resources {
+        cpu    = 300
+        memory = 256
+      }
+
+    }
+  }
+}
+```
+
+2. Create the Job
+
+```sh
+nomad job run mardiadb.nomad
 ```
