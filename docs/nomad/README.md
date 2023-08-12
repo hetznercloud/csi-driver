@@ -9,7 +9,17 @@
 
 1. Create a read+write API token in the [Hetzner Cloud Console](https://console.hetzner.cloud/).
 
-2. Deploy CSI Controller
+2. Create a Nomad Variable for the HCLOUD token:
+
+> [!NOTE]
+> Consider using HashiCorp Vault for secrets management, see https://developer.hashicorp.com/nomad/docs/job-specification/template#vault-kv-api-v2
+
+```sh
+export HCLOUD_TOKEN="..."
+nomad var put secrets/hcloud hcloud_token=$HCLOUD_TOKEN
+```
+
+3. Create a CSI Controller Job
 
 ```hcl
 # hcloud-csi-controller.hcl
@@ -17,9 +27,24 @@
 job "hcloud-csi-controller" {
   datacenters = ["dc1"]
   namespace   = "default"
-  type        = "system"
+  type        = "service"
 
   group "controller" {
+    count = 2
+
+    constraint {
+      distinct_hosts = true
+    }
+
+    update {
+      max_parallel     = 1
+      canary           = 1
+      min_healthy_time = "10s"
+      healthy_deadline = "1m"
+      auto_revert      = true
+      auto_promote     = true
+    }
+
     task "plugin" {
       driver = "docker"
 
@@ -35,13 +60,12 @@ job "hcloud-csi-controller" {
       }
 
       template {
-        data = <<EOH
-# WARNING: Consider using HashiCorp Vault for secrets management, see https://developer.hashicorp.com/nomad/docs/job-specification/template#vault-kv-api-v2
-HCLOUD_TOKEN="<token goes here>"
+        data        = <<EOH
+HCLOUD_TOKEN="{{ with nomadVar "secrets/hcloud" }}{{ .hcloud_token }}{{ end }}"
 EOH
         destination = "secrets/hcloud-token.env"
         env         = true
-}
+      }
 
       csi_plugin {
         id        = "csi.hetzner.cloud"
@@ -58,7 +82,7 @@ EOH
 }
 ```
 
-3. Deploy CSI Node
+4. Create a CSI Node Job
 
 ```hcl
 # hcloud-csi-node.hcl
@@ -83,10 +107,9 @@ job "hcloud-csi-node" {
         ENABLE_METRICS = true
       }
 
-    template {
-        data = <<EOH
-# WARNING: Consider using HashiCorp Vault for secrets management, see https://developer.hashicorp.com/nomad/docs/job-specification/template#vault-kv-api-v2
-HCLOUD_TOKEN="<token goes here>"
+      template {
+        data        = <<EOH
+HCLOUD_TOKEN="{{ with nomadVar "secrets/hcloud" }}{{ .hcloud_token }}{{ end }}"
 EOH
         destination = "secrets/hcloud-token.env"
         env         = true
@@ -107,9 +130,19 @@ EOH
 }
 ```
 
-4. Volume
+5. Deploy Jobs
 
-Create a volume resource:
+```
+nomad job run hcloud-csi-controller.hcl
+nomad job run hcloud-csi-node.hcl
+
+# Check status
+nomad plugin status
+```
+
+6. Define a Volume
+
+Create a file `vol.hcl` for the volume resource:
 
 ```
 # vol.hcl
@@ -129,4 +162,10 @@ mount_options {
   fs_type     = "ext4"
   mount_flags = ["discard", "defaults"]
 }
+```
+
+and run it:
+
+```sh
+nomad volume create vol.hcl
 ```
