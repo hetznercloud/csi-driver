@@ -164,7 +164,7 @@ Create a file `db-vol.hcl` for the volume resource:
 > [!NOTE]
 > See [Nomad Volume Specification](https://developer.hashicorp.com/nomad/docs/other-specifications/volume) for more information.
 
-```
+```hcl
 # file: db-vol.hcl
 
 type      = "csi"
@@ -191,7 +191,7 @@ mount_options {
 
 To define the Hetzner Cloud Location (CLI: `hcloud location list`) you would like to create the volume into, append the following snippet into the volume resource definition:
 
-```
+```hcl
 topology_request {
   required {
    # Use your desired location name here
