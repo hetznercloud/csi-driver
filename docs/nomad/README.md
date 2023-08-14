@@ -21,7 +21,7 @@ export HCLOUD_TOKEN="..."
 nomad var put secrets/hcloud hcloud_token=$HCLOUD_TOKEN
 ```
 
-3. Create a CSI Controller Job
+3. Create a CSI Controller Job:
 
 ```hcl
 # file: hcloud-csi-controller.hcl
