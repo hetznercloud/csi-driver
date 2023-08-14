@@ -84,7 +84,7 @@ EOH
 }
 ```
 
-4. Create a CSI Node Job
+4. Create a CSI Node Job:
 
 ```hcl
 # file: hcloud-csi-node.hcl
