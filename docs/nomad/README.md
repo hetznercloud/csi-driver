@@ -168,7 +168,7 @@ mount_options {
 }
 ```
 
-2. Create a Volume
+2. Create a Volume:
 
 ```sh
 nomad volume create db-vol.hcl
