@@ -181,7 +181,7 @@ nomad volume create db-vol.hcl
 
 1. Create a Job definition
 
-In the following exmaple is shown, how we can mount the volume in a Docker Nomad job definition:
+The following example describes how to mount the volume in a Docker Nomad job definition:
 
 ```hcl
 # file: mariadb.nomad
