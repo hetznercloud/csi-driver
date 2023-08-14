@@ -160,6 +160,9 @@ nomad plugin status
 
 Create a file `db-vol.hcl` for the volume resource:
 
+> [!NOTE]
+> See [Nomad Volume Specification](https://developer.hashicorp.com/nomad/docs/other-specifications/volume) for more information.
+
 ```
 # file: db-vol.hcl
 
@@ -169,6 +172,9 @@ name      = "db-vol"
 namespace = "default"
 plugin_id = "csi.hetzner.cloud"
 
+# Default minimum capacity for Hetzner Cloud is 10G
+capacity_min = "10G"
+
 capability {
   access_mode     = "single-node-writer"
   attachment_mode = "file-system"
@@ -177,6 +183,19 @@ capability {
 mount_options {
   fs_type     = "ext4"
   mount_flags = ["discard", "defaults"]
+}
+```
+> [!IMPORTANT]
+> The volume will be created in the same Hetzner Cloud Location as the controller is deployed into.
+
+To define the Hetzner Cloud Location (CLI: `hcloud location list`) you would like to create the volume into, append the following snippet into the volume resource definition:
+
+```
+topology_request {
+  required {
+   # Use your desired location name here
+    topology { segments { "csi.hetzner.cloud/location" = "fsn1" } }
+  }
 }
 ```
 
