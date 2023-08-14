@@ -213,7 +213,7 @@ nomad volume create db-vol.hcl
 
 1. Create a Job definition:
 
-The following example describes how to mount the volume in a Docker Nomad job definition:
+The following example describes how to mount the volume in a Docker Nomad job definition (especially see the parts commented with `### THIS!`):
 
 ```hcl
 # file: mariadb.nomad
@@ -230,6 +230,7 @@ job "mariadb" {
       }
     }
 
+    ### THIS!
     volume "db-volume" {
       type            = "csi"
       read_only       = false
@@ -248,6 +249,7 @@ job "mariadb" {
         ]
       }
 
+      ### THIS!
       volume_mount {
         volume      = "db-volume"
         destination = "/var/lib/mysql"
