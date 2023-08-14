@@ -3,6 +3,7 @@
 ## Preconditions
 
 - Nomad >= 1.4.x cluster installed following the [Nomad Reference Architecture for production deployments](https://developer.hashicorp.com/nomad/tutorials/enterprise/production-reference-architecture-vm-with-consul). The setup was tested on Nomad Community, version 1.5.x.
+- The cluster nodes need to have the `docker` driver installed & configured with [`allow_privileged = true`](https://developer.hashicorp.com/nomad/docs/drivers/docker#allow_privileged).
 - The HCL resources are meant to be executed on a machine having nomad installed (with access to the Nomad API).
 
 ## Getting Started
