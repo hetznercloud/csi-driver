@@ -205,7 +205,7 @@ topology_request {
 nomad volume create db-vol.hcl
 ```
 
-> [!HINT]
+> [!NOTE]
 >  The hcloud cli provides a convient way to verify if the volume was created: `hcloud volume list`.
 
 ### Make use of the Volume
