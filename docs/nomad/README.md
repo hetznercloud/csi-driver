@@ -132,7 +132,7 @@ EOH
 }
 ```
 
-5. Deploy Jobs
+5. Deploy the Jobs:
 
 ```sh
 nomad job run hcloud-csi-controller.hcl
