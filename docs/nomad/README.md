@@ -243,7 +243,7 @@ job "mariadb" {
 }
 ```
 
-2. Create the Job
+2. Create the Job:
 
 ```sh
 nomad job run mardiadb.nomad
