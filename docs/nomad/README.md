@@ -51,7 +51,7 @@ job "hcloud-csi-controller" {
       driver = "docker"
 
       config {
-        # Check version on https://hub.docker.com/r/hetznercloud/hcloud-csi-driver/tags
+        # Get the latest version on https://hub.docker.com/r/hetznercloud/hcloud-csi-driver/tags
         image   = "hetznercloud/hcloud-csi-driver:v2.3.2"
         command = "bin/hcloud-csi-driver-controller"
       }
@@ -98,7 +98,7 @@ job "hcloud-csi-node" {
       driver = "docker"
 
       config {
-        # Check version on https://hub.docker.com/r/hetznercloud/hcloud-csi-driver/tags
+        # Get the latest version on https://hub.docker.com/r/hetznercloud/hcloud-csi-driver/tags
         image      = "hetznercloud/hcloud-csi-driver:v2.3.2"
         command    = "bin/hcloud-csi-driver-node"
         privileged = true
@@ -134,17 +134,24 @@ EOH
 
 5. Deploy the Jobs:
 
+The following commands deploy the job resources created previously on your Nomad cluster:
+
 ```sh
 nomad job run hcloud-csi-controller.hcl
 nomad job run hcloud-csi-node.hcl
+```
 
-# Check status
+6. Verify the status:
+
+To ensure the plugin is running and healthy, check the web UI on path `/ui/csi/plugins/csi.hetzner.cloud` or by using the CLI:
+
+```sh
 nomad plugin status
 ```
 
 ### Volumes Setup
 
-1. Define a Volume
+1. Define a Volume:
 
 Create a file `db-vol.hcl` for the volume resource:
 
@@ -179,7 +186,7 @@ nomad volume create db-vol.hcl
 
 ### Make use of the Volume
 
-1. Create a Job definition
+1. Create a Job definition:
 
 The following example describes how to mount the volume in a Docker Nomad job definition:
 
