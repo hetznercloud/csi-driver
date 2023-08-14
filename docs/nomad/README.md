@@ -258,5 +258,5 @@ job "mariadb" {
 2. Create the Job:
 
 ```sh
-nomad job run mardiadb.nomad
+nomad job run mariadb.nomad
 ```
