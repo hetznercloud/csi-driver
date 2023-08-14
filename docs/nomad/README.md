@@ -175,7 +175,7 @@ nomad volume create db-vol.hcl
 ```
 
 > [!HINT]
->  The hcloud cli is a convient way to verify if the volume was created: `hcloud volume list`.
+>  The hcloud cli provides a convient way to verify if the volume was created: `hcloud volume list`.
 
 ### Make use of the Volume
 
