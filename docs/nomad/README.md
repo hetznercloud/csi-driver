@@ -70,7 +70,7 @@ job "hcloud-csi-controller" {
         data        = <<EOH
 HCLOUD_TOKEN="{{ with nomadVar "secrets/hcloud" }}{{ .hcloud_token }}{{ end }}"
 EOH
-        destination = "secrets/hcloud-token.env"
+        destination = "${NOMAD_SECRETS_DIR}/hcloud-token.env"
         env         = true
       }
 
@@ -118,7 +118,7 @@ job "hcloud-csi-node" {
         data        = <<EOH
 HCLOUD_TOKEN="{{ with nomadVar "secrets/hcloud" }}{{ .hcloud_token }}{{ end }}"
 EOH
-        destination = "secrets/hcloud-token.env"
+        destination = "${NOMAD_SECRETS_DIR}/hcloud-token.env"
         env         = true
       }
 
