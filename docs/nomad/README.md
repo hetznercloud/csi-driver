@@ -2,7 +2,7 @@
 
 ## Preconditions
 
-- Nomad >= 1.4.x cluster installed and running (tested on Nomad version 1.5.x).
+- Nomad >= 1.4.x cluster installed following the [Nomad Reference Architecture for production deployments](https://developer.hashicorp.com/nomad/tutorials/enterprise/production-reference-architecture-vm-with-consul). The setup was tested on Nomad Community, version 1.5.x.
 - The HCL resources are meant to be executed on a machine having nomad installed (with access to the Nomad API).
 
 ## Getting Started
@@ -32,6 +32,11 @@ job "hcloud-csi-controller" {
   type        = "service"
 
   group "controller" {
+
+    ### NOTE
+    # We define (at least) 2 allocations to increase the availability in case of a node failure with
+    # a controller allocation running on that node. On a "Single Node Cluster", the group stanzas
+    # might need modification or should be removed.
     count = 2
 
     constraint {
