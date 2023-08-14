@@ -262,6 +262,9 @@ job "mariadb" {
 
       service {
         name = "db"
+        # Uses nomad native service discovery. To use consul once configured, set it to "consul".
+        # Also see https://developer.hashicorp.com/nomad/docs/job-specification/service#service-block
+        provider = "nomad"
         port = "mariadb"
       }
 
