@@ -161,7 +161,7 @@ nomad plugin status
 Create a file `db-vol.hcl` for the volume resource:
 
 ```
-# file: vol.hcl
+# file: db-vol.hcl
 
 type      = "csi"
 id        = "db-vol"
