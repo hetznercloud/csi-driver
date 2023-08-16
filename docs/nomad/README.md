@@ -216,7 +216,7 @@ nomad volume create db-vol.hcl
 The following example describes how to mount the volume in a Docker Nomad job definition (especially see the parts commented with `### THIS!`):
 
 ```hcl
-# file: mariadb.nomad
+# file: mariadb.hcl
 
 job "mariadb" {
   datacenters = ["dc1"]
@@ -283,5 +283,5 @@ job "mariadb" {
 2. Create the Job:
 
 ```sh
-nomad job run mariadb.nomad
+nomad job run mariadb.hcl
 ```
