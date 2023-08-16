@@ -16,6 +16,8 @@ relevant to that Container Orchestrator behind the link:
 
 ### [Docker Swarm](./docs/docker-swarm/README.md)️ _⚠ Not officially supported_
 
+### [HashiCorp Nomad](./docs/nomad/README.md)️ _⚠ Not officially supported_
+
 ## Tests
 
 ### Integration Tests
