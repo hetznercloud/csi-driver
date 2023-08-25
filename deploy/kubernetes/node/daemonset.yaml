@@ -41,7 +41,7 @@ spec:
         - name: registration-dir
           mountPath: /registration
       - name: hcloud-csi-driver
-        image: hetznercloud/hcloud-csi-driver:v2.3.2 # x-release-please-version
+        image: hetznercloud/hcloud-csi-driver:v2.4.0 # x-release-please-version
         imagePullPolicy: Always
         command: [/bin/hcloud-csi-driver-node]
         env:
