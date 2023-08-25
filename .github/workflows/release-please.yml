@@ -17,6 +17,13 @@ jobs:
           release-type: go
           package-name: csi-driver
 
+          # Manually set the last commit sha for the first release using release-please.
+          # The previous release pipeline created a new commit outside the `main` branch,
+          # so release-please has issues associated the newer releases and compares against
+          # 1.6.0 instead of 2.3.2. This commit is for the 2.3.2 tag.
+          # TODO: Remove after the first release with release-please.
+          last-release-sha: dfe6183f4d0fddeefdff8069b1c09eeb38113b33
+
           extra-files: |
             driver/driver.go
             
