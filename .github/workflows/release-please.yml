@@ -23,8 +23,8 @@ jobs:
           # 1.6.0 instead of 2.3.2. This commit is the on-branch commit for the 2.3.2 tag.
           # TODO: Remove after the first release with release-please.
           bootstrap-sha: 8ebf8140f2201f053c9c104344e0600736ec80dc
+          last-release-sha: 8ebf8140f2201f053c9c104344e0600736ec80dc
           release-as: "2.4.0"
-
 
           extra-files: |
             driver/driver.go
