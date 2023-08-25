@@ -36,7 +36,7 @@ spec:
         - name: socket-dir
           mountPath: /run/csi
       - name: hcloud-csi-driver
-        image: hetznercloud/hcloud-csi-driver:latest
+        image: hetznercloud/hcloud-csi-driver:v2.3.2 # x-release-please-version
         imagePullPolicy: Always
         command: [/bin/hcloud-csi-driver-controller]
         env:
