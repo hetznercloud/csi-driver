@@ -1,5 +1,20 @@
 # Changelog
 
+## [2.4.0](https://github.com/hetznercloud/csi-driver/compare/v1.6.0...v2.4.0) (2023-08-25)
+
+
+### Features
+
+* add nomad installation docs ([#467](https://github.com/hetznercloud/csi-driver/issues/467)) ([631b117](https://github.com/hetznercloud/csi-driver/commit/631b1175b874bdf966f05c1e5409f6efacba14f4))
+* **docker-swarm:** configure builds for arm64 ([#471](https://github.com/hetznercloud/csi-driver/issues/471)) ([2b9c067](https://github.com/hetznercloud/csi-driver/commit/2b9c067c7bde28eaf894e232aeee371d41129ef2))
+* upgrade to hcloud-go v2 ([3622bcc](https://github.com/hetznercloud/csi-driver/commit/3622bccee2e961e39d5ef9bff9c500eb055c3cc5))
+
+
+### Bug Fixes
+
+* btrfs volumes can not be formatted ([#421](https://github.com/hetznercloud/csi-driver/issues/421)) ([#424](https://github.com/hetznercloud/csi-driver/issues/424)) ([be3fbc9](https://github.com/hetznercloud/csi-driver/commit/be3fbc9be876939b0a0b2197c99193ca52559fcd))
+* improve handling of metadata service connectivity ([#466](https://github.com/hetznercloud/csi-driver/issues/466)) ([8ffa5fe](https://github.com/hetznercloud/csi-driver/commit/8ffa5fec6b07515156f5ee2cd1e978f0b1c877c3))
+
 ## v2.3.2
 
 Affordable, sustainable & powerful! 🚀You can now get one of our Arm64 CAX servers to optimize your operations while minimizing your costs!
