@@ -17,7 +17,7 @@ variables:
   GONOSUMDB: hetzner.cloud
 
 unit:
-  image: golang:1.19
+  image: golang:1.21
   stage: test
   script:
     - go test $(go list ./... | grep -v e2etests | grep -v integrationtests) -v
