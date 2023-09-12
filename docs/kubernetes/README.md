@@ -165,7 +165,7 @@ $ kubectl apply -f https://raw.githubusercontent.com/hetznercloud/csi-driver/v2.
 
 ## Integration with Root Servers
 
-Root servers can be part of the cluster, but the CSI plugin doesn't work there. Taint the root server as follows to skip that node for the daemonset.
+Root servers can be part of the cluster, but the CSI plugin doesn't work there. Taint the root server as follows to skip that node for the DaemonSet.
 
 ```bash
 kubectl label nodes <node name> instance.hetzner.cloud/is-root-server=true
@@ -182,10 +182,11 @@ related only to an unsupported version.
 
 | Kubernetes | CSI Driver |                                                                                   Deployment File |
 |------------|-----------:|--------------------------------------------------------------------------------------------------:|
-| 1.27       |      2.3.2 | https://raw.githubusercontent.com/hetznercloud/csi-driver/v2.3.2/deploy/kubernetes/hcloud-csi.yml |
-| 1.26       |      2.3.2 | https://raw.githubusercontent.com/hetznercloud/csi-driver/v2.3.2/deploy/kubernetes/hcloud-csi.yml |
-| 1.25       |      2.3.2 | https://raw.githubusercontent.com/hetznercloud/csi-driver/v2.3.2/deploy/kubernetes/hcloud-csi.yml |
-| 1.24       |      2.3.2 | https://raw.githubusercontent.com/hetznercloud/csi-driver/v2.3.2/deploy/kubernetes/hcloud-csi.yml |
+| 1.28       |     2.4.0+ | https://raw.githubusercontent.com/hetznercloud/csi-driver/v2.4.0/deploy/kubernetes/hcloud-csi.yml |
+| 1.27       |     2.4.0+ | https://raw.githubusercontent.com/hetznercloud/csi-driver/v2.4.0/deploy/kubernetes/hcloud-csi.yml |
+| 1.26       |     2.4.0+ | https://raw.githubusercontent.com/hetznercloud/csi-driver/v2.4.0/deploy/kubernetes/hcloud-csi.yml |
+| 1.25       |     2.4.0+ | https://raw.githubusercontent.com/hetznercloud/csi-driver/v2.4.0/deploy/kubernetes/hcloud-csi.yml |
+| 1.24       |      2.4.0 | https://raw.githubusercontent.com/hetznercloud/csi-driver/v2.4.0/deploy/kubernetes/hcloud-csi.yml |
 | 1.23       |      2.2.0 | https://raw.githubusercontent.com/hetznercloud/csi-driver/v2.2.0/deploy/kubernetes/hcloud-csi.yml |
 | 1.22       |      1.6.0 | https://raw.githubusercontent.com/hetznercloud/csi-driver/v1.6.0/deploy/kubernetes/hcloud-csi.yml |
 | 1.21       |      1.6.0 | https://raw.githubusercontent.com/hetznercloud/csi-driver/v1.6.0/deploy/kubernetes/hcloud-csi.yml |

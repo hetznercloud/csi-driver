@@ -2,7 +2,7 @@
 set -uex -o pipefail
 SCRIPT_DIR="$( cd "$( dirname "${BASH_SOURCE[0]}" )" &> /dev/null && pwd )"
 
-k8s_test_version="${K8S_TEST_VERSION:-v1.26.3}"
+k8s_test_version="${K8S_TEST_VERSION:-v1.28.1}"
 
 mkdir -p "${SCRIPT_DIR}/test-binaries"
 # TODO: Read linux-amd64 from env
@@ -13,7 +13,7 @@ ginkgo="${SCRIPT_DIR}/test-binaries/ginkgo"
 ginkgo_flags="-v --flakeAttempts=2"
 
 e2e="${SCRIPT_DIR}/test-binaries/e2e.test"
-e2e_flags="-storage.testdriver=${SCRIPT_DIR}/testdriver-1.23.yaml"
+e2e_flags="-storage.testdriver=${SCRIPT_DIR}/testdriver-1.25.yaml"
 
 echo "Executing parallel tests"
 ${ginkgo} ${ginkgo_flags} \
