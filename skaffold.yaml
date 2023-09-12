@@ -4,15 +4,18 @@ metadata:
   name: csi-driver
 build:
   artifacts:
-    - image: hetznercloud/hcloud-csi-driver
+    - image: docker.io/hetznercloud/hcloud-csi-driver
       docker:
         dockerfile: hack/Dockerfile
         cacheFrom:
-          - hetznercloud/hcloud-csi-driver:buildcache
+          - docker.io/hetznercloud/hcloud-csi-driver:buildcache
   local:
     useBuildkit: true
   insecureRegistries:
     - localhost:30666
 manifests:
-  kustomize:
-    paths: [hack/]
+  helm:
+    releases:
+      - name: hcloud-csi
+        namespace: kube-system
+        chartPath: chart
