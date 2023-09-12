@@ -16,14 +16,14 @@ jobs:
       fail-fast: false
       matrix:
         include:
-          - k3s: v1.24
-            k8s-test: v1.24.13
           - k3s: v1.25
-            k8s-test: v1.25.9
+            k8s-test: v1.25.13
           - k3s: v1.26
-            k8s-test: v1.26.4
+            k8s-test: v1.26.8
           - k3s: v1.27
-            k8s-test: v1.27.1
+            k8s-test: v1.27.5
+          - k3s: v1.28
+            k8s-test: v1.28.1
     steps:
     - uses: actions/setup-go@v4
       with:
@@ -44,7 +44,7 @@ jobs:
           kubectl
           skaffold
         helm: v3.11.2
-        kubectl: v1.26.3
+        kubectl: v1.28.1
         skaffold: v2.3.0
 
     - name: Run tests
