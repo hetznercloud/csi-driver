@@ -5,7 +5,7 @@ import (
 	"io"
 	"testing"
 
-	"github.com/go-kit/kit/log"
+	"github.com/go-kit/log"
 
 	"github.com/hetznercloud/csi-driver/csi"
 	"github.com/hetznercloud/csi-driver/mock"

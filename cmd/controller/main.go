@@ -4,8 +4,8 @@ import (
 	"os"
 
 	proto "github.com/container-storage-interface/spec/lib/go/csi"
-	"github.com/go-kit/kit/log"
-	"github.com/go-kit/kit/log/level"
+	"github.com/go-kit/log"
+	"github.com/go-kit/log/level"
 	"github.com/hetznercloud/csi-driver/api"
 	"github.com/hetznercloud/csi-driver/app"
 	"github.com/hetznercloud/csi-driver/driver"
