@@ -18,15 +18,29 @@ jobs:
           key: ${{ runner.os }}-go-${{ hashFiles('**/go.sum') }}
           restore-keys: |
             ${{ runner.os }}-go-
-      - name: Verify manifests are up to date
-        run: |
-          kustomize build deploy/kubernetes > /tmp/hcloud-csi.yml
-          # Workaround for kustomize stripping all comments. This comment is
-          # needed to automatically bump the referenced container tag through
-          # release-please
-          sed -i '/hetznercloud\/hcloud-csi-driver/ s/$/ # x-release-please-version/' /tmp/hcloud-csi.yml
-          diff deploy/kubernetes/hcloud-csi.yml /tmp/hcloud-csi.yml
+
       - name: Run tests
         run: |
           go vet ./...
           go test $(go list ./... | grep -v e2e) -v
+
+  deploy-manifests:
+    name: Check deployment manifests
+    runs-on: ubuntu-latest
+    steps:
+      - uses: yokawasa/action-setup-kube-tools@v0.9.3
+        with:
+          setup-tools: |
+            helm
+          helm: v3.11.2
+
+      - uses: actions/checkout@v4
+      - name: Generate manifests from helm chart
+        run: hack/update-deployment-yamls.sh
+
+      - name: Check for diff
+        run: git diff --exit-code -- deploy/
+
+      - name: Show warning
+        if: ${{ failure() }}
+        run: echo "::error title=Deployment Manifests outdated::Please run hack/update-deployment-yamls.sh and commit the changes to deploy/"

@@ -1,4 +1,8 @@
 apiVersion: kustomize.config.k8s.io/v1beta1
 kind: Kustomization
+
+# This kustomization is left for backwards-compatibility.
+# If you use this, please switch to the Helm Chart if possible.
+
 resources:
 - service-monitor.yaml

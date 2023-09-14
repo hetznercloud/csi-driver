@@ -297,6 +297,11 @@ controller:
   ##
   podLabels: {}
 
+  ## @param controller.matchLabelsOverride Override the default spec.selector.matchLabels. Added for backwards compatibility with the static manifests.
+  ## ref: https://kubernetes.io/docs/concepts/workloads/controllers/deployment/#label-selector-updates
+  ##
+  # matchLabelsOverride: null
+
   ## @param controller.podAnnotations Annotations for controller pods
   ## ref: https://kubernetes.io/docs/concepts/overview/working-with-objects/annotations/
   ##
@@ -566,6 +571,11 @@ node:
   ## ref: https://kubernetes.io/docs/concepts/overview/working-with-objects/labels/
   ##
   podLabels: {}
+
+  ## @param node.matchLabelsOverride Override the default spec.selector.matchLabels. Added for backwards compatibility with the static manifests.
+  ## ref: https://kubernetes.io/docs/concepts/workloads/controllers/daemonset/#pod-selector
+  ##
+  # matchLabelsOverride: {}
 
   ## @param node.podAnnotations Annotations for node pods
   ## ref: https://kubernetes.io/docs/concepts/overview/working-with-objects/annotations/

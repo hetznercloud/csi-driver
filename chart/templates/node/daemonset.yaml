@@ -5,6 +5,7 @@ metadata:
   namespace: {{ include "common.names.namespace" . | quote }}
   labels: {{- include "common.labels.standard" . | nindent 4 }}
     app.kubernetes.io/component: node
+    app: hcloud-csi # Compatibility with old manifests
     {{- if .Values.commonLabels }}
     {{- include "common.tplvalues.render" ( dict "value" .Values.commonLabels "context" $ ) | nindent 4 }}
     {{- end }}
@@ -16,8 +17,13 @@ spec:
   updateStrategy: {{- toYaml .Values.node.updateStrategy | nindent 4 }}
   {{- end }}
   selector:
-    matchLabels: {{- include "common.labels.matchLabels" . | nindent 6 }}
+    matchLabels:
+      {{- if .Values.node.matchLabelsOverride }}
+      {{- toYaml .Values.node.matchLabelsOverride | nindent 6 }}
+      {{- else }}
+      {{- include "common.labels.matchLabels" . | nindent 6 }}
       app.kubernetes.io/component: node
+      {{- end }}
   template:
     metadata:
       {{- if .Values.node.podAnnotations }}
