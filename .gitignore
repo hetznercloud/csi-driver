@@ -6,6 +6,7 @@ hack/.*
 
 # Build output
 dist/
+hcloud-csi-*.tgz
 
 # Test binary for integration tests
 test/integration/integration.tests
