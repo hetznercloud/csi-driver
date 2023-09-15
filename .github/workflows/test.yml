@@ -44,3 +44,27 @@ jobs:
       - name: Show warning
         if: ${{ failure() }}
         run: echo "::error title=Deployment Manifests outdated::Please run hack/update-deployment-yamls.sh and commit the changes to deploy/"
+
+  helm-chart:
+    name: Verify Helm Chart
+    runs-on: ubuntu-latest
+    steps:
+      - uses: yokawasa/action-setup-kube-tools@v0.9.3
+        with:
+          setup-tools: |
+            helm
+          helm: v3.11.2
+
+      - uses: actions/checkout@v4
+
+      # This step also verifies that the chart builds
+      - name: Verify Snapshots
+        run: |
+          hack/update-helm-snapshots.sh
+          git diff --exit-code -- deploy/
+      - name: Show warning
+        if: ${{ failure() }}
+        run: echo "::error title=Helm Snapshots outdated::Please run hack/update-helm-snapshots.sh and commit the changes to chart/.snapshots/"
+
+      - name: Helm Lint
+        run: helm lint chart/
