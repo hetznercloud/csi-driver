@@ -31,10 +31,6 @@ commonLabels: {}
 ##
 commonAnnotations: {}
 
-## @param extraDeploy Array of extra objects to deploy with the release
-##
-extraDeploy: []
-
 ## @section Controller Parameters
 ##
 
