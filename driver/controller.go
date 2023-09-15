@@ -7,8 +7,8 @@ import (
 	"strconv"
 
 	proto "github.com/container-storage-interface/spec/lib/go/csi"
-	"github.com/go-kit/kit/log"
-	"github.com/go-kit/kit/log/level"
+	"github.com/go-kit/log"
+	"github.com/go-kit/log/level"
 	"google.golang.org/grpc/codes"
 	"google.golang.org/grpc/status"
 

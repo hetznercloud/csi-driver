@@ -1,7 +1,7 @@
 package volumes
 
 import (
-	"github.com/go-kit/kit/log"
+	"github.com/go-kit/log"
 	"golang.org/x/sys/unix"
 )
 

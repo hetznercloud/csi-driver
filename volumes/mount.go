@@ -7,8 +7,8 @@ import (
 	"regexp"
 	"strings"
 
-	"github.com/go-kit/kit/log"
-	"github.com/go-kit/kit/log/level"
+	"github.com/go-kit/log"
+	"github.com/go-kit/log/level"
 	"k8s.io/mount-utils"
 	"k8s.io/utils/exec"
 )
