@@ -60,6 +60,6 @@ jobs:
 
         skaffold build --tag="e2e-${GITHUB_RUN_ID}-${GITHUB_RUN_NUMBER}"
         tag=$(skaffold build --tag="e2e-${GITHUB_RUN_ID}-${GITHUB_RUN_NUMBER}" --quiet --output="{{ (index .Builds 0).Tag }}")
-        skaffold deploy --images=hetznercloud/hcloud-csi-driver=$tag
+        skaffold deploy --images=docker.io/hetznercloud/hcloud-csi-driver=$tag
 
         test/e2e/kubernetes/run-e2e-tests.sh
