@@ -1,5 +1,5 @@
 {{- $replicaCount := int .Values.controller.replicaCount }}
-{{- if and .Values.controller.pdb.create (gt $replicaCount 1) }}
+{{- if and .Values.controller.podDisruptionBudget.create (gt $replicaCount 1) }}
 apiVersion: policy/v1
 kind: PodDisruptionBudget
 metadata:
@@ -14,11 +14,11 @@ metadata:
   annotations: {{- include "common.tplvalues.render" ( dict "value" .Values.commonAnnotations "context" $ ) | nindent 4 }}
   {{- end }}
 spec:
-  {{- if .Values.controller.pdb.minAvailable }}
-  minAvailable: {{ .Values.controller.pdb.minAvailable }}
+  {{- if .Values.controller.podDisruptionBudget.minAvailable }}
+  minAvailable: {{ .Values.controller.podDisruptionBudget.minAvailable }}
   {{- end  }}
-  {{- if .Values.controller.pdb.maxUnavailable }}
-  maxUnavailable: {{ .Values.controller.pdb.maxUnavailable }}
+  {{- if .Values.controller.podDisruptionBudget.maxUnavailable }}
+  maxUnavailable: {{ .Values.controller.podDisruptionBudget.maxUnavailable }}
   {{- end  }}
   selector:
     matchLabels: {{- include "common.labels.matchLabels" . | nindent 6 }}

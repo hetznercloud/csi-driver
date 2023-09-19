@@ -83,3 +83,6 @@ node:
             operator: NotIn
             values:
             - ""
+
+metrics:
+  enabled: true

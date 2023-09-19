@@ -268,11 +268,11 @@ controller:
   ##
   podAnnotations: {}
 
-  ## @param controller.pdb.create Enable PodDisruptionBudged for controller pods
-  ## @param controller.pdb.minAvailable Set minAvailable for controller pods
-  ## @param controller.pdb.maxUnavailable Set maxUnavailable for controller pods
+  ## @param controller.podDisruptionBudget.create Enable PodDisruptionBudget for controller pods
+  ## @param controller.podDisruptionBudget.minAvailable Set minAvailable for controller pods
+  ## @param controller.podDisruptionBudget.maxUnavailable Set maxUnavailable for controller pods
   ##
-  pdb:
+  podDisruptionBudget:
     create: true
     minAvailable: 1
     maxUnavailable: ""

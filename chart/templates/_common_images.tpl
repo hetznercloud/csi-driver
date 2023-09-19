@@ -1,6 +1,6 @@
 {{/*
 Return the proper Container Image Registry Secret Names evaluating values as templates
-{{ include "common.images.pullSecrets" ( dict "images" (list .Values.path.to.the.image1, .Values.path.to.the.image2) "context" $) }}
+{{ include "common.images.pullSecrets" ( dict "images" (list .Values.path.to.the.image1 .Values.path.to.the.image2) "context" $) }}
 */}}
 {{- define "common.images.pullSecrets" -}}
   {{- $pullSecrets := list }}

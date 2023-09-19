@@ -38,7 +38,7 @@ spec:
         {{- include "common.tplvalues.render" ( dict "value" .Values.commonLabels "context" $ ) | nindent 8 }}
         {{- end }}
     spec:
-      {{- include "common.images.pullSecrets" (dict "images" (list .Values.node.image ) "context" .) | nindent 6 }}
+      {{- include "common.images.pullSecrets" (dict "images" .Values.node.image "context" .) | nindent 6 }}
       {{- if .Values.node.hostNetwork }}
       hostNetwork: true
       {{- end }}
