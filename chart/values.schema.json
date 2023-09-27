@@ -318,7 +318,7 @@
                     "type": "array"
                 },
                 "terminationGracePeriodSeconds": {
-                    "type": "string"
+                    "type": "integer"
                 },
                 "tolerations": {
                     "type": "array"
@@ -467,6 +467,9 @@
                 },
                 "customStartupProbe": {
                     "type": "object"
+                },
+                "extraEnvVars": {
+                    "type": "array"
                 },
                 "extraVolumeMounts": {
                     "type": "array"
@@ -646,10 +649,10 @@
                     "type": "array"
                 },
                 "terminationGracePeriodSeconds": {
-                    "type": "string"
+                    "type": "integer"
                 },
                 "tolerations": {
-                    "type": "object"
+                    "type": "array"
                 },
                 "updateStrategy": {
                     "type": "object",

@@ -315,16 +315,17 @@ controller:
   ##
   schedulerName: ""
 
-  ## @param controller.terminationGracePeriodSeconds Seconds Redmine pod needs to terminate gracefully
-  ## ref: https://kubernetes.io/docs/concepts/workloads/pods/pod/#termination-of-pods
+  ## @param controller.terminationGracePeriodSeconds Seconds pod needs to terminate gracefully
+  ## ref: https://kubernetes.io/docs/concepts/workloads/pods/pod-lifecycle/#pod-termination
   ##
-  terminationGracePeriodSeconds: ""
+  # terminationGracePeriodSeconds: 30
 
   ## @param controller.lifecycleHooks for the controller container(s) to automate configuration before or after startup
+  ## ref: https://kubernetes.io/docs/concepts/containers/container-lifecycle-hooks/
   ##
   lifecycleHooks: {}
 
-  ## @param controller.extraEnvVars Array with extra environment variables to add to controller nodes
+  ## @param controller.extraEnvVars Array with extra environment variables to add to controller pods
   ## e.g:
   ## extraEnvVars:
   ##   - name: FOO
@@ -546,7 +547,7 @@ node:
   ## @param node.tolerations Tolerations for node pods assignment
   ## ref: https://kubernetes.io/docs/concepts/configuration/taint-and-toleration/
   ##
-  tolerations: {}
+  tolerations: []
     # - effect: NoExecute
     #   operator: Exists
     # - effect: NoSchedule
@@ -572,14 +573,22 @@ node:
   ##
   schedulerName: ""
 
-  ## @param node.terminationGracePeriodSeconds Seconds Redmine pod needs to terminate gracefully
+  ## @param node.terminationGracePeriodSeconds Seconds pod needs to terminate gracefully
   ## ref: https://kubernetes.io/docs/concepts/workloads/pods/pod/#termination-of-pods
   ##
-  terminationGracePeriodSeconds: ""
+  # terminationGracePeriodSeconds: 30
 
   ## @param node.lifecycleHooks for the node container(s) to automate configuration before or after startup
   ##
   lifecycleHooks: {}
+
+  ## @param node.extraEnvVars Array with extra environment variables to add to node pods
+  ## e.g:
+  ## extraEnvVars:
+  ##   - name: FOO
+  ##     value: "bar"
+  ##
+  extraEnvVars: []
 
   ## @param node.extraVolumes Extra Volumes for controller pods
   ##
@@ -628,7 +637,7 @@ serviceAccount:
   ## @param serviceAccount.annotations Additional Service Account annotations (evaluated as a template)
   ##
   annotations: {}
-  ## @param serviceAccount.automountServiceAccountToken Automount service account token for the server service account
+  ## @param serviceAccount.automountServiceAccountToken Automount service account token for the controller service account
   ##
   automountServiceAccountToken: true
 

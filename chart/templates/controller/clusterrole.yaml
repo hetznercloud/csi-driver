@@ -61,7 +61,7 @@ rules:
 - apiGroups: [""]
   resources: [events]
   verbs: [get, list, watch, create, update, patch]
-  {{- if .Values.controller.rbac.rules }}
-  {{- include "common.tplvalues.render" ( dict "value" .Values.controller.rbac.rules "context" $ ) | nindent 2 }}
-  {{- end }}
+{{- if .Values.controller.rbac.rules }}
+{{- include "common.tplvalues.render" ( dict "value" .Values.controller.rbac.rules "context" $ ) | nindent 0 }}
+{{- end }}
 {{- end }}

@@ -5,7 +5,7 @@ metadata:
   namespace: {{ include "common.names.namespace" . | quote }}
   labels: {{- include "common.labels.standard" . | nindent 4 }}
     app.kubernetes.io/component: node
-    app: hcloud-csi # Compatibility with old manifests
+    app: hcloud-csi {{/* Compatibility with old manifests */}}
     {{- if .Values.commonLabels }}
     {{- include "common.tplvalues.render" ( dict "value" .Values.commonLabels "context" $ ) | nindent 4 }}
     {{- end }}
@@ -83,6 +83,9 @@ spec:
               mountPath: /run/csi
             - name: registration-dir
               mountPath: /registration
+            {{- if .Values.controller.extraVolumeMounts }}
+            {{- include "common.tplvalues.render" (dict "value" .Values.controller.extraVolumeMounts "context" $) | nindent 12 }}
+            {{- end }}
           {{- if .Values.node.resources.csiNodeDriverRegistrar }}
           resources: {{- toYaml .Values.node.resources.csiNodeDriverRegistrar | nindent 12 }}
           {{- end }}
@@ -118,6 +121,9 @@ spec:
             {{- end }}
             - name: ENABLE_METRICS
               value: {{if .Values.metrics.enabled}}"true"{{ else }}"false"{{end}}
+            {{- if .Values.node.extraEnvVars }}
+            {{- include "common.tplvalues.render" (dict "value" .Values.node.extraEnvVars "context" $) | nindent 12 }}
+            {{- end }}
           ports:
             {{- if .Values.metrics.enabled }}
             - containerPort: {{ .Values.node.containerPorts.metrics }}
@@ -139,6 +145,9 @@ spec:
           {{- end }}
           {{- if .Values.node.customReadinessProbe }}
           readinessProbe: {{- include "common.tplvalues.render" (dict "value" .Values.node.customReadinessProbe "context" $) | nindent 12 }}
+          {{- end }}
+          {{- if .Values.node.customStartupProbe }}
+          startupProbe: {{- include "common.tplvalues.render" (dict "value" .Values.node.customStartupProbe "context" $) | nindent 12 }}
           {{- end }}
           {{- if .Values.node.lifecycleHooks }}
           lifecycle: {{- include "common.tplvalues.render" (dict "value" .Values.node.lifecycleHooks "context" $) | nindent 12 }}

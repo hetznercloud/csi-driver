@@ -10,7 +10,7 @@ metadata:
     app.kubernetes.io/instance: hcloud-csi
     app.kubernetes.io/managed-by: Helm
     app.kubernetes.io/component: controller
-#automountServiceAccountToken: true
+automountServiceAccountToken: true
 ---
 # Source: hcloud-csi/templates/core/storageclass.yaml
 kind: StorageClass
@@ -115,7 +115,7 @@ metadata:
     app.kubernetes.io/instance: hcloud-csi
     app.kubernetes.io/managed-by: Helm
     app.kubernetes.io/component: node
-    app: hcloud-csi # Compatibility with old manifests
+    app: hcloud-csi 
 spec:
   updateStrategy:
     type: RollingUpdate
@@ -239,7 +239,7 @@ metadata:
     app.kubernetes.io/instance: hcloud-csi
     app.kubernetes.io/managed-by: Helm
     app.kubernetes.io/component: controller
-    app: hcloud-csi-controller # Compatibility with old manifests
+    app: hcloud-csi-controller 
 spec:
   replicas: 1
   strategy:
