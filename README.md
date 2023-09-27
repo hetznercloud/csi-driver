@@ -49,7 +49,7 @@ will create volumes that will be billed.
 
 1. Configure your environment correctly
    ```bash
-   export HCLOUD_TOKEN=<specifiy a project token>
+   export HCLOUD_TOKEN=<specify a project token>
    export K8S_VERSION=1.21.0 # The specific (latest) version is needed here
    export USE_SSH_KEYS=key1,key2 # Name or IDs of your SSH Keys within the Hetzner Cloud, the servers will be accessible with that keys
    ```

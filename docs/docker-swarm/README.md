@@ -35,7 +35,7 @@ docker plugin enable hetznercloud/hcloud-csi-driver:swarm
 
 ## How to create a volume
 
-Example: Create a volume wih size 50G in Nuremberg:
+Example: Create a volume with size 50G in Nuremberg:
 
 ```bash
 docker volume create --driver hetznercloud/hcloud-csi-driver:swarm --required-bytes 50G --type mount --sharing onewriter --scope single hcloud-debug1 --topology-required csi.hetzner.cloud/location=nbg1
