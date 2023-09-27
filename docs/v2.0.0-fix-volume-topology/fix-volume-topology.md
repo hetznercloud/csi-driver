@@ -1,6 +1,6 @@
 # Updating the Topology selection for `PersistentVolumes` created with csi-driver v2.0.0
 
-This guide is intended for Kubernetes Cluster operators that installed the hcloud-csi-driver v2.0.0 and created Volumes. Unfortunatly this version included a change that we had to revert, for details you can read the [issue #333](https://github.com/hetznercloud/csi-driver/issues/333).
+This guide is intended for Kubernetes Cluster operators that installed the hcloud-csi-driver v2.0.0 and created Volumes. Unfortunately this version included a change that we had to revert, for details you can read the [issue #333](https://github.com/hetznercloud/csi-driver/issues/333).
 
 The affected `PersistentVolumes` reference a wrong label in the `spec.nodeAffinity.required` fields. The volumes work as they should, but for consistency and future compatibility we recommend that the `PersistentVolumes` should be fixed.
 
@@ -11,7 +11,7 @@ This is only possible if it is not attached to a node, so any workload using the
 
 You need to have `kubectl` and the `hcloud` cli tool installed for this guide.
 
-To avoid creating any new broken `PersistentVolumes` while you are still fixing old ones, you should ugprade to `v2.0.1` or `v2.1.0` before starting this guide. After all `PersistentVolumes` have been migrated, you should upgrade to `v2.1.0`
+To avoid creating any new broken `PersistentVolumes` while you are still fixing old ones, you should upgrade to `v2.0.1` or `v2.1.0` before starting this guide. After all `PersistentVolumes` have been migrated, you should upgrade to `v2.1.0`
 
 ## Find affected `PersistentVolumes`
 
