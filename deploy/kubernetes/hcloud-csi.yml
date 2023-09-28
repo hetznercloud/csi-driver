@@ -7,9 +7,7 @@ metadata:
   namespace: "kube-system"
   labels:
     app.kubernetes.io/name: hcloud-csi
-    helm.sh/chart: hcloud-csi-2.4.0
     app.kubernetes.io/instance: hcloud-csi
-    app.kubernetes.io/managed-by: Helm
     app.kubernetes.io/component: controller
 automountServiceAccountToken: true
 ---
@@ -32,9 +30,7 @@ metadata:
   name: hcloud-csi-controller
   labels:
     app.kubernetes.io/name: hcloud-csi
-    helm.sh/chart: hcloud-csi-2.4.0
     app.kubernetes.io/instance: hcloud-csi
-    app.kubernetes.io/managed-by: Helm
     app.kubernetes.io/component: controller
 rules:
 # attacher
@@ -94,9 +90,7 @@ metadata:
   name: hcloud-csi-controller
   labels:
     app.kubernetes.io/name: hcloud-csi
-    helm.sh/chart: hcloud-csi-2.4.0
     app.kubernetes.io/instance: hcloud-csi
-    app.kubernetes.io/managed-by: Helm
     app.kubernetes.io/component: controller
 roleRef:
   apiGroup: rbac.authorization.k8s.io
@@ -115,9 +109,7 @@ metadata:
   namespace: "kube-system"
   labels:
     app.kubernetes.io/name: hcloud-csi
-    helm.sh/chart: hcloud-csi-2.4.0
     app.kubernetes.io/instance: hcloud-csi
-    app.kubernetes.io/managed-by: Helm
     app.kubernetes.io/component: controller
 spec:
   ports:
@@ -136,9 +128,7 @@ metadata:
   namespace: "kube-system"
   labels:
     app.kubernetes.io/name: hcloud-csi
-    helm.sh/chart: hcloud-csi-2.4.0
     app.kubernetes.io/instance: hcloud-csi
-    app.kubernetes.io/managed-by: Helm
     app.kubernetes.io/component: node
 spec:
   ports:
@@ -157,9 +147,7 @@ metadata:
   namespace: "kube-system"
   labels:
     app.kubernetes.io/name: hcloud-csi
-    helm.sh/chart: hcloud-csi-2.4.0
     app.kubernetes.io/instance: hcloud-csi
-    app.kubernetes.io/managed-by: Helm
     app.kubernetes.io/component: node
     app: hcloud-csi 
 spec:
@@ -172,9 +160,7 @@ spec:
     metadata:
       labels:
         app.kubernetes.io/name: hcloud-csi
-        helm.sh/chart: hcloud-csi-2.4.0
         app.kubernetes.io/instance: hcloud-csi
-        app.kubernetes.io/managed-by: Helm
         app.kubernetes.io/component: node
         app: hcloud-csi
     spec:
@@ -222,7 +208,7 @@ spec:
             limits: {}
             requests: {}
         - name: hcloud-csi-driver
-          image: docker.io/hetznercloud/hcloud-csi-driver:v2.4.0
+          image: docker.io/hetznercloud/hcloud-csi-driver:v2.4.0 # x-release-please-version
           imagePullPolicy: IfNotPresent
           command: [/bin/hcloud-csi-driver-node]
           volumeMounts:
@@ -286,9 +272,7 @@ metadata:
   namespace: "kube-system"
   labels:
     app.kubernetes.io/name: hcloud-csi
-    helm.sh/chart: hcloud-csi-2.4.0
     app.kubernetes.io/instance: hcloud-csi
-    app.kubernetes.io/managed-by: Helm
     app.kubernetes.io/component: controller
     app: hcloud-csi-controller 
 spec:
@@ -302,9 +286,7 @@ spec:
     metadata:
       labels:
         app.kubernetes.io/name: hcloud-csi
-        helm.sh/chart: hcloud-csi-2.4.0
         app.kubernetes.io/instance: hcloud-csi
-        app.kubernetes.io/managed-by: Helm
         app.kubernetes.io/component: controller
         app: hcloud-csi-controller
     spec:
@@ -360,7 +342,7 @@ spec:
             name: socket-dir
 
         - name: hcloud-csi-driver
-          image: docker.io/hetznercloud/hcloud-csi-driver:v2.4.0
+          image: docker.io/hetznercloud/hcloud-csi-driver:v2.4.0 # x-release-please-version
           imagePullPolicy: IfNotPresent
           command: [/bin/hcloud-csi-driver-controller]
           env:
