@@ -35,7 +35,7 @@ kubectl apply -f https://raw.githubusercontent.com/hetznercloud/csi-driver/v2.4.
 You can uninstall that same deployment, by running the following command:
 
 ```sh
-kubectl delete -f https://raw.githubusercontent.com/hetznercloud/csi-driver/latest/deploy/kubernetes/hcloud-csi.yml
+kubectl delete -f https://raw.githubusercontent.com/hetznercloud/csi-driver/v2.4.0/deploy/kubernetes/hcloud-csi.yml
 ```
 
 Then you can follow the Quickstart installation steps above.
