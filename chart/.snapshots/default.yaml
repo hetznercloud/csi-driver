@@ -7,7 +7,6 @@ metadata:
   namespace: "kube-system"
   labels:
     app.kubernetes.io/name: hcloud-csi
-    helm.sh/chart: hcloud-csi-2.4.0
     app.kubernetes.io/instance: hcloud-csi
     app.kubernetes.io/managed-by: Helm
     app.kubernetes.io/component: controller
@@ -32,7 +31,6 @@ metadata:
   name: hcloud-csi-controller
   labels:
     app.kubernetes.io/name: hcloud-csi
-    helm.sh/chart: hcloud-csi-2.4.0
     app.kubernetes.io/instance: hcloud-csi
     app.kubernetes.io/managed-by: Helm
     app.kubernetes.io/component: controller
@@ -94,7 +92,6 @@ metadata:
   name: hcloud-csi-controller
   labels:
     app.kubernetes.io/name: hcloud-csi
-    helm.sh/chart: hcloud-csi-2.4.0
     app.kubernetes.io/instance: hcloud-csi
     app.kubernetes.io/managed-by: Helm
     app.kubernetes.io/component: controller
@@ -107,48 +104,6 @@ subjects:
     name: hcloud-csi-controller
     namespace: "kube-system"
 ---
-# Source: hcloud-csi/templates/controller/service.yaml
-apiVersion: v1
-kind: Service
-metadata:
-  name: hcloud-csi-controller-metrics
-  namespace: "kube-system"
-  labels:
-    app.kubernetes.io/name: hcloud-csi
-    helm.sh/chart: hcloud-csi-2.4.0
-    app.kubernetes.io/instance: hcloud-csi
-    app.kubernetes.io/managed-by: Helm
-    app.kubernetes.io/component: controller
-spec:
-  ports:
-    - name: metrics
-      port: 9189
-  selector:
-    app.kubernetes.io/name: hcloud-csi
-    app.kubernetes.io/instance: hcloud-csi
-    app.kubernetes.io/component: controller
----
-# Source: hcloud-csi/templates/node/service.yaml
-apiVersion: v1
-kind: Service
-metadata:
-  name: hcloud-csi-node-metrics
-  namespace: "kube-system"
-  labels:
-    app.kubernetes.io/name: hcloud-csi
-    helm.sh/chart: hcloud-csi-2.4.0
-    app.kubernetes.io/instance: hcloud-csi
-    app.kubernetes.io/managed-by: Helm
-    app.kubernetes.io/component: node
-spec:
-  ports:
-    - name: metrics
-      port: 9189
-  selector:
-    app.kubernetes.io/name: hcloud-csi
-    app.kubernetes.io/instance: hcloud-csi
-    app.kubernetes.io/component: node
----
 # Source: hcloud-csi/templates/node/daemonset.yaml
 apiVersion: apps/v1
 kind: DaemonSet
@@ -157,7 +112,6 @@ metadata:
   namespace: "kube-system"
   labels:
     app.kubernetes.io/name: hcloud-csi
-    helm.sh/chart: hcloud-csi-2.4.0
     app.kubernetes.io/instance: hcloud-csi
     app.kubernetes.io/managed-by: Helm
     app.kubernetes.io/component: node
@@ -167,16 +121,16 @@ spec:
     type: RollingUpdate
   selector:
     matchLabels:
-      app: hcloud-csi
+      app.kubernetes.io/name: hcloud-csi
+      app.kubernetes.io/instance: hcloud-csi
+      app.kubernetes.io/component: node
   template:
     metadata:
       labels:
         app.kubernetes.io/name: hcloud-csi
-        helm.sh/chart: hcloud-csi-2.4.0
         app.kubernetes.io/instance: hcloud-csi
         app.kubernetes.io/managed-by: Helm
         app.kubernetes.io/component: node
-        app: hcloud-csi
     spec:
       
       affinity:
@@ -238,13 +192,9 @@ spec:
           env:
             - name: CSI_ENDPOINT
               value: unix:///run/csi/socket
-            - name: METRICS_ENDPOINT
-              value: "0.0.0.0:9189"
             - name: ENABLE_METRICS
-              value: "true"
+              value: "false"
           ports:
-            - containerPort: 9189
-              name: metrics
             - name: healthz
               protocol: TCP
               containerPort: 9808
@@ -286,7 +236,6 @@ metadata:
   namespace: "kube-system"
   labels:
     app.kubernetes.io/name: hcloud-csi
-    helm.sh/chart: hcloud-csi-2.4.0
     app.kubernetes.io/instance: hcloud-csi
     app.kubernetes.io/managed-by: Helm
     app.kubernetes.io/component: controller
@@ -297,16 +246,16 @@ spec:
     type: RollingUpdate
   selector:
     matchLabels:
-      app: hcloud-csi-controller
+      app.kubernetes.io/name: hcloud-csi
+      app.kubernetes.io/instance: hcloud-csi
+      app.kubernetes.io/component: controller
   template:
     metadata:
       labels:
         app.kubernetes.io/name: hcloud-csi
-        helm.sh/chart: hcloud-csi-2.4.0
         app.kubernetes.io/instance: hcloud-csi
         app.kubernetes.io/managed-by: Helm
         app.kubernetes.io/component: controller
-        app: hcloud-csi-controller
     spec:
       serviceAccountName: hcloud-csi-controller
       
@@ -366,10 +315,8 @@ spec:
           env:
             - name: CSI_ENDPOINT
               value: unix:///run/csi/socket
-            - name: METRICS_ENDPOINT
-              value: "0.0.0.0:9189"
             - name: ENABLE_METRICS
-              value: "true"
+              value: "false"
             - name: KUBE_NODE_NAME
               valueFrom:
                 fieldRef:
@@ -384,8 +331,6 @@ spec:
             limits: {}
             requests: {}
           ports:
-            - name: metrics
-              containerPort: 9189
             - name: healthz
               protocol: TCP
               containerPort: 9808

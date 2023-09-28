@@ -1,13 +1,16 @@
-apiVersion: v1
-kind: ServiceAccount
-metadata:
-  name: hcloud-csi-controller
-  namespace: kube-system
----
+{{ if .Values.controller.rbac.create }}
 kind: ClusterRole
 apiVersion: rbac.authorization.k8s.io/v1
 metadata:
-  name: hcloud-csi-controller
+  name: {{ include "common.names.fullname" . }}-controller
+  labels: {{- include "common.labels.standard" . | nindent 4 }}
+    app.kubernetes.io/component: controller
+    {{- if .Values.commonLabels }}
+    {{- include "common.tplvalues.render" ( dict "value" .Values.commonLabels "context" $ ) | nindent 4 }}
+    {{- end }}
+  {{- if .Values.commonAnnotations }}
+  annotations: {{- include "common.tplvalues.render" ( dict "value" .Values.commonAnnotations "context" $ ) | nindent 4 }}
+  {{- end }}
 rules:
 # attacher
 - apiGroups: [""]
@@ -58,16 +61,7 @@ rules:
 - apiGroups: [""]
   resources: [events]
   verbs: [get, list, watch, create, update, patch]
----
-kind: ClusterRoleBinding
-apiVersion: rbac.authorization.k8s.io/v1
-metadata:
-  name: hcloud-csi-controller
-subjects:
-- kind: ServiceAccount
-  name: hcloud-csi-controller
-  namespace: kube-system
-roleRef:
-  kind: ClusterRole
-  name: hcloud-csi-controller
-  apiGroup: rbac.authorization.k8s.io
+{{- if .Values.controller.rbac.rules }}
+{{- include "common.tplvalues.render" ( dict "value" .Values.controller.rbac.rules "context" $ ) | nindent 0 }}
+{{- end }}
+{{- end }}

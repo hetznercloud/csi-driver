@@ -1,3 +1,7 @@
+before:
+  hooks:
+    - ./hack/release-generate-deployment-yamls.sh {{ .Version }}
+
 builds:
   - id: controller
     main: ./cmd/controller
@@ -48,3 +52,20 @@ docker_manifests:
       - hetznercloud/hcloud-csi-driver:{{ if not .IsSnapshot }}v{{ end }}{{ .Version }}-amd64
       - hetznercloud/hcloud-csi-driver:{{ if not .IsSnapshot }}v{{ end }}{{ .Version }}-arm64v8
       - hetznercloud/hcloud-csi-driver:{{ if not .IsSnapshot }}v{{ end }}{{ .Version }}-armv6
+
+release:
+  ids: [""]
+  extra_files:
+    - glob: "./hcloud-csi-*.tgz"
+
+publishers:
+  - name: helm-chart-repo
+
+    # make sure that this is only executed once. There are no separate ids per binary built,
+    # we filter for no actual ID and then run the publisher for the checksum.
+    ids: [""]
+    checksum: true
+
+    cmd: ./hack/release-publish-helm-chart.sh hcloud-csi-{{ .Version }}.tgz
+    env:
+      - CHART_REPO_REMOTE={{ .Env.CHART_REPO_REMOTE }}

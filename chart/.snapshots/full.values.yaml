@@ -1,0 +1,370 @@
+# This values file sets all available values that are not set in the default.
+# The snapshot test related to this verifies that all the optional functionality works as expected.
+# These values are not meant to be actually used as is.
+
+global:
+  imagePullSecrets:
+    - global-image-pull-secret
+
+fullnameOverride: fullname-override
+namespaceOverride: namespace-override
+
+commonLabels:
+  common-label: common-label
+commonAnnotations:
+  common-annotation: common-annotation
+
+controller:
+  image:
+    csiAttacher:
+      pullPolicy: Always
+      pullSecrets:
+        - csiAttacher
+    csiResizer:
+      pullPolicy: Always
+      pullSecrets:
+        - csiResizer
+    csiProvisioner:
+      pullPolicy: Always
+      pullSecrets:
+        - csiProvisioner
+    livenessProbe:
+      pullPolicy: Always
+      pullSecrets:
+        - livenessProbe
+    hcloudCSIDriver:
+      pullPolicy: Always
+      pullSecrets:
+        - hcloudCSIDriver
+
+  replicaCount: 3
+
+  hcloudVolumeDefaultLocation: ash
+
+  service:
+    annotations:
+      controller-svc: controller-svc
+
+  rbac:
+    rules:
+      - apiGroups:
+          - ""
+        resources:
+          - pods
+        verbs:
+          - get
+          - list
+
+  customLivenessProbe:
+    exec:
+      command:
+        - cat
+        - /tmp/live
+      initialDelaySeconds: 5
+      periodSeconds: 5
+
+  customReadinessProbe:
+    exec:
+      command:
+        - cat
+        - /tmp/ready
+      initialDelaySeconds: 5
+      periodSeconds: 5
+
+  customStartupProbe:
+    exec:
+      command:
+        - cat
+        - /tmp/starty
+      initialDelaySeconds: 5
+      periodSeconds: 5
+
+
+  resources:
+    csiAttacher:
+      limits:
+        memory: 81Mi
+        cpu: 51m
+      requests:
+        memory: 21Mi
+        cpu: 11m
+    csiResizer:
+      limits:
+        memory: 82Mi
+        cpu: 52m
+      requests:
+        memory: 22Mi
+        cpu: 12m
+    csiProvisioner:
+      limits:
+        memory: 83Mi
+        cpu: 53m
+      requests:
+        memory: 23Mi
+        cpu: 13m
+    livenessProbe:
+      limits:
+        memory: 84Mi
+        cpu: 54m
+      requests:
+        memory: 24Mi
+        cpu: 14m
+    hcloudCSIDriver:
+      limits:
+        memory: 85Mi
+        cpu: 105m
+      requests:
+        memory: 45Mi
+        cpu: 15m
+
+  podLabels:
+    pod-label: pod-label
+
+  podAnnotations:
+    pod-annotation: pod-annotation
+
+  affinity:
+    nodeAffinity:
+      requiredDuringSchedulingIgnoredDuringExecution:
+        nodeSelectorTerms:
+          - matchExpressions:
+              - key: topology.kubernetes.io/zone
+                operator: In
+                values:
+                  - antarctica-east1
+                  - antarctica-west1
+      preferredDuringSchedulingIgnoredDuringExecution:
+        - weight: 1
+          preference:
+            matchExpressions:
+              - key: another-node-label-key
+                operator: In
+                values:
+                  - another-node-label-value
+
+  nodeSelector:
+    foo: bar
+
+  tolerations:
+    - key: "example-key"
+      operator: "Exists"
+      effect: "NoSchedule"
+
+  updateStrategy:
+    type: OnDelete
+
+  priorityClassName: super-duper-important
+
+  topologySpreadConstraints:
+    - maxSkew: 1
+      topologyKey: zone
+      whenUnsatisfiable: DoNotSchedule
+      labelSelector:
+        matchLabels:
+          foo: bar
+
+  schedulerName: foobar
+
+  terminationGracePeriodSeconds: 35
+
+  lifecycleHooks:
+    postStart:
+      exec:
+        command: [ "/bin/sh", "-c", "echo Hello from the postStart handler > /usr/share/message" ]
+    preStop:
+      exec:
+        command: [ "/bin/sh","-c","nginx -s quit; while killall -0 nginx; do sleep 1; done" ]
+
+  extraEnvVars:
+    - name: HCLOUD_DEBUG
+      value: "true"
+
+  extraVolumes:
+    - name: extra-volume
+      emptyDir: {}
+
+  extraVolumeMounts:
+    - name: extra-volume
+      mountPath: /tmp/extra-volume
+
+  sidecars:
+    - name: your-image-name
+      image: your-image
+      imagePullPolicy: Always
+      ports:
+        - name: portname
+          containerPort: 1234
+
+  initContainers:
+    - name: your-image-name
+      image: your-image
+      imagePullPolicy: Always
+      command: ['sh', '-c', 'echo "hello world"']
+
+node:
+  image:
+    csiNodeDriverRegistrar:
+      pullPolicy: Always
+      pullSecrets:
+        - csiNodeDriverRegistrar
+    livenessProbe:
+      pullPolicy: Always
+      pullSecrets:
+        - livenessProbe
+    hcloudCSIDriver:
+      pullPolicy: Always
+      pullSecrets:
+          - hcloudCSIDriver
+
+  service:
+    annotations:
+      node-svc: node-svc
+
+
+  customLivenessProbe:
+    exec:
+      command:
+        - cat
+        - /tmp-node/live
+      initialDelaySeconds: 5
+      periodSeconds: 5
+
+  customReadinessProbe:
+    exec:
+      command:
+        - cat
+        - /tmp-node/ready
+      initialDelaySeconds: 5
+      periodSeconds: 5
+
+  customStartupProbe:
+    exec:
+      command:
+        - cat
+        - /tmp-node/starty
+      initialDelaySeconds: 5
+      periodSeconds: 5
+
+  resources:
+    csiNodeDriverRegistrar:
+      limits:
+        memory: 41Mi
+        cpu: 51m
+      requests:
+        memory: 21Mi
+        cpu: 11m
+    livenessProbe:
+      limits:
+        memory: 42Mi
+        cpu: 52m
+      requests:
+        memory: 22Mi
+        cpu: 12m
+    hcloudCSIDriver:
+      limits:
+        memory: 83Mi
+        cpu: 103m
+      requests:
+        memory: 43Mi
+        cpu: 13m
+
+  podLabels:
+    pod-label: pod-label
+
+  podAnnotations:
+    pod-annotation: pod-annotation
+
+  nodeSelector:
+    foo: bar
+
+  tolerations:
+    - key: "example-key"
+      operator: "Exists"
+      effect: "NoSchedule"
+
+  updateStrategy:
+    type: OnDelete
+
+  priorityClassName: super-duper-important
+
+  topologySpreadConstraints:
+    - maxSkew: 1
+      topologyKey: zone
+      whenUnsatisfiable: DoNotSchedule
+      labelSelector:
+        matchLabels:
+          foo: bar
+
+  schedulerName: foobar
+
+  terminationGracePeriodSeconds: 35
+
+  lifecycleHooks:
+    postStart:
+      exec:
+        command: [ "/bin/sh", "-c", "echo Hello from the postStart handler > /usr/share/message" ]
+    preStop:
+      exec:
+        command: [ "/bin/sh","-c","nginx -s quit; while killall -0 nginx; do sleep 1; done" ]
+
+  extraEnvVars:
+    - name: HCLOUD_DEBUG
+      value: "true"
+
+  extraVolumes:
+    - name: extra-volume
+      emptyDir: { }
+
+  extraVolumeMounts:
+    - name: extra-volume
+      mountPath: /tmp/extra-volume
+
+  sidecars:
+    - name: your-image-name
+      image: your-image
+      imagePullPolicy: Always
+      ports:
+        - name: portname
+          containerPort: 1234
+
+  initContainers:
+    - name: your-image-name
+      image: your-image
+      imagePullPolicy: Always
+      command: [ 'sh', '-c', 'echo "hello world"' ]
+
+serviceAccount:
+  annotations:
+    service-account-annotation: service-account-annotation
+  automountServiceAccountToken: false
+
+metrics:
+  enabled: true
+
+  serviceMonitor:
+    enabled: true
+    namespace: monitoring
+    annotations:
+      service-monitor-annotation: service-monitor-annotation
+    labels:
+        service-monitor-label: service-monitor-label
+    jobLabel: service-monitor-job-label
+    honorLabels: true
+    interval: 15s
+    scrapeTimeout: 15s
+    metricRelabelings:
+      - sourceLabels:
+        - bar
+        action: Drop
+    relabelings:
+      - sourceLabels:
+        - foo
+        action: Keep
+
+    selector:
+      prometheus: my-prometheus
+
+storageClasses:
+  - name: foobar
+    defaultStorageClass: false
+    reclaimPolicy: Keep

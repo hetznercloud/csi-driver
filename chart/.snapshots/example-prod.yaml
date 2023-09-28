@@ -1,4 +1,23 @@
 ---
+# Source: hcloud-csi/templates/controller/poddisruptionbudget.yaml
+apiVersion: policy/v1
+kind: PodDisruptionBudget
+metadata:
+  name: hcloud-csi-controller
+  namespace: "kube-system"
+  labels:
+    app.kubernetes.io/name: hcloud-csi
+    app.kubernetes.io/instance: hcloud-csi
+    app.kubernetes.io/managed-by: Helm
+    app.kubernetes.io/component: controller
+spec:
+  minAvailable: 1
+  selector:
+    matchLabels:
+      app.kubernetes.io/name: hcloud-csi
+      app.kubernetes.io/instance: hcloud-csi
+      app.kubernetes.io/component: controller
+---
 # Source: hcloud-csi/templates/controller/serviceaccount.yaml
 apiVersion: v1
 kind: ServiceAccount
@@ -7,7 +26,6 @@ metadata:
   namespace: "kube-system"
   labels:
     app.kubernetes.io/name: hcloud-csi
-    helm.sh/chart: hcloud-csi-2.4.0
     app.kubernetes.io/instance: hcloud-csi
     app.kubernetes.io/managed-by: Helm
     app.kubernetes.io/component: controller
@@ -32,7 +50,6 @@ metadata:
   name: hcloud-csi-controller
   labels:
     app.kubernetes.io/name: hcloud-csi
-    helm.sh/chart: hcloud-csi-2.4.0
     app.kubernetes.io/instance: hcloud-csi
     app.kubernetes.io/managed-by: Helm
     app.kubernetes.io/component: controller
@@ -94,7 +111,6 @@ metadata:
   name: hcloud-csi-controller
   labels:
     app.kubernetes.io/name: hcloud-csi
-    helm.sh/chart: hcloud-csi-2.4.0
     app.kubernetes.io/instance: hcloud-csi
     app.kubernetes.io/managed-by: Helm
     app.kubernetes.io/component: controller
@@ -115,7 +131,6 @@ metadata:
   namespace: "kube-system"
   labels:
     app.kubernetes.io/name: hcloud-csi
-    helm.sh/chart: hcloud-csi-2.4.0
     app.kubernetes.io/instance: hcloud-csi
     app.kubernetes.io/managed-by: Helm
     app.kubernetes.io/component: controller
@@ -136,7 +151,6 @@ metadata:
   namespace: "kube-system"
   labels:
     app.kubernetes.io/name: hcloud-csi
-    helm.sh/chart: hcloud-csi-2.4.0
     app.kubernetes.io/instance: hcloud-csi
     app.kubernetes.io/managed-by: Helm
     app.kubernetes.io/component: node
@@ -157,7 +171,6 @@ metadata:
   namespace: "kube-system"
   labels:
     app.kubernetes.io/name: hcloud-csi
-    helm.sh/chart: hcloud-csi-2.4.0
     app.kubernetes.io/instance: hcloud-csi
     app.kubernetes.io/managed-by: Helm
     app.kubernetes.io/component: node
@@ -167,27 +180,28 @@ spec:
     type: RollingUpdate
   selector:
     matchLabels:
-      app: hcloud-csi
+      app.kubernetes.io/name: hcloud-csi
+      app.kubernetes.io/instance: hcloud-csi
+      app.kubernetes.io/component: node
   template:
     metadata:
       labels:
         app.kubernetes.io/name: hcloud-csi
-        helm.sh/chart: hcloud-csi-2.4.0
         app.kubernetes.io/instance: hcloud-csi
         app.kubernetes.io/managed-by: Helm
         app.kubernetes.io/component: node
-        app: hcloud-csi
     spec:
       
+      hostNetwork: true
       affinity:
         nodeAffinity:
           requiredDuringSchedulingIgnoredDuringExecution:
             nodeSelectorTerms:
             - matchExpressions:
-              - key: instance.hetzner.cloud/is-root-server
+              - key: node-role.kubernetes.io/control-plane
                 operator: NotIn
                 values:
-                - "true"
+                - ""
       tolerations:
         - effect: NoExecute
           operator: Exists
@@ -195,6 +209,7 @@ spec:
           operator: Exists
         - key: CriticalAddonsOnly
           operator: Exists
+      priorityClassName: "system-node-critical"
       securityContext:
         fsGroup: 1001
       initContainers:
@@ -210,8 +225,12 @@ spec:
             - name: registration-dir
               mountPath: /registration
           resources:
-            limits: {}
-            requests: {}
+            limits:
+              cpu: 50m
+              memory: 40Mi
+            requests:
+              cpu: 10m
+              memory: 20Mi
         - name: liveness-probe
           image: registry.k8s.io/sig-storage/livenessprobe:v2.9.0
           imagePullPolicy: IfNotPresent
@@ -219,8 +238,12 @@ spec:
           - mountPath: /run/csi
             name: plugin-dir
           resources:
-            limits: {}
-            requests: {}
+            limits:
+              cpu: 50m
+              memory: 40Mi
+            requests:
+              cpu: 10m
+              memory: 20Mi
         - name: hcloud-csi-driver
           image: docker.io/hetznercloud/hcloud-csi-driver:v2.4.0
           imagePullPolicy: IfNotPresent
@@ -249,8 +272,12 @@ spec:
               protocol: TCP
               containerPort: 9808
           resources:
-            limits: {}
-            requests: {}
+            limits:
+              cpu: 100m
+              memory: 80Mi
+            requests:
+              cpu: 10m
+              memory: 40Mi
           livenessProbe:
             failureThreshold: 5
             initialDelaySeconds: 10
@@ -286,30 +313,40 @@ metadata:
   namespace: "kube-system"
   labels:
     app.kubernetes.io/name: hcloud-csi
-    helm.sh/chart: hcloud-csi-2.4.0
     app.kubernetes.io/instance: hcloud-csi
     app.kubernetes.io/managed-by: Helm
     app.kubernetes.io/component: controller
     app: hcloud-csi-controller 
 spec:
-  replicas: 1
+  replicas: 2
   strategy:
     type: RollingUpdate
   selector:
     matchLabels:
-      app: hcloud-csi-controller
+      app.kubernetes.io/name: hcloud-csi
+      app.kubernetes.io/instance: hcloud-csi
+      app.kubernetes.io/component: controller
   template:
     metadata:
       labels:
         app.kubernetes.io/name: hcloud-csi
-        helm.sh/chart: hcloud-csi-2.4.0
         app.kubernetes.io/instance: hcloud-csi
         app.kubernetes.io/managed-by: Helm
         app.kubernetes.io/component: controller
-        app: hcloud-csi-controller
     spec:
       serviceAccountName: hcloud-csi-controller
       
+      affinity:
+        podAntiAffinity:
+          requiredDuringSchedulingIgnoredDuringExecution:
+          - labelSelector:
+              matchExpressions:
+              - key: csi-hcloud
+                operator: In
+                values:
+                - controller
+            topologyKey: kubernetes.io/hostname
+      priorityClassName: "system-cluster-critical"
       securityContext:
         fsGroup: 1001
       initContainers:
@@ -318,10 +355,16 @@ spec:
           image: registry.k8s.io/sig-storage/csi-attacher:v4.1.0
           imagePullPolicy: IfNotPresent
           resources:
-            limits: {}
-            requests: {}
+            limits:
+              cpu: 50m
+              memory: 80Mi
+            requests:
+              cpu: 10m
+              memory: 20Mi
           args:
             - --default-fstype=ext4
+            - --leader-election
+            - --leader-election-namespace=kube-system
           volumeMounts:
           - name: socket-dir
             mountPath: /run/csi
@@ -330,8 +373,15 @@ spec:
           image: registry.k8s.io/sig-storage/csi-resizer:v1.7.0
           imagePullPolicy: IfNotPresent
           resources:
-            limits: {}
-            requests: {}
+            limits:
+              cpu: 50m
+              memory: 80Mi
+            requests:
+              cpu: 10m
+              memory: 20Mi
+          args:
+            - --leader-election
+            - --leader-election-namespace=kube-system
           volumeMounts:
           - name: socket-dir
             mountPath: /run/csi
@@ -340,11 +390,17 @@ spec:
           image: registry.k8s.io/sig-storage/csi-provisioner:v3.4.0
           imagePullPolicy: IfNotPresent
           resources:
-            limits: {}
-            requests: {}
+            limits:
+              cpu: 50m
+              memory: 80Mi
+            requests:
+              cpu: 10m
+              memory: 20Mi
           args:
             - --feature-gates=Topology=true
             - --default-fstype=ext4
+            - --leader-election
+            - --leader-election-namespace=kube-system
           volumeMounts:
           - name: socket-dir
             mountPath: /run/csi
@@ -353,8 +409,12 @@ spec:
           image: registry.k8s.io/sig-storage/livenessprobe:v2.9.0
           imagePullPolicy: IfNotPresent
           resources:
-            limits: {}
-            requests: {}
+            limits:
+              cpu: 50m
+              memory: 80Mi
+            requests:
+              cpu: 10m
+              memory: 20Mi
           volumeMounts:
           - mountPath: /run/csi
             name: socket-dir
@@ -366,6 +426,8 @@ spec:
           env:
             - name: CSI_ENDPOINT
               value: unix:///run/csi/socket
+            - name: HCLOUD_VOLUME_DEFAULT_LOCATION
+              value: "nbg1"
             - name: METRICS_ENDPOINT
               value: "0.0.0.0:9189"
             - name: ENABLE_METRICS
@@ -381,8 +443,12 @@ spec:
                   name: hcloud
                   key: token
           resources:
-            limits: {}
-            requests: {}
+            limits:
+              cpu: 100m
+              memory: 80Mi
+            requests:
+              cpu: 10m
+              memory: 40Mi
           ports:
             - name: metrics
               containerPort: 9189
