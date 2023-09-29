@@ -58,7 +58,7 @@ job "hcloud-csi-controller" {
 
       config {
         # Get the latest version on https://hub.docker.com/r/hetznercloud/hcloud-csi-driver/tags
-        image   = "hetznercloud/hcloud-csi-driver:v2.3.2"
+        image   = "hetznercloud/hcloud-csi-driver:v2.5.1"
         command = "bin/hcloud-csi-driver-controller"
       }
 
@@ -105,7 +105,7 @@ job "hcloud-csi-node" {
 
       config {
         # Get the latest version on https://hub.docker.com/r/hetznercloud/hcloud-csi-driver/tags
-        image      = "hetznercloud/hcloud-csi-driver:v2.3.2"
+        image      = "hetznercloud/hcloud-csi-driver:v2.5.1"
         command    = "bin/hcloud-csi-driver-node"
         privileged = true
       }
@@ -207,7 +207,7 @@ nomad volume create db-vol.hcl
 ```
 
 > [!NOTE]
->  The hcloud cli provides a convient way to verify if the volume was created: `hcloud volume list`.
+>  The hcloud cli provides a convenient way to verify if the volume was created: `hcloud volume list`.
 
 ### Make use of the Volume
 

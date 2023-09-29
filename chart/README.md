@@ -2,9 +2,6 @@
 
 This Helm chart is the recommended installation method for [hcloud-csi-driver](https://github.com/hetznercloud/csi-driver) on Kubernetes.
 
-> [!WARNING]
-> The Helm Chart is not yet published and the instructions below will not work until the next release (v2.5.0).
-
 ## Quickstart
 
 First, [install Helm 3](https://helm.sh/docs/intro/install/).
@@ -29,13 +26,13 @@ If you're unfamiliar with Helm it would behoove you to peep around the documenta
 If you previously installed csi-driver with this command:
 
 ```sh
-kubectl apply -f https://raw.githubusercontent.com/hetznercloud/csi-driver/v2.4.0/deploy/kubernetes/hcloud-csi.yml
+kubectl apply -f https://raw.githubusercontent.com/hetznercloud/csi-driver/v2.5.1/deploy/kubernetes/hcloud-csi.yml
 ```
 
 You can uninstall that same deployment, by running the following command:
 
 ```sh
-kubectl delete -f https://raw.githubusercontent.com/hetznercloud/csi-driver/v2.4.0/deploy/kubernetes/hcloud-csi.yml
+kubectl delete -f https://raw.githubusercontent.com/hetznercloud/csi-driver/v2.5.1/deploy/kubernetes/hcloud-csi.yml
 ```
 
 Then you can follow the Quickstart installation steps above.
