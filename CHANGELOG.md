@@ -1,5 +1,14 @@
 # Changelog
 
+## [2.5.0](https://github.com/hetznercloud/csi-driver/compare/v2.4.0...v2.5.0) (2023-09-29)
+
+
+### Features
+
+* build with Go 1.21 ([#503](https://github.com/hetznercloud/csi-driver/issues/503)) ([2a82c3b](https://github.com/hetznercloud/csi-driver/commit/2a82c3ba9a78802cb82ae6a2d03264d06782e842))
+* **k8s:** add Helm Chart ([#500](https://github.com/hetznercloud/csi-driver/issues/500)) ([c39b138](https://github.com/hetznercloud/csi-driver/commit/c39b138421a664b22bdb5b2257c3a50c1d26d0d7))
+* test against Kubernetes 1.28 and drop 1.24 ([#491](https://github.com/hetznercloud/csi-driver/issues/491)) ([b331348](https://github.com/hetznercloud/csi-driver/commit/b33134844b5d53bc70e57b30e33a38bdfb33d03e))
+
 ## [2.4.0](https://github.com/hetznercloud/csi-driver/compare/v1.6.0...v2.4.0) (2023-08-25)
 
 
