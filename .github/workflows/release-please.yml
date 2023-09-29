@@ -19,9 +19,10 @@ jobs:
 
           extra-files: |
             driver/driver.go
-            
+
             deploy/kubernetes/hcloud-csi.yml
-            deploy/kubernetes/controller/deployment.yaml
-            deploy/kubernetes/node/daemonset.yaml
+
             chart/Chart.yaml
-            chart/values.yaml
+            chart/.snapshots/example-prod.yaml
+            chart/.snapshots/full.yaml
+            chart/.snapshots/default.yaml
