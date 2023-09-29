@@ -1,5 +1,12 @@
 # Changelog
 
+## [2.5.1](https://github.com/hetznercloud/csi-driver/compare/v2.5.0...v2.5.1) (2023-09-29)
+
+
+### Bug Fixes
+
+* release workflow fails publishing with missing Git author ([#512](https://github.com/hetznercloud/csi-driver/issues/512)) ([c45b40f](https://github.com/hetznercloud/csi-driver/commit/c45b40f9dd095aa29e8e729859de42bcc8325a55))
+
 ## [2.5.0](https://github.com/hetznercloud/csi-driver/compare/v2.4.0...v2.5.0) (2023-09-29)
 
 
