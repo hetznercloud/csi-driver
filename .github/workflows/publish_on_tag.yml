@@ -28,6 +28,12 @@ jobs:
           username: ${{ secrets.DOCKER_USER }}
           password: ${{ secrets.DOCKER_PASSWORD }}
 
+      # Git is used to push helm chart to hetznercloud/helm-charts
+      - name: Setup Git
+        run: |
+          git config --global user.name hcloud-bot
+          git config --global user.email github-bot@hetzner-cloud.de
+
       - name: "make docker plugin"
         run: |
           cd deploy/docker-swarm/pkg
