@@ -14,7 +14,7 @@ helm repo add hcloud https://charts.hetzner.cloud
 helm repo update hcloud
 
 # Install the latest version of the csi-driver chart.
-helm install hcloud-csi hcloud/csi-driver -n kube-system
+helm install hcloud-csi hcloud/hcloud-csi -n kube-system
 ```
 
 Please note that a secret containing the Hetzner Cloud token is necessary. See the main [Kubernetes Deployment](../docs/kubernetes/README.md) guide.
