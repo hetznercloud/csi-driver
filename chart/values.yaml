@@ -101,7 +101,7 @@ controller:
       ##   - myRegistryKeySecretName
       ##
       pullSecrets: []
-    
+
     livenessProbe:
       name: registry.k8s.io/sig-storage/livenessprobe:v2.9.0
       ## Specify a imagePullPolicy
@@ -165,7 +165,7 @@ controller:
     ## @param controller.service.ports.metrics controller service metrics port
     ports:
       metrics: 9189
-    
+
     ## @param controller.service.annotations Additional custom annotations for controller service
     annotations: {}
 
@@ -395,7 +395,7 @@ node:
       ##   - myRegistryKeySecretName
       ##
       pullSecrets: []
-    
+
     livenessProbe:
       name: registry.k8s.io/sig-storage/livenessprobe:v2.9.0
       ## Specify a imagePullPolicy
@@ -443,7 +443,7 @@ node:
     ##
     ports:
       metrics: 9189
-    
+
     ## @param node.service.annotations Additional custom annotations for node service
     ##
     annotations: {}
@@ -620,6 +620,12 @@ node:
   ##    command: ['sh', '-c', 'echo "hello world"']
   ##
   initContainers: []
+
+  ## @param node.kubeletDir Location of the /var/lib/kubelet directory as some k8s distribution differ from the standard.
+  ## e.g:
+  ## kubeletDir: /var/lib/k0s/kubelet
+  ##
+  kubeletDir: /var/lib/kubelet
 
 ## @section Other Parameters
 ##
