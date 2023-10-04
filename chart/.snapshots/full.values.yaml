@@ -333,6 +333,8 @@ node:
       imagePullPolicy: Always
       command: [ 'sh', '-c', 'echo "hello world"' ]
 
+  kubeletDir: /var/lib/k0s/kubelet
+
 serviceAccount:
   annotations:
     service-account-annotation: service-account-annotation
