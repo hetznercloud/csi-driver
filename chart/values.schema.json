@@ -539,6 +539,9 @@
                 "initContainers": {
                     "type": "array"
                 },
+                "kubeletDir": {
+                    "type": "string"
+                },
                 "lifecycleHooks": {
                     "type": "object"
                 },

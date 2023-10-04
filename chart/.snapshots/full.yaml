@@ -264,7 +264,7 @@ spec:
           image: registry.k8s.io/sig-storage/csi-node-driver-registrar:v2.7.0
           imagePullPolicy: Always
           args:
-            - --kubelet-registration-path=/var/lib/kubelet/plugins/csi.hetzner.cloud/socket
+            - --kubelet-registration-path=/var/lib/k0s/kubelet/plugins/csi.hetzner.cloud/socket
           volumeMounts:
             - name: plugin-dir
               mountPath: /run/csi
@@ -298,7 +298,7 @@ spec:
           command: [/bin/hcloud-csi-driver-node]
           volumeMounts:
             - name: kubelet-dir
-              mountPath: /var/lib/kubelet
+              mountPath: /var/lib/k0s/kubelet
               mountPropagation: "Bidirectional"
             - name: plugin-dir
               mountPath: /run/csi
@@ -371,15 +371,15 @@ spec:
       volumes:
         - name: kubelet-dir
           hostPath:
-            path: /var/lib/kubelet
+            path: /var/lib/k0s/kubelet
             type: Directory
         - name: plugin-dir
           hostPath:
-            path: /var/lib/kubelet/plugins/csi.hetzner.cloud/
+            path: /var/lib/k0s/kubelet/plugins/csi.hetzner.cloud/
             type: DirectoryOrCreate
         - name: registration-dir
           hostPath:
-            path: /var/lib/kubelet/plugins_registry/
+            path: /var/lib/k0s/kubelet/plugins_registry/
             type: Directory
         - name: device-dir
           hostPath:
