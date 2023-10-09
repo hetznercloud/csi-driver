@@ -1,9 +1,4 @@
 {
   "$schema": "https://docs.renovatebot.com/renovate-schema.json",
-  "extends": [
-    "config:base",
-
-    ":semanticCommitTypeAll(deps)",
-    ":semanticCommitScopeDisabled"
-  ]
+  "extends": ["github>hetznercloud/.github//renovate/default"]
 }
