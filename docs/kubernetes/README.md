@@ -24,10 +24,24 @@
 
 3. Deploy the CSI driver and wait until everything is up and running:
 
-   Have a look at our [Version Matrix](README.md#versioning-policy) to pick the correct deployment file.
+   Have a look at our [Version Matrix](README.md#versioning-policy) to pick the correct version.
+
+   ```sh
+   # Sync the Hetzner Cloud helm chart repository to your local computer.
+   helm repo add hcloud https://charts.hetzner.cloud
+   helm repo update hcloud
+
+   # Install the latest version of the csi-driver chart.
+   helm install hcloud-csi hcloud/hcloud-csi -n kube-system
+   ```
+
+   <details>
+     <summary><b>Alternative</b>: Using a plain manifest</summary>
+
    ```
    kubectl apply -f https://raw.githubusercontent.com/hetznercloud/csi-driver/v2.5.1/deploy/kubernetes/hcloud-csi.yml
    ```
+   </details>
 
 4. To verify everything is working, create a persistent volume claim and a pod
    which uses that volume:
