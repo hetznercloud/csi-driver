@@ -69,6 +69,16 @@
    kubectl exec -it my-csi-app -- /bin/sh
    ```
 
+### Alternative Kubelet Directory
+
+Some Kubernetes distributions use a non-standard path for the Kubelet directory.
+The csi-driver needs to know about this to successfully mount volumes. You can
+configure this through the Helm Chart Value `node.kubeletDir`.
+
+- Standard: `/var/lib/kubelet`
+- **k0s**: `/var/lib/k0s/kubelet`
+- **microk8s**: `/var/snap/microk8s/common/var/lib/kubelet`
+
 ### Volumes Encrypted with LUKS
 
 To add encryption with LUKS you have to create a dedicate secret containing an encryption passphrase and duplicate the default `hcloud-volumes` storage class with added parameters referencing this secret:
