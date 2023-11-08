@@ -622,9 +622,10 @@ node:
   initContainers: []
 
   ## @param node.kubeletDir Location of the /var/lib/kubelet directory as some k8s distribution differ from the standard.
-  ## e.g:
+  ## For k0s:
   ## kubeletDir: /var/lib/k0s/kubelet
-  ##
+  ## For microk8s:
+  ## kubeletDir: /var/snap/microk8s/common/var/lib/kubelet
   kubeletDir: /var/lib/kubelet
 
 ## @section Other Parameters
