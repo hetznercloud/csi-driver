@@ -54,6 +54,10 @@ metadata:
     app.kubernetes.io/managed-by: Helm
     app.kubernetes.io/component: controller
 rules:
+# leader election
+- apiGroups: [coordination.k8s.io]
+  resources: [leases]
+  verbs: [get, watch, list, delete, update, create]
 # attacher
 - apiGroups: [""]
   resources: [persistentvolumes]

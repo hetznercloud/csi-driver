@@ -1,4 +1,6 @@
 {{ if .Values.controller.rbac.create }}
+{{ $enableLeaderElection := gt (int .Values.controller.replicaCount) 1 }}
+
 kind: ClusterRole
 apiVersion: rbac.authorization.k8s.io/v1
 metadata:
@@ -12,6 +14,12 @@ metadata:
   annotations: {{- include "common.tplvalues.render" ( dict "value" .Values.commonAnnotations "context" $ ) | nindent 4 }}
   {{- end }}
 rules:
+{{- if $enableLeaderElection}}
+# leader election
+- apiGroups: [coordination.k8s.io]
+  resources: [leases]
+  verbs: [get, watch, list, delete, update, create]
+{{- end}}
 # attacher
 - apiGroups: [""]
   resources: [persistentvolumes]
