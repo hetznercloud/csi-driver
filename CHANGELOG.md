@@ -1,5 +1,12 @@
 # Changelog
 
+## [2.6.0](https://github.com/hetznercloud/csi-driver/compare/v2.5.1...v2.6.0) (2023-11-08)
+
+
+### Features
+
+* **helm:** add value to customize kubeletDir ([#516](https://github.com/hetznercloud/csi-driver/issues/516)) ([501fbe3](https://github.com/hetznercloud/csi-driver/commit/501fbe3c226f860fcfa9fed33d92cb994a0d589c))
+
 ## [2.5.1](https://github.com/hetznercloud/csi-driver/compare/v2.5.0...v2.5.1) (2023-09-29)
 
 
