@@ -285,3 +285,19 @@ job "mariadb" {
 ```sh
 nomad job run mariadb.hcl
 ```
+
+### Volumes Encrypted with LUKS
+
+To add encryption with LUKS you have to provide a secret containing the encryption passphrase as part of the volume definition. The secret must be named `encryption-passphrase`. The volume will then be LUKS encrypted on first use.
+
+```hcl
+# file: db-vol.hcl
+
+secrets {
+  "encryption-passphrase" = "<your_encryption_value>"
+}
+```
+
+
+> [!NOTE]
+> Consider using HashiCorp Vault for secrets management, see https://developer.hashicorp.com/nomad/docs/job-specification/template#vault-kv-api-v2
