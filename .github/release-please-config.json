@@ -1,0 +1,20 @@
+{
+  "$schema": "https://raw.githubusercontent.com/googleapis/release-please/main/schemas/config.json",
+  "bootstrap-sha": "9a352361bc1392962c3e75384cf92d99664f902f",
+  "include-component-in-tag": false,
+  "include-v-in-tag": true,
+  "packages": {
+    ".": {
+      "release-type": "go",
+      "package-name": "csi-driver",
+      "extra-files": [
+        "driver/driver.go",
+        "deploy/kubernetes/hcloud-csi.yml",
+        "chart/.snapshots/default.yaml",
+        "chart/.snapshots/example-prod.yaml",
+        "chart/.snapshots/full.yaml",
+        "chart/Chart.yaml"
+      ]
+    }
+  }
+}
