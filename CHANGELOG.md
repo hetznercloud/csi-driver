@@ -1,5 +1,12 @@
 # Changelog
 
+## [2.6.1](https://github.com/hetznercloud/csi-driver/compare/v2.6.0...v2.6.1) (2023-12-19)
+
+
+### Bug Fixes
+
+* **helm:** missing rbac for leader election / leases ([#538](https://github.com/hetznercloud/csi-driver/issues/538)) ([5da7a14](https://github.com/hetznercloud/csi-driver/commit/5da7a14e9e8dfc6716ede0b72b5aaeac6b8f1306)), closes [#531](https://github.com/hetznercloud/csi-driver/issues/531)
+
 ## [2.6.0](https://github.com/hetznercloud/csi-driver/compare/v2.5.1...v2.6.0) (2023-11-08)
 
 
