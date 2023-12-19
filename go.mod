@@ -13,7 +13,7 @@ require (
 	github.com/prometheus/client_golang v1.17.0
 	golang.org/x/sys v0.15.0
 	google.golang.org/grpc v1.59.0
-	k8s.io/mount-utils v0.28.3
+	k8s.io/mount-utils v0.29.0
 	k8s.io/utils v0.0.0-20231127182322-b307cd553661
 )
 
@@ -21,7 +21,7 @@ require (
 	github.com/beorn7/perks v1.0.1 // indirect
 	github.com/cespare/xxhash/v2 v2.2.0 // indirect
 	github.com/go-logfmt/logfmt v0.5.1 // indirect
-	github.com/go-logr/logr v1.2.4 // indirect
+	github.com/go-logr/logr v1.3.0 // indirect
 	github.com/go-task/slim-sprig v0.0.0-20230315185526-52ccab3ef572 // indirect
 	github.com/google/go-cmp v0.6.0 // indirect
 	github.com/google/pprof v0.0.0-20210720184732-4bb14d4b1be1 // indirect
@@ -40,5 +40,5 @@ require (
 	google.golang.org/protobuf v1.31.0 // indirect
 	gopkg.in/yaml.v2 v2.4.0 // indirect
 	gopkg.in/yaml.v3 v3.0.1 // indirect
-	k8s.io/klog/v2 v2.100.1 // indirect
+	k8s.io/klog/v2 v2.110.1 // indirect
 )
