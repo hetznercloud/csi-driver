@@ -25,7 +25,7 @@ jobs:
           - k3s: v1.28
             k8s-test: v1.28.1
     steps:
-    - uses: actions/setup-go@v4
+    - uses: actions/setup-go@v5
       with:
         go-version: "1.21"
     - uses: actions/checkout@v4
