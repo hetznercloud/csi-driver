@@ -22,7 +22,10 @@ jobs:
       - name: Run tests
         run: |
           go vet ./...
-          go test $(go list ./... | grep -v e2e) -v
+          go test -v -race -coverprofile=coverage.txt $(go list ./... | grep -v e2e)
+
+      - name: Upload coverage reports to Codecov
+        uses: codecov/codecov-action@v3
 
   deploy-manifests:
     name: Check deployment manifests
