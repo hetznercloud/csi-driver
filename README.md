@@ -1,6 +1,7 @@
 # Container Storage Interface driver for Hetzner Cloud
 
 [![GitHub Actions status](https://github.com/hetznercloud/csi-driver/workflows/Run%20tests/badge.svg)](https://github.com/hetznercloud/csi-driver/actions)
+[![codecov](https://codecov.io/github/hetznercloud/csi-driver/graph/badge.svg?token=OHFN24A0sR)](https://codecov.io/github/hetznercloud/csi-driver/tree/main)
 
 This is a [Container Storage Interface](https://github.com/container-storage-interface/spec) driver for Hetzner Cloud
 enabling you to use ReadWriteOnce Volumes within Kubernetes & other Container
