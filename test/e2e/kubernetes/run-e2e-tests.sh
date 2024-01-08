@@ -2,7 +2,7 @@
 set -uex -o pipefail
 SCRIPT_DIR="$( cd "$( dirname "${BASH_SOURCE[0]}" )" &> /dev/null && pwd )"
 
-k8s_test_version="${K8S_TEST_VERSION:-v1.28.1}"
+k8s_test_version="${K8S_TEST_VERSION:-v1.29.0}"
 
 mkdir -p "${SCRIPT_DIR}/test-binaries"
 # TODO: Read linux-amd64 from env
