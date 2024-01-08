@@ -13,7 +13,7 @@ ginkgo="${SCRIPT_DIR}/test-binaries/ginkgo"
 ginkgo_flags="-v --flakeAttempts=2"
 
 e2e="${SCRIPT_DIR}/test-binaries/e2e.test"
-e2e_flags="-storage.testdriver=${SCRIPT_DIR}/testdriver-1.25.yaml"
+e2e_flags="-storage.testdriver=${SCRIPT_DIR}/testdriver.yaml"
 
 echo "Executing parallel tests"
 ${ginkgo} ${ginkgo_flags} \

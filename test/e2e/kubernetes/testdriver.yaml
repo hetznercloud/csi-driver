@@ -6,9 +6,14 @@ DriverInfo:
     Max: 15Gi
     Min: 10Gi
   Capabilities:
+    # We set all capabilities from the lowest supported version of Kubernetes.
+    #
     # Available capabilities are defined in the kubernetes repositories, make
     # sure to select the corresponding k8s version:
-    # https://github.com/kubernetes/kubernetes/blob/release-1.25/test/e2e/storage/framework/testdriver.go#L150
+    # https://github.com/kubernetes/kubernetes/blob/release-1.26/test/e2e/storage/framework/testdriver.go#L150
+    #
+    # To get a list of new capabilities when upgrading, run this command in the kubernetes repository:
+    #   git diff origin/release-1.26 origin/release-1.27 -- test/e2e/storage/framework/testdriver.go
     persistence: true
     block: true
     fsGroup: true
@@ -26,6 +31,8 @@ DriverInfo:
     singleNodeVolume: true
     topology: true
     capacity: false
+    readWriteOncePod: false # https://github.com/hetznercloud/csi-driver/issues/327
+    multiplePVsSameID: true # No need to disable according to comment on CapMultiplePVsSameID
   SupportedFsType:
     ext4:
     xfs:
