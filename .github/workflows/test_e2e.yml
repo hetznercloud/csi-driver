@@ -22,6 +22,8 @@ jobs:
             k8s-test: v1.27.9
           - k3s: v1.28
             k8s-test: v1.28.5
+          - k3s: v1.29
+            k8s-test: v1.29.0
     steps:
     - uses: actions/setup-go@v5
       with:
@@ -42,7 +44,7 @@ jobs:
           kubectl
           skaffold
         helm: v3.11.2
-        kubectl: v1.28.1
+        kubectl: v1.29.0
         skaffold: v2.3.0
 
     - name: Run tests
