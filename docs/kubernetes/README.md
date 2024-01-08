@@ -197,12 +197,13 @@ kubectl label nodes <node name> instance.hetzner.cloud/is-root-server=true
 
 ## Versioning policy
 
-We aim to support the latest three versions of Kubernetes. After a new
-Kubernetes version has been released we will stop supporting the oldest
-previously supported version. This does not necessarily mean that the
-CSI driver does not still work with this version. However, it means that
-we do not test that version anymore. Additionally, we will not fix bugs
-related only to an unsupported version.
+We aim to support the latest three versions of Kubernetes. When a Kubernetes
+version is marked as _End Of Life_, we will stop support for it and remove the
+version from our CI tests. This does not necessarily mean that the
+csi-driver does not still work with this version. We will
+not fix bugs related only to an unsupported version.
+
+Current Kubernetes Releases: https://kubernetes.io/releases/
 
 | Kubernetes | CSI Driver |                                                                                   Deployment File |
 |------------|-----------:|--------------------------------------------------------------------------------------------------:|
