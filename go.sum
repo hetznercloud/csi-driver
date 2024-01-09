@@ -59,6 +59,8 @@ github.com/hetznercloud/hcloud-go/v2 v2.4.0 h1:MqlAE+w125PLvJRCpAJmEwrIxoVdUdOyu
 github.com/hetznercloud/hcloud-go/v2 v2.4.0/go.mod h1:l7fA5xsncFBzQTyw29/dw5Yr88yEGKKdc6BHf24ONS0=
 github.com/hetznercloud/hcloud-go/v2 v2.5.1 h1:tJQxd+Qyd9CwGOFL0og80zZ3a4Z5p9+iIRTnUPlvOgc=
 github.com/hetznercloud/hcloud-go/v2 v2.5.1/go.mod h1:y75vdFT0eNNnYyGWO55Qv0LI23kSgsQZl3Gyy0KMrI4=
+github.com/hetznercloud/hcloud-go/v2 v2.6.0 h1:RJOA2hHZ7rD1pScA4O1NF6qhkHyUdbbxjHgFNot8928=
+github.com/hetznercloud/hcloud-go/v2 v2.6.0/go.mod h1:4J1cSE57+g0WS93IiHLV7ubTHItcp+awzeBp5bM9mfA=
 github.com/ianlancetaylor/demangle v0.0.0-20200824232613-28f6c0f3b639/go.mod h1:aSSvb/t6k1mPoxDqO4vJh6VOCGPwU4O0C2/Eqndh1Sc=
 github.com/kisielk/errcheck v1.5.0/go.mod h1:pFxgyoBC7bSaBwPgfKdkLd5X25qrDl4LWUI2bnpBCr8=
 github.com/kisielk/gotool v1.0.0/go.mod h1:XhKaO+MFFWcvkIS/tQcRk01m1F5IRFswLeQ+oQHNcck=
@@ -145,6 +147,8 @@ golang.org/x/net v0.17.0 h1:pVaXccu2ozPjCXewfr1S7xza/zcXTity9cCdXQYSjIM=
 golang.org/x/net v0.17.0/go.mod h1:NxSsAGuq816PNPmqtQdLE42eU2Fs7NoRIZrHJAlaCOE=
 golang.org/x/net v0.19.0 h1:zTwKpTd2XuCqf8huc7Fo2iSy+4RHPd10s4KzeTnVr1c=
 golang.org/x/net v0.19.0/go.mod h1:CfAk/cbD4CthTvqiEl8NpboMuiuOYsAr/7NOjZJtv1U=
+golang.org/x/net v0.20.0 h1:aCL9BSgETF1k+blQaYUBx9hJ9LOGP3gAVemcZlf1Kpo=
+golang.org/x/net v0.20.0/go.mod h1:z8BVo6PvndSri0LbOE3hAn0apkU+1YvI6E70E9jsnvY=
 golang.org/x/oauth2 v0.0.0-20180821212333-d2e6202438be/go.mod h1:N/0e6XlmueqKjAGxoOufVs8QHGRruUQn6yWY3a++T0U=
 golang.org/x/sync v0.0.0-20180314180146-1d60e4601c6f/go.mod h1:RxMgew5VJxzue5/jJTE5uejpjVlOe/izrB70Jof72aM=
 golang.org/x/sync v0.0.0-20181108010431-42b317875d0f/go.mod h1:RxMgew5VJxzue5/jJTE5uejpjVlOe/izrB70Jof72aM=
