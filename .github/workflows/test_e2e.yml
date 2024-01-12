@@ -36,7 +36,7 @@ jobs:
       with:
         token: ${{ secrets.HCLOUD_TOKEN  }}
 
-    - uses: 3bit/setup-hcloud@v2
+    - uses: hetznercloud/setup-hcloud@v1
     - uses: yokawasa/action-setup-kube-tools@v0.9.3
       with:
         setup-tools: |
