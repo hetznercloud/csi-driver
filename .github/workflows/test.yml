@@ -21,6 +21,68 @@ jobs:
       - name: Upload coverage reports to Codecov
         uses: codecov/codecov-action@v3
 
+  test-kubernetes:
+    name: e2e k3s ${{ matrix.k3s }}
+    runs-on: ubuntu-latest
+
+    permissions:
+      id-token: write
+
+    concurrency: ${{ github.workflow }}-${{ github.ref }}-${{ matrix.k3s }}
+
+    strategy:
+      # The e2e tests are flaky and often one of the jobs fails. The default setting
+      # causes all other currently running jobs to abort and all need to be restarted.
+      fail-fast: false
+      matrix:
+        include:
+          - k3s: v1.26
+            k8s-test: v1.26.12
+          - k3s: v1.27
+            k8s-test: v1.27.9
+          - k3s: v1.28
+            k8s-test: v1.28.5
+          - k3s: v1.29
+            k8s-test: v1.29.0
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-go@v5
+        with:
+          go-version-file: go.mod
+
+      - uses: hetznercloud/tps-action@main
+
+      - uses: hetznercloud/setup-hcloud@v1
+
+      - uses: yokawasa/action-setup-kube-tools@v0.9.3
+        with:
+          setup-tools: |
+            helm
+            kubectl
+            skaffold
+          helm: v3.11.2
+          kubectl: v1.29.0
+          skaffold: v2.3.0
+
+      - name: Run tests
+        env:
+          K3S_CHANNEL: ${{ matrix.k3s }}
+          K8S_TEST_VERSION: ${{ matrix.k8s-test }}
+          SCOPE: gha-${{ github.run_id }}-${{ github.run_attempt }}-${{ matrix.k3s }}
+        run: |
+          curl -sLS https://get.k3sup.dev | sh
+
+          trap "hack/dev-down.sh" EXIT
+          source <(hack/dev-up.sh)
+
+          skaffold build --tag="e2e-${GITHUB_RUN_ID}-${GITHUB_RUN_NUMBER}"
+          tag=$(skaffold build --tag="e2e-${GITHUB_RUN_ID}-${GITHUB_RUN_NUMBER}" --quiet --output="{{ (index .Builds 0).Tag }}")
+          skaffold deploy --images=docker.io/hetznercloud/hcloud-csi-driver=$tag
+
+          test/e2e/kubernetes/run-e2e-tests.sh
+
   deploy-manifests:
     runs-on: ubuntu-latest
 
