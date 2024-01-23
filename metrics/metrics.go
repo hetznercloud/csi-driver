@@ -7,6 +7,7 @@ import (
 	"github.com/go-kit/log/level"
 	grpc_prometheus "github.com/grpc-ecosystem/go-grpc-prometheus"
 	"github.com/prometheus/client_golang/prometheus"
+	"github.com/prometheus/client_golang/prometheus/collectors"
 	"github.com/prometheus/client_golang/prometheus/promhttp"
 	"google.golang.org/grpc"
 )
@@ -28,7 +29,7 @@ func New(logger log.Logger, addr string) *Metrics {
 		addr:        addr,
 		reg:         prometheus.NewRegistry(),
 		grpcMetrics: grpc_prometheus.NewServerMetrics(),
-		goMetrics:   prometheus.NewGoCollector(),
+		goMetrics:   collectors.NewGoCollector(),
 	}
 
 	level.Debug(metrics.logger).Log(

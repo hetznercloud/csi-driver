@@ -5,6 +5,7 @@ import (
 	"testing"
 
 	"github.com/go-kit/log"
+
 	"github.com/hetznercloud/csi-driver/volumes"
 )
 
@@ -31,7 +32,7 @@ func TestCryptSetup(t *testing.T) {
 		t.Fatal(err)
 	}
 	decryptedDevice := "/dev/mapper/" + decryptedName
-	defer runCmd("cryptsetup", "luksClose", decryptedName)
+	defer mustRunCmd(t, "cryptsetup", "luksClose", decryptedName)
 
 	if _, err := runCmd("mkfs.ext4", decryptedDevice); err != nil {
 		t.Fatal(err)
@@ -43,7 +44,7 @@ func TestCryptSetup(t *testing.T) {
 	if _, err := runCmd("mount", "-t", "ext4", decryptedDevice, decryptedMount); err != nil {
 		t.Fatal(err)
 	}
-	defer runCmd("umount", decryptedMount)
+	defer mustRunCmd(t, "umount", decryptedMount)
 
 	if _, err := runCmd("umount", decryptedMount); err != nil {
 		t.Fatal(err)

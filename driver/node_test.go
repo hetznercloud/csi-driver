@@ -7,8 +7,8 @@ import (
 
 	proto "github.com/container-storage-interface/spec/lib/go/csi"
 	"github.com/go-kit/log"
-	"google.golang.org/grpc"
 	"google.golang.org/grpc/codes"
+	"google.golang.org/grpc/status"
 
 	"github.com/hetznercloud/csi-driver/mock"
 	"github.com/hetznercloud/csi-driver/volumes"
@@ -139,7 +139,7 @@ func TestNodeServiceNodePublishPublishError(t *testing.T) {
 			"devicePath": "devpath",
 		},
 	})
-	if grpc.Code(err) != codes.Internal {
+	if status.Code(err) != codes.Internal {
 		t.Fatalf("unexpected error: %v", err)
 	}
 }
@@ -206,7 +206,7 @@ func TestNodeServiceNodePublishVolumeInputErrors(t *testing.T) {
 	for _, testCase := range testCases {
 		t.Run(testCase.Name, func(t *testing.T) {
 			_, err := env.service.NodePublishVolume(env.ctx, testCase.Req)
-			if grpc.Code(err) != testCase.Code {
+			if status.Code(err) != testCase.Code {
 				t.Fatalf("unexpected error: %s", err)
 			}
 		})
@@ -243,7 +243,7 @@ func TestNodeServiceNodeUnpublishUnpublishError(t *testing.T) {
 		VolumeId:   "1",
 		TargetPath: "target",
 	})
-	if grpc.Code(err) != codes.Internal {
+	if status.Code(err) != codes.Internal {
 		t.Fatalf("unexpected error: %v", err)
 	}
 }
@@ -275,7 +275,7 @@ func TestNodeServiceNodeUnpublishVolumeInputErrors(t *testing.T) {
 	for _, testCase := range testCases {
 		t.Run(testCase.Name, func(t *testing.T) {
 			_, err := env.service.NodeUnpublishVolume(env.ctx, testCase.Req)
-			if grpc.Code(err) != testCase.Code {
+			if status.Code(err) != testCase.Code {
 				t.Fatalf("unexpected error: %s", err)
 			}
 		})
@@ -401,7 +401,7 @@ func TestNodeServiceNodeExpandVolumeInputErrors(t *testing.T) {
 	for _, testCase := range testCases {
 		t.Run(testCase.Name, func(t *testing.T) {
 			_, err := env.service.NodeExpandVolume(env.ctx, testCase.Req)
-			if grpc.Code(err) != testCase.Code {
+			if status.Code(err) != testCase.Code {
 				t.Fatalf("unexpected error: %s", err)
 			}
 		})

@@ -2,7 +2,6 @@ package integration
 
 import (
 	"fmt"
-	"io/ioutil"
 	"math"
 	"os"
 	"path"
@@ -10,6 +9,7 @@ import (
 	"testing"
 
 	"github.com/go-kit/log"
+
 	"github.com/hetznercloud/csi-driver/volumes"
 )
 
@@ -63,10 +63,7 @@ func TestVolumePublishUnpublish(t *testing.T) {
 			"encrypted-correct-formatted-1",
 			volumes.MountOpts{EncryptionPassphrase: "passphrase"},
 			func(svc volumes.MountService, cs *volumes.CryptSetup, device string) error {
-				if err := cs.Format(device, "passphrase"); err != nil {
-					return err
-				}
-				return nil
+				return cs.Format(device, "passphrase")
 			},
 			nil,
 		},
@@ -77,16 +74,16 @@ func TestVolumePublishUnpublish(t *testing.T) {
 				if err := cs.Format(device, "passphrase"); err != nil {
 					return err
 				}
+
 				luksDeviceName := volumes.GenerateLUKSDeviceName(device)
 				if err := cs.Open(device, luksDeviceName, "passphrase"); err != nil {
 					return err
 				}
 				defer cs.Close(luksDeviceName)
+
 				luksDevicePath := volumes.GenerateLUKSDevicePath(luksDeviceName)
-				if err := svc.FormatDisk(luksDevicePath, "ext4"); err != nil {
-					return err
-				}
-				return nil
+
+				return svc.FormatDisk(luksDevicePath, "ext4")
 			},
 			nil,
 		},
@@ -102,7 +99,6 @@ func TestVolumePublishUnpublish(t *testing.T) {
 
 	for _, test := range tests {
 		t.Run(test.name, func(t *testing.T) {
-
 			logger := log.NewLogfmtLogger(NewTestingWriter(t))
 			mountService := volumes.NewLinuxMountService(logger)
 			cryptSetup := volumes.NewCryptSetup(logger)
@@ -117,11 +113,11 @@ func TestVolumePublishUnpublish(t *testing.T) {
 				}
 			}
 
-			targetPath, err := ioutil.TempDir(os.TempDir(), "csi-driver")
+			targetPath, err := os.MkdirTemp(os.TempDir(), "csi-driver")
 			if err != nil {
 				t.Fatal()
 			}
-			// Make sure that target path is non-existant
+			// Make sure that target path is non-existent
 			// Required as FS volumes require target dir, but block volumes require
 			// target file
 			targetPath = path.Join(targetPath, "target-path")
@@ -138,12 +134,16 @@ func TestVolumePublishUnpublish(t *testing.T) {
 				// Makes no sense to continue verification if we got the error that we expected
 				_ = mountService.Unpublish(targetPath)
 				return
-			} else {
-				if err != nil {
-					t.Fatal(publishErr)
-				}
 			}
-			defer mountService.Unpublish(targetPath)
+			if err != nil {
+				t.Fatal(publishErr)
+			}
+			defer func() {
+				err := mountService.Unpublish(targetPath)
+				if err != nil {
+					t.Fatal(err)
+				}
+			}()
 
 			// Verify target exists and is of expected type
 			fileInfo, err := os.Stat(targetPath)
@@ -180,7 +180,6 @@ func TestVolumePublishUnpublish(t *testing.T) {
 					t.Fatal(err)
 				}
 			}
-
 		})
 	}
 }
@@ -213,7 +212,7 @@ func TestVolumeResize(t *testing.T) {
 			if err != nil {
 				t.Fatal(err)
 			}
-			targetPath, err := ioutil.TempDir(os.TempDir(), "")
+			targetPath, err := os.MkdirTemp(os.TempDir(), "")
 			if err != nil {
 				t.Fatal()
 			}
@@ -339,5 +338,4 @@ func TestDetectDiskFormat(t *testing.T) {
 			}
 		})
 	}
-
 }

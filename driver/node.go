@@ -48,17 +48,17 @@ func NewNodeService(
 
 const encryptionPassphraseKey = "encryption-passphrase"
 
-func (s *NodeService) NodeStageVolume(ctx context.Context, req *proto.NodeStageVolumeRequest) (*proto.NodeStageVolumeResponse, error) {
+func (s *NodeService) NodeStageVolume(_ context.Context, _ *proto.NodeStageVolumeRequest) (*proto.NodeStageVolumeResponse, error) {
 	// while we dont do anything here, Swarm 23.0.1 might require this
 	return &proto.NodeStageVolumeResponse{}, nil
 }
 
-func (s *NodeService) NodeUnstageVolume(ctx context.Context, req *proto.NodeUnstageVolumeRequest) (*proto.NodeUnstageVolumeResponse, error) {
+func (s *NodeService) NodeUnstageVolume(_ context.Context, _ *proto.NodeUnstageVolumeRequest) (*proto.NodeUnstageVolumeResponse, error) {
 	// while we dont do anything here, Swarm 23.0.1 might require this
 	return &proto.NodeUnstageVolumeResponse{}, nil
 }
 
-func (s *NodeService) NodePublishVolume(ctx context.Context, req *proto.NodePublishVolumeRequest) (*proto.NodePublishVolumeResponse, error) {
+func (s *NodeService) NodePublishVolume(_ context.Context, req *proto.NodePublishVolumeRequest) (*proto.NodePublishVolumeResponse, error) {
 	if req.VolumeId == "" {
 		return nil, status.Error(codes.InvalidArgument, "missing volume id")
 	}
@@ -96,7 +96,7 @@ func (s *NodeService) NodePublishVolume(ctx context.Context, req *proto.NodePubl
 	return &proto.NodePublishVolumeResponse{}, nil
 }
 
-func (s *NodeService) NodeUnpublishVolume(ctx context.Context, req *proto.NodeUnpublishVolumeRequest) (*proto.NodeUnpublishVolumeResponse, error) {
+func (s *NodeService) NodeUnpublishVolume(_ context.Context, req *proto.NodeUnpublishVolumeRequest) (*proto.NodeUnpublishVolumeResponse, error) {
 	if req.VolumeId == "" {
 		return nil, status.Error(codes.InvalidArgument, "missing volume id")
 	}
@@ -112,7 +112,7 @@ func (s *NodeService) NodeUnpublishVolume(ctx context.Context, req *proto.NodeUn
 	return resp, nil
 }
 
-func (s *NodeService) NodeGetVolumeStats(ctx context.Context, req *proto.NodeGetVolumeStatsRequest) (*proto.NodeGetVolumeStatsResponse, error) {
+func (s *NodeService) NodeGetVolumeStats(_ context.Context, req *proto.NodeGetVolumeStatsRequest) (*proto.NodeGetVolumeStatsResponse, error) {
 	if req.VolumeId == "" {
 		return nil, status.Error(codes.InvalidArgument, "missing volume id")
 	}
@@ -156,7 +156,7 @@ func (s *NodeService) NodeGetVolumeStats(ctx context.Context, req *proto.NodeGet
 	}, nil
 }
 
-func (s *NodeService) NodeGetCapabilities(ctx context.Context, req *proto.NodeGetCapabilitiesRequest) (*proto.NodeGetCapabilitiesResponse, error) {
+func (s *NodeService) NodeGetCapabilities(_ context.Context, _ *proto.NodeGetCapabilitiesRequest) (*proto.NodeGetCapabilitiesResponse, error) {
 	capabilities := []*proto.NodeServiceCapability{
 		{
 			Type: &proto.NodeServiceCapability_Rpc{
@@ -191,7 +191,7 @@ func (s *NodeService) NodeGetCapabilities(ctx context.Context, req *proto.NodeGe
 	return resp, nil
 }
 
-func (s *NodeService) NodeGetInfo(context.Context, *proto.NodeGetInfoRequest) (*proto.NodeGetInfoResponse, error) {
+func (s *NodeService) NodeGetInfo(_ context.Context, _ *proto.NodeGetInfoRequest) (*proto.NodeGetInfoResponse, error) {
 	resp := &proto.NodeGetInfoResponse{
 		NodeId:            s.serverID,
 		MaxVolumesPerNode: MaxVolumesPerNode,
@@ -204,7 +204,7 @@ func (s *NodeService) NodeGetInfo(context.Context, *proto.NodeGetInfoRequest) (*
 	return resp, nil
 }
 
-func (s *NodeService) NodeExpandVolume(ctx context.Context, req *proto.NodeExpandVolumeRequest) (*proto.NodeExpandVolumeResponse, error) {
+func (s *NodeService) NodeExpandVolume(_ context.Context, req *proto.NodeExpandVolumeRequest) (*proto.NodeExpandVolumeResponse, error) {
 	if req.VolumeId == "" {
 		return nil, status.Error(codes.InvalidArgument, "missing volume id")
 	}

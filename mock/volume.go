@@ -3,10 +3,9 @@ package mock
 import (
 	"context"
 
-	"github.com/hetznercloud/hcloud-go/v2/hcloud"
-
 	"github.com/hetznercloud/csi-driver/csi"
 	"github.com/hetznercloud/csi-driver/volumes"
+	"github.com/hetznercloud/hcloud-go/v2/hcloud"
 )
 
 type VolumeService struct {

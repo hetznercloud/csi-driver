@@ -5,7 +5,6 @@ import (
 	"context"
 	"errors"
 	"fmt"
-	"io/ioutil"
 	"net"
 	"os"
 	"sync"
@@ -70,7 +69,7 @@ func TestSanity(t *testing.T) {
 		}
 	}()
 
-	tempDir, err := ioutil.TempDir("", "csi")
+	tempDir, err := os.MkdirTemp("", "csi")
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -89,7 +88,7 @@ type sanityVolumeService struct {
 	volumes list.List
 }
 
-func (s *sanityVolumeService) All(ctx context.Context) ([]*csi.Volume, error) {
+func (s *sanityVolumeService) All(_ context.Context) ([]*csi.Volume, error) {
 	s.mu.Lock()
 	defer s.mu.Unlock()
 
@@ -97,12 +96,11 @@ func (s *sanityVolumeService) All(ctx context.Context) ([]*csi.Volume, error) {
 	for e := s.volumes.Front(); e != nil; e = e.Next() {
 		v := e.Value.(*csi.Volume)
 		vols = append(vols, v)
-
 	}
 	return vols, nil
 }
 
-func (s *sanityVolumeService) Create(ctx context.Context, opts volumes.CreateOpts) (*csi.Volume, error) {
+func (s *sanityVolumeService) Create(_ context.Context, opts volumes.CreateOpts) (*csi.Volume, error) {
 	s.mu.Lock()
 	defer s.mu.Unlock()
 
@@ -125,7 +123,7 @@ func (s *sanityVolumeService) Create(ctx context.Context, opts volumes.CreateOpt
 	return volume, nil
 }
 
-func (s *sanityVolumeService) GetByID(ctx context.Context, id int64) (*csi.Volume, error) {
+func (s *sanityVolumeService) GetByID(_ context.Context, id int64) (*csi.Volume, error) {
 	s.mu.Lock()
 	defer s.mu.Unlock()
 
@@ -139,7 +137,7 @@ func (s *sanityVolumeService) GetByID(ctx context.Context, id int64) (*csi.Volum
 	return nil, volumes.ErrVolumeNotFound
 }
 
-func (s *sanityVolumeService) GetByName(ctx context.Context, name string) (*csi.Volume, error) {
+func (s *sanityVolumeService) GetByName(_ context.Context, name string) (*csi.Volume, error) {
 	s.mu.Lock()
 	defer s.mu.Unlock()
 
@@ -153,7 +151,7 @@ func (s *sanityVolumeService) GetByName(ctx context.Context, name string) (*csi.
 	return nil, volumes.ErrVolumeNotFound
 }
 
-func (s *sanityVolumeService) Delete(ctx context.Context, volume *csi.Volume) error {
+func (s *sanityVolumeService) Delete(_ context.Context, volume *csi.Volume) error {
 	s.mu.Lock()
 	defer s.mu.Unlock()
 
@@ -168,7 +166,7 @@ func (s *sanityVolumeService) Delete(ctx context.Context, volume *csi.Volume) er
 	return volumes.ErrVolumeNotFound
 }
 
-func (s *sanityVolumeService) Resize(ctx context.Context, volume *csi.Volume, size int) error {
+func (s *sanityVolumeService) Resize(_ context.Context, volume *csi.Volume, size int) error {
 	s.mu.Lock()
 	defer s.mu.Unlock()
 
@@ -183,21 +181,21 @@ func (s *sanityVolumeService) Resize(ctx context.Context, volume *csi.Volume, si
 	return volumes.ErrVolumeNotFound
 }
 
-func (s *sanityVolumeService) Attach(ctx context.Context, volume *csi.Volume, server *csi.Server) error {
+func (s *sanityVolumeService) Attach(_ context.Context, _ *csi.Volume, _ *csi.Server) error {
 	return nil
 }
 
-func (s *sanityVolumeService) Detach(ctx context.Context, volume *csi.Volume, server *csi.Server) error {
+func (s *sanityVolumeService) Detach(_ context.Context, _ *csi.Volume, _ *csi.Server) error {
 	return nil
 }
 
 type sanityMountService struct{}
 
-func (s *sanityMountService) Publish(targetPath string, devicePath string, opts volumes.MountOpts) error {
+func (s *sanityMountService) Publish(_ string, _ string, _ volumes.MountOpts) error {
 	return nil
 }
 
-func (s *sanityMountService) Unpublish(targetPath string) error {
+func (s *sanityMountService) Unpublish(_ string) error {
 	return nil
 }
 
@@ -208,11 +206,11 @@ func (s *sanityMountService) PathExists(path string) (bool, error) {
 	return true, nil
 }
 
-func (s *sanityMountService) FormatDisk(disk string, fstype string) error {
+func (s *sanityMountService) FormatDisk(_ string, _ string) error {
 	return nil
 }
 
-func (s *sanityMountService) DetectDiskFormat(disk string) (string, error) {
+func (s *sanityMountService) DetectDiskFormat(_ string) (string, error) {
 	return "ext4", nil
 }
 
@@ -227,9 +225,9 @@ func (s *sanityResizeService) Resize(volumePath string) error {
 
 type sanityStatsService struct{}
 
-func (s *sanityStatsService) ByteFilesystemStats(volumePath string) (totalBytes int64, availableBytes int64, usedBytes int64, err error) {
+func (s *sanityStatsService) ByteFilesystemStats(_ string) (totalBytes int64, availableBytes int64, usedBytes int64, err error) {
 	return 1, 1, 1, nil
 }
-func (s *sanityStatsService) INodeFilesystemStats(volumePath string) (total int64, used int64, free int64, err error) {
+func (s *sanityStatsService) INodeFilesystemStats(_ string) (total int64, used int64, free int64, err error) {
 	return 1, 1, 1, nil
 }

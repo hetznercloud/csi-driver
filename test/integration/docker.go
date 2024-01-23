@@ -5,6 +5,7 @@ import (
 	"os/exec"
 	"runtime"
 	"strings"
+	"testing"
 )
 
 const dockerExecutable = "docker"
@@ -48,7 +49,14 @@ func runCmdWithStdin(stdin string, name string, args ...string) (string, error) 
 	outputBytes, err := cmd.CombinedOutput()
 	output := string(outputBytes)
 	if err != nil {
-		return output, fmt.Errorf("run command %s failed: %w\n", strings.Join(append([]string{name}, args...), " "), err)
+		return output, fmt.Errorf("run command %s failed: %w", strings.Join(append([]string{name}, args...), " "), err)
 	}
 	return output, nil
+}
+
+func mustRunCmd(t *testing.T, name string, args ...string) {
+	_, err := runCmd(name, args...)
+	if err != nil {
+		t.Fatal(err)
+	}
 }
