@@ -19,7 +19,7 @@ jobs:
         run: go test -v -race -coverprofile=coverage.txt ./...
 
       - name: Upload coverage reports to Codecov
-        uses: codecov/codecov-action@v3
+        uses: codecov/codecov-action@v4
 
   test-kubernetes:
     name: e2e k3s ${{ matrix.k3s }}
