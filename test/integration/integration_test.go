@@ -2,6 +2,7 @@ package integration
 
 import (
 	"fmt"
+	"log"
 	"os"
 	"regexp"
 	"strconv"
@@ -13,7 +14,9 @@ const testImageEnvironmentVariable = "HCLOUD_CSI_DRIVER_INTEGRATIONTESTS"
 
 func TestMain(t *testing.M) {
 	if os.Getenv(testImageEnvironmentVariable) != "true" {
-		prepareDockerImage()
+		if err := prepareDockerImage(); err != nil {
+			log.Fatal(err)
+		}
 	}
 
 	os.Exit(t.Run())
@@ -27,25 +30,23 @@ func prepareDockerImage() error {
 	os.Setenv("CGO_ENABLED", "0")
 	defer os.Unsetenv("CGO_ENABLED")
 	if output, err := runCmd("go", "test", "-c", "-o", "integration.tests"); err != nil {
-		fmt.Printf("Error compiling test binary: %v\n%s\n", err, output)
-		os.Exit(1)
+		return fmt.Errorf("error compiling test binary: %w\n%s", err, output)
 	}
 
 	if output, err := DockerBuild(testImageName, "."); err != nil {
-		fmt.Printf("Error building docker image: %v\n%s\n", err, output)
-		os.Exit(1)
+		return fmt.Errorf("error building docker image: %w\n%s", err, output)
 	}
 
 	return nil
 }
 
-func runTestInDockerImage(t *testing.T, privileged bool) bool {
+func runTestInDockerImage(t *testing.T, privileged bool) bool { //nolint:unparam
 	if os.Getenv(testImageEnvironmentVariable) == "true" {
 		return true
 	}
 
 	if output, err := DockerRun(testImageName, []string{testImageEnvironmentVariable + "=true"}, []string{"-test.v", "-test.run", t.Name()}, privileged); err != nil {
-		err := fmt.Errorf("Error running test in docker image: %w\n%s\n", err, output)
+		err := fmt.Errorf("error running test in docker image: %w\n%s", err, output)
 		t.Fatal(err)
 	} else {
 		t.Log(output)
@@ -74,17 +75,18 @@ func increaseFakeDeviceSize(name string, megabytesToAdd int) error {
 }
 
 func getFakeDeviceSizeKilobytes(mountPoint string) (int, error) {
-	if output, err := runCmd("df", "--output=size", "-k", mountPoint); err != nil {
+	output, err := runCmd("df", "--output=size", "-k", mountPoint)
+	if err != nil {
 		return -1, err
-	} else {
-		regex := regexp.MustCompile(`(?ms)^\s*1K-blocks\s*(\d+)\s*$`)
-		match := regex.FindStringSubmatch(output)
-		if match == nil {
-			return -1, fmt.Errorf("unexpected df command output")
-		}
-		size, _ := strconv.Atoi(match[1])
-		return size, nil
 	}
+
+	regex := regexp.MustCompile(`(?ms)^\s*1K-blocks\s*(\d+)\s*$`)
+	match := regex.FindStringSubmatch(output)
+	if match == nil {
+		return -1, fmt.Errorf("unexpected df command output")
+	}
+	size, _ := strconv.Atoi(match[1])
+	return size, nil
 }
 
 type TestingWriter struct {

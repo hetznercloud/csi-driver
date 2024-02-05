@@ -7,8 +7,8 @@ import (
 
 	proto "github.com/container-storage-interface/spec/lib/go/csi"
 	"github.com/go-kit/log"
-	"google.golang.org/grpc"
 	"google.golang.org/grpc/codes"
+	"google.golang.org/grpc/status"
 
 	"github.com/hetznercloud/csi-driver/csi"
 	"github.com/hetznercloud/csi-driver/mock"
@@ -69,7 +69,7 @@ func TestControllerServiceCreateVolume(t *testing.T) {
 			LimitBytes:    2 * MinVolumeSize * GB,
 		},
 		VolumeCapabilities: []*proto.VolumeCapability{
-			&proto.VolumeCapability{
+			{
 				AccessType: &proto.VolumeCapability_Mount{
 					Mount: &proto.VolumeCapability_MountVolume{},
 				},
@@ -121,7 +121,7 @@ func TestControllerServiceCreateVolumeWithLocation(t *testing.T) {
 			LimitBytes:    10 * GB,
 		},
 		VolumeCapabilities: []*proto.VolumeCapability{
-			&proto.VolumeCapability{
+			{
 				AccessType: &proto.VolumeCapability_Mount{
 					Mount: &proto.VolumeCapability_MountVolume{},
 				},
@@ -132,7 +132,7 @@ func TestControllerServiceCreateVolumeWithLocation(t *testing.T) {
 		},
 		AccessibilityRequirements: &proto.TopologyRequirement{
 			Preferred: []*proto.Topology{
-				&proto.Topology{
+				{
 					Segments: map[string]string{
 						TopologySegmentLocation: "explicit",
 					},
@@ -170,7 +170,7 @@ func TestControllerServiceCreateVolumeInputErrors(t *testing.T) {
 					LimitBytes:    10 * GB,
 				},
 				VolumeCapabilities: []*proto.VolumeCapability{
-					&proto.VolumeCapability{
+					{
 						AccessType: &proto.VolumeCapability_Mount{
 							Mount: &proto.VolumeCapability_MountVolume{},
 						},
@@ -202,7 +202,7 @@ func TestControllerServiceCreateVolumeInputErrors(t *testing.T) {
 					LimitBytes:    5 * GB,
 				},
 				VolumeCapabilities: []*proto.VolumeCapability{
-					&proto.VolumeCapability{
+					{
 						AccessType: &proto.VolumeCapability_Mount{
 							Mount: &proto.VolumeCapability_MountVolume{},
 						},
@@ -223,7 +223,7 @@ func TestControllerServiceCreateVolumeInputErrors(t *testing.T) {
 					LimitBytes:    10 * GB,
 				},
 				VolumeCapabilities: []*proto.VolumeCapability{
-					&proto.VolumeCapability{
+					{
 						AccessType: &proto.VolumeCapability_Mount{
 							Mount: &proto.VolumeCapability_MountVolume{},
 						},
@@ -240,7 +240,7 @@ func TestControllerServiceCreateVolumeInputErrors(t *testing.T) {
 	for _, testCase := range testCases {
 		t.Run(testCase.Name, func(t *testing.T) {
 			_, err := env.service.CreateVolume(env.ctx, testCase.Req)
-			if grpc.Code(err) != testCase.Code {
+			if status.Code(err) != testCase.Code {
 				t.Fatalf("unexpected error: %v", err)
 			}
 		})
@@ -280,7 +280,7 @@ func TestControllerServiceCreateVolumeCreateErrors(t *testing.T) {
 					LimitBytes:    10 * GB,
 				},
 				VolumeCapabilities: []*proto.VolumeCapability{
-					&proto.VolumeCapability{
+					{
 						AccessType: &proto.VolumeCapability_Mount{
 							Mount: &proto.VolumeCapability_MountVolume{},
 						},
@@ -290,7 +290,7 @@ func TestControllerServiceCreateVolumeCreateErrors(t *testing.T) {
 					},
 				},
 			})
-			if grpc.Code(err) != testCase.Code {
+			if status.Code(err) != testCase.Code {
 				t.Fatalf("unexpected error: %v", err)
 			}
 		})
@@ -336,7 +336,7 @@ func TestControllerServiceDeleteVolumeInputErrors(t *testing.T) {
 	for _, testCase := range testCases {
 		t.Run(testCase.Name, func(t *testing.T) {
 			_, err := env.service.DeleteVolume(env.ctx, testCase.Req)
-			if grpc.Code(err) != testCase.Code {
+			if status.Code(err) != testCase.Code {
 				t.Fatalf("unexpected error: %v", err)
 			}
 		})
@@ -353,7 +353,7 @@ func TestControllerServiceDeleteVolumeAttached(t *testing.T) {
 	_, err := env.service.DeleteVolume(env.ctx, &proto.DeleteVolumeRequest{
 		VolumeId: "1",
 	})
-	if grpc.Code(err) != codes.FailedPrecondition {
+	if status.Code(err) != codes.FailedPrecondition {
 		t.Fatalf("unexpected error: %v", err)
 	}
 }
@@ -383,7 +383,7 @@ func TestControllerServiceDeleteVolumeInternalError(t *testing.T) {
 	_, err := env.service.DeleteVolume(env.ctx, &proto.DeleteVolumeRequest{
 		VolumeId: "1",
 	})
-	if grpc.Code(err) != codes.Internal {
+	if status.Code(err) != codes.Internal {
 		t.Fatalf("unexpected error: %v", err)
 	}
 }
@@ -531,7 +531,7 @@ func TestControllerServicePublishVolumeInputErrors(t *testing.T) {
 	for _, testCase := range testCases {
 		t.Run(testCase.Name, func(t *testing.T) {
 			_, err := env.service.ControllerPublishVolume(env.ctx, testCase.Req)
-			if grpc.Code(err) != testCase.Code {
+			if status.Code(err) != testCase.Code {
 				t.Fatalf("unexpected error: %v", err)
 			}
 		})
@@ -587,7 +587,7 @@ func TestControllerServicePublishVolumeAttachErrors(t *testing.T) {
 					},
 				},
 			})
-			if grpc.Code(err) != testCase.Code {
+			if status.Code(err) != testCase.Code {
 				t.Fatalf("unexpected error: %v", err)
 			}
 		})
@@ -678,7 +678,7 @@ func TestControllerServiceUnpublishVolumeInputErrors(t *testing.T) {
 	for _, testCase := range testCases {
 		t.Run(testCase.Name, func(t *testing.T) {
 			_, err := env.service.ControllerUnpublishVolume(env.ctx, testCase.Req)
-			if grpc.Code(err) != testCase.Code {
+			if status.Code(err) != testCase.Code {
 				t.Fatalf("unexpected error: %v", err)
 			}
 		})
@@ -714,7 +714,7 @@ func TestControllerServiceUnpublishVolumeDetachErrors(t *testing.T) {
 				VolumeId: "1",
 				NodeId:   "2",
 			})
-			if grpc.Code(err) != testCase.Code {
+			if status.Code(err) != testCase.Code {
 				t.Fatalf("unexpected error: %v", err)
 			}
 		})
@@ -744,7 +744,7 @@ func TestControllerServiceValidateVolumeCapabilities(t *testing.T) {
 	req := &proto.ValidateVolumeCapabilitiesRequest{
 		VolumeId: "1",
 		VolumeCapabilities: []*proto.VolumeCapability{
-			&proto.VolumeCapability{
+			{
 				AccessMode: &proto.VolumeCapability_AccessMode{
 					Mode: proto.VolumeCapability_AccessMode_SINGLE_NODE_WRITER,
 				},
@@ -776,7 +776,7 @@ func TestControllerServiceValidateVolumeCapabilitiesInputErrors(t *testing.T) {
 			Req: &proto.ValidateVolumeCapabilitiesRequest{
 				VolumeId: "",
 				VolumeCapabilities: []*proto.VolumeCapability{
-					&proto.VolumeCapability{
+					{
 						AccessMode: &proto.VolumeCapability_AccessMode{
 							Mode: proto.VolumeCapability_AccessMode_SINGLE_NODE_WRITER,
 						},
@@ -797,7 +797,7 @@ func TestControllerServiceValidateVolumeCapabilitiesInputErrors(t *testing.T) {
 			Req: &proto.ValidateVolumeCapabilitiesRequest{
 				VolumeId: "xxx",
 				VolumeCapabilities: []*proto.VolumeCapability{
-					&proto.VolumeCapability{
+					{
 						AccessMode: &proto.VolumeCapability_AccessMode{
 							Mode: proto.VolumeCapability_AccessMode_SINGLE_NODE_WRITER,
 						},
@@ -811,7 +811,7 @@ func TestControllerServiceValidateVolumeCapabilitiesInputErrors(t *testing.T) {
 	for _, testCase := range testCases {
 		t.Run(testCase.Name, func(t *testing.T) {
 			_, err := env.service.ValidateVolumeCapabilities(env.ctx, testCase.Req)
-			if grpc.Code(err) != testCase.Code {
+			if status.Code(err) != testCase.Code {
 				t.Fatalf("unexpected error: %v", err)
 			}
 		})
@@ -828,7 +828,7 @@ func TestControllerServiceValidateVolumeCapabilitiesVolumeNotFound(t *testing.T)
 	req := &proto.ValidateVolumeCapabilitiesRequest{
 		VolumeId: "1",
 		VolumeCapabilities: []*proto.VolumeCapability{
-			&proto.VolumeCapability{
+			{
 				AccessMode: &proto.VolumeCapability_AccessMode{
 					Mode: proto.VolumeCapability_AccessMode_SINGLE_NODE_WRITER,
 				},
@@ -836,7 +836,7 @@ func TestControllerServiceValidateVolumeCapabilitiesVolumeNotFound(t *testing.T)
 		},
 	}
 	_, err := env.service.ValidateVolumeCapabilities(env.ctx, req)
-	if grpc.Code(err) != codes.NotFound {
+	if status.Code(err) != codes.NotFound {
 		t.Fatalf("unexpected error: %v", err)
 	}
 }
@@ -851,7 +851,7 @@ func TestControllerServiceValidateVolumeCapabilitiesInternalError(t *testing.T) 
 	req := &proto.ValidateVolumeCapabilitiesRequest{
 		VolumeId: "1",
 		VolumeCapabilities: []*proto.VolumeCapability{
-			&proto.VolumeCapability{
+			{
 				AccessMode: &proto.VolumeCapability_AccessMode{
 					Mode: proto.VolumeCapability_AccessMode_SINGLE_NODE_WRITER,
 				},
@@ -859,7 +859,7 @@ func TestControllerServiceValidateVolumeCapabilitiesInternalError(t *testing.T) 
 		},
 	}
 	_, err := env.service.ValidateVolumeCapabilities(env.ctx, req)
-	if grpc.Code(err) != codes.Internal {
+	if status.Code(err) != codes.Internal {
 		t.Fatalf("unexpected error: %v", err)
 	}
 }
@@ -874,7 +874,7 @@ func TestControllerServiceValidateVolumeCapabilitiesUnsupportedCapability(t *tes
 	req := &proto.ValidateVolumeCapabilitiesRequest{
 		VolumeId: "1",
 		VolumeCapabilities: []*proto.VolumeCapability{
-			&proto.VolumeCapability{
+			{
 				AccessMode: &proto.VolumeCapability_AccessMode{
 					Mode: proto.VolumeCapability_AccessMode_MULTI_NODE_MULTI_WRITER,
 				},

@@ -13,12 +13,13 @@ import (
 	"github.com/go-kit/log"
 	"github.com/go-kit/log/level"
 	grpc_middleware "github.com/grpc-ecosystem/go-grpc-middleware"
+	"github.com/prometheus/client_golang/prometheus"
+	"google.golang.org/grpc"
+
 	"github.com/hetznercloud/csi-driver/driver"
 	"github.com/hetznercloud/csi-driver/metrics"
 	"github.com/hetznercloud/hcloud-go/v2/hcloud"
 	"github.com/hetznercloud/hcloud-go/v2/hcloud/metadata"
-	"github.com/prometheus/client_golang/prometheus"
-	"google.golang.org/grpc"
 )
 
 func parseLogLevel(lvl string) level.Option {

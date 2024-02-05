@@ -5,6 +5,7 @@ import (
 	"testing"
 
 	"github.com/go-kit/log"
+
 	"github.com/hetznercloud/csi-driver/volumes"
 )
 

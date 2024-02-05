@@ -75,7 +75,7 @@ func (s *ControllerService) CreateVolume(ctx context.Context, req *proto.CreateV
 			"err", err,
 		)
 		code := codes.Internal
-		switch err {
+		switch err { //nolint:gocritic
 		case volumes.ErrVolumeAlreadyExists:
 			code = codes.AlreadyExists
 		}
@@ -368,7 +368,7 @@ func (s *ControllerService) ControllerExpandVolume(ctx context.Context, req *pro
 
 	if err := s.volumeService.Resize(ctx, volume, minSize); err != nil {
 		code := codes.Internal
-		switch err {
+		switch err { //nolint:gocritic
 		case volumes.ErrVolumeNotFound:
 			code = codes.NotFound
 		}
@@ -377,7 +377,7 @@ func (s *ControllerService) ControllerExpandVolume(ctx context.Context, req *pro
 
 	if volume, err = s.volumeService.GetByID(ctx, volumeID); err != nil {
 		code := codes.Internal
-		switch err {
+		switch err { //nolint:gocritic
 		case volumes.ErrVolumeNotFound:
 			code = codes.NotFound
 		}
@@ -391,6 +391,6 @@ func (s *ControllerService) ControllerExpandVolume(ctx context.Context, req *pro
 	return resp, nil
 }
 
-func (s *ControllerService) ControllerGetVolume(ctx context.Context, req *proto.ControllerGetVolumeRequest) (*proto.ControllerGetVolumeResponse, error) {
+func (s *ControllerService) ControllerGetVolume(_ context.Context, _ *proto.ControllerGetVolumeRequest) (*proto.ControllerGetVolumeResponse, error) {
 	return nil, status.Errorf(codes.Unimplemented, "method ControllerGetVolume not implemented")
 }

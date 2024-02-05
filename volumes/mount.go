@@ -52,20 +52,21 @@ func NewLinuxMountService(logger log.Logger) *LinuxMountService {
 }
 
 func (s *LinuxMountService) Publish(targetPath string, devicePath string, opts MountOpts) error {
-	isNotMountPoint, err := mount.IsNotMountPoint(s.mounter, targetPath)
+	isMountPoint, err := s.mounter.IsMountPoint(targetPath)
 	if err != nil {
 		if os.IsNotExist(err) {
-			isNotMountPoint = true
+			isMountPoint = false
 		} else {
 			return err
 		}
 	}
 
-	var mountOptions []string
-
-	if !isNotMountPoint {
+	if isMountPoint {
 		return nil
 	}
+
+	var mountOptions []string
+
 	targetPathPermissions := os.FileMode(0750)
 	if opts.BlockVolume {
 		mountOptions = append(mountOptions, "bind")
@@ -152,11 +153,7 @@ func (s *LinuxMountService) Publish(targetPath string, devicePath string, opts M
 		"encrypted", opts.EncryptionPassphrase != "",
 	)
 
-	if err := s.mounter.Mount(devicePath, targetPath, opts.FSType, mountOptions); err != nil {
-		return err
-	}
-
-	return nil
+	return s.mounter.Mount(devicePath, targetPath, opts.FSType, mountOptions)
 }
 
 func (s *LinuxMountService) Unpublish(targetPath string) error {
@@ -176,11 +173,8 @@ func (s *LinuxMountService) Unpublish(targetPath string) error {
 	}
 
 	luksDeviceName := GenerateLUKSDeviceName(devicePath)
-	if err := s.cryptSetup.Close(luksDeviceName); err != nil {
-		return err
-	}
 
-	return nil
+	return s.cryptSetup.Close(luksDeviceName)
 }
 
 func (s *LinuxMountService) PathExists(path string) (bool, error) {

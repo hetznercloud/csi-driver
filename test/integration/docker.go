@@ -48,7 +48,7 @@ func runCmdWithStdin(stdin string, name string, args ...string) (string, error) 
 	outputBytes, err := cmd.CombinedOutput()
 	output := string(outputBytes)
 	if err != nil {
-		return output, fmt.Errorf("run command %s failed: %w\n", strings.Join(append([]string{name}, args...), " "), err)
+		return output, fmt.Errorf("run command %s failed: %w", strings.Join(append([]string{name}, args...), " "), err)
 	}
 	return output, nil
 }
