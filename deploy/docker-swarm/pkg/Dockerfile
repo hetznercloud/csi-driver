@@ -1,4 +1,4 @@
-FROM --platform=$TARGETPLATFORM golang:1.21 as builder
+FROM --platform=$TARGETPLATFORM golang:1.22 as builder
 WORKDIR /csi
 ADD go.mod go.sum /csi/
 RUN go mod download
