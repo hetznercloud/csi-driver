@@ -25,7 +25,10 @@ if [[ -n "${DEBUG:-}" ]]; then set -x; fi
   location=${LOCATION:-fsn1}
   network_zone=${NETWORK_ZONE:-eu-central}
   ssh_keys=${SSH_KEYS:-}
-  channel=${K3S_CHANNEL:-stable}
+  # All k3s after January 2024 break our e2e tests, we hardcode
+  # the versions for now until we can fix the source of this.
+  # channel=${K3S_CHANNEL:-stable}
+  k3s_version=${K3S_VERSION:-v1.28.5+k3s1}
   network_cidr=${NETWORK_CIDR:-10.0.0.0/8}
   subnet_cidr=${SUBNET_CIDR:-10.0.0.0/24}
   cluster_cidr=${CLUSTER_CIDR:-10.244.0.0/16}
@@ -99,7 +102,7 @@ if [[ -n "${DEBUG:-}" ]]; then set -x; fi
 
       if [[ "$num" == "1" ]]; then
         # First node is control plane.
-        k3sup install --print-config=false --ip $ip --k3s-channel $channel --k3s-extra-args "${k3s_server_opts} ${k3s_opts} ${k3s_node_ip_opts}" --local-path $KUBECONFIG --ssh-key $ssh_private_key
+        k3sup install --print-config=false --ip $ip --k3s-version "${k3s_version}" --k3s-extra-args "${k3s_server_opts} ${k3s_opts} ${k3s_node_ip_opts}" --local-path $KUBECONFIG --ssh-key $ssh_private_key
       else
         # All subsequent nodes are initialized as workers.
 
@@ -108,7 +111,7 @@ if [[ -n "${DEBUG:-}" ]]; then set -x; fi
           sleep 1
         done
 
-        k3sup join --server-ip $(hcloud server ip $scope_name-1) --ip $ip --k3s-channel $channel --k3s-extra-args "${k3s_opts} ${k3s_node_ip_opts}" --ssh-key $ssh_private_key
+        k3sup join --server-ip $(hcloud server ip $scope_name-1) --ip $ip --k3s-version "${k3s_version}" --k3s-extra-args "${k3s_opts} ${k3s_node_ip_opts}" --ssh-key $ssh_private_key
       fi
     ) &
 
