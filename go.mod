@@ -3,7 +3,7 @@ module github.com/hetznercloud/csi-driver
 go 1.21
 
 require (
-	github.com/container-storage-interface/spec v1.8.0
+	github.com/container-storage-interface/spec v1.9.0
 	github.com/go-kit/log v0.2.1
 	github.com/golang/protobuf v1.5.3
 	github.com/grpc-ecosystem/go-grpc-middleware v1.4.0
