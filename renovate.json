@@ -1,4 +1,13 @@
 {
   "$schema": "https://docs.renovatebot.com/renovate-schema.json",
-  "extends": ["github>hetznercloud/.github//renovate/default"]
+  "extends": ["github>hetznercloud/.github//renovate/default"],
+  "packageRules": [
+    {
+      "groupName": "github.com/container-storage-interface/spec",
+      "matchPackagePrefixes": [
+        "github.com/container-storage-interface/spec",
+        "github.com/kubernetes-csi/csi-test"
+      ]
+    }
+  ]
 }
