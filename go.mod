@@ -8,9 +8,9 @@ require (
 	github.com/golang/protobuf v1.5.4
 	github.com/grpc-ecosystem/go-grpc-middleware v1.4.0
 	github.com/grpc-ecosystem/go-grpc-prometheus v1.2.0
-	github.com/hetznercloud/hcloud-go/v2 v2.6.0
+	github.com/hetznercloud/hcloud-go/v2 v2.7.0
 	github.com/kubernetes-csi/csi-test/v5 v5.1.0
-	github.com/prometheus/client_golang v1.18.0
+	github.com/prometheus/client_golang v1.19.0
 	golang.org/x/sys v0.18.0
 	google.golang.org/grpc v1.63.0
 	k8s.io/mount-utils v0.29.3
@@ -32,11 +32,11 @@ require (
 	github.com/onsi/ginkgo/v2 v2.12.0 // indirect
 	github.com/onsi/gomega v1.27.10 // indirect
 	github.com/prometheus/client_model v0.5.0 // indirect
-	github.com/prometheus/common v0.45.0 // indirect
+	github.com/prometheus/common v0.48.0 // indirect
 	github.com/prometheus/procfs v0.12.0 // indirect
-	golang.org/x/net v0.21.0 // indirect
+	golang.org/x/net v0.22.0 // indirect
 	golang.org/x/text v0.14.0 // indirect
-	golang.org/x/tools v0.12.0 // indirect
+	golang.org/x/tools v0.17.0 // indirect
 	google.golang.org/genproto/googleapis/rpc v0.0.0-20240227224415-6ceb2ff114de // indirect
 	google.golang.org/protobuf v1.33.0 // indirect
 	gopkg.in/yaml.v2 v2.4.0 // indirect
