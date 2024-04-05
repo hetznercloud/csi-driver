@@ -60,7 +60,7 @@ jobs:
 
       - uses: hetznercloud/setup-hcloud@v1
 
-      - uses: yokawasa/action-setup-kube-tools@v0.9.3
+      - uses: yokawasa/action-setup-kube-tools@v0.11.1
         with:
           setup-tools: |
             helm
@@ -91,7 +91,7 @@ jobs:
     runs-on: ubuntu-latest
 
     steps:
-      - uses: yokawasa/action-setup-kube-tools@v0.9.3
+      - uses: yokawasa/action-setup-kube-tools@v0.11.1
         with:
           setup-tools: |
             helm
@@ -113,7 +113,7 @@ jobs:
     runs-on: ubuntu-latest
 
     steps:
-      - uses: yokawasa/action-setup-kube-tools@v0.9.3
+      - uses: yokawasa/action-setup-kube-tools@v0.11.1
         with:
           setup-tools: |
             helm
