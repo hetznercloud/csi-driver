@@ -394,3 +394,7 @@ func (s *ControllerService) ControllerExpandVolume(ctx context.Context, req *pro
 func (s *ControllerService) ControllerGetVolume(_ context.Context, _ *proto.ControllerGetVolumeRequest) (*proto.ControllerGetVolumeResponse, error) {
 	return nil, status.Errorf(codes.Unimplemented, "method ControllerGetVolume not implemented")
 }
+
+func (s *ControllerService) ControllerModifyVolume(_ context.Context, _ *proto.ControllerModifyVolumeRequest) (*proto.ControllerModifyVolumeResponse, error) {
+	return nil, status.Errorf(codes.Unimplemented, "method ControllerModifyVolume not implemented")
+}

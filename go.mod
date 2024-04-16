@@ -3,14 +3,14 @@ module github.com/hetznercloud/csi-driver
 go 1.21
 
 require (
-	github.com/container-storage-interface/spec v1.8.0
+	github.com/container-storage-interface/spec v1.9.0
 	github.com/go-kit/log v0.2.1
 	github.com/golang/protobuf v1.5.4
 	github.com/grpc-ecosystem/go-grpc-middleware v1.4.0
 	github.com/grpc-ecosystem/go-grpc-middleware/v2 v2.1.0
 	github.com/grpc-ecosystem/go-grpc-prometheus v1.2.0
 	github.com/hetznercloud/hcloud-go/v2 v2.7.0
-	github.com/kubernetes-csi/csi-test/v5 v5.1.0
+	github.com/kubernetes-csi/csi-test/v5 v5.2.0
 	github.com/prometheus/client_golang v1.19.0
 	golang.org/x/sys v0.19.0
 	google.golang.org/grpc v1.63.2
@@ -30,8 +30,8 @@ require (
 	github.com/matttproud/golang_protobuf_extensions v1.0.4 // indirect
 	github.com/matttproud/golang_protobuf_extensions/v2 v2.0.0 // indirect
 	github.com/moby/sys/mountinfo v0.6.2 // indirect
-	github.com/onsi/ginkgo/v2 v2.12.0 // indirect
-	github.com/onsi/gomega v1.27.10 // indirect
+	github.com/onsi/ginkgo/v2 v2.13.1 // indirect
+	github.com/onsi/gomega v1.30.0 // indirect
 	github.com/prometheus/client_model v0.5.0 // indirect
 	github.com/prometheus/common v0.48.0 // indirect
 	github.com/prometheus/procfs v0.12.0 // indirect
