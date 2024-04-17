@@ -14,7 +14,7 @@ require (
 	github.com/prometheus/client_golang v1.19.0
 	golang.org/x/sys v0.19.0
 	google.golang.org/grpc v1.63.2
-	k8s.io/mount-utils v0.29.3
+	k8s.io/mount-utils v0.29.4
 	k8s.io/utils v0.0.0-20240310230437-4693a0247e57
 )
 
