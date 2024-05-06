@@ -66,8 +66,7 @@ func (s *VolumeService) Create(ctx context.Context, opts volumes.CreateOpts) (*c
 		return nil, err
 	}
 
-	_, errCh := s.client.Action.WatchProgress(ctx, result.Action)
-	if err := <-errCh; err != nil {
+	if err := s.client.Action.WaitFor(ctx, result.Action); err != nil {
 		level.Info(s.logger).Log(
 			"msg", "failed to create volume",
 			"volume-name", opts.Name,
@@ -250,8 +249,7 @@ func (s *VolumeService) Attach(ctx context.Context, volume *csi.Volume, server *
 		return err
 	}
 	time.Sleep(3 * time.Second) // We know that the Attach action will take some time, so we wait 3 seconds before starting polling the action status. Within these 3 seconds the volume attach action may be already finished.
-	_, errCh := s.client.Action.WatchProgress(ctx, action)
-	if err := <-errCh; err != nil {
+	if err := s.client.Action.WaitFor(ctx, action); err != nil {
 		level.Info(s.logger).Log(
 			"msg", "failed to attach volume",
 			"volume-id", volume.ID,
@@ -335,8 +333,7 @@ func (s *VolumeService) Detach(ctx context.Context, volume *csi.Volume, server *
 		return err
 	}
 
-	_, errCh := s.client.Action.WatchProgress(ctx, action)
-	if err := <-errCh; err != nil {
+	if err := s.client.Action.WaitFor(ctx, action); err != nil {
 		level.Info(s.logger).Log(
 			"msg", "failed to detach volume",
 			"volume-id", volume.ID,
@@ -382,8 +379,7 @@ func (s *VolumeService) Resize(ctx context.Context, volume *csi.Volume, size int
 		return err
 	}
 
-	_, errCh := s.client.Action.WatchProgress(ctx, action)
-	if err := <-errCh; err != nil {
+	if err := s.client.Action.WaitFor(ctx, action); err != nil {
 		level.Info(s.logger).Log(
 			"msg", "failed to resize volume",
 			"volume-id", volume.ID,
