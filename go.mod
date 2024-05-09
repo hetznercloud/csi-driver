@@ -10,7 +10,7 @@ require (
 	github.com/grpc-ecosystem/go-grpc-prometheus v1.2.0
 	github.com/hetznercloud/hcloud-go/v2 v2.8.0
 	github.com/kubernetes-csi/csi-test/v5 v5.2.0
-	github.com/prometheus/client_golang v1.19.0
+	github.com/prometheus/client_golang v1.19.1
 	golang.org/x/sys v0.20.0
 	google.golang.org/grpc v1.63.2
 	k8s.io/mount-utils v0.29.4
