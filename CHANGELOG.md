@@ -1,5 +1,18 @@
 # Changelog
 
+## [2.7.0](https://github.com/hetznercloud/csi-driver/compare/v2.6.0...v2.7.0) (2024-05-10)
+
+
+### Features
+
+* add support & tests for Kubernetes 1.29 ([#560](https://github.com/hetznercloud/csi-driver/issues/560)) ([b620486](https://github.com/hetznercloud/csi-driver/commit/b620486ac05de11336a5c8342966a699503b9f86))
+* drop tests for kubernetes v1.25 ([#559](https://github.com/hetznercloud/csi-driver/issues/559)) ([5d19ae8](https://github.com/hetznercloud/csi-driver/commit/5d19ae876f1abd9391791ee8f8fa8106394a4901))
+
+
+### Bug Fixes
+
+* **helm:** missing rbac for leader election / leases ([#538](https://github.com/hetznercloud/csi-driver/issues/538)) ([5da7a14](https://github.com/hetznercloud/csi-driver/commit/5da7a14e9e8dfc6716ede0b72b5aaeac6b8f1306)), closes [#531](https://github.com/hetznercloud/csi-driver/issues/531)
+
 ## [2.6.0](https://github.com/hetznercloud/csi-driver/compare/v2.5.1...v2.6.0) (2023-11-08)
 
 
