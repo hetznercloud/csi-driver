@@ -111,7 +111,7 @@ func CreateHcloudClient(metricsRegistry *prometheus.Registry, logger log.Logger)
 		if err != nil {
 			return nil, errors.New("failed to read HCLOUD_TOKEN from file: " + err.Error())
 		}
-		apiToken = string(apiTokenBytes)
+		apiToken = strings.TrimSpace(string(apiTokenBytes))
 	}
 
 	if len(apiToken) != 64 {
