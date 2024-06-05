@@ -42,10 +42,10 @@ jobs:
           make push PLUGIN_NAME=${{ github.repository_owner }}/hcloud-csi-driver PLUGIN_TAG=${{ github.ref_name }}-swarm-arm64 ARCH=arm64
 
       - name: Run GoReleaser
-        uses: goreleaser/goreleaser-action@v5
+        uses: goreleaser/goreleaser-action@v6
         with:
           distribution: goreleaser
-          version: latest
+          version: "~> v2"
           args: release --clean
         env:
           # https://github.com/goreleaser/goreleaser/blob/3345f8c9c5b287198a29d3db228388148b788c5e/www/docs/customization/builds.md?plain=1#L416-L418
