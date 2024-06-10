@@ -21,7 +21,7 @@ if [[ -n "${DEBUG:-}" ]]; then set -x; fi
 
   image_name=${IMAGE_NAME:-ubuntu-20.04}
   instance_count=${INSTANCES:-3}
-  instance_type=${INSTANCE_TYPE:-cx22}
+  instance_type=${INSTANCE_TYPE:-cpx11}
   location=${LOCATION:-fsn1}
   network_zone=${NETWORK_ZONE:-eu-central}
   ssh_keys=${SSH_KEYS:-}
