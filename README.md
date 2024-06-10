@@ -90,7 +90,7 @@ hcloud ssh-key create --name ssh-key-csi-test --public-key-from-file ~/.ssh/id_r
 
 2. Create a server
 ```
-hcloud server create --name csi-test-server --image ubuntu-20.04 --ssh-key ssh-key-csi-test --type cx11 
+hcloud server create --name csi-test-server --image ubuntu-20.04 --ssh-key ssh-key-csi-test --type cx22 
 ```
 
 3. Setup k3s on this server
