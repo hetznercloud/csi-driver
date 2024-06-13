@@ -367,8 +367,8 @@ func (s *VolumeService) Resize(ctx context.Context, volume *csi.Volume, size int
 	logger = log.With(logger, "current-size", hcloudVolume.Size)
 
 	if hcloudVolume.Size >= size {
-		level.Info(logger).Log("msg", "volume already has a size larger or equal than the request")
-		return volumes.ErrVolumeAlreadyFulfillsSizeRequirement
+		level.Info(logger).Log("msg", "volume size is already larger or equal than the requested size")
+		return volumes.ErrVolumeSizeAlreadyReached
 	}
 
 	action, _, err := s.client.Volume.Resize(ctx, hcloudVolume, size)

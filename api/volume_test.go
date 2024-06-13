@@ -35,7 +35,7 @@ func makeTestVolumeService(t *testing.T, requests []mocked.Request) (*VolumeServ
 }
 
 func TestResize(t *testing.T) {
-	t.Run("ErrVolumeAlreadyFulfillsSizeRequirement", func(t *testing.T) {
+	t.Run("ErrVolumeSizeAlreadyReached", func(t *testing.T) {
 		t.Run("happy with larger volume size", func(t *testing.T) {
 			volumeService, cleanup := makeTestVolumeService(t, []mocked.Request{
 				{
@@ -72,7 +72,7 @@ func TestResize(t *testing.T) {
 			defer cleanup()
 
 			err := volumeService.Resize(context.Background(), &csi.Volume{ID: 1}, 15)
-			assert.Equal(t, volumes.ErrVolumeAlreadyFulfillsSizeRequirement, err)
+			assert.Equal(t, volumes.ErrVolumeSizeAlreadyReached, err)
 		})
 
 		t.Run("with smaller volume size", func(t *testing.T) {
@@ -88,7 +88,7 @@ func TestResize(t *testing.T) {
 			defer cleanup()
 
 			err := volumeService.Resize(context.Background(), &csi.Volume{ID: 1}, 10)
-			assert.Equal(t, volumes.ErrVolumeAlreadyFulfillsSizeRequirement, err)
+			assert.Equal(t, volumes.ErrVolumeSizeAlreadyReached, err)
 		})
 	})
 }
