@@ -8,13 +8,14 @@ import (
 )
 
 var (
-	ErrVolumeNotFound      = errors.New("volume not found")
-	ErrVolumeAlreadyExists = errors.New("volume does already exist")
-	ErrServerNotFound      = errors.New("server not found")
-	ErrAttached            = errors.New("volume is attached")
-	ErrNotAttached         = errors.New("volume is not attached")
-	ErrAttachLimitReached  = errors.New("max number of attachments per server reached")
-	ErrLockedServer        = errors.New("server is locked")
+	ErrVolumeNotFound           = errors.New("volume not found")
+	ErrVolumeAlreadyExists      = errors.New("volume does already exist")
+	ErrServerNotFound           = errors.New("server not found")
+	ErrAttached                 = errors.New("volume is attached")
+	ErrNotAttached              = errors.New("volume is not attached")
+	ErrAttachLimitReached       = errors.New("max number of attachments per server reached")
+	ErrLockedServer             = errors.New("server is locked")
+	ErrVolumeSizeAlreadyReached = errors.New("volume size is already larger or equal than the requested size")
 )
 
 type Service interface {

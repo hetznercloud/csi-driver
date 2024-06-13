@@ -11,6 +11,7 @@ require (
 	github.com/hetznercloud/hcloud-go/v2 v2.8.0
 	github.com/kubernetes-csi/csi-test/v5 v5.2.0
 	github.com/prometheus/client_golang v1.19.1
+	github.com/stretchr/testify v1.9.0
 	golang.org/x/sys v0.21.0
 	google.golang.org/grpc v1.64.0
 	k8s.io/mount-utils v0.29.4
@@ -20,6 +21,7 @@ require (
 require (
 	github.com/beorn7/perks v1.0.1 // indirect
 	github.com/cespare/xxhash/v2 v2.2.0 // indirect
+	github.com/davecgh/go-spew v1.1.1 // indirect
 	github.com/go-logfmt/logfmt v0.5.1 // indirect
 	github.com/go-logr/logr v1.3.0 // indirect
 	github.com/go-task/slim-sprig v0.0.0-20230315185526-52ccab3ef572 // indirect
@@ -29,6 +31,7 @@ require (
 	github.com/moby/sys/mountinfo v0.6.2 // indirect
 	github.com/onsi/ginkgo/v2 v2.13.1 // indirect
 	github.com/onsi/gomega v1.30.0 // indirect
+	github.com/pmezard/go-difflib v1.0.0 // indirect
 	github.com/prometheus/client_model v0.5.0 // indirect
 	github.com/prometheus/common v0.48.0 // indirect
 	github.com/prometheus/procfs v0.12.0 // indirect
