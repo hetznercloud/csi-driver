@@ -345,45 +345,51 @@ func (s *VolumeService) Detach(ctx context.Context, volume *csi.Volume, server *
 }
 
 func (s *VolumeService) Resize(ctx context.Context, volume *csi.Volume, size int) error {
-	level.Info(s.logger).Log(
-		"msg", "resize volume",
+	logger := log.With(s.logger,
 		"volume-id", volume.ID,
 		"requested-size", size,
 	)
 
+	level.Info(logger).Log(
+		"msg", "resize volume",
+	)
+
 	hcloudVolume, _, err := s.client.Volume.GetByID(ctx, volume.ID)
 	if err != nil {
-		level.Info(s.logger).Log(
+		level.Info(logger).Log(
 			"msg", "failed to get volume",
-			"volume-id", volume.ID,
 			"err", err,
 		)
 		return err
 	}
 	if hcloudVolume == nil {
-		level.Info(s.logger).Log(
+		level.Info(logger).Log(
 			"msg", "volume to resize not found",
-			"volume-id", volume.ID,
 		)
 		return volumes.ErrVolumeNotFound
 	}
 
+	logger = log.With(logger, "current-size", hcloudVolume.Size)
+
+	if hcloudVolume.Size >= size {
+		level.Info(logger).Log(
+			"msg", "volume already has a size larger or equal than the request",
+		)
+		return volumes.ErrVolumeAlreadyFulfillsSizeRequirement
+	}
+
 	action, _, err := s.client.Volume.Resize(ctx, hcloudVolume, size)
 	if err != nil {
-		level.Info(s.logger).Log(
+		level.Info(logger).Log(
 			"msg", "failed to resize volume",
-			"volume-id", volume.ID,
-			"size", size,
 			"err", err,
 		)
 		return err
 	}
 
-	if err := s.client.Action.WaitFor(ctx, action); err != nil {
-		level.Info(s.logger).Log(
+	if err = s.client.Action.WaitFor(ctx, action); err != nil {
+		level.Info(logger).Log(
 			"msg", "failed to resize volume",
-			"volume-id", volume.ID,
-			"size", size,
 			"err", err,
 		)
 		return err

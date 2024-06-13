@@ -156,5 +156,15 @@ func (s *IdempotentService) Detach(ctx context.Context, volume *csi.Volume, serv
 }
 
 func (s *IdempotentService) Resize(ctx context.Context, volume *csi.Volume, size int) error {
-	return s.volumeService.Resize(ctx, volume, size)
+	switch err := s.volumeService.Resize(ctx, volume, size); err {
+	case ErrVolumeAlreadyFulfillsSizeRequirement:
+		// If a previous rescale attempt failed (rate limit, network connectivity, ...), the volume might already have the target size.
+		// In the Hetzner Cloud API, a resize must always be larger than the current size, so this
+		// would manifest as a "volume size is too small (invalid_input)" error.
+		return nil
+	case nil:
+		return nil
+	default:
+		return err
+	}
 }

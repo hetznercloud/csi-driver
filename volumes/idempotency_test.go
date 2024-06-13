@@ -371,3 +371,20 @@ func TestIdempotentServiceDetachAttachedToDifferentServer(t *testing.T) {
 		t.Fatal(err)
 	}
 }
+
+func TestIdempotentServiceExpand(t *testing.T) {
+	t.Run("ErrVolumeAlreadyFulfillsSizeRequirement", func(t *testing.T) {
+		volumeService := &mock.VolumeService{
+			ResizeFunc: func(ctx context.Context, volume *csi.Volume, size int) error {
+				return volumes.ErrVolumeAlreadyFulfillsSizeRequirement
+			},
+		}
+
+		service := volumes.NewIdempotentService(log.NewNopLogger(), volumeService)
+
+		err := service.Resize(context.Background(), &csi.Volume{}, 10)
+		if err != nil {
+			t.Fatal(err)
+		}
+	})
+}
