@@ -1,5 +1,12 @@
 # Changelog
 
+## [2.7.1](https://github.com/hetznercloud/csi-driver/compare/v2.7.0...v2.7.1) (2024-06-13)
+
+
+### Bug Fixes
+
+* **resize:** recover from part-way failed resizes ([#623](https://github.com/hetznercloud/csi-driver/issues/623)) ([f9016af](https://github.com/hetznercloud/csi-driver/commit/f9016af982c134f391de4cd46c1189fc314411bd))
+
 ## [2.7.0](https://github.com/hetznercloud/csi-driver/compare/v2.6.0...v2.7.0) (2024-05-10)
 
 
