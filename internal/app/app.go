@@ -16,8 +16,8 @@ import (
 	"github.com/prometheus/client_golang/prometheus"
 	"google.golang.org/grpc"
 
-	"github.com/hetznercloud/csi-driver/driver"
-	"github.com/hetznercloud/csi-driver/metrics"
+	"github.com/hetznercloud/csi-driver/internal/driver"
+	"github.com/hetznercloud/csi-driver/internal/metrics"
 	"github.com/hetznercloud/hcloud-go/v2/hcloud"
 	"github.com/hetznercloud/hcloud-go/v2/hcloud/metadata"
 )

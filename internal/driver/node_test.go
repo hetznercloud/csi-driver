@@ -10,8 +10,8 @@ import (
 	"google.golang.org/grpc/codes"
 	"google.golang.org/grpc/status"
 
-	"github.com/hetznercloud/csi-driver/mock"
-	"github.com/hetznercloud/csi-driver/volumes"
+	"github.com/hetznercloud/csi-driver/internal/mock"
+	"github.com/hetznercloud/csi-driver/internal/volumes"
 )
 
 var _ proto.NodeServer = (*NodeService)(nil)

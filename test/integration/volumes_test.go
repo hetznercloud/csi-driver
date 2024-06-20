@@ -10,7 +10,7 @@ import (
 
 	"github.com/go-kit/log"
 
-	"github.com/hetznercloud/csi-driver/volumes"
+	"github.com/hetznercloud/csi-driver/internal/volumes"
 )
 
 func TestVolumePublishUnpublish(t *testing.T) {

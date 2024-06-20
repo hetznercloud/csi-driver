@@ -9,9 +9,9 @@ import (
 	"github.com/go-kit/log"
 	"github.com/stretchr/testify/assert"
 
-	"github.com/hetznercloud/csi-driver/csi"
+	"github.com/hetznercloud/csi-driver/internal/csi"
 	"github.com/hetznercloud/csi-driver/internal/mocked"
-	"github.com/hetznercloud/csi-driver/volumes"
+	"github.com/hetznercloud/csi-driver/internal/volumes"
 	"github.com/hetznercloud/hcloud-go/v2/hcloud"
 	"github.com/hetznercloud/hcloud-go/v2/hcloud/schema"
 )
