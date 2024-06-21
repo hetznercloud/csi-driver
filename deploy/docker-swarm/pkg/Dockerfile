@@ -1,15 +1,30 @@
 FROM --platform=$TARGETPLATFORM golang:1.21 as builder
-WORKDIR /csi
-ADD go.mod go.sum /csi/
+
+WORKDIR /build
+
+ADD go.mod go.sum /build/
 RUN go mod download
-ADD . /csi/
+
+ADD . /build/
 RUN ls -al
-RUN CGO_ENABLED=0 go build -o aio.bin github.com/hetznercloud/csi-driver/cmd/aio
+
+ARG CGO_ENABLED=0
+RUN go build -o aio.bin github.com/hetznercloud/csi-driver/cmd/aio
 
 FROM --platform=$TARGETPLATFORM alpine:3.15
-RUN apk add --no-cache ca-certificates e2fsprogs xfsprogs blkid xfsprogs-extra e2fsprogs-extra btrfs-progs cryptsetup
+
+RUN apk add --no-cache \
+    blkid \
+    btrfs-progs \
+    ca-certificates \
+    cryptsetup \
+    e2fsprogs \
+    e2fsprogs-extra \
+    xfsprogs \
+    xfsprogs-extra
+
 ENV GOTRACEBACK=all
 RUN mkdir -p /plugin
-COPY --from=builder /csi/aio.bin /plugin
+COPY --from=builder /build/aio.bin /plugin
 
 ENTRYPOINT [ "/plugin/aio.bin" ]
