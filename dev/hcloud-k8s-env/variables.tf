@@ -14,7 +14,7 @@ variable "hcloud_token" {
 variable "hcloud_server_type" {
   description = "Hetzner Cloud Server Type used for the environement"
   type        = string
-  default     = "cpx11"
+  default     = "cpx21"
 }
 variable "hcloud_location" {
   description = "Hetzner Cloud Location used for the environement"
