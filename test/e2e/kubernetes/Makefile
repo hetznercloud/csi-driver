@@ -17,7 +17,7 @@ bin:
 
 parallel: bin
 	$(GINKGO) $(GINKGO_ARGS) \
-		-nodes=6 \
+		-nodes=12 \
 		-focus='External.Storage' \
 		-skip='\[Feature:|\[Disruptive\]|\[Serial\]' \
 		$(E2E) -- $(E2E_ARGS)
