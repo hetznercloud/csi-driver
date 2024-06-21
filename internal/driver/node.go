@@ -10,7 +10,7 @@ import (
 	"google.golang.org/grpc/codes"
 	"google.golang.org/grpc/status"
 
-	"github.com/hetznercloud/csi-driver/volumes"
+	"github.com/hetznercloud/csi-driver/internal/volumes"
 )
 
 type NodeService struct {

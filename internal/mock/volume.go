@@ -3,8 +3,8 @@ package mock
 import (
 	"context"
 
-	"github.com/hetznercloud/csi-driver/csi"
-	"github.com/hetznercloud/csi-driver/volumes"
+	"github.com/hetznercloud/csi-driver/internal/csi"
+	"github.com/hetznercloud/csi-driver/internal/volumes"
 	"github.com/hetznercloud/hcloud-go/v2/hcloud"
 )
 
