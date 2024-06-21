@@ -13,11 +13,9 @@ Depending on your Container Orchestrator you need to follow different steps to
 get started with the Hetzner Cloud csi-driver. You can also find other docs
 relevant to that Container Orchestrator behind the link:
 
-### [Kubernetes](./docs/kubernetes/README.md#getting-started)
-
-### [Docker Swarm](./docs/docker-swarm/README.md)️ _⚠ Not officially supported_
-
-### [HashiCorp Nomad](./docs/nomad/README.md)️ _⚠ Not officially supported_
+- [Kubernetes](./docs/kubernetes/README.md#getting-started)
+- [Docker Swarm](./docs/docker-swarm/README.md)️ _⚠️ Not officially supported_
+- [HashiCorp Nomad](./docs/nomad/README.md)️ _⚠️ Not officially supported_
 
 ## Tests
 
