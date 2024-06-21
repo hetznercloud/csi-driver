@@ -90,10 +90,15 @@ jobs:
           source dev/files/env.sh
           skaffold run
 
-      - name: Run tests
+      - name: Run parallel tests
         run: |
           source dev/files/env.sh
-          make -C test/e2e/kubernetes parallel serial
+          make -C test/e2e/kubernetes parallel
+
+      - name: Run serial tests
+        run: |
+          source dev/files/env.sh
+          make -C test/e2e/kubernetes serial
 
   deploy-manifests:
     runs-on: ubuntu-latest
