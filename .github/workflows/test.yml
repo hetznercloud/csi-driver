@@ -59,7 +59,7 @@ jobs:
 
       - uses: opentofu/setup-opentofu@v1
         with:
-          tofu_version: v1.7.2
+          tofu_version: v1.7.2 # renovate: datasource=github-releases depName=opentofu/opentofu
           tofu_wrapper: false
 
       - uses: docker/setup-buildx-action@v3
