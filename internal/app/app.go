@@ -107,11 +107,11 @@ func CreateHcloudClient(metricsRegistry *prometheus.Registry, logger log.Logger)
 	if !ok {
 		filepath, ok := os.LookupEnv("HCLOUD_TOKEN_FILE")
 		if !ok {
-			return nil, errors.New("you need to provide an API token via the HCLOUD_TOKEN or HCLOUD_TOKEN_FILE env var")
+			return nil, fmt.Errorf("you need to provide an API token via the HCLOUD_TOKEN or HCLOUD_TOKEN_FILE env var")
 		}
 		apiTokenBytes, err := os.ReadFile(filepath)
 		if err != nil {
-			return nil, errors.New("failed to read HCLOUD_TOKEN_FILE: " + err.Error())
+			return nil, fmt.Errorf("failed to read HCLOUD_TOKEN_FILE: %w", err)
 		}
 		apiToken = strings.TrimSpace(string(apiTokenBytes))
 	}
