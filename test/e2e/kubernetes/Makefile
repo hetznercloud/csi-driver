@@ -27,3 +27,5 @@ serial: bin
 		-focus='External.Storage.*(\[Feature:|\[Serial\])' \
 		-skip='\[Feature:SELinuxMountReadWriteOncePod\]' \
 		$(E2E) -- $(E2E_ARGS)
+
+test: parallel serial
