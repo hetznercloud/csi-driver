@@ -1,6 +1,9 @@
 {
   "$schema": "https://docs.renovatebot.com/renovate-schema.json",
-  "extends": ["github>hetznercloud/.github//renovate/default"],
+  "extends": [
+    "github>hetznercloud/.github//renovate/default",
+    "github>hetznercloud/.github//renovate/golang"
+  ],
   "packageRules": [
     {
       "groupName": "github.com/container-storage-interface/spec",
