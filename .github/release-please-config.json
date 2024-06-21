@@ -8,7 +8,7 @@
       "release-type": "go",
       "package-name": "csi-driver",
       "extra-files": [
-        "driver/driver.go",
+        "internal/driver/driver.go",
         "deploy/kubernetes/hcloud-csi.yml",
         "chart/.snapshots/default.yaml",
         "chart/.snapshots/example-prod.yaml",
