@@ -38,14 +38,14 @@ jobs:
       fail-fast: false # Continue tests matrix if a flaky run occur.
       matrix:
         include:
-          - k3s: v1.26
-            k8s-test: v1.26.15
           - k3s: v1.27
             k8s-test: v1.27.15
           - k3s: v1.28
             k8s-test: v1.28.11
           - k3s: v1.29
             k8s-test: v1.29.6
+          - k3s: v1.30
+            k8s-test: v1.30.2
 
     env:
       K3S_CHANNEL: ${{ matrix.k3s }}
