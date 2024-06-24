@@ -115,7 +115,7 @@ jobs:
         with:
           setup-tools: |
             helm
-          helm: v3.11.2 # renovate: datasource=github-releases depName=helm/helm
+          helm: v3.15.2 # renovate: datasource=github-releases depName=helm/helm
 
       - uses: actions/checkout@v4
 
@@ -137,7 +137,7 @@ jobs:
         with:
           setup-tools: |
             helm
-          helm: v3.11.2 # renovate: datasource=github-releases depName=helm/helm
+          helm: v3.15.2 # renovate: datasource=github-releases depName=helm/helm
 
       - uses: actions/checkout@v4
 
