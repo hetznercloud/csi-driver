@@ -1,5 +1,5 @@
 {{/*
-Return the proper Container Image Name
+Return the Container Image Name
 {{ include "common.images.image" (dict "value" .Values.controller.image.hcloudCSIDriver "context" .) }}
 */}}
 {{- define "common.images.image" -}}
