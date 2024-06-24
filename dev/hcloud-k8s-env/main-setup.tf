@@ -179,7 +179,7 @@ resource "helm_release" "docker_registry" {
   chart      = "docker-registry"
   repository = "https://helm.twun.io"
   namespace  = "kube-system"
-  version    = "2.2.3" # renovate: datasource=github-releases depName=distribution/distribution extractVersion=v(?<version>.+)
+  version    = "2.8.3" # renovate: datasource=github-releases depName=distribution/distribution extractVersion=v(?<version>.+)
   wait       = true
 
   set {
