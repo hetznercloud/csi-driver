@@ -1,6 +1,8 @@
 module github.com/hetznercloud/csi-driver
 
-go 1.22
+go 1.22.0
+
+toolchain go1.22.4
 
 require (
 	github.com/container-storage-interface/spec v1.9.0
@@ -14,7 +16,7 @@ require (
 	github.com/stretchr/testify v1.9.0
 	golang.org/x/sys v0.21.0
 	google.golang.org/grpc v1.64.0
-	k8s.io/mount-utils v0.29.4
+	k8s.io/mount-utils v0.30.2
 	k8s.io/utils v0.0.0-20240502163921-fe8a2dddb1d0
 )
 
@@ -23,7 +25,7 @@ require (
 	github.com/cespare/xxhash/v2 v2.2.0 // indirect
 	github.com/davecgh/go-spew v1.1.1 // indirect
 	github.com/go-logfmt/logfmt v0.5.1 // indirect
-	github.com/go-logr/logr v1.3.0 // indirect
+	github.com/go-logr/logr v1.4.1 // indirect
 	github.com/go-task/slim-sprig v0.0.0-20230315185526-52ccab3ef572 // indirect
 	github.com/google/go-cmp v0.6.0 // indirect
 	github.com/google/pprof v0.0.0-20210720184732-4bb14d4b1be1 // indirect
@@ -42,5 +44,5 @@ require (
 	google.golang.org/protobuf v1.33.0 // indirect
 	gopkg.in/yaml.v2 v2.4.0 // indirect
 	gopkg.in/yaml.v3 v3.0.1 // indirect
-	k8s.io/klog/v2 v2.110.1 // indirect
+	k8s.io/klog/v2 v2.120.1 // indirect
 )
