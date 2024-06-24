@@ -139,7 +139,7 @@ resource "helm_release" "cilium" {
   chart      = "cilium"
   repository = "https://helm.cilium.io"
   namespace  = "kube-system"
-  version    = "1.13.1" # renovate: datasource=github-releases depName=cilium/cilium extractVersion=v(?<version>.+)
+  version    = "1.13.1"
   wait       = true
 
   set {
@@ -165,7 +165,7 @@ resource "helm_release" "hcloud_cloud_controller_manager" {
   chart      = "hcloud-cloud-controller-manager"
   repository = "https://charts.hetzner.cloud"
   namespace  = "kube-system"
-  version    = "1.19.0" # renovate: datasource=github-releases depName=hetznercloud/hcloud-cloud-controller-manager extractVersion=v(?<version>.+)
+  version    = "1.19.0"
   wait       = true
 
   set {
@@ -179,7 +179,7 @@ resource "helm_release" "docker_registry" {
   chart      = "docker-registry"
   repository = "https://helm.twun.io"
   namespace  = "kube-system"
-  version    = "2.2.3" # renovate: datasource=github-releases depName=distribution/distribution extractVersion=v(?<version>.+)
+  version    = "2.2.3"
   wait       = true
 
   set {
