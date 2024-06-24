@@ -102,6 +102,11 @@ jobs:
           source dev/files/env.sh
           make -C test/e2e/kubernetes serial
 
+      - name: Cleanup
+        if: always()
+        continue-on-error: true
+        run: make -C dev down
+
   deploy-manifests:
     runs-on: ubuntu-latest
 
@@ -121,7 +126,7 @@ jobs:
         run: git diff --exit-code -- deploy/
 
       - name: Show warning
-        if: ${{ failure() }}
+        if: failure()
         run: echo "::error title=Deployment Manifests outdated::Please run hack/update-deployment-yamls.sh and commit the changes to deploy/"
 
   helm-chart:
@@ -143,7 +148,7 @@ jobs:
           git diff --exit-code -- deploy/
 
       - name: Show warning
-        if: ${{ failure() }}
+        if: failure()
         run: echo "::error title=Helm Snapshots outdated::Please run hack/update-helm-snapshots.sh and commit the changes to chart/.snapshots/"
 
       - name: Helm Lint
