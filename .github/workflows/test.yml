@@ -102,6 +102,11 @@ jobs:
           source dev/files/env.sh
           make -C test/e2e/kubernetes serial
 
+      - name: Cleanup
+        if: ${{ always() }}
+        continue-on-error: true
+        run: make -C dev down
+
   deploy-manifests:
     runs-on: ubuntu-latest
 
