@@ -37,25 +37,31 @@ commonAnnotations: {}
 ## Controller
 ##
 controller:
-  ## @param controller.image.csiAttacher.name full path to csi-attacher image (including tag/digest & registry)
+  ## @param controller.image.csiAttacher.name csi-attacher image name
+  ## @param controller.image.csiAttacher.tag csi-attacher image tag
   ## @param controller.image.csiAttacher.pullPolicy csi-attacher image pull policy
   ## @param controller.image.csiAttacher.pullSecrets csi-attacher image pull secrets
-  ## @param controller.image.csiResizer.name full path to csi-resizer image (including tag/digest & registry)
+  ## @param controller.image.csiResizer.name csi-resizer image name
+  ## @param controller.image.csiResizer.tag csi-resizer image tag
   ## @param controller.image.csiResizer.pullPolicy csi-resizer image pull policy
   ## @param controller.image.csiResizer.pullSecrets csi-resizer image pull secrets
-  ## @param controller.image.csiProvisioner.name full path to csi-provisioner image (including tag/digest & registry)
+  ## @param controller.image.csiProvisioner.name csi-provisioner image name
+  ## @param controller.image.csiProvisioner.tag csi-provisioner image tag
   ## @param controller.image.csiProvisioner.pullPolicy csi-provisioner image pull policy
   ## @param controller.image.csiProvisioner.pullSecrets csi-provisioner image pull secrets
-  ## @param controller.image.livenessProbe.name full path to liveness-probe image (including tag/digest & registry)
+  ## @param controller.image.livenessProbe.name liveness-probe image name
+  ## @param controller.image.livenessProbe.tag liveness-probe image tag
   ## @param controller.image.livenessProbe.pullPolicy liveness-probe image pull policy
   ## @param controller.image.livenessProbe.pullSecrets liveness-probe image pull secrets
-  ## @param controller.image.hcloudCSIDriver.name full path to hcloud-csi-driver image (including tag/digest & registry)
+  ## @param controller.image.hcloudCSIDriver.name hcloud-csi-driver image name
+  ## @param controller.image.hcloudCSIDriver.tag hcloud-csi-driver image tag
   ## @param controller.image.hcloudCSIDriver.pullPolicy hcloud-csi-driver image pull policy
   ## @param controller.image.hcloudCSIDriver.pullSecrets hcloud-csi-driver image pull secrets
   ##
   image:
     csiAttacher:
-      name: registry.k8s.io/sig-storage/csi-attacher:v4.1.0
+      name: registry.k8s.io/sig-storage/csi-attacher
+      tag: v4.1.0
       ## Specify a imagePullPolicy
       ## Defaults to 'Always' if image tag is 'latest', else set to 'IfNotPresent'
       ## ref: http://kubernetes.io/docs/user-guide/images/#pre-pulling-images
@@ -71,7 +77,8 @@ controller:
       pullSecrets: []
 
     csiResizer:
-      name: registry.k8s.io/sig-storage/csi-resizer:v1.7.0
+      name: registry.k8s.io/sig-storage/csi-resizer
+      tag: v1.7.0
       ## Specify a imagePullPolicy
       ## Defaults to 'Always' if image tag is 'latest', else set to 'IfNotPresent'
       ## ref: http://kubernetes.io/docs/user-guide/images/#pre-pulling-images
@@ -87,7 +94,8 @@ controller:
       pullSecrets: []
 
     csiProvisioner:
-      name: registry.k8s.io/sig-storage/csi-provisioner:v3.4.0
+      name: registry.k8s.io/sig-storage/csi-provisioner
+      tag: v3.4.0
       ## Specify a imagePullPolicy
       ## Defaults to 'Always' if image tag is 'latest', else set to 'IfNotPresent'
       ## ref: http://kubernetes.io/docs/user-guide/images/#pre-pulling-images
@@ -103,7 +111,8 @@ controller:
       pullSecrets: []
 
     livenessProbe:
-      name: registry.k8s.io/sig-storage/livenessprobe:v2.9.0
+      name: registry.k8s.io/sig-storage/livenessprobe
+      tag: v2.9.0
       ## Specify a imagePullPolicy
       ## Defaults to 'Always' if image tag is 'latest', else set to 'IfNotPresent'
       ## ref: http://kubernetes.io/docs/user-guide/images/#pre-pulling-images
@@ -119,7 +128,8 @@ controller:
       pullSecrets: []
 
     hcloudCSIDriver:
-      name: docker.io/hetznercloud/hcloud-csi-driver:v{{ .Chart.Version }}
+      name: docker.io/hetznercloud/hcloud-csi-driver
+      tag: v{{ .Chart.Version }}
       ## Specify a imagePullPolicy
       ## Defaults to 'Always' if image tag is 'latest', else set to 'IfNotPresent'
       ## ref: http://kubernetes.io/docs/user-guide/images/#pre-pulling-images
@@ -371,19 +381,23 @@ controller:
 ## Node
 ##
 node:
-  ## @param node.image.csiNodeDriverRegistrar.name full path to csi-node-driver-registrar image (including tag/digest & registry)
+  ## @param node.image.csiNodeDriverRegistrar.name csi-node-driver-registrar image name
+  ## @param node.image.csiNodeDriverRegistrar.tag csi-node-driver-registrar image tag
   ## @param node.image.csiNodeDriverRegistrar.pullPolicy csi-node-driver-registrar image pull policy
   ## @param node.image.csiNodeDriverRegistrar.pullSecrets csi-node-driver-registrar image pull secrets
-  ## @param node.image.livenessProbe.name full path to liveness-probe image (including tag/digest & registry)
+  ## @param node.image.livenessProbe.name liveness-probe image name
+  ## @param node.image.livenessProbe.tag liveness-probe image tag
   ## @param node.image.livenessProbe.pullPolicy liveness-probe image pull policy
   ## @param node.image.livenessProbe.pullSecrets liveness-probe image pull secrets
-  ## @param node.image.hcloudCSIDriver.name full path to hcloud-csi-driver image (including tag/digest & registry)
+  ## @param node.image.hcloudCSIDriver.name hcloud-csi-driver image name
+  ## @param node.image.hcloudCSIDriver.tag hcloud-csi-driver image tag
   ## @param node.image.hcloudCSIDriver.pullPolicy hcloud-csi-driver image pull policy
   ## @param node.image.hcloudCSIDriver.pullSecrets hcloud-csi-driver image pull secrets
   ##
   image:
     csiNodeDriverRegistrar:
-      name: registry.k8s.io/sig-storage/csi-node-driver-registrar:v2.7.0
+      name: registry.k8s.io/sig-storage/csi-node-driver-registrar
+      tag: v2.7.0
       ## Specify a imagePullPolicy
       ## Defaults to 'Always' if image tag is 'latest', else set to 'IfNotPresent'
       ## ref: http://kubernetes.io/docs/user-guide/images/#pre-pulling-images
@@ -399,7 +413,8 @@ node:
       pullSecrets: []
 
     livenessProbe:
-      name: registry.k8s.io/sig-storage/livenessprobe:v2.9.0
+      name: registry.k8s.io/sig-storage/livenessprobe
+      tag: v2.9.0
       ## Specify a imagePullPolicy
       ## Defaults to 'Always' if image tag is 'latest', else set to 'IfNotPresent'
       ## ref: http://kubernetes.io/docs/user-guide/images/#pre-pulling-images
@@ -415,7 +430,8 @@ node:
       pullSecrets: []
 
     hcloudCSIDriver:
-      name: docker.io/hetznercloud/hcloud-csi-driver:v{{ .Chart.Version }}
+      name: docker.io/hetznercloud/hcloud-csi-driver
+      tag: v{{ .Chart.Version }}
       ## Specify a imagePullPolicy
       ## Defaults to 'Always' if image tag is 'latest', else set to 'IfNotPresent'
       ## ref: http://kubernetes.io/docs/user-guide/images/#pre-pulling-images

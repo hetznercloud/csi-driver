@@ -73,7 +73,7 @@ spec:
         {{- end }}
       containers:
         - name: csi-attacher
-          image: {{ tpl .Values.controller.image.csiAttacher.name . }}
+          image: {{ include "common.images.image" (dict "value" .Values.controller.image.csiAttacher "context" .) }}
           imagePullPolicy: {{ .Values.controller.image.csiAttacher.pullPolicy }}
           {{- if .Values.controller.resources.csiAttacher }}
           resources: {{- toYaml .Values.controller.resources.csiAttacher | nindent 12 }}
@@ -89,7 +89,7 @@ spec:
             mountPath: /run/csi
 
         - name: csi-resizer
-          image: {{ tpl .Values.controller.image.csiResizer.name . }}
+          image: {{ include "common.images.image" (dict "value" .Values.controller.image.csiResizer "context" .) }}
           imagePullPolicy: {{ .Values.controller.image.csiResizer.pullPolicy }}
           {{- if .Values.controller.resources.csiResizer }}
           resources: {{- toYaml .Values.controller.resources.csiResizer | nindent 12 }}
@@ -104,7 +104,7 @@ spec:
             mountPath: /run/csi
 
         - name: csi-provisioner
-          image: {{ tpl .Values.controller.image.csiProvisioner.name . }}
+          image: {{ include "common.images.image" (dict "value" .Values.controller.image.csiProvisioner "context" .) }}
           imagePullPolicy: {{ .Values.controller.image.csiProvisioner.pullPolicy }}
           {{- if .Values.controller.resources.csiProvisioner }}
           resources: {{- toYaml .Values.controller.resources.csiProvisioner | nindent 12 }}
@@ -121,7 +121,7 @@ spec:
             mountPath: /run/csi
 
         - name: liveness-probe
-          image: {{ tpl .Values.controller.image.livenessProbe.name . }}
+          image: {{ include "common.images.image" (dict "value" .Values.controller.image.livenessProbe "context" .) }}
           imagePullPolicy: {{ .Values.controller.image.livenessProbe.pullPolicy }}
           {{- if .Values.controller.resources.livenessProbe }}
           resources: {{- toYaml .Values.controller.resources.livenessProbe | nindent 12 }}
@@ -131,7 +131,7 @@ spec:
             name: socket-dir
 
         - name: hcloud-csi-driver
-          image: {{ tpl .Values.controller.image.hcloudCSIDriver.name . }} # x-release-please-version
+          image: {{ include "common.images.image" (dict "value" .Values.controller.image.hcloudCSIDriver "context" .) }} # x-release-please-version
           imagePullPolicy: {{ .Values.controller.image.hcloudCSIDriver.pullPolicy }}
           command: [/bin/hcloud-csi-driver-controller]
           env:
