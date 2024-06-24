@@ -74,7 +74,7 @@ spec:
         {{- end }}
       containers:
         - name: csi-node-driver-registrar
-          image: {{ tpl .Values.node.image.csiNodeDriverRegistrar.name . }}
+          image: {{ include "common.images.image" (dict "value" .Values.node.image.csiNodeDriverRegistrar "context" .) }}
           imagePullPolicy: {{ .Values.node.image.csiNodeDriverRegistrar.pullPolicy }}
           args:
             - --kubelet-registration-path={{ .Values.node.kubeletDir }}/plugins/csi.hetzner.cloud/socket
@@ -90,7 +90,7 @@ spec:
           resources: {{- toYaml .Values.node.resources.csiNodeDriverRegistrar | nindent 12 }}
           {{- end }}
         - name: liveness-probe
-          image: {{ tpl .Values.node.image.livenessProbe.name . }}
+          image: {{ include "common.images.image" (dict "value" .Values.node.image.livenessProbe "context" .) }}
           imagePullPolicy: {{ .Values.node.image.livenessProbe.pullPolicy }}
           volumeMounts:
           - mountPath: /run/csi
@@ -99,7 +99,7 @@ spec:
           resources: {{- toYaml .Values.node.resources.livenessProbe | nindent 12 }}
           {{- end }}
         - name: hcloud-csi-driver
-          image: {{ tpl .Values.node.image.hcloudCSIDriver.name . }} # x-release-please-version
+          image: {{ include "common.images.image" (dict "value" .Values.node.image.hcloudCSIDriver "context" .) }} # x-release-please-version
           imagePullPolicy: {{ .Values.node.image.hcloudCSIDriver.pullPolicy }}
           command: [/bin/hcloud-csi-driver-node]
           volumeMounts:

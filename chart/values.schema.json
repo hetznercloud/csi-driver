@@ -74,6 +74,9 @@
                                 "name": {
                                     "type": "string"
                                 },
+                                "tag": {
+                                    "type": "string"
+                                },
                                 "pullPolicy": {
                                     "type": "string"
                                 },
@@ -89,6 +92,9 @@
                             "type": "object",
                             "properties": {
                                 "name": {
+                                    "type": "string"
+                                },
+                                "tag": {
                                     "type": "string"
                                 },
                                 "pullPolicy": {
@@ -108,6 +114,9 @@
                                 "name": {
                                     "type": "string"
                                 },
+                                "tag": {
+                                    "type": "string"
+                                },
                                 "pullPolicy": {
                                     "type": "string"
                                 },
@@ -123,6 +132,9 @@
                             "type": "object",
                             "properties": {
                                 "name": {
+                                    "type": "string"
+                                },
+                                "tag": {
                                     "type": "string"
                                 },
                                 "pullPolicy": {
@@ -489,6 +501,9 @@
                                 "name": {
                                     "type": "string"
                                 },
+                                "tag": {
+                                    "type": "string"
+                                },
                                 "pullPolicy": {
                                     "type": "string"
                                 },
@@ -506,6 +521,9 @@
                                 "name": {
                                     "type": "string"
                                 },
+                                "tag": {
+                                    "type": "string"
+                                },
                                 "pullPolicy": {
                                     "type": "string"
                                 },
@@ -521,6 +539,9 @@
                             "type": "object",
                             "properties": {
                                 "name": {
+                                    "type": "string"
+                                },
+                                "tag": {
                                     "type": "string"
                                 },
                                 "pullPolicy": {

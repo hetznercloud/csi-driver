@@ -1,4 +1,12 @@
 {{/*
+Return the proper Container Image Name
+{{ include "common.images.image" (dict "value" .Values.controller.image.hcloudCSIDriver "context" $) }}
+*/}}
+{{- define "common.images.image" -}}
+{{ .value.name }}{{ if .value.tag }}:{{ tpl .value.tag .context }}{{ end }}
+{{- end -}}
+
+{{/*
 Return the proper Container Image Registry Secret Names evaluating values as templates
 {{ include "common.images.pullSecrets" ( dict "images" (list .Values.path.to.the.image1 .Values.path.to.the.image2) "context" $) }}
 */}}
