@@ -30,7 +30,9 @@ jobs:
     permissions:
       id-token: write
 
-    concurrency: ${{ github.workflow }}-${{ github.ref }}-${{ matrix.k3s }}
+    concurrency:
+      group: ${{ github.workflow }}-${{ github.ref }}-${{ matrix.k3s }}
+      cancel-in-progress: true
 
     strategy:
       fail-fast: false # Continue tests matrix if a flaky run occur.
