@@ -139,11 +139,13 @@ controller:
   replicaCount: 1
 
   ## @param controller.hcloudToken.value  Specifies the value for the hcloudToken. Creates a secret from that value. If you have already a hcloud token secret leave this empty.
+  ## @param controller.hcloudToken.file Specifies the file path for the hcloudToken. The file must be provided externally (e.g. via secret agent injection). If you want to use a Kubernetes secret, leave this empty.
   ## @param controller.hcloudToken.existingSecret.name Specifies the name of an existing Secret for the hcloud Token
   ## @param controller.hcloudToken.existingSecret.key Specifies the key of an existing Secret for the hcloud Token
   ##
   hcloudToken:
     value: ""
+    file: ""
     existingSecret:
       name: hcloud
       key: token

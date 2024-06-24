@@ -101,9 +101,19 @@ func CreateMetrics(logger log.Logger) *metrics.Metrics {
 
 // CreateHcloudClient creates a hcloud.Client using  various environment variables to guide configuration
 func CreateHcloudClient(metricsRegistry *prometheus.Registry, logger log.Logger) (*hcloud.Client, error) {
-	apiToken := os.Getenv("HCLOUD_TOKEN")
-	if apiToken == "" {
-		return nil, errors.New("you need to provide an API token via the HCLOUD_TOKEN env var")
+	// apiToken can be set via HCLOUD_TOKEN or HCLOUD_TOKEN_FILE
+	// HCLOUD_TOKEN is preferred
+	apiToken, ok := os.LookupEnv("HCLOUD_TOKEN")
+	if !ok {
+		filepath, ok := os.LookupEnv("HCLOUD_TOKEN_FILE")
+		if !ok {
+			return nil, fmt.Errorf("you need to provide an API token via the HCLOUD_TOKEN or HCLOUD_TOKEN_FILE env var")
+		}
+		apiTokenBytes, err := os.ReadFile(filepath)
+		if err != nil {
+			return nil, fmt.Errorf("failed to read HCLOUD_TOKEN_FILE: %w", err)
+		}
+		apiToken = strings.TrimSpace(string(apiTokenBytes))
 	}
 
 	if len(apiToken) != 64 {

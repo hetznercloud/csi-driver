@@ -152,6 +152,10 @@ spec:
                 fieldRef:
                   apiVersion: v1
                   fieldPath: spec.nodeName
+            {{- if .Values.controller.hcloudToken.file }}
+            - name: HCLOUD_TOKEN_FILE
+              value: {{ .Values.controller.hcloudToken.file | quote }}
+            {{- else }}
             - name: HCLOUD_TOKEN
               valueFrom:
                 secretKeyRef:
@@ -162,6 +166,7 @@ spec:
                   name: {{ .Values.controller.hcloudToken.existingSecret.name }}
                   key: {{ .Values.controller.hcloudToken.existingSecret.key }}
                   {{- end }}
+            {{- end }}
             {{- if .Values.controller.extraEnvVars }}
             {{- include "common.tplvalues.render" (dict "value" .Values.controller.extraEnvVars "context" $) | nindent 12 }}
             {{- end }}
