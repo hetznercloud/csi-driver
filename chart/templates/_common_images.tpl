@@ -1,6 +1,6 @@
 {{/*
 Return the proper Container Image Name
-{{ include "common.images.image" (dict "value" .Values.controller.image.hcloudCSIDriver "context" $) }}
+{{ include "common.images.image" (dict "value" .Values.controller.image.hcloudCSIDriver "context" .) }}
 */}}
 {{- define "common.images.image" -}}
 {{ tpl .value.name .context }}{{ if .value.tag }}:{{ tpl .value.tag .context }}{{ end }}
