@@ -139,7 +139,7 @@ resource "helm_release" "cilium" {
   chart      = "cilium"
   repository = "https://helm.cilium.io"
   namespace  = "kube-system"
-  version    = "1.13.1" # renovate: datasource=github-releases depName=cilium/cilium extractVersion=v(?<version>.+)
+  version    = "1.15.6" # renovate: datasource=github-releases depName=cilium/cilium extractVersion=v(?<version>.+)
   wait       = true
 
   set {
