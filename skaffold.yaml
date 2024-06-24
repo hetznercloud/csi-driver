@@ -1,4 +1,4 @@
-apiVersion: skaffold/v4beta3
+apiVersion: skaffold/v4beta11
 kind: Config
 metadata:
   name: csi-driver
@@ -6,13 +6,12 @@ build:
   artifacts:
     - image: docker.io/hetznercloud/hcloud-csi-driver
       docker:
-        dockerfile: hack/Dockerfile
-        cacheFrom:
-          - docker.io/hetznercloud/hcloud-csi-driver:buildcache
+        dockerfile: dev/Dockerfile
   local:
     useBuildkit: true
   insecureRegistries:
     - localhost:30666
+
 manifests:
   helm:
     releases:
