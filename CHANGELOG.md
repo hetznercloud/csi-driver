@@ -1,5 +1,15 @@
 # Changelog
 
+## [2.8.0](https://github.com/hetznercloud/csi-driver/compare/v2.7.1...v2.8.0) (2024-06-24)
+
+
+### Features
+
+* **chart:** separate image name and tag ([#616](https://github.com/hetznercloud/csi-driver/issues/616)) ([0300b14](https://github.com/hetznercloud/csi-driver/commit/0300b14dc0a02444ce47a51066b2c5818ad90df4))
+* **k8s:** drop Kubernetes 1.26 from tests ([93fe229](https://github.com/hetznercloud/csi-driver/commit/93fe229dfe87e0e6fc0972c6d0d25306e934bd57))
+* **k8s:** test against Kubernetes 1.30 ([93fe229](https://github.com/hetznercloud/csi-driver/commit/93fe229dfe87e0e6fc0972c6d0d25306e934bd57))
+* read HCLOUD_TOKEN from file ([#617](https://github.com/hetznercloud/csi-driver/issues/617)) ([4e1cd9d](https://github.com/hetznercloud/csi-driver/commit/4e1cd9d47f7056fdb90f481d08f3060e8cf9cb30))
+
 ## [2.7.1](https://github.com/hetznercloud/csi-driver/compare/v2.7.0...v2.7.1) (2024-06-13)
 
 
