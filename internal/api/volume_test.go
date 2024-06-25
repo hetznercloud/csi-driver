@@ -10,18 +10,18 @@ import (
 	"github.com/stretchr/testify/assert"
 
 	"github.com/hetznercloud/csi-driver/internal/csi"
-	"github.com/hetznercloud/csi-driver/internal/mocked"
 	"github.com/hetznercloud/csi-driver/internal/volumes"
 	"github.com/hetznercloud/hcloud-go/v2/hcloud"
+	"github.com/hetznercloud/hcloud-go/v2/hcloud/exp/mockutils"
 	"github.com/hetznercloud/hcloud-go/v2/hcloud/schema"
 )
 
 var _ volumes.Service = (*VolumeService)(nil)
 
-func makeTestVolumeService(t *testing.T, requests []mocked.Request) (*VolumeService, func()) {
+func makeTestVolumeService(t *testing.T, requests []mockutils.Request) (*VolumeService, func()) {
 	t.Helper()
 
-	testServer := httptest.NewServer(mocked.Handler(t, requests))
+	testServer := httptest.NewServer(mockutils.Handler(t, requests))
 
 	testClient := hcloud.NewClient(
 		hcloud.WithEndpoint(testServer.URL),
@@ -37,7 +37,7 @@ func makeTestVolumeService(t *testing.T, requests []mocked.Request) (*VolumeServ
 func TestResize(t *testing.T) {
 	t.Run("ErrVolumeSizeAlreadyReached", func(t *testing.T) {
 		t.Run("happy with larger volume size", func(t *testing.T) {
-			volumeService, cleanup := makeTestVolumeService(t, []mocked.Request{
+			volumeService, cleanup := makeTestVolumeService(t, []mockutils.Request{
 				{
 					Method: "GET", Path: "/volumes/1",
 					Status: 200,
@@ -60,7 +60,7 @@ func TestResize(t *testing.T) {
 		})
 
 		t.Run("with equal volume size", func(t *testing.T) {
-			volumeService, cleanup := makeTestVolumeService(t, []mocked.Request{
+			volumeService, cleanup := makeTestVolumeService(t, []mockutils.Request{
 				{
 					Method: "GET", Path: "/volumes/1",
 					Status: 200,
@@ -76,7 +76,7 @@ func TestResize(t *testing.T) {
 		})
 
 		t.Run("with smaller volume size", func(t *testing.T) {
-			volumeService, cleanup := makeTestVolumeService(t, []mocked.Request{
+			volumeService, cleanup := makeTestVolumeService(t, []mockutils.Request{
 				{
 					Method: "GET", Path: "/volumes/1",
 					Status: 200,
