@@ -1,9 +1,5 @@
-.terraform*
-terraform.tfstate
-terraform.tfstate.backup
+.terraform/
+terraform.tfstate*
 *.auto.tfvars
 
-files/*
-!files/.gitkeep
-
-.env
+files/
