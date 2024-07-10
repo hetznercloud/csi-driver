@@ -15,14 +15,14 @@ require (
 	github.com/prometheus/client_golang v1.19.1
 	github.com/stretchr/testify v1.9.0
 	golang.org/x/sys v0.22.0
-	google.golang.org/grpc v1.64.0
+	google.golang.org/grpc v1.65.0
 	k8s.io/mount-utils v0.30.2
 	k8s.io/utils v0.0.0-20240502163921-fe8a2dddb1d0
 )
 
 require (
 	github.com/beorn7/perks v1.0.1 // indirect
-	github.com/cespare/xxhash/v2 v2.2.0 // indirect
+	github.com/cespare/xxhash/v2 v2.3.0 // indirect
 	github.com/davecgh/go-spew v1.1.1 // indirect
 	github.com/go-logfmt/logfmt v0.5.1 // indirect
 	github.com/go-logr/logr v1.4.1 // indirect
@@ -40,8 +40,8 @@ require (
 	golang.org/x/net v0.26.0 // indirect
 	golang.org/x/text v0.16.0 // indirect
 	golang.org/x/tools v0.21.1-0.20240508182429-e35e4ccd0d2d // indirect
-	google.golang.org/genproto/googleapis/rpc v0.0.0-20240318140521-94a12d6c2237 // indirect
-	google.golang.org/protobuf v1.33.0 // indirect
+	google.golang.org/genproto/googleapis/rpc v0.0.0-20240528184218-531527333157 // indirect
+	google.golang.org/protobuf v1.34.1 // indirect
 	gopkg.in/yaml.v2 v2.4.0 // indirect
 	gopkg.in/yaml.v3 v3.0.1 // indirect
 	k8s.io/klog/v2 v2.120.1 // indirect
