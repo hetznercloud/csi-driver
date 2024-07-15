@@ -74,7 +74,7 @@ To run the integrations tests, make sure you installed the following tools:
 1. Run the following command to run the integrations tests:
 
 ```sh
-go test -v ./test/integration
+go test -v -tags integration ./test/integration
 ```
 
 ### Run the kubernetes e2e tests
