@@ -31,7 +31,7 @@ func prepareDockerImage() error {
 	defer os.Unsetenv("GOARCH")
 	os.Setenv("CGO_ENABLED", "0")
 	defer os.Unsetenv("CGO_ENABLED")
-	if output, err := runCmd("go", "test", "-c", "-o", "integration.tests"); err != nil {
+	if output, err := runCmd("go", "test", "-tags", "integration", "-c", "-o", "integration.tests"); err != nil {
 		return fmt.Errorf("error compiling test binary: %w\n%s", err, output)
 	}
 
