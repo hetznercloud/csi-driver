@@ -4,7 +4,6 @@ import (
 	"context"
 	"net/http/httptest"
 	"testing"
-	"time"
 
 	"github.com/go-kit/log"
 	"github.com/stretchr/testify/assert"
@@ -12,21 +11,21 @@ import (
 	"github.com/hetznercloud/csi-driver/internal/csi"
 	"github.com/hetznercloud/csi-driver/internal/volumes"
 	"github.com/hetznercloud/hcloud-go/v2/hcloud"
-	"github.com/hetznercloud/hcloud-go/v2/hcloud/exp/mockutils"
+	"github.com/hetznercloud/hcloud-go/v2/hcloud/exp/mockutil"
 	"github.com/hetznercloud/hcloud-go/v2/hcloud/schema"
 )
 
 var _ volumes.Service = (*VolumeService)(nil)
 
-func makeTestVolumeService(t *testing.T, requests []mockutils.Request) (*VolumeService, func()) {
+func makeTestVolumeService(t *testing.T, requests []mockutil.Request) (*VolumeService, func()) {
 	t.Helper()
 
-	testServer := httptest.NewServer(mockutils.Handler(t, requests))
+	testServer := httptest.NewServer(mockutil.Handler(t, requests))
 
 	testClient := hcloud.NewClient(
 		hcloud.WithEndpoint(testServer.URL),
-		hcloud.WithBackoffFunc(func(_ int) time.Duration { return 0 }),
-		hcloud.WithPollBackoffFunc(func(_ int) time.Duration { return 0 }),
+		hcloud.WithRetryOpts(hcloud.RetryOpts{BackoffFunc: hcloud.ConstantBackoff(0), MaxRetries: 3}),
+		hcloud.WithPollBackoffFunc(hcloud.ConstantBackoff(0)),
 	)
 
 	volumeService := NewVolumeService(log.NewNopLogger(), testClient)
@@ -37,7 +36,7 @@ func makeTestVolumeService(t *testing.T, requests []mockutils.Request) (*VolumeS
 func TestResize(t *testing.T) {
 	t.Run("ErrVolumeSizeAlreadyReached", func(t *testing.T) {
 		t.Run("happy with larger volume size", func(t *testing.T) {
-			volumeService, cleanup := makeTestVolumeService(t, []mockutils.Request{
+			volumeService, cleanup := makeTestVolumeService(t, []mockutil.Request{
 				{
 					Method: "GET", Path: "/volumes/1",
 					Status: 200,
@@ -60,7 +59,7 @@ func TestResize(t *testing.T) {
 		})
 
 		t.Run("with equal volume size", func(t *testing.T) {
-			volumeService, cleanup := makeTestVolumeService(t, []mockutils.Request{
+			volumeService, cleanup := makeTestVolumeService(t, []mockutil.Request{
 				{
 					Method: "GET", Path: "/volumes/1",
 					Status: 200,
@@ -76,7 +75,7 @@ func TestResize(t *testing.T) {
 		})
 
 		t.Run("with smaller volume size", func(t *testing.T) {
-			volumeService, cleanup := makeTestVolumeService(t, []mockutils.Request{
+			volumeService, cleanup := makeTestVolumeService(t, []mockutil.Request{
 				{
 					Method: "GET", Path: "/volumes/1",
 					Status: 200,
