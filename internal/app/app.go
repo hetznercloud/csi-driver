@@ -149,7 +149,11 @@ func CreateHcloudClient(metricsRegistry *prometheus.Registry, logger log.Logger)
 	}
 
 	opts = append(opts, hcloud.WithPollOpts(hcloud.PollOpts{
-		BackoffFunc: hcloud.ExponentialBackoff(2, time.Duration(pollingInterval)*time.Second),
+		BackoffFunc: hcloud.ExponentialBackoffWithOpts(hcloud.ExponentialBackoffOpts{
+			Base:       time.Duration(pollingInterval) * time.Second,
+			Multiplier: 2,
+			Cap:        5 * time.Second,
+		}),
 	}))
 
 	return hcloud.NewClient(opts...), nil
