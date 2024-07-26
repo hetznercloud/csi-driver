@@ -77,7 +77,7 @@ jobs:
             skaffold
           helm: v3.15.3 # renovate: datasource=github-releases depName=helm/helm
           kubectl: v1.30.3 # renovate: datasource=github-releases depName=kubernetes/kubernetes
-          skaffold: v2.13.0 # renovate: datasource=github-releases depName=GoogleContainerTools/skaffold
+          skaffold: v2.13.1 # renovate: datasource=github-releases depName=GoogleContainerTools/skaffold
 
       - name: Setup k3sup
         run: curl -sLS https://get.k3sup.dev | sh
