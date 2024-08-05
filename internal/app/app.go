@@ -19,6 +19,7 @@ import (
 	"github.com/hetznercloud/csi-driver/internal/driver"
 	"github.com/hetznercloud/csi-driver/internal/metrics"
 	"github.com/hetznercloud/hcloud-go/v2/hcloud"
+	"github.com/hetznercloud/hcloud-go/v2/hcloud/exp/kit/envutil"
 	"github.com/hetznercloud/hcloud-go/v2/hcloud/metadata"
 )
 
@@ -101,21 +102,14 @@ func CreateMetrics(logger log.Logger) *metrics.Metrics {
 
 // CreateHcloudClient creates a hcloud.Client using  various environment variables to guide configuration
 func CreateHcloudClient(metricsRegistry *prometheus.Registry, logger log.Logger) (*hcloud.Client, error) {
-	// apiToken can be set via HCLOUD_TOKEN or HCLOUD_TOKEN_FILE
-	// HCLOUD_TOKEN is preferred
-	apiToken, ok := os.LookupEnv("HCLOUD_TOKEN")
-	if !ok {
-		filepath, ok := os.LookupEnv("HCLOUD_TOKEN_FILE")
-		if !ok {
-			return nil, fmt.Errorf("you need to provide an API token via the HCLOUD_TOKEN or HCLOUD_TOKEN_FILE env var")
-		}
-		apiTokenBytes, err := os.ReadFile(filepath)
-		if err != nil {
-			return nil, fmt.Errorf("failed to read HCLOUD_TOKEN_FILE: %w", err)
-		}
-		apiToken = strings.TrimSpace(string(apiTokenBytes))
+	// apiToken can be set via HCLOUD_TOKEN (preferred) or HCLOUD_TOKEN_FILE
+	apiToken, err := envutil.LookupEnvWithFile("HCLOUD_TOKEN")
+	if err != nil {
+		return nil, err
 	}
-
+	if apiToken == "" {
+		return nil, fmt.Errorf("you need to provide an API token via the HCLOUD_TOKEN or HCLOUD_TOKEN_FILE env var")
+	}
 	if len(apiToken) != 64 {
 		return nil, errors.New("entered token is invalid (must be exactly 64 characters long)")
 	}
