@@ -199,7 +199,7 @@ spec:
             limits: {}
             requests: {}
         - name: liveness-probe
-          image: registry.k8s.io/sig-storage/livenessprobe:v2.9.0
+          image: registry.k8s.io/sig-storage/livenessprobe:v2.13.1
           imagePullPolicy: IfNotPresent
           volumeMounts:
           - mountPath: /run/csi
@@ -332,7 +332,7 @@ spec:
             mountPath: /run/csi
 
         - name: liveness-probe
-          image: registry.k8s.io/sig-storage/livenessprobe:v2.9.0
+          image: registry.k8s.io/sig-storage/livenessprobe:v2.13.1
           imagePullPolicy: IfNotPresent
           resources:
             limits: {}
