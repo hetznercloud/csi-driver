@@ -64,6 +64,8 @@ github.com/hetznercloud/hcloud-go/v2 v2.11.0 h1:U1wD58/trMnKO6aHy2i2aguT5USwWbzC
 github.com/hetznercloud/hcloud-go/v2 v2.11.0/go.mod h1:dhix40Br3fDiBhwaSG/zgaYOFFddpfBm/6R1Zz0IiF0=
 github.com/hetznercloud/hcloud-go/v2 v2.12.0 h1:nOgfNTo0gyXZJJdM8mo/XH5MO/e80wAEpldRzdWayhY=
 github.com/hetznercloud/hcloud-go/v2 v2.12.0/go.mod h1:dhix40Br3fDiBhwaSG/zgaYOFFddpfBm/6R1Zz0IiF0=
+github.com/hetznercloud/hcloud-go/v2 v2.13.0 h1:rtjqtlrjLFROZxoD5m6hkg0Ve4MoElSvB6LWWD6/iG4=
+github.com/hetznercloud/hcloud-go/v2 v2.13.0/go.mod h1:dhix40Br3fDiBhwaSG/zgaYOFFddpfBm/6R1Zz0IiF0=
 github.com/ianlancetaylor/demangle v0.0.0-20200824232613-28f6c0f3b639/go.mod h1:aSSvb/t6k1mPoxDqO4vJh6VOCGPwU4O0C2/Eqndh1Sc=
 github.com/kisielk/errcheck v1.5.0/go.mod h1:pFxgyoBC7bSaBwPgfKdkLd5X25qrDl4LWUI2bnpBCr8=
 github.com/kisielk/gotool v1.0.0/go.mod h1:XhKaO+MFFWcvkIS/tQcRk01m1F5IRFswLeQ+oQHNcck=
