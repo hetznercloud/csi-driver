@@ -397,7 +397,7 @@ node:
   image:
     csiNodeDriverRegistrar:
       name: registry.k8s.io/sig-storage/csi-node-driver-registrar
-      tag: v2.7.0 # renovate: datasource=github-releases depName=kubernetes-csi/node-driver-registrar
+      tag: v2.11.1 # renovate: datasource=github-releases depName=kubernetes-csi/node-driver-registrar
       ## Specify a imagePullPolicy
       ## Defaults to 'Always' if image tag is 'latest', else set to 'IfNotPresent'
       ## ref: http://kubernetes.io/docs/user-guide/images/#pre-pulling-images
