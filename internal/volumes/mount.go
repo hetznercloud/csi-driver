@@ -203,7 +203,10 @@ func (s *LinuxMountService) FormatDisk(disk string, fstype string) error {
 		_, _, err := command("mkfs.ext4", "-F", "-m0", disk)
 		return err
 	case "xfs":
-		_, _, err := command("mkfs.xfs", disk)
+		_, _, err := command(
+			"mkfs.xfs",
+			"-i", "nrext64=0", // Compatibility with kernel that do not support nrext64
+			disk)
 		return err
 	case "btrfs":
 		_, _, err := command("mkfs.btrfs", disk)
