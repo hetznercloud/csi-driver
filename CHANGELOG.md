@@ -1,5 +1,17 @@
 # Changelog
 
+## [2.9.0](https://github.com/hetznercloud/csi-driver/compare/v2.8.0...v2.9.0) (2024-08-08)
+
+
+### Features
+
+* truncate poll exponential backoff function to max 10s ([#674](https://github.com/hetznercloud/csi-driver/issues/674)) ([5785418](https://github.com/hetznercloud/csi-driver/commit/57854187478ee5bfb5f6eff91173dc54f7f04f39))
+
+
+### Bug Fixes
+
+* xfs options compatibility between alpine and node kernel ([#689](https://github.com/hetznercloud/csi-driver/issues/689)) ([13d853b](https://github.com/hetznercloud/csi-driver/commit/13d853bfe821dc155df8c9eb30074107f732fa2e)), closes [#648](https://github.com/hetznercloud/csi-driver/issues/648)
+
 ## [2.8.0](https://github.com/hetznercloud/csi-driver/compare/v2.7.1...v2.8.0) (2024-06-24)
 
 
