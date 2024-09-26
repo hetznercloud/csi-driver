@@ -110,7 +110,10 @@ func CreateHcloudClient(metricsRegistry *prometheus.Registry, logger log.Logger)
 	if apiToken == "" {
 		return nil, fmt.Errorf("you need to provide an API token via the HCLOUD_TOKEN or HCLOUD_TOKEN_FILE env var")
 	}
-	if len(apiToken) != 64 {
+
+	allowArbitraryLengthToken := os.Getenv("HCLOUD_ALLOW_ARBITRARY_LENGTH_TOKEN") != ""
+
+	if !allowArbitraryLengthToken && len(apiToken) != 64 {
 		return nil, errors.New("entered token is invalid (must be exactly 64 characters long)")
 	}
 
