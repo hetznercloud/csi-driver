@@ -10,6 +10,8 @@ import (
 )
 
 type IdentityService struct {
+	proto.UnimplementedIdentityServer
+
 	logger log.Logger
 
 	readyMu sync.RWMutex

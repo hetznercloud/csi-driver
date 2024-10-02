@@ -17,6 +17,8 @@ import (
 )
 
 type ControllerService struct {
+	proto.UnimplementedControllerServer
+
 	logger        log.Logger
 	volumeService volumes.Service
 	location      string
@@ -298,10 +300,6 @@ func (s *ControllerService) ListVolumes(ctx context.Context, req *proto.ListVolu
 	return resp, nil
 }
 
-func (s *ControllerService) GetCapacity(context.Context, *proto.GetCapacityRequest) (*proto.GetCapacityResponse, error) {
-	return nil, status.Error(codes.Unimplemented, "getting capacity is not supported")
-}
-
 func (s *ControllerService) ControllerGetCapabilities(context.Context, *proto.ControllerGetCapabilitiesRequest) (*proto.ControllerGetCapabilitiesResponse, error) {
 	resp := &proto.ControllerGetCapabilitiesResponse{
 		Capabilities: []*proto.ControllerServiceCapability{
@@ -336,18 +334,6 @@ func (s *ControllerService) ControllerGetCapabilities(context.Context, *proto.Co
 		},
 	}
 	return resp, nil
-}
-
-func (s *ControllerService) CreateSnapshot(context.Context, *proto.CreateSnapshotRequest) (*proto.CreateSnapshotResponse, error) {
-	return nil, status.Error(codes.Unimplemented, "creating snapshots is not supported")
-}
-
-func (s *ControllerService) DeleteSnapshot(context.Context, *proto.DeleteSnapshotRequest) (*proto.DeleteSnapshotResponse, error) {
-	return nil, status.Error(codes.Unimplemented, "deleting snapshots is not supported")
-}
-
-func (s *ControllerService) ListSnapshots(context.Context, *proto.ListSnapshotsRequest) (*proto.ListSnapshotsResponse, error) {
-	return nil, status.Error(codes.Unimplemented, "listing snapshots is not supported")
 }
 
 func (s *ControllerService) ControllerExpandVolume(ctx context.Context, req *proto.ControllerExpandVolumeRequest) (*proto.ControllerExpandVolumeResponse, error) {
@@ -389,12 +375,4 @@ func (s *ControllerService) ControllerExpandVolume(ctx context.Context, req *pro
 		NodeExpansionRequired: true,
 	}
 	return resp, nil
-}
-
-func (s *ControllerService) ControllerGetVolume(_ context.Context, _ *proto.ControllerGetVolumeRequest) (*proto.ControllerGetVolumeResponse, error) {
-	return nil, status.Errorf(codes.Unimplemented, "method ControllerGetVolume not implemented")
-}
-
-func (s *ControllerService) ControllerModifyVolume(_ context.Context, _ *proto.ControllerModifyVolumeRequest) (*proto.ControllerModifyVolumeResponse, error) {
-	return nil, status.Errorf(codes.Unimplemented, "method ControllerModifyVolume not implemented")
 }

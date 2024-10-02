@@ -14,6 +14,8 @@ import (
 )
 
 type NodeService struct {
+	proto.UnimplementedNodeServer
+
 	logger              log.Logger
 	serverID            string
 	serverLocation      string
