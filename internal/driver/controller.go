@@ -331,6 +331,13 @@ func (s *ControllerService) ControllerGetCapabilities(context.Context, *proto.Co
 					},
 				},
 			},
+			{
+				Type: &proto.ControllerServiceCapability_Rpc{
+					Rpc: &proto.ControllerServiceCapability_RPC{
+						Type: proto.ControllerServiceCapability_RPC_SINGLE_NODE_MULTI_WRITER,
+					},
+				},
+			},
 		},
 	}
 	return resp, nil
