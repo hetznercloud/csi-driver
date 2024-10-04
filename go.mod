@@ -8,8 +8,7 @@ require (
 	github.com/container-storage-interface/spec v1.10.0
 	github.com/go-kit/log v0.2.1
 	github.com/golang/protobuf v1.5.4
-	github.com/grpc-ecosystem/go-grpc-middleware/v2 v2.1.0
-	github.com/grpc-ecosystem/go-grpc-prometheus v1.2.0
+	github.com/grpc-ecosystem/go-grpc-middleware/providers/prometheus v1.0.1
 	github.com/hetznercloud/hcloud-go/v2 v2.13.1
 	github.com/kubernetes-csi/csi-test/v5 v5.3.1
 	github.com/prometheus/client_golang v1.20.4
@@ -33,6 +32,7 @@ require (
 	github.com/google/go-cmp v0.6.0 // indirect
 	github.com/google/pprof v0.0.0-20210720184732-4bb14d4b1be1 // indirect
 	github.com/google/uuid v1.6.0 // indirect
+	github.com/grpc-ecosystem/go-grpc-middleware/v2 v2.1.0 // indirect
 	github.com/klauspost/compress v1.17.9 // indirect
 	github.com/moby/sys/mountinfo v0.7.1 // indirect
 	github.com/munnerz/goautoneg v0.0.0-20191010083416-a7dc8b61c822 // indirect
