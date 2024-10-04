@@ -12,7 +12,6 @@ import (
 
 	"github.com/go-kit/log"
 	"github.com/go-kit/log/level"
-	grpc_middleware "github.com/grpc-ecosystem/go-grpc-middleware/v2"
 	"github.com/prometheus/client_golang/prometheus"
 	"google.golang.org/grpc"
 
@@ -243,11 +242,9 @@ func CreateGRPCServer(logger log.Logger, metricsInterceptor grpc.UnaryServerInte
 	}
 
 	return grpc.NewServer(
-		grpc.UnaryInterceptor(
-			grpc_middleware.ChainUnaryServer(
-				requestLogger,
-				metricsInterceptor,
-			),
+		grpc.ChainUnaryInterceptor(
+			requestLogger,
+			metricsInterceptor,
 		),
 	)
 }
