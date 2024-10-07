@@ -52,6 +52,8 @@ func isCapabilitySupported(cap *proto.VolumeCapability) bool {
 	switch cap.AccessMode.Mode {
 	case proto.VolumeCapability_AccessMode_SINGLE_NODE_WRITER:
 		return true
+	case proto.VolumeCapability_AccessMode_SINGLE_NODE_MULTI_WRITER:
+		return true
 	default:
 		return false
 	}

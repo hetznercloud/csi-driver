@@ -154,7 +154,7 @@ spec:
       initContainers:
       containers:
         - name: csi-node-driver-registrar
-          image: registry.k8s.io/sig-storage/csi-node-driver-registrar:v2.11.1
+          image: registry.k8s.io/sig-storage/csi-node-driver-registrar:v2.12.0
           imagePullPolicy: IfNotPresent
           args:
             - --kubelet-registration-path=/var/lib/kubelet/plugins/csi.hetzner.cloud/socket
@@ -167,7 +167,7 @@ spec:
             limits: {}
             requests: {}
         - name: liveness-probe
-          image: registry.k8s.io/sig-storage/livenessprobe:v2.13.1
+          image: registry.k8s.io/sig-storage/livenessprobe:v2.14.0
           imagePullPolicy: IfNotPresent
           volumeMounts:
           - mountPath: /run/csi
@@ -264,7 +264,7 @@ spec:
       initContainers:
       containers:
         - name: csi-attacher
-          image: registry.k8s.io/sig-storage/csi-attacher:v4.6.1
+          image: registry.k8s.io/sig-storage/csi-attacher:v4.7.0
           imagePullPolicy: IfNotPresent
           resources:
             limits: {}
@@ -276,7 +276,7 @@ spec:
             mountPath: /run/csi
 
         - name: csi-resizer
-          image: registry.k8s.io/sig-storage/csi-resizer:v1.11.2
+          image: registry.k8s.io/sig-storage/csi-resizer:v1.12.0
           imagePullPolicy: IfNotPresent
           resources:
             limits: {}
@@ -286,7 +286,7 @@ spec:
             mountPath: /run/csi
 
         - name: csi-provisioner
-          image: registry.k8s.io/sig-storage/csi-provisioner:v5.0.2
+          image: registry.k8s.io/sig-storage/csi-provisioner:v5.1.0
           imagePullPolicy: IfNotPresent
           resources:
             limits: {}
@@ -299,7 +299,7 @@ spec:
             mountPath: /run/csi
 
         - name: liveness-probe
-          image: registry.k8s.io/sig-storage/livenessprobe:v2.13.1
+          image: registry.k8s.io/sig-storage/livenessprobe:v2.14.0
           imagePullPolicy: IfNotPresent
           resources:
             limits: {}

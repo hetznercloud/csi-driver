@@ -18,20 +18,20 @@ cache:
 
 build:
   stage: build
-  image: golang:1.22
+  image: golang:1.23
   script:
     - go env
     - go mod download
 
 test:lint:
   stage: test
-  image: golangci/golangci-lint:v1.60
+  image: golangci/golangci-lint:v1.61
   script:
     - golangci-lint run -v
 
 test:unit:
   stage: test
-  image: golang:1.22
+  image: golang:1.23
   script:
     - go test -v -coverprofile=coverage.txt -covermode count ./...
     - go get github.com/boumenot/gocover-cobertura

@@ -729,7 +729,7 @@ func TestControllerServiceControllerGetCapabilities(t *testing.T) {
 		t.Fatal(err)
 	}
 
-	if len(resp.Capabilities) != 4 {
+	if len(resp.Capabilities) != 5 {
 		t.Fatalf("unexpected number of capabilities: %d", len(resp.Capabilities))
 	}
 }
@@ -741,25 +741,48 @@ func TestControllerServiceValidateVolumeCapabilities(t *testing.T) {
 		return &csi.Volume{ID: id}, nil
 	}
 
-	req := &proto.ValidateVolumeCapabilitiesRequest{
-		VolumeId: "1",
-		VolumeCapabilities: []*proto.VolumeCapability{
-			{
-				AccessMode: &proto.VolumeCapability_AccessMode{
-					Mode: proto.VolumeCapability_AccessMode_SINGLE_NODE_WRITER,
+	testCases := []struct {
+		Name string
+		Req  *proto.ValidateVolumeCapabilitiesRequest
+		Code codes.Code
+	}{
+		{
+			Name: "SINGLE_NODE_WRITER",
+			Req: &proto.ValidateVolumeCapabilitiesRequest{
+				VolumeId: "1",
+				VolumeCapabilities: []*proto.VolumeCapability{
+					{
+						AccessMode: &proto.VolumeCapability_AccessMode{
+							Mode: proto.VolumeCapability_AccessMode_SINGLE_NODE_WRITER,
+						},
+					},
 				},
 			},
+			Code: codes.OK,
+		},
+		{
+			Name: "SINGLE_NODE_MULTI_WRITER",
+			Req: &proto.ValidateVolumeCapabilitiesRequest{
+				VolumeId: "1",
+				VolumeCapabilities: []*proto.VolumeCapability{
+					{
+						AccessMode: &proto.VolumeCapability_AccessMode{
+							Mode: proto.VolumeCapability_AccessMode_SINGLE_NODE_MULTI_WRITER,
+						},
+					},
+				},
+			},
+			Code: codes.OK,
 		},
 	}
-	resp, err := env.service.ValidateVolumeCapabilities(env.ctx, req)
-	if err != nil {
-		t.Fatal(err)
-	}
-	if resp.Confirmed == nil {
-		t.Fatal("expected confirmation")
-	}
-	if len(resp.Confirmed.VolumeCapabilities) != 1 {
-		t.Errorf("unexpected confirmed capabilities: %v", resp.Confirmed.VolumeCapabilities)
+
+	for _, testCase := range testCases {
+		t.Run(testCase.Name, func(t *testing.T) {
+			_, err := env.service.ValidateVolumeCapabilities(env.ctx, testCase.Req)
+			if status.Code(err) != testCase.Code {
+				t.Fatalf("unexpected error: %v", err)
+			}
+		})
 	}
 }
 

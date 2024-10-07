@@ -12,5 +12,11 @@
         "github.com/kubernetes-csi/csi-test"
       ]
     }
-  ]
+  ],
+  "kubernetes": {
+    "fileMatch": [
+      "deploy/kubernetes/hcloud-csi.yml",
+      "chart/.snapshots/.+\\.yaml$"
+    ]
+  }
 }
