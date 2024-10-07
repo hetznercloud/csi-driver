@@ -5,7 +5,7 @@ import (
 
 	"github.com/go-kit/log"
 	"github.com/go-kit/log/level"
-	grpc_prometheus "github.com/grpc-ecosystem/go-grpc-prometheus"
+	grpcprom "github.com/grpc-ecosystem/go-grpc-middleware/providers/prometheus"
 	"github.com/prometheus/client_golang/prometheus"
 	"github.com/prometheus/client_golang/prometheus/collectors"
 	"github.com/prometheus/client_golang/prometheus/promhttp"
@@ -19,24 +19,25 @@ type Metrics struct {
 	logger      log.Logger
 	addr        string
 	reg         *prometheus.Registry
-	grpcMetrics *grpc_prometheus.ServerMetrics
+	grpcMetrics *grpcprom.ServerMetrics
 	goMetrics   prometheus.Collector
 }
 
 func New(logger log.Logger, addr string) *Metrics {
 	metrics := &Metrics{
-		logger:      logger,
-		addr:        addr,
-		reg:         prometheus.NewRegistry(),
-		grpcMetrics: grpc_prometheus.NewServerMetrics(),
-		goMetrics:   collectors.NewGoCollector(),
+		logger: logger,
+		addr:   addr,
+		reg:    prometheus.NewRegistry(),
+		grpcMetrics: grpcprom.NewServerMetrics(
+			grpcprom.WithServerHandlingTimeHistogram(),
+		),
+		goMetrics: collectors.NewGoCollector(),
 	}
 
 	level.Debug(metrics.logger).Log(
 		"msg", "registering metrics with registry",
 	)
 
-	metrics.grpcMetrics.EnableHandlingTimeHistogram()
 	metrics.reg.MustRegister(metrics.goMetrics)
 	metrics.reg.MustRegister(metrics.grpcMetrics)
 
