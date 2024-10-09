@@ -724,3 +724,4 @@ storageClasses:
   - name: hcloud-volumes
     defaultStorageClass: true
     reclaimPolicy: Delete
+    includesRobotServers: false 
