@@ -10,6 +10,13 @@ provisioner: csi.hetzner.cloud
 volumeBindingMode: WaitForFirstConsumer
 allowVolumeExpansion: true
 reclaimPolicy: {{ $val.reclaimPolicy | quote }}
+{{- if $val.includesRobotServers }}
+allowedTopologies:
+- matchLabelExpressions:
+  - key: instance.hetzner.cloud/is-root-server
+    values:
+    - "false"
+{{- end }}
 ---
 {{- end }}
 {{- end }}
