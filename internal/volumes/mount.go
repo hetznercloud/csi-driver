@@ -203,10 +203,19 @@ func (s *LinuxMountService) FormatDisk(disk string, fstype string) error {
 		_, _, err := command("mkfs.ext4", "-F", "-m0", disk)
 		return err
 	case "xfs":
-		_, _, err := command(
-			"mkfs.xfs",
-			"-i", "nrext64=0", // Compatibility with kernel that do not support nrext64
-			disk)
+		xfsConfigPath, err := GetXFSConfigPath()
+		if err == nil {
+			_, _, err = command(
+				"mkfs.xfs", "-f", "-c", fmt.Sprintf("options=%s", xfsConfigPath), disk)
+		} else {
+			// Fallback
+			// Default flags extracted from /usr/share/xfsprogs/mkfs/lts_4.19.conf
+			// for maximum backwards compatibility with older kernels
+			// Also see: https://man.archlinux.org/man/xfs_admin.8.en#O
+			// This document mentions the flags and their minimal supported kernel version
+			_, _, err = command(
+				"mkfs.xfs", "-i", "nrext64=0", "-m", "bigtime=0", "-m", "inobtcount=0", disk)
+		}
 		return err
 	case "btrfs":
 		_, _, err := command("mkfs.btrfs", disk)
