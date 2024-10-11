@@ -35,9 +35,10 @@ type MountService interface {
 
 // LinuxMountService mounts volumes on a Linux system.
 type LinuxMountService struct {
-	logger     log.Logger
-	mounter    *mount.SafeFormatAndMount
-	cryptSetup *CryptSetup
+	logger        log.Logger
+	mounter       *mount.SafeFormatAndMount
+	cryptSetup    *CryptSetup
+	xfsConfigPath string
 }
 
 func NewLinuxMountService(logger log.Logger) *LinuxMountService {
@@ -47,7 +48,8 @@ func NewLinuxMountService(logger log.Logger) *LinuxMountService {
 			Interface: mount.New(""),
 			Exec:      exec.New(),
 		},
-		cryptSetup: NewCryptSetup(logger),
+		cryptSetup:    NewCryptSetup(logger),
+		xfsConfigPath: GetXFSConfigPath(),
 	}
 }
 
@@ -203,10 +205,10 @@ func (s *LinuxMountService) FormatDisk(disk string, fstype string) error {
 		_, _, err := command("mkfs.ext4", "-F", "-m0", disk)
 		return err
 	case "xfs":
-		xfsConfigPath, err := GetXFSConfigPath()
-		if err == nil {
+		var err error
+		if s.xfsConfigPath != "" {
 			_, _, err = command(
-				"mkfs.xfs", "-f", "-c", fmt.Sprintf("options=%s", xfsConfigPath), disk)
+				"mkfs.xfs", "-f", "-c", fmt.Sprintf("options=%s", s.xfsConfigPath), disk)
 		} else {
 			// Fallback
 			// Default flags extracted from /usr/share/xfsprogs/mkfs/lts_4.19.conf

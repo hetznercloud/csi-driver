@@ -1,7 +1,6 @@
 package volumes
 
 import (
-	"errors"
 	"fmt"
 	"io/fs"
 	"os"
@@ -68,10 +67,10 @@ func (k *KernelVersion) IsNewerThan(b KernelVersion) bool {
 	return false
 }
 
-func GetXFSConfigPath() (string, error) {
+func GetXFSConfigPath() string {
 	files, err := os.ReadDir(XFSDefaultConfigsLocation)
 	if err != nil {
-		return "", err
+		return ""
 	}
 
 	files = slices.DeleteFunc(files, func(file fs.DirEntry) bool {
@@ -84,11 +83,11 @@ func GetXFSConfigPath() (string, error) {
 		parts := strings.Split(versionString, ".")
 		major, err := strconv.Atoi(parts[0])
 		if err != nil {
-			return "", err
+			return ""
 		}
 		minor, err := strconv.Atoi(parts[1])
 		if err != nil {
-			return "", err
+			return ""
 		}
 		kernelVersionXFS := KernelVersion{
 			major: major,
@@ -104,15 +103,15 @@ func GetXFSConfigPath() (string, error) {
 
 	current, err := getKernelVersion()
 	if err != nil {
-		return "", nil
+		return ""
 	}
 
 	for _, supported := range supportedVersions {
 		if current == supported || current.IsNewerThan(supported) {
 			configName := fmt.Sprintf("lts_%d.%d.conf", supported.major, supported.minor)
-			return path.Join(XFSDefaultConfigsLocation, configName), nil
+			return path.Join(XFSDefaultConfigsLocation, configName)
 		}
 	}
 
-	return "", errors.New("no suitable mkfs XFS config found")
+	return ""
 }
