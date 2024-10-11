@@ -123,6 +123,38 @@ parameters:
 
 Your nodes might need to have `cryptsetup` installed to mount the volumes with LUKS.
 
+### XFS Filesystem
+
+XFS can be enabled by creating a custom storage class and settting the `csi.storage.k8s.io/fstype` parameter to `xfs`.
+
+If all nodes in your cluster run the same kernel version, the CSI driver will automatically determine the correct `mkfs.xfs` options. 
+
+However, if your cluster has nodes with different kernel versions, older nodes may fail to mount volumes created by newer kernels. To avoid this issue, you can set a minimum kernel version via `xfsMinSupportedKernel`. This ensures that all nodes use the appropriate `mkfs.xfs` defaults for maximum compatibility. 
+
+The following strings are valid versions, but only the major, minor, and patch components are considered. If a major, minor, or patch version is not provided, it is evaluated as `0`. 
+
+- `6`
+- `6.8`
+- `6.8.0`
+- `6.8.0-45`
+- `6.8.0-45-generic`
+
+#### Example
+
+```yaml
+apiVersion: storage.k8s.io/v1
+kind: StorageClass
+metadata:
+ name: hcloud-volumes-xfs
+provisioner: csi.hetzner.cloud
+reclaimPolicy: Delete
+volumeBindingMode: WaitForFirstConsumer
+allowVolumeExpansion: true
+parameters:
+ csi.storage.k8s.io/fstype: xfs
+ xfsMinSupportedKernel: "5.10"
+```
+
 ## Upgrading
 
 To upgrade the csi-driver version, you just need to apply the new manifests to your cluster.

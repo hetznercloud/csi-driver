@@ -16,11 +16,12 @@ const DefaultFSType = "ext4"
 
 // MountOpts specifies options for mounting a volume.
 type MountOpts struct {
-	BlockVolume          bool
-	FSType               string
-	Readonly             bool
-	Additional           []string // Additional mount options/flags passed to /bin/mount
-	EncryptionPassphrase string
+	BlockVolume           bool
+	FSType                string
+	Readonly              bool
+	Additional            []string // Additional mount options/flags passed to /bin/mount
+	EncryptionPassphrase  string
+	XFSMinSupportedKernel string
 }
 
 // MountService mounts volumes.
@@ -39,6 +40,7 @@ type LinuxMountService struct {
 }
 
 func NewLinuxMountService(logger log.Logger) *LinuxMountService {
+	currentKernelVersion, _ := getKernelVersion()
 	return &LinuxMountService{
 		logger: logger,
 		mounter: &mount.SafeFormatAndMount{
@@ -46,7 +48,7 @@ func NewLinuxMountService(logger log.Logger) *LinuxMountService {
 			Exec:      exec.New(),
 		},
 		cryptSetup:    NewCryptSetup(logger),
-		xfsConfigPath: GetXFSConfigPath(),
+		xfsConfigPath: GetXFSConfigPath(currentKernelVersion),
 	}
 }
 
