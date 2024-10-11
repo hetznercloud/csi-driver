@@ -32,9 +32,10 @@ type MountService interface {
 
 // LinuxMountService mounts volumes on a Linux system.
 type LinuxMountService struct {
-	logger     log.Logger
-	mounter    *mount.SafeFormatAndMount
-	cryptSetup *CryptSetup
+	logger        log.Logger
+	mounter       *mount.SafeFormatAndMount
+	cryptSetup    *CryptSetup
+	xfsConfigPath string
 }
 
 func NewLinuxMountService(logger log.Logger) *LinuxMountService {
@@ -44,7 +45,8 @@ func NewLinuxMountService(logger log.Logger) *LinuxMountService {
 			Interface: mount.New(""),
 			Exec:      exec.New(),
 		},
-		cryptSetup: NewCryptSetup(logger),
+		cryptSetup:    NewCryptSetup(logger),
+		xfsConfigPath: GetXFSConfigPath(),
 	}
 }
 
