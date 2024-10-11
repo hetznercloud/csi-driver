@@ -17,11 +17,12 @@ const DefaultFSType = "ext4"
 
 // MountOpts specifies options for mounting a volume.
 type MountOpts struct {
-	BlockVolume          bool
-	FSType               string
-	Readonly             bool
-	Additional           []string // Additional mount options/flags passed to /bin/mount
-	EncryptionPassphrase string
+	BlockVolume           bool
+	FSType                string
+	Readonly              bool
+	Additional            []string // Additional mount options/flags passed to /bin/mount
+	EncryptionPassphrase  string
+	XFSMinSupportedKernel string
 }
 
 // MountService mounts volumes.
@@ -29,7 +30,7 @@ type MountService interface {
 	Publish(targetPath string, devicePath string, opts MountOpts) error
 	Unpublish(targetPath string) error
 	PathExists(path string) (bool, error)
-	FormatDisk(disk string, fstype string) error
+	FormatDisk(disk string, fstype string, xfsMinSupportedKernel string) error
 	DetectDiskFormat(disk string) (string, error)
 }
 
@@ -42,6 +43,7 @@ type LinuxMountService struct {
 }
 
 func NewLinuxMountService(logger log.Logger) *LinuxMountService {
+	currentKernelVersion, _ := getKernelVersion()
 	return &LinuxMountService{
 		logger: logger,
 		mounter: &mount.SafeFormatAndMount{
@@ -49,7 +51,7 @@ func NewLinuxMountService(logger log.Logger) *LinuxMountService {
 			Exec:      exec.New(),
 		},
 		cryptSetup:    NewCryptSetup(logger),
-		xfsConfigPath: GetXFSConfigPath(),
+		xfsConfigPath: GetXFSConfigPath(currentKernelVersion),
 	}
 }
 
@@ -136,7 +138,7 @@ func (s *LinuxMountService) Publish(targetPath string, devicePath string, opts M
 				return fmt.Errorf("cannot publish unformatted disk %s in read-only mode", devicePath)
 			}
 
-			if err = s.FormatDisk(devicePath, opts.FSType); err != nil {
+			if err = s.FormatDisk(devicePath, opts.FSType, opts.XFSMinSupportedKernel); err != nil {
 				return err
 			}
 		} else if existingFSType != opts.FSType {
@@ -194,7 +196,7 @@ func (s *LinuxMountService) PathExists(path string) (bool, error) {
 	return false, err
 }
 
-func (s *LinuxMountService) FormatDisk(disk string, fstype string) error {
+func (s *LinuxMountService) FormatDisk(disk string, fstype string, xfsMinSupportedKernel string) error {
 	level.Info(s.logger).Log(
 		"msg", "formatting disk",
 		"disk", disk,
@@ -206,9 +208,28 @@ func (s *LinuxMountService) FormatDisk(disk string, fstype string) error {
 		return err
 	case "xfs":
 		var err error
-		if s.xfsConfigPath != "" {
+		// By default node checks its own minimal supported kernel version
+		var xfsConfigPath = s.xfsConfigPath
+
+		// User configures cluster wide minimal supported kernel version
+		if xfsMinSupportedKernel != "" {
+			kv, err := ParseKernelVersion(xfsMinSupportedKernel)
+			if err == nil {
+				xfsConfigPath = GetXFSConfigPath(kv)
+			}
+		}
+
+		if xfsConfigPath != "" {
 			_, _, err = command(
 				"mkfs.xfs", "-f", "-c", fmt.Sprintf("options=%s", s.xfsConfigPath), disk)
+
+			if err == nil {
+				level.Info(s.logger).Log(
+					"msg", "formatted disk with xfs",
+					"xfs-config-path", xfsConfigPath,
+					"is-cluster-config", xfsMinSupportedKernel != "",
+				)
+			}
 		} else {
 			// Fallback
 			// Default flags extracted from /usr/share/xfsprogs/mkfs/lts_4.19.conf
@@ -218,6 +239,7 @@ func (s *LinuxMountService) FormatDisk(disk string, fstype string) error {
 			_, _, err = command(
 				"mkfs.xfs", "-i", "nrext64=0", "-m", "bigtime=0", "-m", "inobtcount=0", disk)
 		}
+
 		return err
 	case "btrfs":
 		_, _, err := command("mkfs.btrfs", disk)

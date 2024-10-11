@@ -206,7 +206,7 @@ func (s *sanityMountService) PathExists(path string) (bool, error) {
 	return true, nil
 }
 
-func (s *sanityMountService) FormatDisk(_ string, _ string) error {
+func (s *sanityMountService) FormatDisk(_ string, _ string, _ string) error {
 	return nil
 }
 

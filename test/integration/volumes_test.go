@@ -37,7 +37,7 @@ func TestVolumePublishUnpublish(t *testing.T) {
 			"plain-correct-formatted",
 			volumes.MountOpts{},
 			func(svc volumes.MountService, cs *volumes.CryptSetup, device string) error {
-				return svc.FormatDisk(device, "ext4")
+				return svc.FormatDisk(device, "ext4", "")
 			},
 			nil,
 		},
@@ -45,7 +45,7 @@ func TestVolumePublishUnpublish(t *testing.T) {
 			"plain-wrong-formatted",
 			volumes.MountOpts{},
 			func(svc volumes.MountService, cs *volumes.CryptSetup, device string) error {
-				return svc.FormatDisk(device, "xfs")
+				return svc.FormatDisk(device, "xfs", "")
 			},
 			fmt.Errorf("requested ext4 volume, but disk /dev-fake-plain-wrong-formatted already is formatted with xfs"),
 		},
@@ -85,7 +85,7 @@ func TestVolumePublishUnpublish(t *testing.T) {
 
 				luksDevicePath := volumes.GenerateLUKSDevicePath(luksDeviceName)
 
-				return svc.FormatDisk(luksDevicePath, "ext4")
+				return svc.FormatDisk(luksDevicePath, "ext4", "")
 			},
 			nil,
 		},
@@ -93,7 +93,7 @@ func TestVolumePublishUnpublish(t *testing.T) {
 			"encrypted-wrong-formatted-1",
 			volumes.MountOpts{EncryptionPassphrase: "passphrase"},
 			func(svc volumes.MountService, cs *volumes.CryptSetup, device string) error {
-				return svc.FormatDisk(device, "ext4")
+				return svc.FormatDisk(device, "ext4", "")
 			},
 			fmt.Errorf("requested encrypted volume, but disk /dev-fake-encrypted-wrong-formatted-1 already is formatted with ext4"),
 		},
@@ -295,14 +295,14 @@ func TestDetectDiskFormat(t *testing.T) {
 		{
 			"ext4",
 			func(svc *volumes.LinuxMountService, disk string) error {
-				return svc.FormatDisk(disk, "ext4")
+				return svc.FormatDisk(disk, "ext4", "")
 			},
 			"ext4",
 		},
 		{
 			"xfs",
 			func(svc *volumes.LinuxMountService, disk string) error {
-				return svc.FormatDisk(disk, "xfs")
+				return svc.FormatDisk(disk, "xfs", "")
 			},
 			"xfs",
 		},
