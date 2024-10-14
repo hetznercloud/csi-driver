@@ -221,15 +221,17 @@ func (s *LinuxMountService) FormatDisk(disk string, fstype string, xfsMinSupport
 
 		if xfsConfigPath != "" {
 			_, _, err = command(
-				"mkfs.xfs", "-f", "-c", fmt.Sprintf("options=%s", s.xfsConfigPath), disk)
+				"mkfs.xfs", "-f", "-c", fmt.Sprintf("options=%s", xfsConfigPath), disk)
 
-			if err == nil {
-				level.Info(s.logger).Log(
-					"msg", "formatted disk with xfs",
-					"xfs-config-path", xfsConfigPath,
-					"is-cluster-config", xfsMinSupportedKernel != "",
-				)
+			if err != nil {
+				return err
 			}
+
+			level.Info(s.logger).Log(
+				"msg", "formatted disk with xfs",
+				"xfs-config-path", xfsConfigPath,
+				"is-cluster-config", xfsMinSupportedKernel != "",
+			)
 		} else {
 			// Fallback
 			// Default flags extracted from /usr/share/xfsprogs/mkfs/lts_4.19.conf
