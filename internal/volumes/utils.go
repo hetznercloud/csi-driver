@@ -15,9 +15,17 @@ import (
 const XFSDefaultConfigsLocation = "/usr/share/xfsprogs/mkfs"
 
 type KernelVersion struct {
-	major int
-	minor int
-	patch int
+	Major int
+	Minor int
+	Patch int
+}
+
+func NewKernelVersion(major int, minor int, patch int) *KernelVersion {
+	return &KernelVersion{
+		Major: major,
+		Minor: minor,
+		Patch: patch,
+	}
 }
 
 func ParseKernelVersion(versionString string) (*KernelVersion, error) {
@@ -35,9 +43,9 @@ func ParseKernelVersion(versionString string) (*KernelVersion, error) {
 	}
 
 	return &KernelVersion{
-		major: versions[0],
-		minor: versions[1],
-		patch: versions[2],
+		Major: versions[0],
+		Minor: versions[1],
+		Patch: versions[2],
 	}, nil
 }
 
@@ -59,15 +67,15 @@ func getKernelVersion() (*KernelVersion, error) {
 }
 
 func (k *KernelVersion) IsNewerThan(b *KernelVersion) bool {
-	if k.major != b.major {
-		return k.major > b.major
+	if k.Major != b.Major {
+		return k.Major > b.Major
 	}
 
-	if k.minor != b.minor {
-		return k.minor > b.minor
+	if k.Minor != b.Minor {
+		return k.Minor > b.Minor
 	}
 
-	return k.patch > b.patch
+	return k.Patch > b.Patch
 }
 
 func GetXFSConfigPath(current *KernelVersion) string {
@@ -93,8 +101,8 @@ func GetXFSConfigPath(current *KernelVersion) string {
 			return ""
 		}
 		kernelVersionXFS := KernelVersion{
-			major: major,
-			minor: minor,
+			Major: major,
+			Minor: minor,
 		}
 
 		supportedVersions = append(supportedVersions, kernelVersionXFS)
@@ -106,7 +114,7 @@ func GetXFSConfigPath(current *KernelVersion) string {
 
 	for _, supported := range supportedVersions {
 		if *current == supported || current.IsNewerThan(&supported) {
-			configName := fmt.Sprintf("lts_%d.%d.conf", supported.major, supported.minor)
+			configName := fmt.Sprintf("lts_%d.%d.conf", supported.Major, supported.Minor)
 			return path.Join(XFSDefaultConfigsLocation, configName)
 		}
 	}
