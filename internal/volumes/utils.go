@@ -2,17 +2,19 @@ package volumes
 
 import (
 	"fmt"
-	"io/fs"
-	"os"
 	"path"
-	"slices"
+	"path/filepath"
 	"sort"
 	"strconv"
 	"strings"
 	"syscall"
 )
 
-const XFSDefaultConfigsLocation = "/usr/share/xfsprogs/mkfs"
+const (
+	XFSDefaultConfigsLocation = "/usr/share/xfsprogs/mkfs/"
+	XFSConfigMatchPattern     = "lts_[0-9]*.[0-9]*.conf"
+	XFSGlobMatchPattern       = XFSDefaultConfigsLocation + XFSConfigMatchPattern
+)
 
 type KernelVersion struct {
 	Major int
@@ -79,18 +81,20 @@ func (k *KernelVersion) IsNewerThan(b *KernelVersion) bool {
 }
 
 func GetXFSConfigPath(current *KernelVersion) string {
-	files, err := os.ReadDir(XFSDefaultConfigsLocation)
+	filepaths, err := filepath.Glob(XFSGlobMatchPattern)
 	if err != nil {
 		return ""
 	}
 
-	files = slices.DeleteFunc(files, func(file fs.DirEntry) bool {
-		return !strings.HasPrefix(file.Name(), "lts_")
-	})
+	filenames := make([]string, 0, len(filepaths))
+	for _, path := range filepaths {
+		filename := strings.TrimPrefix(path, XFSDefaultConfigsLocation)
+		filenames = append(filenames, filename)
+	}
 
-	supportedVersions := make([]KernelVersion, 0, len(files))
-	for _, file := range files {
-		versionString := strings.TrimSuffix(strings.TrimPrefix(file.Name(), "lts_"), ".conf")
+	supportedVersions := make([]KernelVersion, 0, len(filepaths))
+	for _, filename := range filenames {
+		versionString := strings.TrimSuffix(strings.TrimPrefix(filename, "lts_"), ".conf")
 		parts := strings.Split(versionString, ".")
 		major, err := strconv.Atoi(parts[0])
 		if err != nil {
