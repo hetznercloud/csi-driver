@@ -217,7 +217,8 @@ func (s *LinuxMountService) FormatDisk(disk string, fstype string, xfsOpts XFSOp
 			xfsArgs []string
 		)
 
-		if xfsOpts.AutofetchKernelVersion != "" {
+		switch {
+		case xfsOpts.AutofetchKernelVersion != "":
 			fetch, err := strconv.ParseBool(xfsOpts.AutofetchKernelVersion)
 			if err != nil {
 				return err
@@ -237,7 +238,7 @@ func (s *LinuxMountService) FormatDisk(disk string, fstype string, xfsOpts XFSOp
 					"-c", fmt.Sprintf("options=%s", xfsConfigPath),
 				}
 			}
-		} else if xfsOpts.MinimumSupportedKernelVersion != "" {
+		case xfsOpts.MinimumSupportedKernelVersion != "":
 			kernelVersion, err := version.ParseSemantic(xfsOpts.MinimumSupportedKernelVersion)
 			if err != nil {
 				return err
@@ -250,7 +251,7 @@ func (s *LinuxMountService) FormatDisk(disk string, fstype string, xfsOpts XFSOp
 			xfsArgs = []string{
 				"-c", fmt.Sprintf("options=%s", xfsConfigPath),
 			}
-		} else if xfsOpts.ExtraArgs != "" {
+		case xfsOpts.ExtraArgs != "":
 			xfsArgs = strings.Split(xfsOpts.ExtraArgs, " ")
 		}
 
