@@ -127,7 +127,7 @@ Your nodes might need to have `cryptsetup` installed to mount the volumes with L
 
 XFS can be enabled by specifying a custom storage class and setting the `csi.storage.k8s.io/fstype` parameter to `xfs`.
 
-XFS disk formatting can be configured in different modes, but only one mode should be active at any given time. If no mode is specified, the CSI driver will default to options provided by the XFS tooling to ensure compatibility with older kernel versions.
+XFS disk formatting can be configured in different modes, but only one mode should be active at any given time. If no mode is specified, the CSI driver will default to options provided by the XFS tooling to ensure compatibility with older kernel versions (>=4.19).
 
 #### Extra Args
 
