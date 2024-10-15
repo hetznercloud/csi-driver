@@ -3,36 +3,32 @@ package volumes_test
 import (
 	"testing"
 
-	"github.com/hetznercloud/csi-driver/internal/volumes"
+	"k8s.io/apimachinery/pkg/util/version"
 )
 
 func TestParseKernelVersion(t *testing.T) {
 	kernelVersions := []string{
-		"6.8",
 		"6.8.0",
-		"6.8.0-45",
 		"6.8.0-45-generic",
+		"6.8.0-rc1",
+		"v6.8.0",
+		"v6.8.0-45-generic",
+		"v6.8.0-rc1",
 	}
 
-	correctVersion := volumes.NewKernelVersion(6, 8, 0)
+	correctVersion, err := version.ParseSemantic("6.8.0")
+	if err != nil {
+		t.Fatal(err)
+	}
 
-	for _, version := range kernelVersions {
-		parsedVersion, err := volumes.ParseKernelVersion(version)
+	for _, kernelVersion := range kernelVersions {
+		parsedVersion, err := version.ParseSemantic(kernelVersion)
 		if err != nil {
 			t.Fatal(err)
 		}
 
-		if *parsedVersion != *correctVersion {
+		if !correctVersion.AtLeast(parsedVersion) {
 			t.Fatalf("Parsed version is not correct: %v\n", parsedVersion)
 		}
-	}
-}
-
-func TestIsNewerThan(t *testing.T) {
-	newerVersion := volumes.NewKernelVersion(6, 8, 0)
-	olderVersion := volumes.NewKernelVersion(6, 1, 0)
-
-	if !newerVersion.IsNewerThan(olderVersion) {
-		t.Fatalf("IsNewerThan returned false result for newer version: %v and older version %v\n", newerVersion, olderVersion)
 	}
 }

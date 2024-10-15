@@ -125,34 +125,46 @@ Your nodes might need to have `cryptsetup` installed to mount the volumes with L
 
 ### XFS Filesystem
 
-XFS can be enabled by creating a custom storage class and settting the `csi.storage.k8s.io/fstype` parameter to `xfs`.
+XFS can be enabled by specifying a custom storage class and setting the `csi.storage.k8s.io/fstype` parameter to `xfs`.
 
-If all nodes in your cluster run the same kernel version, the CSI driver will automatically determine the correct `mkfs.xfs` options. 
+XFS disk formatting can be configured in different modes, but only one mode should be active at any given time. If no mode is specified, the CSI driver will default to options provided by the XFS tooling to ensure compatibility with older kernel versions.
 
-However, if your cluster has nodes with different kernel versions, older nodes may fail to mount volumes created by newer kernels. To avoid this issue, you can set a minimum kernel version via `xfsMinSupportedKernel`. This ensures that all nodes use the appropriate `mkfs.xfs` defaults for maximum compatibility. 
+#### Extra Args
 
-The following strings are valid versions, but only the major, minor, and patch components are considered. If a major, minor, or patch version is not provided, it is evaluated as `0`. 
+The storage class parameter `xfs.extraArgs` allows you to pass specific options to the `mkfs.xfs` command directly. The CSI driver will append the disk path to the end of the command.
+```yaml
+parameters:
+  csi.storage.k8s.io/fstype: xfs
+  xfs.extraArgs: "-i nrext64=0 -m bigtime=0 -m inobtcount=0"
+```
 
-- `6`
-- `6.8`
+#### Minimum Supported Kernel Version
+
+The `xfs.minimumSupportedKernelVersion` storage class parameter forces `mkfs.xfs` to use default options that ensure compatibility with all nodes running at least the specified kernel version.
+
+##### Version Examples
+
+Version strings are evaluated based on [semver versioning](https://semver.org/).
+
 - `6.8.0`
-- `6.8.0-45`
 - `6.8.0-45-generic`
-
-#### Example
+- `v6.8.0`
+- `v6.8.0-45-generic`
 
 ```yaml
-apiVersion: storage.k8s.io/v1
-kind: StorageClass
-metadata:
- name: hcloud-volumes-xfs
-provisioner: csi.hetzner.cloud
-reclaimPolicy: Delete
-volumeBindingMode: WaitForFirstConsumer
-allowVolumeExpansion: true
 parameters:
- csi.storage.k8s.io/fstype: xfs
- xfsMinSupportedKernel: "5.10"
+  csi.storage.k8s.io/fstype: xfs
+  xfs.minimumSupportedKernelVersion: "5.15"
+```
+
+#### Auto Fetch Kernel Version
+
+With the `xfs.autofetchKernelVersion` parameter, the CSI driver will automatically detect the currently used kernel version and apply the appropriate `mkfs.xfs` options. This should only be used in clusters with uniform kernel versions.
+
+```yaml
+parameters:
+  csi.storage.k8s.io/fstype: xfs
+  xfs.autofetchKernelVersion: "true"
 ```
 
 ## Upgrading

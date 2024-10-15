@@ -1,13 +1,15 @@
 package volumes
 
 import (
+	"errors"
 	"fmt"
 	"path"
 	"path/filepath"
 	"sort"
-	"strconv"
 	"strings"
 	"syscall"
+
+	"k8s.io/apimachinery/pkg/util/version"
 )
 
 const (
@@ -16,45 +18,10 @@ const (
 	XFSGlobMatchPattern       = XFSDefaultConfigsLocation + XFSConfigMatchPattern
 )
 
-type KernelVersion struct {
-	Major int
-	Minor int
-	Patch int
-}
-
-func NewKernelVersion(major int, minor int, patch int) *KernelVersion {
-	return &KernelVersion{
-		Major: major,
-		Minor: minor,
-		Patch: patch,
-	}
-}
-
-func ParseKernelVersion(versionString string) (*KernelVersion, error) {
-	releaseString := strings.Trim(versionString, "\x00")
-	parts := strings.Split(releaseString, "-")
-	mmpParts := strings.Split(parts[0], ".") // Major.Minor.Patch
-
-	versions := make([]int, 3)
-	for i, part := range mmpParts {
-		version, err := strconv.Atoi(part)
-		if err != nil {
-			return &KernelVersion{}, err
-		}
-		versions[i] = version
-	}
-
-	return &KernelVersion{
-		Major: versions[0],
-		Minor: versions[1],
-		Patch: versions[2],
-	}, nil
-}
-
-func getKernelVersion() (*KernelVersion, error) {
+func GetKernelVersion() (*version.Version, error) {
 	var utsname syscall.Utsname
 	if err := syscall.Uname(&utsname); err != nil {
-		return &KernelVersion{}, err
+		return &version.Version{}, err
 	}
 
 	data := make([]byte, 65)
@@ -65,25 +32,15 @@ func getKernelVersion() (*KernelVersion, error) {
 		data[i] = byte(utsname.Release[i])
 	}
 
-	return ParseKernelVersion(string(data))
+	versionString := strings.Trim(string(data), "\x00")
+
+	return version.ParseSemantic(versionString)
 }
 
-func (k *KernelVersion) IsNewerThan(b *KernelVersion) bool {
-	if k.Major != b.Major {
-		return k.Major > b.Major
-	}
-
-	if k.Minor != b.Minor {
-		return k.Minor > b.Minor
-	}
-
-	return k.Patch > b.Patch
-}
-
-func GetXFSConfigPath(current *KernelVersion) string {
+func GetXFSConfigPath(current *version.Version) (string, error) {
 	filepaths, err := filepath.Glob(XFSGlobMatchPattern)
 	if err != nil {
-		return ""
+		return "", err
 	}
 
 	filenames := make([]string, 0, len(filepaths))
@@ -92,36 +49,27 @@ func GetXFSConfigPath(current *KernelVersion) string {
 		filenames = append(filenames, filename)
 	}
 
-	supportedVersions := make([]KernelVersion, 0, len(filepaths))
+	supportedVersions := make([]*version.Version, 0, len(filepaths))
 	for _, filename := range filenames {
 		versionString := strings.TrimSuffix(strings.TrimPrefix(filename, "lts_"), ".conf")
-		parts := strings.Split(versionString, ".")
-		major, err := strconv.Atoi(parts[0])
+		versionString = fmt.Sprintf("%s.0", versionString)
+		kernelVersionXFS, err := version.ParseSemantic(versionString)
 		if err != nil {
-			return ""
+			continue
 		}
-		minor, err := strconv.Atoi(parts[1])
-		if err != nil {
-			return ""
-		}
-		kernelVersionXFS := KernelVersion{
-			Major: major,
-			Minor: minor,
-		}
-
 		supportedVersions = append(supportedVersions, kernelVersionXFS)
 	}
 
 	sort.Slice(supportedVersions, func(i, j int) bool {
-		return supportedVersions[i].IsNewerThan(&supportedVersions[j])
+		return supportedVersions[i].GreaterThan(supportedVersions[j])
 	})
 
 	for _, supported := range supportedVersions {
-		if *current == supported || current.IsNewerThan(&supported) {
-			configName := fmt.Sprintf("lts_%d.%d.conf", supported.Major, supported.Minor)
-			return path.Join(XFSDefaultConfigsLocation, configName)
+		if current.AtLeast(supported) || current.GreaterThan(supported) {
+			configName := fmt.Sprintf("lts_%d.%d.conf", supported.Major(), supported.Minor())
+			return path.Join(XFSDefaultConfigsLocation, configName), nil
 		}
 	}
 
-	return ""
+	return "", errors.New("no suitable mkfs.xfs config found")
 }
