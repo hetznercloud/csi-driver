@@ -80,7 +80,7 @@ type VolumeMountService struct {
 	PublishFunc          func(targetPath string, devicePath string, opts volumes.MountOpts) error
 	UnpublishFunc        func(targetPath string) error
 	PathExistsFunc       func(path string) (bool, error)
-	FormatDiskFunc       func(disk string, fstype string, xfsMinSupportedKernel string) error
+	FormatDiskFunc       func(disk string, fstype string, xfsOpts volumes.XFSOpts) error
 	DetectDiskFormatFunc func(disk string) (string, error)
 }
 
@@ -105,11 +105,11 @@ func (s *VolumeMountService) Unpublish(targetPath string) error {
 	return s.UnpublishFunc(targetPath)
 }
 
-func (s *VolumeMountService) FormatDisk(disk string, fstype string, _ string) error {
+func (s *VolumeMountService) FormatDisk(disk string, fstype string, _ volumes.XFSOpts) error {
 	if s.FormatDiskFunc == nil {
 		panic("not implemented")
 	}
-	return s.FormatDiskFunc(disk, fstype, "")
+	return s.FormatDiskFunc(disk, fstype, volumes.XFSOpts{})
 }
 
 func (s *VolumeMountService) DetectDiskFormat(disk string) (string, error) {

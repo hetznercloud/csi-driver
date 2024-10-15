@@ -101,7 +101,9 @@ func (s *ControllerService) CreateVolume(ctx context.Context, req *proto.CreateV
 				},
 			},
 			VolumeContext: map[string]string{
-				"xfsMinSupportedKernel": req.Parameters["xfsMinSupportedKernel"],
+				"xfs.extraArgs":                     req.Parameters["xfs.extraArgs"],
+				"xfs.minimumSupportedKernelVersion": req.Parameters["xfs.minimumSupportedKernelVersion"],
+				"xfs.autofetchKernelVersion":        req.Parameters["xfs.autofetchKernelVersion"],
 			},
 		},
 	}
