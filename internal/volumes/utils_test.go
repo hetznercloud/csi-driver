@@ -1,10 +1,25 @@
 package volumes_test
 
 import (
+	"os/exec"
+	"strings"
 	"testing"
 
 	"k8s.io/apimachinery/pkg/util/version"
+
+	"github.com/hetznercloud/csi-driver/internal/volumes"
 )
+
+func getKernelVersionViaExec() (*version.Version, error) {
+	cmd := exec.Command("uname", "-r")
+	combinedOutput, err := cmd.CombinedOutput()
+	if err != nil {
+		return nil, err
+	}
+	output := string(combinedOutput)
+	output = strings.TrimSpace(output)
+	return version.ParseSemantic(output)
+}
 
 func TestParseKernelVersion(t *testing.T) {
 	kernelVersions := []string{
@@ -30,5 +45,21 @@ func TestParseKernelVersion(t *testing.T) {
 		if !correctVersion.AtLeast(parsedVersion) {
 			t.Fatalf("Parsed version is not correct: %v\n", parsedVersion)
 		}
+	}
+}
+
+func TestKernelVersion(t *testing.T) {
+	unameVersion, err := getKernelVersionViaExec()
+	if err != nil {
+		t.Fatal(err)
+	}
+
+	kernelVersion, err := volumes.GetKernelVersion()
+	if err != nil {
+		t.Fatal(err)
+	}
+
+	if !unameVersion.EqualTo(kernelVersion) {
+		t.Fatalf("Versions differ! uname: %s - GetKernelVersion: %s", unameVersion, kernelVersion)
 	}
 }

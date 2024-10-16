@@ -1,7 +1,6 @@
 package volumes
 
 import (
-	"errors"
 	"fmt"
 	"path"
 	"path/filepath"
@@ -21,7 +20,7 @@ const (
 func GetKernelVersion() (*version.Version, error) {
 	var utsname syscall.Utsname
 	if err := syscall.Uname(&utsname); err != nil {
-		return &version.Version{}, err
+		return nil, err
 	}
 
 	data := make([]byte, 65)
@@ -71,5 +70,5 @@ func GetXFSConfigPath(current *version.Version) (string, error) {
 		}
 	}
 
-	return "", errors.New("no suitable mkfs.xfs config found")
+	return "", fmt.Errorf("no suitable mkfs.xfs config found for version: %s; tested versions: %v", current.String(), supportedVersions)
 }
