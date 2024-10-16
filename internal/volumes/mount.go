@@ -5,10 +5,12 @@ import (
 	"os"
 	"path/filepath"
 	"regexp"
+	"strconv"
 	"strings"
 
 	"github.com/go-kit/log"
 	"github.com/go-kit/log/level"
+	"k8s.io/apimachinery/pkg/util/version"
 	"k8s.io/mount-utils"
 	"k8s.io/utils/exec"
 )
@@ -22,6 +24,13 @@ type MountOpts struct {
 	Readonly             bool
 	Additional           []string // Additional mount options/flags passed to /bin/mount
 	EncryptionPassphrase string
+	XFSOpts              XFSOpts
+}
+
+type XFSOpts struct {
+	ExtraArgs                     string
+	MinimumSupportedKernelVersion string
+	AutofetchKernelVersion        string
 }
 
 // MountService mounts volumes.
@@ -29,7 +38,7 @@ type MountService interface {
 	Publish(targetPath string, devicePath string, opts MountOpts) error
 	Unpublish(targetPath string) error
 	PathExists(path string) (bool, error)
-	FormatDisk(disk string, fstype string) error
+	FormatDisk(disk string, fstype string, xfsOpts XFSOpts) error
 	DetectDiskFormat(disk string) (string, error)
 }
 
@@ -134,7 +143,7 @@ func (s *LinuxMountService) Publish(targetPath string, devicePath string, opts M
 				return fmt.Errorf("cannot publish unformatted disk %s in read-only mode", devicePath)
 			}
 
-			if err = s.FormatDisk(devicePath, opts.FSType); err != nil {
+			if err = s.FormatDisk(devicePath, opts.FSType, opts.XFSOpts); err != nil {
 				return err
 			}
 		} else if existingFSType != opts.FSType {
@@ -192,7 +201,7 @@ func (s *LinuxMountService) PathExists(path string) (bool, error) {
 	return false, err
 }
 
-func (s *LinuxMountService) FormatDisk(disk string, fstype string) error {
+func (s *LinuxMountService) FormatDisk(disk string, fstype string, xfsOpts XFSOpts) error {
 	level.Info(s.logger).Log(
 		"msg", "formatting disk",
 		"disk", disk,
@@ -203,10 +212,67 @@ func (s *LinuxMountService) FormatDisk(disk string, fstype string) error {
 		_, _, err := command("mkfs.ext4", "-F", "-m0", disk)
 		return err
 	case "xfs":
-		_, _, err := command(
-			"mkfs.xfs",
-			"-i", "nrext64=0", // Compatibility with kernel that do not support nrext64
-			disk)
+		var (
+			err     error
+			xfsArgs []string
+		)
+
+		switch {
+		case xfsOpts.AutofetchKernelVersion != "":
+			fetch, err := strconv.ParseBool(xfsOpts.AutofetchKernelVersion)
+			if err != nil {
+				return err
+			}
+
+			if fetch {
+				kernelVersion, err := GetKernelVersion()
+				if err != nil {
+					return err
+				}
+
+				xfsConfigPath, err := GetXFSConfigPath(kernelVersion)
+				if err != nil {
+					return err
+				}
+				xfsArgs = []string{
+					"-c", fmt.Sprintf("options=%s", xfsConfigPath),
+				}
+			}
+		case xfsOpts.MinimumSupportedKernelVersion != "":
+			kernelVersion, err := version.ParseSemantic(xfsOpts.MinimumSupportedKernelVersion)
+			if err != nil {
+				return err
+			}
+
+			xfsConfigPath, err := GetXFSConfigPath(kernelVersion)
+			if err != nil {
+				return err
+			}
+			xfsArgs = []string{
+				"-c", fmt.Sprintf("options=%s", xfsConfigPath),
+			}
+		case xfsOpts.ExtraArgs != "":
+			xfsArgs = strings.Split(xfsOpts.ExtraArgs, " ")
+		}
+
+		if len(xfsArgs) == 0 {
+			level.Warn(s.logger).Log(
+				"msg", "No XFS disk formatting mode is configured -> Using fallback method",
+			)
+			// Fallback
+			// Default flags extracted from /usr/share/xfsprogs/mkfs/lts_4.19.conf
+			// for maximum backwards compatibility with older kernels
+			// Also see: https://man.archlinux.org/man/xfs_admin.8.en#O
+			// This document mentions the flags and their minimal supported kernel version
+			xfsArgs = []string{
+				"-i", "nrext64=0",
+				"-m", "bigtime=0",
+				"-m", "inobtcount=0",
+			}
+		}
+
+		xfsArgs = append(xfsArgs, disk)
+		_, _, err = command("mkfs.xfs", xfsArgs...)
 		return err
 	case "btrfs":
 		_, _, err := command("mkfs.btrfs", disk)
