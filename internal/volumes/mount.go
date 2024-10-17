@@ -4,7 +4,6 @@ import (
 	"fmt"
 	"os"
 	"path/filepath"
-	"regexp"
 	"strings"
 
 	"github.com/go-kit/log"
@@ -29,8 +28,6 @@ type MountService interface {
 	Publish(targetPath string, devicePath string, opts MountOpts) error
 	Unpublish(targetPath string) error
 	PathExists(path string) (bool, error)
-	FormatDisk(disk string, fstype string) error
-	DetectDiskFormat(disk string) (string, error)
 }
 
 // LinuxMountService mounts volumes on a Linux system.
@@ -100,7 +97,7 @@ func (s *LinuxMountService) Publish(targetPath string, devicePath string, opts M
 	mountOptions = append(mountOptions, opts.Additional...)
 
 	if opts.EncryptionPassphrase != "" {
-		existingFSType, err := s.DetectDiskFormat(devicePath)
+		existingFSType, err := s.mounter.GetDiskFormat(devicePath)
 		if err != nil {
 			return fmt.Errorf("unable to detect existing disk format of %s: %w", devicePath, err)
 		}
@@ -122,26 +119,6 @@ func (s *LinuxMountService) Publish(targetPath string, devicePath string, opts M
 		devicePath = luksDevicePath
 	}
 
-	// Format disk if requested (/skip formatting for block devices)
-	if opts.FSType != "" {
-		existingFSType, err := s.DetectDiskFormat(devicePath)
-		if err != nil {
-			return fmt.Errorf("unable to detect existing disk format of %s: %w", devicePath, err)
-		}
-
-		if existingFSType == "" {
-			if opts.Readonly {
-				return fmt.Errorf("cannot publish unformatted disk %s in read-only mode", devicePath)
-			}
-
-			if err = s.FormatDisk(devicePath, opts.FSType); err != nil {
-				return err
-			}
-		} else if existingFSType != opts.FSType {
-			return fmt.Errorf("requested %s volume, but disk %s already is formatted with %s", opts.FSType, devicePath, existingFSType)
-		}
-	}
-
 	level.Info(s.logger).Log(
 		"msg", "publishing volume",
 		"target-path", targetPath,
@@ -153,7 +130,11 @@ func (s *LinuxMountService) Publish(targetPath string, devicePath string, opts M
 		"encrypted", opts.EncryptionPassphrase != "",
 	)
 
-	return s.mounter.Mount(devicePath, targetPath, opts.FSType, mountOptions)
+	if opts.BlockVolume {
+		return s.mounter.Mount(devicePath, targetPath, opts.FSType, mountOptions)
+	}
+
+	return s.mounter.FormatAndMount(devicePath, targetPath, opts.FSType, mountOptions)
 }
 
 func (s *LinuxMountService) Unpublish(targetPath string) error {
@@ -178,71 +159,5 @@ func (s *LinuxMountService) Unpublish(targetPath string) error {
 }
 
 func (s *LinuxMountService) PathExists(path string) (bool, error) {
-	level.Debug(s.logger).Log(
-		"msg", "checking path existence",
-		"path", path,
-	)
-	_, err := os.Stat(path)
-	if err == nil {
-		return true, nil
-	}
-	if os.IsNotExist(err) {
-		return false, nil
-	}
-	return false, err
-}
-
-func (s *LinuxMountService) FormatDisk(disk string, fstype string) error {
-	level.Info(s.logger).Log(
-		"msg", "formatting disk",
-		"disk", disk,
-		"fstype", fstype,
-	)
-	switch fstype {
-	case "ext4":
-		_, _, err := command("mkfs.ext4", "-F", "-m0", disk)
-		return err
-	case "xfs":
-		_, _, err := command(
-			"mkfs.xfs",
-			"-i", "nrext64=0", // Compatibility with kernel that do not support nrext64
-			disk)
-		return err
-	case "btrfs":
-		_, _, err := command("mkfs.btrfs", disk)
-		return err
-	default:
-		return fmt.Errorf("unsupported disk format %s", fstype)
-	}
-}
-
-// see https://github.com/kubernetes/mount-utils/blob/master/mount_linux.go
-func (s *LinuxMountService) DetectDiskFormat(disk string) (string, error) {
-	args := []string{"-p", "-s", "TYPE", "-s", "PTTYPE", "-o", "export", disk}
-	output, exitCode, err := command("blkid", args...)
-	if exitCode == 2 {
-		return "", nil
-	}
-	if err != nil {
-		return "", err
-	}
-
-	fstypeRegex := regexp.MustCompile(`TYPE=(.*)`)
-	pttypeRegex := regexp.MustCompile(`PTTYPE=(.*)`)
-	fstype := ""
-	pttype := ""
-	fstypeMatch := fstypeRegex.FindStringSubmatch(output)
-	if fstypeMatch != nil {
-		fstype = fstypeMatch[1]
-	}
-	pttypeMatch := pttypeRegex.FindStringSubmatch(output)
-	if pttypeMatch != nil {
-		pttype = pttypeMatch[1]
-	}
-
-	if pttype != "" {
-		return "", fmt.Errorf("disk %s propably contains partitions", disk)
-	}
-
-	return fstype, nil
+	return mount.PathExists(path)
 }
