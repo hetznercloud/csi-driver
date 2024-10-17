@@ -206,14 +206,6 @@ func (s *sanityMountService) PathExists(path string) (bool, error) {
 	return true, nil
 }
 
-func (s *sanityMountService) FormatDisk(_ string, _ string) error {
-	return nil
-}
-
-func (s *sanityMountService) DetectDiskFormat(_ string) (string, error) {
-	return "ext4", nil
-}
-
 type sanityResizeService struct{}
 
 func (s *sanityResizeService) Resize(volumePath string) error {
