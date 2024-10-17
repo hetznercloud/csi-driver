@@ -3,7 +3,6 @@ package driver
 import (
 	"context"
 	"fmt"
-	"os"
 
 	proto "github.com/container-storage-interface/spec/lib/go/csi"
 	"github.com/go-kit/log"
@@ -22,11 +21,6 @@ type NodeService struct {
 	volumeMountService  volumes.MountService
 	volumeResizeService volumes.ResizeService
 	volumeStatsService  volumes.StatsService
-	// enable volume staging api to workaround
-	// docker CSI support not working properly
-	// if a plugin does not support staging
-	// see https://github.com/moby/swarmkit/pull/3116
-	forceVolumeStaging bool
 }
 
 func NewNodeService(
@@ -44,20 +38,17 @@ func NewNodeService(
 		volumeMountService:  volumeMountService,
 		volumeResizeService: volumeResizeService,
 		volumeStatsService:  volumeStatsService,
-		forceVolumeStaging:  os.Getenv("FORCE_STAGING_SUPPORT") == "true",
 	}
 }
 
 const encryptionPassphraseKey = "encryption-passphrase"
 
 func (s *NodeService) NodeStageVolume(_ context.Context, _ *proto.NodeStageVolumeRequest) (*proto.NodeStageVolumeResponse, error) {
-	// while we dont do anything here, Swarm 23.0.1 might require this
-	return &proto.NodeStageVolumeResponse{}, nil
+	return nil, status.Error(codes.Unimplemented, "not supported")
 }
 
 func (s *NodeService) NodeUnstageVolume(_ context.Context, _ *proto.NodeUnstageVolumeRequest) (*proto.NodeUnstageVolumeResponse, error) {
-	// while we dont do anything here, Swarm 23.0.1 might require this
-	return &proto.NodeUnstageVolumeResponse{}, nil
+	return nil, status.Error(codes.Unimplemented, "not supported")
 }
 
 func (s *NodeService) NodePublishVolume(_ context.Context, req *proto.NodePublishVolumeRequest) (*proto.NodePublishVolumeResponse, error) {
@@ -159,38 +150,24 @@ func (s *NodeService) NodeGetVolumeStats(_ context.Context, req *proto.NodeGetVo
 }
 
 func (s *NodeService) NodeGetCapabilities(_ context.Context, _ *proto.NodeGetCapabilitiesRequest) (*proto.NodeGetCapabilitiesResponse, error) {
-	capabilities := []*proto.NodeServiceCapability{
-		{
-			Type: &proto.NodeServiceCapability_Rpc{
-				Rpc: &proto.NodeServiceCapability_RPC{
-					Type: proto.NodeServiceCapability_RPC_EXPAND_VOLUME,
+	return &proto.NodeGetCapabilitiesResponse{
+		Capabilities: []*proto.NodeServiceCapability{
+			{
+				Type: &proto.NodeServiceCapability_Rpc{
+					Rpc: &proto.NodeServiceCapability_RPC{
+						Type: proto.NodeServiceCapability_RPC_EXPAND_VOLUME,
+					},
+				},
+			},
+			{
+				Type: &proto.NodeServiceCapability_Rpc{
+					Rpc: &proto.NodeServiceCapability_RPC{
+						Type: proto.NodeServiceCapability_RPC_GET_VOLUME_STATS,
+					},
 				},
 			},
 		},
-		{
-			Type: &proto.NodeServiceCapability_Rpc{
-				Rpc: &proto.NodeServiceCapability_RPC{
-					Type: proto.NodeServiceCapability_RPC_GET_VOLUME_STATS,
-				},
-			},
-		},
-	}
-
-	if s.forceVolumeStaging {
-		capabilities = append(capabilities, &proto.NodeServiceCapability{
-			Type: &proto.NodeServiceCapability_Rpc{
-				Rpc: &proto.NodeServiceCapability_RPC{
-					Type: proto.NodeServiceCapability_RPC_STAGE_UNSTAGE_VOLUME,
-				},
-			},
-		})
-	}
-
-	resp := &proto.NodeGetCapabilitiesResponse{
-		Capabilities: capabilities,
-	}
-
-	return resp, nil
+	}, nil
 }
 
 func (s *NodeService) NodeGetInfo(_ context.Context, _ *proto.NodeGetInfoRequest) (*proto.NodeGetInfoResponse, error) {

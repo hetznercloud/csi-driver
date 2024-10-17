@@ -26,12 +26,6 @@
         "value"
       ],
       "value": "debug"
-    },
-    {
-      "name": "FORCE_STAGING_SUPPORT",
-      "description": "workaround: force staging support to make Docker 23.0.0 work without https://github.com/moby/swarmkit/pull/3116",
-      "settable": ["value"],
-      "value": "true"
     }
   ],
   "interface": {
