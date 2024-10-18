@@ -21,6 +21,13 @@ type MountOpts struct {
 	Readonly             bool
 	Additional           []string // Additional mount options/flags passed to /bin/mount
 	EncryptionPassphrase string
+	XFSOpts              XFSOpts
+}
+
+type XFSOpts struct {
+	ExtraArgs                     string
+	MinimumSupportedKernelVersion string
+	AutofetchKernelVersion        string
 }
 
 // MountService mounts volumes.
