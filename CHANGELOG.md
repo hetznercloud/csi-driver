@@ -1,5 +1,16 @@
 # Changelog
 
+## [2.10.0](https://github.com/hetznercloud/csi-driver/compare/v2.9.0...v2.10.0) (2024-10-18)
+
+
+### Features
+
+* add support & tests for Kubernetes 1.31 ([#721](https://github.com/hetznercloud/csi-driver/issues/721)) ([85035b9](https://github.com/hetznercloud/csi-driver/commit/85035b906613c40b9cff28e75429a70275b93c8b))
+* allow arbitrary length API tokens ([#724](https://github.com/hetznercloud/csi-driver/issues/724)) ([61c3a0e](https://github.com/hetznercloud/csi-driver/commit/61c3a0eb5309cdeac2613da5396d23fb86942ceb))
+* drop tests for Kubernetes 1.27 ([#722](https://github.com/hetznercloud/csi-driver/issues/722)) ([d46a54b](https://github.com/hetznercloud/csi-driver/commit/d46a54b232336a4ed02458c0c40c8c7d6a8f003d))
+* Support SINGLE_NODE_MULTI_WRITER capability ([#725](https://github.com/hetznercloud/csi-driver/issues/725)) ([cd53c23](https://github.com/hetznercloud/csi-driver/commit/cd53c23d500d555bf53ba423ea4081a9348e19ca)), closes [#327](https://github.com/hetznercloud/csi-driver/issues/327)
+* **swarm:** removed workaround support for mock staging/unstaging ([#746](https://github.com/hetznercloud/csi-driver/issues/746)) ([465ec21](https://github.com/hetznercloud/csi-driver/commit/465ec21147cba7a85deed0164b600d012fa9a8ae))
+
 ## [2.9.0](https://github.com/hetznercloud/csi-driver/compare/v2.8.0...v2.9.0) (2024-08-08)
 
 
