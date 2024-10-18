@@ -39,14 +39,7 @@ func TestVolumePublishUnpublish(t *testing.T) {
 			name:      "plain-correct-formatted",
 			mountOpts: volumes.MountOpts{},
 			prepare: func(mounter *mount.SafeFormatAndMount, cs *volumes.CryptSetup, device string) error {
-				tmppath, err := os.MkdirTemp(os.TempDir(), "csi-driver-prepare")
-				if err != nil {
-					return err
-				}
-
-				defer os.RemoveAll(tmppath)
-				defer mounter.Unmount(tmppath)
-				return mounter.FormatAndMount(device, tmppath, "ext4", nil)
+				return formatDisk(mounter, device, "ext4")
 			},
 			expectedError: nil,
 		},
@@ -54,14 +47,7 @@ func TestVolumePublishUnpublish(t *testing.T) {
 			name:      "plain-wrong-formatted",
 			mountOpts: volumes.MountOpts{},
 			prepare: func(mounter *mount.SafeFormatAndMount, cs *volumes.CryptSetup, device string) error {
-				tmppath, err := os.MkdirTemp(os.TempDir(), "csi-driver-prepare")
-				if err != nil {
-					return err
-				}
-
-				defer os.RemoveAll(tmppath)
-				defer mounter.Unmount(tmppath)
-				return mounter.FormatAndMount(device, tmppath, "xfs", nil)
+				return formatDisk(mounter, device, "xfs")
 			},
 			expectedError: mount.NewMountError(mount.FilesystemMismatch, ""),
 		},
@@ -101,14 +87,7 @@ func TestVolumePublishUnpublish(t *testing.T) {
 
 				luksDevicePath := volumes.GenerateLUKSDevicePath(luksDeviceName)
 
-				tmppath, err := os.MkdirTemp(os.TempDir(), "csi-driver-prepare")
-				if err != nil {
-					return err
-				}
-
-				defer os.RemoveAll(tmppath)
-				defer mounter.Unmount(tmppath)
-				return mounter.FormatAndMount(luksDevicePath, tmppath, "ext4", nil)
+				return formatDisk(mounter, luksDevicePath, "ext4")
 			},
 			expectedError: nil,
 		},
@@ -116,14 +95,7 @@ func TestVolumePublishUnpublish(t *testing.T) {
 			name:      "encrypted-wrong-formatted-1",
 			mountOpts: volumes.MountOpts{EncryptionPassphrase: "passphrase"},
 			prepare: func(mounter *mount.SafeFormatAndMount, cs *volumes.CryptSetup, device string) error {
-				tmppath, err := os.MkdirTemp(os.TempDir(), "csi-driver-prepare")
-				if err != nil {
-					return err
-				}
-
-				defer os.RemoveAll(tmppath)
-				defer mounter.Unmount(tmppath)
-				return mounter.FormatAndMount(device, tmppath, "ext4", nil)
+				return formatDisk(mounter, device, "ext4")
 			},
 			expectedError: fmt.Errorf("requested encrypted volume, but disk /dev-fake-encrypted-wrong-formatted-1 already is formatted with ext4"),
 		},
@@ -157,6 +129,7 @@ func TestVolumePublishUnpublish(t *testing.T) {
 			// Required as FS volumes require target dir, but block volumes require
 			// target file
 			targetPath = path.Join(targetPath, "target-path")
+			publishErr := mountService.Publish(targetPath, device, test.mountOpts)
 			defer func() {
 				err := mountService.Unpublish(targetPath)
 				if err != nil {
@@ -165,7 +138,6 @@ func TestVolumePublishUnpublish(t *testing.T) {
 					t.Logf("Unpublished targetPath %s", targetPath)
 				}
 			}()
-			publishErr := mountService.Publish(targetPath, device, test.mountOpts)
 
 			if test.expectedError != nil {
 				if publishErr == nil {
@@ -183,7 +155,6 @@ func TestVolumePublishUnpublish(t *testing.T) {
 					}
 				} else if test.expectedError.Error() != publishErr.Error() {
 					t.Fatal(fmt.Errorf("expected error %q but got %q", test.expectedError.Error(), publishErr.Error()))
-					return
 				}
 			}
 
@@ -339,28 +310,14 @@ func TestDetectDiskFormat(t *testing.T) {
 		{
 			name: "ext4",
 			prepare: func(mounter *mount.SafeFormatAndMount, device string) error {
-				tmppath, err := os.MkdirTemp(os.TempDir(), "csi-driver-prepare")
-				if err != nil {
-					return err
-				}
-
-				defer os.RemoveAll(tmppath)
-				defer mounter.Unmount(tmppath)
-				return mounter.FormatAndMount(device, tmppath, "ext4", nil)
+				return formatDisk(mounter, device, "ext4")
 			},
 			expectedFormat: "ext4",
 		},
 		{
 			name: "xfs",
 			prepare: func(mounter *mount.SafeFormatAndMount, device string) error {
-				tmppath, err := os.MkdirTemp(os.TempDir(), "csi-driver-prepare")
-				if err != nil {
-					return err
-				}
-
-				defer os.RemoveAll(tmppath)
-				defer mounter.Unmount(tmppath)
-				return mounter.FormatAndMount(device, tmppath, "xfs", nil)
+				return formatDisk(mounter, device, "xfs")
 			},
 			expectedFormat: "xfs",
 		},

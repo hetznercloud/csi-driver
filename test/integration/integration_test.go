@@ -9,6 +9,8 @@ import (
 	"regexp"
 	"strconv"
 	"testing"
+
+	"k8s.io/mount-utils"
 )
 
 const testImageName = "hcloud-csi-driver-integrationtests"
@@ -104,4 +106,15 @@ func (w TestingWriter) Write(p []byte) (n int, err error) {
 		w.t.Log(string(p))
 	}
 	return len(p), nil
+}
+
+func formatDisk(mounter *mount.SafeFormatAndMount, device string, fstype string) error {
+	tmppath, err := os.MkdirTemp(os.TempDir(), "csi-driver-prepare")
+	if err != nil {
+		return err
+	}
+
+	defer os.RemoveAll(tmppath)
+	defer mounter.Unmount(tmppath)
+	return mounter.FormatAndMount(device, tmppath, fstype, nil)
 }
