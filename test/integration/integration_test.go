@@ -114,6 +114,8 @@ func formatDisk(mounter *mount.SafeFormatAndMount, device string, fstype string)
 		return err
 	}
 
+  // The library we use to format volumes only supports a combined "FormatAndMount"
+  // so we call that and immediately unmount and cleanup the temp path afterwards.
 	defer os.RemoveAll(tmppath)
 	defer mounter.Unmount(tmppath)
 	return mounter.FormatAndMount(device, tmppath, fstype, nil)
