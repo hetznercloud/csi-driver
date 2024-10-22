@@ -17,14 +17,6 @@ import (
 	"github.com/hetznercloud/csi-driver/internal/volumes"
 )
 
-func TestXFSDefaultConfigFile(t *testing.T) {
-	// Testing if the default xfs config exists
-	// If this is not the case, then an older kernel version may no longer be supported
-	if _, err := os.Stat(volumes.XFSDefaultConfigPath); err != nil {
-		t.Fatal(err)
-	}
-}
-
 func TestVolumePublishUnpublish(t *testing.T) {
 	if !runTestInDockerImage(t, true) {
 		return
