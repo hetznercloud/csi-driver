@@ -124,6 +124,7 @@ parameters:
 Your nodes might need to have `cryptsetup` installed to mount the volumes with LUKS.
 
 ### Formatting Options
+
 You can specify extra formatting options which are passed directly to `mkfs.FSTYPE` via the `formatOptions` parameter in the storage class.
 
 #### Example
