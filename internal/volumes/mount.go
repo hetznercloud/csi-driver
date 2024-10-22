@@ -8,6 +8,7 @@ import (
 
 	"github.com/go-kit/log"
 	"github.com/go-kit/log/level"
+	"github.com/moby/buildkit/frontend/dockerfile/shell"
 	"k8s.io/mount-utils"
 	"k8s.io/utils/exec"
 )
@@ -139,7 +140,11 @@ func (s *LinuxMountService) Publish(targetPath string, devicePath string, opts M
 	formatOptions := make([]string, 0)
 
 	if opts.FormatOptions != "" {
-		formatOptions = strings.Split(opts.FormatOptions, " ")
+		lexer := shell.NewLex('\\')
+		formatOptions, err = lexer.ProcessWords(opts.FormatOptions, shell.EnvsFromSlice([]string{}))
+		if err != nil {
+			return err
+		}
 	} else if opts.FSType == "xfs" {
 		formatOptions = append(formatOptions, "-c")
 		formatOptions = append(formatOptions, fmt.Sprintf("options=%s", XFSDefaultConfigPath))
