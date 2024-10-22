@@ -13,8 +13,8 @@ import (
 )
 
 const (
-	DefaultFSType    = "ext4"
-	XFSDefaultConfig = "/usr/share/xfsprogs/mkfs/lts_4.19.conf"
+	DefaultFSType        = "ext4"
+	XFSDefaultConfigPath = "/usr/share/xfsprogs/mkfs/lts_4.19.conf"
 )
 
 // MountOpts specifies options for mounting a volume.
@@ -143,7 +143,7 @@ func (s *LinuxMountService) Publish(targetPath string, devicePath string, opts M
 	} else {
 		if opts.FSType == "xfs" {
 			formatOptions = append(formatOptions, "-c")
-			formatOptions = append(formatOptions, fmt.Sprintf("options=%s", XFSDefaultConfig))
+			formatOptions = append(formatOptions, fmt.Sprintf("options=%s", XFSDefaultConfigPath))
 		}
 	}
 
