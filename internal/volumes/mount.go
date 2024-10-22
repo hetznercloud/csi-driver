@@ -138,10 +138,10 @@ func (s *LinuxMountService) Publish(targetPath string, devicePath string, opts M
 
 	formatOptions := make([]string, 0)
 
-	if opts.FSType == "xfs" {
-		if opts.FormatOptions != "" {
-			formatOptions = strings.Split(opts.FormatOptions, " ")
-		} else {
+	if opts.FormatOptions != "" {
+		formatOptions = strings.Split(opts.FormatOptions, " ")
+	} else {
+		if opts.FSType == "xfs" {
 			formatOptions = append(formatOptions, "-c")
 			formatOptions = append(formatOptions, fmt.Sprintf("options=%s", XFSDefaultConfig))
 		}
