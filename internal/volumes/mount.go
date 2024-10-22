@@ -140,11 +140,9 @@ func (s *LinuxMountService) Publish(targetPath string, devicePath string, opts M
 
 	if opts.FormatOptions != "" {
 		formatOptions = strings.Split(opts.FormatOptions, " ")
-	} else {
-		if opts.FSType == "xfs" {
-			formatOptions = append(formatOptions, "-c")
-			formatOptions = append(formatOptions, fmt.Sprintf("options=%s", XFSDefaultConfigPath))
-		}
+	} else if opts.FSType == "xfs" {
+		formatOptions = append(formatOptions, "-c")
+		formatOptions = append(formatOptions, fmt.Sprintf("options=%s", XFSDefaultConfigPath))
 	}
 
 	return s.mounter.FormatAndMountSensitiveWithFormatOptions(devicePath, targetPath, opts.FSType, mountOptions, opts.Additional, formatOptions)
