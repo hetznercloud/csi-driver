@@ -12,7 +12,10 @@ import (
 	"k8s.io/utils/exec"
 )
 
-const DefaultFSType = "ext4"
+const (
+	DefaultFSType    = "ext4"
+	XFSDefaultConfig = "/usr/share/xfsprogs/mkfs/lts_4.19.conf"
+)
 
 // MountOpts specifies options for mounting a volume.
 type MountOpts struct {
@@ -21,13 +24,7 @@ type MountOpts struct {
 	Readonly             bool
 	Additional           []string // Additional mount options/flags passed to /bin/mount
 	EncryptionPassphrase string
-	XFSOpts              XFSOpts
-}
-
-type XFSOpts struct {
-	ExtraArgs                     string
-	MinimumSupportedKernelVersion string
-	AutofetchKernelVersion        string
+	FormatOptions        string
 }
 
 // MountService mounts volumes.
@@ -139,7 +136,18 @@ func (s *LinuxMountService) Publish(targetPath string, devicePath string, opts M
 		return s.mounter.MountSensitive(devicePath, targetPath, opts.FSType, mountOptions, opts.Additional)
 	}
 
-	return s.mounter.FormatAndMountSensitive(devicePath, targetPath, opts.FSType, mountOptions, opts.Additional)
+	formatOptions := make([]string, 0)
+
+	if opts.FSType == "xfs" {
+		if opts.FormatOptions != "" {
+			formatOptions = strings.Split(opts.FormatOptions, " ")
+		} else {
+			formatOptions = append(formatOptions, "-c")
+			formatOptions = append(formatOptions, fmt.Sprintf("options=%s", XFSDefaultConfig))
+		}
+	}
+
+	return s.mounter.FormatAndMountSensitiveWithFormatOptions(devicePath, targetPath, opts.FSType, mountOptions, opts.Additional, formatOptions)
 }
 
 func (s *LinuxMountService) Unpublish(targetPath string) error {
