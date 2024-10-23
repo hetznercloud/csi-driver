@@ -223,6 +223,21 @@ storageClasses:
 
 Label the nodes according to their type:
 
+### New Label
+
+**Cloud Servers**
+```bash
+kubectl label nodes <node name> instance.hetzner.cloud/provided-by=cloud
+```
+
+**Root Servers**
+```bash
+kubectl label nodes <node name> instance.hetzner.cloud/provided-by=robot
+```
+
+
+### Old Label
+
 **Cloud Servers**
 ```bash
 kubectl label nodes <node name> instance.hetzner.cloud/is-root-server=false
