@@ -236,7 +236,9 @@ kubectl label nodes <node name> instance.hetzner.cloud/provided-by=robot
 ```
 
 
-### Old Label
+### DEPRECATED: Old Label
+
+Please switch to the [new label](#new-label). The label `instance.hetzner.cloud/is-robot-server` will be removed in future releases.
 
 **Cloud Servers**
 ```bash
