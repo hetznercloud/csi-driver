@@ -143,9 +143,9 @@ spec:
                 values:
                 - "true"
               - key: instance.hetzner.cloud/provided-by
-                operator: In
+                operator: NotIn
                 values:
-                - cloud
+                - robot
       tolerations:
         - effect: NoExecute
           operator: Exists
