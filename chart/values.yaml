@@ -557,9 +557,9 @@ node:
                 values:
                   - "true"
               - key: "instance.hetzner.cloud/provided-by"
-                operator: In
+                operator: NotIn
                 values:
-                  - "cloud"
+                  - "robot"
 
   ## @param node.nodeSelector Node labels for node pods assignment
   ## ref: https://kubernetes.io/docs/user-guide/node-selection/
