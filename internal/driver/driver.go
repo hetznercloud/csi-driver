@@ -9,4 +9,6 @@ const (
 	DefaultVolumeSize = MinVolumeSize
 
 	TopologySegmentLocation = PluginName + "/location"
+	IsRootServerLabel       = "instance.hetzner.cloud/is-root-server"
+	ProvidedByLabel         = "instance.hetzner.cloud/provided-by"
 )

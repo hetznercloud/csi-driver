@@ -177,6 +177,8 @@ func (s *NodeService) NodeGetInfo(_ context.Context, _ *proto.NodeGetInfoRequest
 		AccessibleTopology: &proto.Topology{
 			Segments: map[string]string{
 				TopologySegmentLocation: s.serverLocation,
+				IsRootServerLabel:       "false",
+				ProvidedByLabel:         "cloud",
 			},
 		},
 	}

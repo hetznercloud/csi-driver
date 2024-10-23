@@ -142,6 +142,10 @@ spec:
                 operator: NotIn
                 values:
                 - "true"
+              - key: instance.hetzner.cloud/provided-by
+                operator: NotIn
+                values:
+                - robot
       tolerations:
         - effect: NoExecute
           operator: Exists

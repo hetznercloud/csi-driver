@@ -245,6 +245,10 @@ spec:
                 operator: NotIn
                 values:
                 - "true"
+              - key: instance.hetzner.cloud/provided-by
+                operator: NotIn
+                values:
+                - robot
       nodeSelector:
         foo: bar
       tolerations:

@@ -189,8 +189,43 @@ $ kubectl apply -f https://raw.githubusercontent.com/hetznercloud/csi-driver/v2.
 
 ## Integration with Root Servers
 
-Root servers can be part of the cluster, but the CSI plugin doesn't work there. Taint the root server as follows to skip that node for the DaemonSet.
+Root servers can be part of the cluster, but the CSI plugin doesn't work there and the current behaviour of the scheduler can cause Pods to be stuck in `Pending`. 
 
+Include topology key evaluation into storage class, by setting the helm chart value `includesRobotServers`:
+
+```yaml
+storageClasses:
+  - name: hcloud-volumes
+    defaultStorageClass: true
+    reclaimPolicy: Delete
+    includesRobotServers: true # <---
+```
+
+Label the nodes according to their type:
+
+### New Label
+
+**Cloud Servers**
+```bash
+kubectl label nodes <node name> instance.hetzner.cloud/provided-by=cloud
+```
+
+**Root Servers**
+```bash
+kubectl label nodes <node name> instance.hetzner.cloud/provided-by=robot
+```
+
+
+### DEPRECATED: Old Label
+
+Please switch to the [new label](#new-label). The label `instance.hetzner.cloud/is-robot-server` will be removed in future releases.
+
+**Cloud Servers**
+```bash
+kubectl label nodes <node name> instance.hetzner.cloud/is-root-server=false
+```
+
+**Root Servers**
 ```bash
 kubectl label nodes <node name> instance.hetzner.cloud/is-root-server=true
 ```
