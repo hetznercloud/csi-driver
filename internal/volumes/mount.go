@@ -94,8 +94,6 @@ func (s *LinuxMountService) Publish(targetPath string, devicePath string, opts M
 		mountOptions = append(mountOptions, "ro")
 	}
 
-	mountOptions = append(mountOptions, opts.Additional...)
-
 	if opts.EncryptionPassphrase != "" {
 		existingFSType, err := s.mounter.GetDiskFormat(devicePath)
 		if err != nil {
@@ -131,10 +129,10 @@ func (s *LinuxMountService) Publish(targetPath string, devicePath string, opts M
 	)
 
 	if opts.BlockVolume {
-		return s.mounter.Mount(devicePath, targetPath, opts.FSType, mountOptions)
+		return s.mounter.MountSensitive(devicePath, targetPath, opts.FSType, mountOptions, opts.Additional)
 	}
 
-	return s.mounter.FormatAndMount(devicePath, targetPath, opts.FSType, mountOptions)
+	return s.mounter.FormatAndMountSensitive(devicePath, targetPath, opts.FSType, mountOptions, opts.Additional)
 }
 
 func (s *LinuxMountService) Unpublish(targetPath string) error {
