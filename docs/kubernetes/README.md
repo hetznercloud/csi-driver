@@ -125,13 +125,13 @@ Your nodes might need to have `cryptsetup` installed to mount the volumes with L
 
 ### Formatting Options
 
-You can specify extra formatting options which are passed directly to `mkfs.FSTYPE` via the `formatOptions` parameter in the storage class.
+You can specify extra formatting options which are passed directly to `mkfs.FSTYPE` via the `fsFormatOptions` parameter in the storage class.
 
 #### Example
 ```yaml
 parameters:
   csi.storage.k8s.io/fstype: xfs
-  formatOptions: "-i nrext64=1"
+  fsFormatOptions: "-i nrext64=1"
 ```
 
 ### XFS Filesystem
