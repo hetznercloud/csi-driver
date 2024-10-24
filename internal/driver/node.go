@@ -78,6 +78,7 @@ func (s *NodeService) NodePublishVolume(_ context.Context, req *proto.NodePublis
 			Readonly:             req.Readonly,
 			Additional:           mount.MountFlags,
 			EncryptionPassphrase: req.Secrets[encryptionPassphraseKey],
+			FsFormatOptions:      req.VolumeContext["fsFormatOptions"],
 		}
 	default:
 		return nil, status.Error(codes.InvalidArgument, "publish volume: unsupported volume capability")
