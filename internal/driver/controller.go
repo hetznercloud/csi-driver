@@ -101,7 +101,7 @@ func (s *ControllerService) CreateVolume(ctx context.Context, req *proto.CreateV
 				},
 			},
 			VolumeContext: map[string]string{
-				"formatOptions": req.Parameters["formatOptions"],
+				"fsFormatOptions": req.Parameters["fsFormatOptions"],
 			},
 		},
 	}

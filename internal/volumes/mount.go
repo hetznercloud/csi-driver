@@ -25,7 +25,7 @@ type MountOpts struct {
 	Readonly             bool
 	Additional           []string // Additional mount options/flags passed to /bin/mount
 	EncryptionPassphrase string
-	FormatOptions        string
+	FsFormatOptions      string
 }
 
 // MountService mounts volumes.
@@ -139,9 +139,9 @@ func (s *LinuxMountService) Publish(targetPath string, devicePath string, opts M
 
 	formatOptions := make([]string, 0)
 
-	if opts.FormatOptions != "" {
+	if opts.FsFormatOptions != "" {
 		lexer := shell.NewLex('\\')
-		formatOptions, err = lexer.ProcessWords(opts.FormatOptions, shell.EnvsFromSlice([]string{}))
+		formatOptions, err = lexer.ProcessWords(opts.FsFormatOptions, shell.EnvsFromSlice([]string{}))
 		if err != nil {
 			return err
 		}
