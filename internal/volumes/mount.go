@@ -15,6 +15,7 @@ import (
 
 const (
 	DefaultFSType        = "ext4"
+  // XFSDefaultConfigPath is the oldest Linux Version available from `xfsprogs`. If this becomes unavailable, we need to increase it to the next lowest version and announce the change in the Release Notes.
 	XFSDefaultConfigPath = "/usr/share/xfsprogs/mkfs/lts_4.19.conf"
 )
 
