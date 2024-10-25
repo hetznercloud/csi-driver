@@ -8,11 +8,16 @@ import (
 
 	"github.com/go-kit/log"
 	"github.com/go-kit/log/level"
+	"github.com/moby/buildkit/frontend/dockerfile/shell"
 	"k8s.io/mount-utils"
 	"k8s.io/utils/exec"
 )
 
-const DefaultFSType = "ext4"
+const (
+	DefaultFSType = "ext4"
+	// XFSDefaultConfigPath is the oldest Linux Version available from `xfsprogs`. If this becomes unavailable, we need to increase it to the next lowest version and announce the change in the Release Notes.
+	XFSDefaultConfigPath = "/usr/share/xfsprogs/mkfs/lts_4.19.conf"
+)
 
 // MountOpts specifies options for mounting a volume.
 type MountOpts struct {
@@ -21,6 +26,7 @@ type MountOpts struct {
 	Readonly             bool
 	Additional           []string // Additional mount options/flags passed to /bin/mount
 	EncryptionPassphrase string
+	FsFormatOptions      string
 }
 
 // MountService mounts volumes.
@@ -132,7 +138,19 @@ func (s *LinuxMountService) Publish(targetPath string, devicePath string, opts M
 		return s.mounter.MountSensitive(devicePath, targetPath, opts.FSType, mountOptions, opts.Additional)
 	}
 
-	return s.mounter.FormatAndMountSensitive(devicePath, targetPath, opts.FSType, mountOptions, opts.Additional)
+	formatOptions := make([]string, 0)
+
+	if opts.FsFormatOptions != "" {
+		lexer := shell.NewLex('\\')
+		formatOptions, err = lexer.ProcessWords(opts.FsFormatOptions, shell.EnvsFromSlice([]string{}))
+		if err != nil {
+			return err
+		}
+	} else if opts.FSType == "xfs" {
+		formatOptions = append(formatOptions, "-c", fmt.Sprintf("options=%s", XFSDefaultConfigPath))
+	}
+
+	return s.mounter.FormatAndMountSensitiveWithFormatOptions(devicePath, targetPath, opts.FSType, mountOptions, opts.Additional, formatOptions)
 }
 
 func (s *LinuxMountService) Unpublish(targetPath string) error {
