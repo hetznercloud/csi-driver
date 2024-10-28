@@ -649,6 +649,7 @@ spec:
   attachRequired: true
   fsGroupPolicy: File
   podInfoOnMount: true
+  seLinuxMount: true
   volumeLifecycleModes:
   - Persistent
 ---
