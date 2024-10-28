@@ -5,13 +5,13 @@ import (
 	"context"
 	"errors"
 	"fmt"
+	"log/slog"
 	"net"
 	"os"
 	"sync"
 	"testing"
 
 	proto "github.com/container-storage-interface/spec/lib/go/csi"
-	"github.com/go-kit/log"
 	"github.com/kubernetes-csi/csi-test/v5/pkg/sanity"
 	"google.golang.org/grpc"
 
@@ -31,26 +31,29 @@ func TestSanity(t *testing.T) {
 	}
 	defer os.Remove(endpoint)
 
-	logger := log.NewLogfmtLogger(log.NewSyncWriter(os.Stdout))
-	logger = log.With(logger, "ts", log.DefaultTimestampUTC)
+	th := slog.NewTextHandler(os.Stdout, nil)
+	logger := slog.New(th)
 
 	volumeService := volumes.NewIdempotentService(
-		log.With(logger, "component", "idempotent-volume-service"),
+		logger.With("component", "idempotent-volume-service"),
 		&sanityVolumeService{},
 	)
 	volumeMountService := &sanityMountService{}
 	volumeResizeService := &sanityResizeService{}
 	volumeStatsService := &sanityStatsService{}
+
 	controllerService := NewControllerService(
-		log.With(logger, "component", "driver-controller-service"),
+		logger.With("component", "driver-controller-service"),
 		volumeService,
 		"testloc",
 	)
+
 	identityService := NewIdentityService(
-		log.With(logger, "component", "driver-identity-service"),
+		logger.With("component", "driver-identity-service"),
 	)
+
 	nodeService := NewNodeService(
-		log.With(logger, "component", "driver-node-service"),
+		logger.With("component", "driver-node-service"),
 		"123456",
 		"loc",
 		volumeMountService,

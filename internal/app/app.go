@@ -4,14 +4,13 @@ import (
 	"context"
 	"errors"
 	"fmt"
+	"log/slog"
 	"net"
 	"os"
 	"strconv"
 	"strings"
 	"time"
 
-	"github.com/go-kit/log"
-	"github.com/go-kit/log/level"
 	"github.com/prometheus/client_golang/prometheus"
 	"google.golang.org/grpc"
 
@@ -22,26 +21,32 @@ import (
 	"github.com/hetznercloud/hcloud-go/v2/hcloud/metadata"
 )
 
-func parseLogLevel(lvl string) level.Option {
-	switch lvl {
+func parseLogLevel(lvl string) slog.Level {
+	switch strings.ToLower(lvl) {
 	case "debug":
-		return level.AllowDebug()
+		return slog.LevelDebug
 	case "info":
-		return level.AllowInfo()
+		return slog.LevelInfo
 	case "warn":
-		return level.AllowWarn()
+		return slog.LevelWarn
 	case "error":
-		return level.AllowError()
+		return slog.LevelError
 	default:
-		return level.AllowInfo()
+		return slog.LevelInfo
 	}
 }
 
 // CreateLogger prepares a logger according to LOG_LEVEL environment variable.
-func CreateLogger() log.Logger {
-	logger := log.NewLogfmtLogger(log.NewSyncWriter(os.Stdout))
-	logger = level.NewFilter(logger, parseLogLevel(os.Getenv("LOG_LEVEL")))
-	return log.With(logger, "ts", log.DefaultTimestampUTC)
+func CreateLogger() *slog.Logger {
+	logLevel := parseLogLevel(os.Getenv("LOG_LEVEL"))
+	options := slog.HandlerOptions{
+		AddSource: true,
+		Level:     logLevel,
+	}
+	th := slog.NewTextHandler(os.Stdout, &options)
+	logger := slog.New(th)
+
+	return logger
 }
 
 // CreateListener creates and binds the unix socket in location specified by the CSI_ENDPOINT environment variable.
@@ -64,7 +69,7 @@ func CreateListener() (net.Listener, error) {
 
 // CreateMetrics prepares a metrics client pointing at METRICS_ENDPOINT environment variable (will fallback)
 // It will start the metrics HTTP listener depending on the ENABLE_METRICS environment variable.
-func CreateMetrics(logger log.Logger) *metrics.Metrics {
+func CreateMetrics(logger *slog.Logger) *metrics.Metrics {
 	metricsEndpoint := os.Getenv("METRICS_ENDPOINT")
 	if metricsEndpoint == "" {
 		// Use a default endpoint
@@ -72,7 +77,7 @@ func CreateMetrics(logger log.Logger) *metrics.Metrics {
 	}
 
 	m := metrics.New(
-		log.With(logger, "component", "metrics-service"),
+		logger,
 		metricsEndpoint,
 	)
 
@@ -81,15 +86,15 @@ func CreateMetrics(logger log.Logger) *metrics.Metrics {
 		var err error
 		enableMetrics, err = strconv.ParseBool(enableMetricsEnv)
 		if err != nil {
-			level.Error(logger).Log(
-				"msg", "ENABLE_METRICS can only contain a boolean value, true or false",
+			logger.Error(
+				"ENABLE_METRICS can only contain a boolean value, true or false",
 				"err", err,
 			)
 			os.Exit(1)
 		}
 	} else {
-		level.Warn(logger).Log(
-			"msg", "the environment variable ENABLE_METRICS should be set to true, you can disable metrics by setting this env to false. Not specifying the ENV is deprecated. With v1.9.0 we will change the default to false and in v1.10.0 we will fail on start when the ENABLE_METRICS is not specified.",
+		logger.Warn(
+			"the environment variable ENABLE_METRICS should be set to true, you can disable metrics by setting this env to false. Not specifying the ENV is deprecated. With v1.9.0 we will change the default to false and in v1.10.0 we will fail on start when the ENABLE_METRICS is not specified.",
 		)
 	}
 	if enableMetrics {
@@ -100,7 +105,7 @@ func CreateMetrics(logger log.Logger) *metrics.Metrics {
 }
 
 // CreateHcloudClient creates a hcloud.Client using  various environment variables to guide configuration
-func CreateHcloudClient(metricsRegistry *prometheus.Registry, logger log.Logger) (*hcloud.Client, error) {
+func CreateHcloudClient(metricsRegistry *prometheus.Registry, logger *slog.Logger) (*hcloud.Client, error) {
 	// apiToken can be set via HCLOUD_TOKEN (preferred) or HCLOUD_TOKEN_FILE
 	apiToken, err := envutil.LookupEnvWithFile("HCLOUD_TOKEN")
 	if err != nil {
@@ -111,7 +116,7 @@ func CreateHcloudClient(metricsRegistry *prometheus.Registry, logger log.Logger)
 	}
 
 	if len(apiToken) != 64 {
-		level.Warn(logger).Log("msg", fmt.Sprintf("unrecognized token format, expected 64 characters, got %d, proceeding anyway", len(apiToken)))
+		logger.Warn(fmt.Sprintf("unrecognized token format, expected 64 characters, got %d, proceeding anyway", len(apiToken)))
 	}
 
 	opts := []hcloud.ClientOption{
@@ -134,8 +139,8 @@ func CreateHcloudClient(metricsRegistry *prometheus.Registry, logger log.Logger)
 		if err != nil || tmp < 1 {
 			return nil, errors.New("entered polling interval configuration is not a integer that is higher than 1")
 		}
-		level.Info(logger).Log(
-			"msg", "got custom configuration for polling interval",
+		logger.Info(
+			"got custom configuration for polling interval",
 			"interval", customPollingInterval,
 		)
 
@@ -154,12 +159,12 @@ func CreateHcloudClient(metricsRegistry *prometheus.Registry, logger log.Logger)
 }
 
 // GetServer retrieves the hcloud server the application is running on.
-func GetServer(logger log.Logger, hcloudClient *hcloud.Client, metadataClient *metadata.Client) (*hcloud.Server, error) {
+func GetServer(logger *slog.Logger, hcloudClient *hcloud.Client, metadataClient *metadata.Client) (*hcloud.Server, error) {
 	hcloudServerID, err := getServerID(logger, hcloudClient, metadataClient)
 	if err != nil {
 		return nil, err
 	}
-	level.Debug(logger).Log("msg", "fetching server")
+	logger.Debug("fetching server")
 	server, _, err := hcloudClient.Server.GetByID(context.Background(), hcloudServerID)
 	if err != nil {
 		return nil, err
@@ -172,19 +177,19 @@ func GetServer(logger log.Logger, hcloudClient *hcloud.Client, metadataClient *m
 		return nil, errors.New("could not determine server")
 	}
 
-	level.Info(logger).Log("msg", "fetched server", "server-name", server.Name)
+	logger.Info("fetched server", "server-name", server.Name)
 
 	return server, nil
 }
 
-func getServerID(logger log.Logger, hcloudClient *hcloud.Client, metadataClient *metadata.Client) (int64, error) {
+func getServerID(logger *slog.Logger, hcloudClient *hcloud.Client, metadataClient *metadata.Client) (int64, error) {
 	if s := os.Getenv("HCLOUD_SERVER_ID"); s != "" {
 		id, err := strconv.ParseInt(s, 10, 64)
 		if err != nil {
 			return 0, fmt.Errorf("invalid server id in HCLOUD_SERVER_ID env var: %s", err)
 		}
-		level.Debug(logger).Log(
-			"msg", "using server id from HCLOUD_SERVER_ID env var",
+		logger.Debug(
+			"using server id from HCLOUD_SERVER_ID env var",
 			"server-id", id,
 		)
 		return id, nil
@@ -196,20 +201,20 @@ func getServerID(logger log.Logger, hcloudClient *hcloud.Client, metadataClient 
 			return 0, fmt.Errorf("error while getting server through node name: %s", err)
 		}
 		if server != nil {
-			level.Debug(logger).Log(
-				"msg", "using server name from KUBE_NODE_NAME env var",
+			logger.Debug(
+				"using server name from KUBE_NODE_NAME env var",
 				"server-id", server.ID,
 			)
 			return server.ID, nil
 		}
-		level.Debug(logger).Log(
-			"msg", "server not found by name, fallback to metadata service",
+		logger.Debug(
+			"server not found by name, fallback to metadata service",
 			"err", err,
 		)
 	}
 
-	level.Debug(logger).Log(
-		"msg", "getting instance id from metadata service",
+	logger.Debug(
+		"getting instance id from metadata service",
 	)
 	id, err := metadataClient.InstanceID()
 	if err != nil {
@@ -218,26 +223,25 @@ func getServerID(logger log.Logger, hcloudClient *hcloud.Client, metadataClient 
 	return id, nil
 }
 
-func CreateGRPCServer(logger log.Logger, metricsInterceptor grpc.UnaryServerInterceptor) *grpc.Server {
-	logger = log.With(logger, "component", "grpc-server")
+func CreateGRPCServer(logger *slog.Logger, metricsInterceptor grpc.UnaryServerInterceptor) *grpc.Server {
 	requestLogger := func(ctx context.Context, req interface{}, info *grpc.UnaryServerInfo, handler grpc.UnaryHandler) (interface{}, error) {
 		isProbe := info.FullMethod == "/csi.v1.Identity/Probe"
 
 		if !isProbe {
-			level.Debug(logger).Log(
-				"msg", "handling request",
+			logger.Debug(
+				"handling request",
 				"method", info.FullMethod,
 				"req", req,
 			)
 		}
 		resp, err := handler(ctx, req)
 		if err != nil {
-			level.Error(logger).Log(
-				"msg", "handler failed",
+			logger.Error(
+				"handler failed",
 				"err", err,
 			)
 		} else if !isProbe {
-			level.Debug(logger).Log("msg", "finished handling request", "method", info.FullMethod, "err", err)
+			logger.Debug("finished handling request", "method", info.FullMethod, "err", err)
 		}
 		return resp, err
 	}

@@ -3,10 +3,9 @@
 package integration
 
 import (
+	"log/slog"
 	"os"
 	"testing"
-
-	"github.com/go-kit/log"
 
 	"github.com/hetznercloud/csi-driver/internal/volumes"
 )
@@ -16,7 +15,7 @@ func TestCryptSetup(t *testing.T) {
 		return
 	}
 
-	logger := log.NewLogfmtLogger(NewTestingWriter(t))
+	logger := slog.New(slog.NewTextHandler(os.Stdout, nil))
 	cryptSetup := volumes.NewCryptSetup(logger)
 	name := "fake"
 	device, err := createFakeDevice(name, 32)

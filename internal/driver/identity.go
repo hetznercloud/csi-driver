@@ -2,23 +2,23 @@ package driver
 
 import (
 	"context"
+	"log/slog"
 	"sync"
 
 	proto "github.com/container-storage-interface/spec/lib/go/csi"
-	"github.com/go-kit/log"
 	"github.com/golang/protobuf/ptypes/wrappers"
 )
 
 type IdentityService struct {
 	proto.UnimplementedIdentityServer
 
-	logger log.Logger
+	logger *slog.Logger
 
 	readyMu sync.RWMutex
 	ready   bool
 }
 
-func NewIdentityService(logger log.Logger) *IdentityService {
+func NewIdentityService(logger *slog.Logger) *IdentityService {
 	return &IdentityService{
 		logger: logger,
 	}

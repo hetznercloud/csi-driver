@@ -5,7 +5,8 @@ import (
 	"testing"
 
 	proto "github.com/container-storage-interface/spec/lib/go/csi"
-	"github.com/go-kit/log"
+
+	"github.com/hetznercloud/csi-driver/internal/testutil"
 )
 
 var _ proto.IdentityServer = (*IdentityService)(nil)
@@ -19,7 +20,7 @@ func newIdentityServerTestEnv() identityServiceTestEnv {
 	return identityServiceTestEnv{
 		ctx: context.Background(),
 		service: NewIdentityService(
-			log.NewNopLogger(),
+			testutil.NewNopLogger(),
 		),
 	}
 }
