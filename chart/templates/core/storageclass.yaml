@@ -13,10 +13,6 @@ reclaimPolicy: {{ $val.reclaimPolicy | quote }}
 {{- if $val.allowedTopologyCloudServer }}
 allowedTopologies:
 - matchLabelExpressions:
-  - key: instance.hetzner.cloud/is-root-server
-    values:
-    - "false"
-- matchLabelExpressions:
   - key: instance.hetzner.cloud/provided-by
     values:
     - "cloud"
