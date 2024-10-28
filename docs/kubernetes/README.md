@@ -221,7 +221,7 @@ storageClasses:
     allowedTopologyCloudServer: true # <---
 ```
 
-To ensure proper topology evaluation, labels are needed to indicate whether a node is a cloud VM or a dedicated server from Robot. If you are using the `hcloud-cloud-controller-manager` version 1.20.0 or later, these labels are added automatically. Otherwise, you will need to label the nodes manually.
+To ensure proper topology evaluation, labels are needed to indicate whether a node is a cloud VM or a dedicated server from Robot. If you are using the `hcloud-cloud-controller-manager` version 1.21.0 or later, these labels are added automatically. Otherwise, you will need to label the nodes manually.
 
 ### Adding labels manually
 
