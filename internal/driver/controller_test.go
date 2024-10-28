@@ -6,12 +6,12 @@ import (
 	"testing"
 
 	proto "github.com/container-storage-interface/spec/lib/go/csi"
-	"github.com/go-kit/log"
 	"google.golang.org/grpc/codes"
 	"google.golang.org/grpc/status"
 
 	"github.com/hetznercloud/csi-driver/internal/csi"
 	"github.com/hetznercloud/csi-driver/internal/mock"
+	"github.com/hetznercloud/csi-driver/internal/testutil"
 	"github.com/hetznercloud/csi-driver/internal/volumes"
 )
 
@@ -24,7 +24,7 @@ type controllerServiceTestEnv struct {
 }
 
 func newControllerServiceTestEnv() *controllerServiceTestEnv {
-	logger := log.NewNopLogger()
+	logger := testutil.NewNopLogger()
 	volumeService := &mock.VolumeService{}
 
 	return &controllerServiceTestEnv{

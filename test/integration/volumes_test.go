@@ -4,13 +4,13 @@ package integration
 
 import (
 	"fmt"
+	"log/slog"
 	"math"
 	"os"
 	"path"
 	"runtime"
 	"testing"
 
-	"github.com/go-kit/log"
 	"k8s.io/mount-utils"
 	"k8s.io/utils/exec"
 
@@ -103,7 +103,7 @@ func TestVolumePublishUnpublish(t *testing.T) {
 
 	for _, test := range tests {
 		t.Run(test.name, func(t *testing.T) {
-			logger := log.NewLogfmtLogger(NewTestingWriter(t))
+			logger := slog.New(slog.NewTextHandler(os.Stdout, nil))
 			mountService := volumes.NewLinuxMountService(logger)
 			mounter := &mount.SafeFormatAndMount{
 				Interface: mount.New(""),
@@ -220,7 +220,7 @@ func TestVolumeResize(t *testing.T) {
 
 	for _, test := range tests {
 		t.Run(test.name, func(t *testing.T) {
-			logger := log.NewLogfmtLogger(NewTestingWriter(t))
+			logger := slog.New(slog.NewTextHandler(os.Stdout, nil))
 			mountService := volumes.NewLinuxMountService(logger)
 			resizeService := volumes.NewLinuxResizeService(logger)
 			cryptSetup := volumes.NewCryptSetup(logger)
@@ -324,7 +324,7 @@ func TestDetectDiskFormat(t *testing.T) {
 		{
 			name: "crypto_LUKS",
 			prepare: func(mounter *mount.SafeFormatAndMount, device string) error {
-				logger := log.NewLogfmtLogger(NewTestingWriter(t))
+				logger := slog.New(slog.NewTextHandler(os.Stdout, nil))
 				cryptSetup := volumes.NewCryptSetup(logger)
 				err := cryptSetup.Format(device, "passphrase")
 				return err

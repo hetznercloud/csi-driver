@@ -2,20 +2,18 @@ package volumes
 
 import (
 	"fmt"
+	"log/slog"
 	"os/exec"
 	"strings"
-
-	"github.com/go-kit/log"
-	"github.com/go-kit/log/level"
 )
 
 const cryptsetupExecuable = "cryptsetup"
 
 type CryptSetup struct {
-	logger log.Logger
+	logger *slog.Logger
 }
 
-func NewCryptSetup(logger log.Logger) *CryptSetup {
+func NewCryptSetup(logger *slog.Logger) *CryptSetup {
 	return &CryptSetup{logger: logger}
 }
 
@@ -31,8 +29,8 @@ func (cs *CryptSetup) IsActive(luksDeviceName string) (bool, error) {
 }
 
 func (cs *CryptSetup) Format(devicePath string, passphrase string) error {
-	level.Info(cs.logger).Log(
-		"msg", "formatting LUKS device",
+	cs.logger.Info(
+		"formatting LUKS device",
 		"devicePath", devicePath,
 	)
 	output, _, err := commandWithStdin(passphrase, cryptsetupExecuable, "luksFormat", "--type", "luks1", devicePath)
@@ -50,8 +48,8 @@ func (cs *CryptSetup) Open(devicePath string, luksDeviceName string, passphrase 
 	if active {
 		return nil
 	}
-	level.Info(cs.logger).Log(
-		"msg", "opening LUKS device",
+	cs.logger.Info(
+		"opening LUKS device",
 		"devicePath", devicePath,
 		"luksDeviceName", luksDeviceName,
 	)
@@ -70,8 +68,8 @@ func (cs *CryptSetup) Close(luksDeviceName string) error {
 	if !active {
 		return nil
 	}
-	level.Info(cs.logger).Log(
-		"msg", "closing LUKS device",
+	cs.logger.Info(
+		"closing LUKS device",
 		"luksDeviceName", luksDeviceName,
 	)
 	output, _, err := command(cryptsetupExecuable, "luksClose", luksDeviceName)
@@ -82,8 +80,8 @@ func (cs *CryptSetup) Close(luksDeviceName string) error {
 }
 
 func (cs *CryptSetup) Resize(luksDeviceName string) error {
-	level.Info(cs.logger).Log(
-		"msg", "resizing LUKS device",
+	cs.logger.Info(
+		"resizing LUKS device",
 		"luksDeviceName", luksDeviceName,
 	)
 	output, _, err := command(cryptsetupExecuable, "resize", luksDeviceName)

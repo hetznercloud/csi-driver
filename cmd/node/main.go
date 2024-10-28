@@ -2,13 +2,12 @@ package main
 
 import (
 	"fmt"
+	"log/slog"
 	"os"
 	"strconv"
 	"strings"
 
 	proto "github.com/container-storage-interface/spec/lib/go/csi"
-	"github.com/go-kit/log"
-	"github.com/go-kit/log/level"
 
 	"github.com/hetznercloud/csi-driver/internal/app"
 	"github.com/hetznercloud/csi-driver/internal/driver"
@@ -16,7 +15,7 @@ import (
 	"github.com/hetznercloud/hcloud-go/v2/hcloud/metadata"
 )
 
-var logger log.Logger
+var logger *slog.Logger
 
 func main() {
 	logger = app.CreateLogger()
@@ -26,43 +25,36 @@ func main() {
 	metadataClient := metadata.NewClient(metadata.WithInstrumentation(m.Registry()))
 
 	if !metadataClient.IsHcloudServer() {
-		level.Warn(logger).Log("msg", "unable to connect to metadata service, are you sure this is running on a Hetzner Cloud server?")
+		logger.Warn("unable to connect to metadata service, are you sure this is running on a Hetzner Cloud server?")
 	}
 
 	serverID, err := metadataClient.InstanceID()
 	if err != nil {
-		level.Error(logger).Log("msg", "failed to fetch server ID from metadata service", "err", err)
+		logger.Error("failed to fetch server ID from metadata service", "err", err)
 		os.Exit(1)
 	}
 
 	serverAZ, err := metadataClient.AvailabilityZone()
 	if err != nil {
-		level.Error(logger).Log("msg", "failed to fetch server availability-zone from metadata service", "err", err)
+		logger.Error("failed to fetch server availability-zone from metadata service", "err", err)
 		os.Exit(1)
 	}
 	parts := strings.Split(serverAZ, "-")
 	if len(parts) != 2 {
-		level.Error(logger).Log("msg", fmt.Sprintf("unexpected server availability zone: %s", serverAZ), "err", err)
+		logger.Error(fmt.Sprintf("unexpected server availability zone: %s", serverAZ), "err", err)
 		os.Exit(1)
 	}
 	serverLocation := parts[0]
 
-	level.Info(logger).Log("msg", "Fetched data from metadata service", "id", serverID, "location", serverLocation)
+	logger.Info("Fetched data from metadata service", "id", serverID, "location", serverLocation)
 
-	volumeMountService := volumes.NewLinuxMountService(
-		log.With(logger, "component", "linux-mount-service"),
-	)
-	volumeResizeService := volumes.NewLinuxResizeService(
-		log.With(logger, "component", "linux-resize-service"),
-	)
-	volumeStatsService := volumes.NewLinuxStatsService(
-		log.With(logger, "component", "linux-stats-service"),
-	)
-	identityService := driver.NewIdentityService(
-		log.With(logger, "component", "driver-identity-service"),
-	)
+	volumeMountService := volumes.NewLinuxMountService(logger.With("component", "linux-mount-service"))
+	volumeResizeService := volumes.NewLinuxResizeService(logger.With("component", "linux-resize-service"))
+	volumeStatsService := volumes.NewLinuxStatsService(logger.With("component", "linux-stats-service"))
+	identityService := driver.NewIdentityService(logger.With("component", "driver-identity-service"))
+
 	nodeService := driver.NewNodeService(
-		log.With(logger, "component", "driver-node-service"),
+		logger.With("component", "driver-node-service"),
 		strconv.FormatInt(serverID, 10),
 		serverLocation,
 		volumeMountService,
@@ -72,8 +64,8 @@ func main() {
 
 	listener, err := app.CreateListener()
 	if err != nil {
-		level.Error(logger).Log(
-			"msg", "failed to create listener",
+		logger.Error(
+			"failed to create listener",
 			"err", err,
 		)
 		os.Exit(1)
@@ -89,8 +81,8 @@ func main() {
 	identityService.SetReady(true)
 
 	if err := grpcServer.Serve(listener); err != nil {
-		level.Error(logger).Log(
-			"msg", "grpc server failed",
+		logger.Error(
+			"grpc server failed",
 			"err", err,
 		)
 		os.Exit(1)

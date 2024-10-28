@@ -2,12 +2,11 @@ package volumes
 
 import (
 	"fmt"
+	"log/slog"
 	"os"
 	"path/filepath"
 	"strings"
 
-	"github.com/go-kit/log"
-	"github.com/go-kit/log/level"
 	"github.com/moby/buildkit/frontend/dockerfile/shell"
 	"k8s.io/mount-utils"
 	"k8s.io/utils/exec"
@@ -38,12 +37,12 @@ type MountService interface {
 
 // LinuxMountService mounts volumes on a Linux system.
 type LinuxMountService struct {
-	logger     log.Logger
+	logger     *slog.Logger
 	mounter    *mount.SafeFormatAndMount
 	cryptSetup *CryptSetup
 }
 
-func NewLinuxMountService(logger log.Logger) *LinuxMountService {
+func NewLinuxMountService(logger *slog.Logger) *LinuxMountService {
 	return &LinuxMountService{
 		logger: logger,
 		mounter: &mount.SafeFormatAndMount{
@@ -123,8 +122,8 @@ func (s *LinuxMountService) Publish(targetPath string, devicePath string, opts M
 		devicePath = luksDevicePath
 	}
 
-	level.Info(s.logger).Log(
-		"msg", "publishing volume",
+	s.logger.Info(
+		"publishing volume",
 		"target-path", targetPath,
 		"device-path", devicePath,
 		"fs-type", opts.FSType,
@@ -159,8 +158,8 @@ func (s *LinuxMountService) Unpublish(targetPath string) error {
 		return fmt.Errorf("failed to determine mount path for %s: %s", targetPath, err)
 	}
 
-	level.Info(s.logger).Log(
-		"msg", "unpublishing volume",
+	s.logger.Info(
+		"unpublishing volume",
 		"target-path", targetPath,
 		"device-path", devicePath,
 	)

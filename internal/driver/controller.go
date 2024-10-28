@@ -4,11 +4,10 @@ import (
 	"context"
 	"errors"
 	"fmt"
+	"log/slog"
 	"strconv"
 
 	proto "github.com/container-storage-interface/spec/lib/go/csi"
-	"github.com/go-kit/log"
-	"github.com/go-kit/log/level"
 	"google.golang.org/grpc/codes"
 	"google.golang.org/grpc/status"
 
@@ -19,13 +18,13 @@ import (
 type ControllerService struct {
 	proto.UnimplementedControllerServer
 
-	logger        log.Logger
+	logger        *slog.Logger
 	volumeService volumes.Service
 	location      string
 }
 
 func NewControllerService(
-	logger log.Logger,
+	logger *slog.Logger,
 	volumeService volumes.Service,
 	location string,
 ) *ControllerService {
@@ -72,8 +71,8 @@ func (s *ControllerService) CreateVolume(ctx context.Context, req *proto.CreateV
 		Location: location,
 	})
 	if err != nil {
-		level.Error(s.logger).Log(
-			"msg", "failed to create volume",
+		s.logger.Error(
+			"failed to create volume",
 			"err", err,
 		)
 		code := codes.Internal
@@ -83,8 +82,8 @@ func (s *ControllerService) CreateVolume(ctx context.Context, req *proto.CreateV
 		}
 		return nil, status.Error(code, fmt.Sprintf("failed to create volume: %s", err))
 	}
-	level.Info(s.logger).Log(
-		"msg", "created volume",
+	s.logger.Info(
+		"created volume",
 		"volume-id", volume.ID,
 		"volume-name", volume.Name,
 	)

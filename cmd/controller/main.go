@@ -1,11 +1,10 @@
 package main
 
 import (
+	"log/slog"
 	"os"
 
 	proto "github.com/container-storage-interface/spec/lib/go/csi"
-	"github.com/go-kit/log"
-	"github.com/go-kit/log/level"
 
 	"github.com/hetznercloud/csi-driver/internal/api"
 	"github.com/hetznercloud/csi-driver/internal/app"
@@ -14,7 +13,7 @@ import (
 	"github.com/hetznercloud/hcloud-go/v2/hcloud/metadata"
 )
 
-var logger log.Logger
+var logger *slog.Logger
 
 func main() {
 	logger = app.CreateLogger()
@@ -23,8 +22,8 @@ func main() {
 
 	hcloudClient, err := app.CreateHcloudClient(m.Registry(), logger)
 	if err != nil {
-		level.Error(logger).Log(
-			"msg", "failed to initialize hcloud client",
+		logger.Error(
+			"failed to initialize hcloud client",
 			"err", err,
 		)
 		os.Exit(1)
@@ -38,15 +37,15 @@ func main() {
 		metadataClient := metadata.NewClient(metadata.WithInstrumentation(m.Registry()))
 
 		if !metadataClient.IsHcloudServer() {
-			level.Warn(logger).Log("msg", "Unable to connect to metadata service. "+
-				"In the current configuration the controller is required to run on a Hetzner Cloud server. "+
+			logger.Warn("Unable to connect to metadata service. " +
+				"In the current configuration the controller is required to run on a Hetzner Cloud server. " +
 				"You can set HCLOUD_VOLUME_DEFAULT_LOCATION if you want to run it somewhere else.")
 		}
 
 		server, err := app.GetServer(logger, hcloudClient, metadataClient)
 		if err != nil {
-			level.Error(logger).Log(
-				"msg", "failed to fetch server",
+			logger.Error(
+				"failed to fetch server",
 				"err", err,
 			)
 			os.Exit(1)
@@ -56,25 +55,26 @@ func main() {
 	}
 
 	volumeService := volumes.NewIdempotentService(
-		log.With(logger, "component", "idempotent-volume-service"),
+		logger.With("component", "idempotent-volume-service"),
 		api.NewVolumeService(
-			log.With(logger, "component", "api-volume-service"),
+			logger.With("component", "api-volume-service"),
 			hcloudClient,
 		),
 	)
 	controllerService := driver.NewControllerService(
-		log.With(logger, "component", "driver-controller-service"),
+		logger.With("component", "driver-controller-service"),
 		volumeService,
 		location,
 	)
+
 	identityService := driver.NewIdentityService(
-		log.With(logger, "component", "driver-identity-service"),
+		logger.With("component", "driver-identity-service"),
 	)
 
 	listener, err := app.CreateListener()
 	if err != nil {
-		level.Error(logger).Log(
-			"msg", "failed to create listener",
+		logger.Error(
+			"failed to create listener",
 			"err", err,
 		)
 		os.Exit(1)
@@ -90,8 +90,8 @@ func main() {
 	identityService.SetReady(true)
 
 	if err := grpcServer.Serve(listener); err != nil {
-		level.Error(logger).Log(
-			"msg", "grpc server failed",
+		logger.Error(
+			"grpc server failed",
 			"err", err,
 		)
 		os.Exit(1)

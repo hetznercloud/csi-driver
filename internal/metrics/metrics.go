@@ -1,10 +1,9 @@
 package metrics
 
 import (
+	"log/slog"
 	"net/http"
 
-	"github.com/go-kit/log"
-	"github.com/go-kit/log/level"
 	grpcprom "github.com/grpc-ecosystem/go-grpc-middleware/providers/prometheus"
 	"github.com/prometheus/client_golang/prometheus"
 	"github.com/prometheus/client_golang/prometheus/collectors"
@@ -16,14 +15,14 @@ import (
 //
 // It exposes gRPC and Go Runtime metrics.
 type Metrics struct {
-	logger      log.Logger
+	logger      *slog.Logger
 	addr        string
 	reg         *prometheus.Registry
 	grpcMetrics *grpcprom.ServerMetrics
 	goMetrics   prometheus.Collector
 }
 
-func New(logger log.Logger, addr string) *Metrics {
+func New(logger *slog.Logger, addr string) *Metrics {
 	metrics := &Metrics{
 		logger: logger,
 		addr:   addr,
@@ -34,15 +33,15 @@ func New(logger log.Logger, addr string) *Metrics {
 		goMetrics: collectors.NewGoCollector(),
 	}
 
-	level.Debug(metrics.logger).Log(
-		"msg", "registering metrics with registry",
+	metrics.logger.Debug(
+		"registering metrics with registry",
 	)
 
 	metrics.reg.MustRegister(metrics.goMetrics)
 	metrics.reg.MustRegister(metrics.grpcMetrics)
 
-	level.Debug(metrics.logger).Log(
-		"msg", "registered metrics",
+	metrics.logger.Debug(
+		"registered metrics",
 	)
 
 	return metrics
@@ -67,15 +66,15 @@ func (s *Metrics) Registry() *prometheus.Registry {
 func (s *Metrics) Serve() {
 	httpServer := &http.Server{Handler: promhttp.HandlerFor(s.reg, promhttp.HandlerOpts{}), Addr: s.addr}
 
-	level.Debug(s.logger).Log(
-		"msg", "starting prometheus http server",
+	s.logger.Debug(
+		"starting prometheus http server",
 		"addr", s.addr,
 	)
 
 	go func() {
 		if err := httpServer.ListenAndServe(); err != nil {
-			level.Error(s.logger).Log(
-				"msg", "Unable to start the prometheus http server",
+			s.logger.Error(
+				"Unable to start the prometheus http server",
 				"err", err,
 			)
 		}

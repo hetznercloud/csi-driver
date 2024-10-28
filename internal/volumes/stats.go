@@ -1,7 +1,8 @@
 package volumes
 
 import (
-	"github.com/go-kit/log"
+	"log/slog"
+
 	"golang.org/x/sys/unix"
 )
 
@@ -13,10 +14,10 @@ type StatsService interface {
 
 // LinuxStatsService mounts volumes on a Linux system.
 type LinuxStatsService struct {
-	logger log.Logger
+	logger *slog.Logger
 }
 
-func NewLinuxStatsService(logger log.Logger) *LinuxStatsService {
+func NewLinuxStatsService(logger *slog.Logger) *LinuxStatsService {
 	return &LinuxStatsService{
 		logger: logger,
 	}

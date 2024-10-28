@@ -5,10 +5,9 @@ import (
 	"io"
 	"testing"
 
-	"github.com/go-kit/log"
-
 	"github.com/hetznercloud/csi-driver/internal/csi"
 	"github.com/hetznercloud/csi-driver/internal/mock"
+	"github.com/hetznercloud/csi-driver/internal/testutil"
 	"github.com/hetznercloud/csi-driver/internal/volumes"
 )
 
@@ -37,7 +36,7 @@ func TestIdempotentServiceCreateNew(t *testing.T) {
 		},
 	}
 
-	service := volumes.NewIdempotentService(log.NewNopLogger(), volumeService)
+	service := volumes.NewIdempotentService(testutil.NewNopLogger(), volumeService)
 
 	volume, err := service.Create(context.Background(), creatingOpts)
 	if err != nil {
@@ -65,7 +64,7 @@ func TestIdempotentServiceCreateExisting(t *testing.T) {
 		},
 	}
 
-	service := volumes.NewIdempotentService(log.NewNopLogger(), volumeService)
+	service := volumes.NewIdempotentService(testutil.NewNopLogger(), volumeService)
 
 	volume, err := service.Create(context.Background(), volumes.CreateOpts{
 		Name:     "test",
@@ -91,7 +90,7 @@ func TestIdempotentServiceCreateExistingError(t *testing.T) {
 		},
 	}
 
-	service := volumes.NewIdempotentService(log.NewNopLogger(), volumeService)
+	service := volumes.NewIdempotentService(testutil.NewNopLogger(), volumeService)
 
 	_, err := service.Create(context.Background(), volumes.CreateOpts{
 		Name:     "test",
@@ -144,7 +143,7 @@ func TestIdempotentServiceCreateExistingNotFitting(t *testing.T) {
 		},
 	}
 
-	service := volumes.NewIdempotentService(log.NewNopLogger(), volumeService)
+	service := volumes.NewIdempotentService(testutil.NewNopLogger(), volumeService)
 
 	for _, testCase := range testCases {
 		t.Run(testCase.Name, func(t *testing.T) {
@@ -167,7 +166,7 @@ func TestIdempotentServiceCreateExistingNotFitting(t *testing.T) {
 
 func TestIdempotentServiceDelete(t *testing.T) {
 	volumeService := &mock.VolumeService{}
-	service := volumes.NewIdempotentService(log.NewNopLogger(), volumeService)
+	service := volumes.NewIdempotentService(testutil.NewNopLogger(), volumeService)
 
 	testCases := []struct {
 		Name       string
@@ -240,7 +239,7 @@ func TestIdempotentServiceDeleteVolumeNotFound(t *testing.T) {
 		},
 	}
 
-	service := volumes.NewIdempotentService(log.NewNopLogger(), volumeService)
+	service := volumes.NewIdempotentService(testutil.NewNopLogger(), volumeService)
 
 	err := service.Delete(context.Background(), &csi.Volume{})
 	if err != nil {
@@ -258,7 +257,7 @@ func TestIdempotentServiceDeleteError(t *testing.T) {
 		},
 	}
 
-	service := volumes.NewIdempotentService(log.NewNopLogger(), volumeService)
+	service := volumes.NewIdempotentService(testutil.NewNopLogger(), volumeService)
 
 	err := service.Delete(context.Background(), &csi.Volume{})
 	if err != io.EOF {
@@ -273,7 +272,7 @@ func TestIdempotentServiceAttach(t *testing.T) {
 		},
 	}
 
-	service := volumes.NewIdempotentService(log.NewNopLogger(), volumeService)
+	service := volumes.NewIdempotentService(testutil.NewNopLogger(), volumeService)
 
 	err := service.Attach(context.Background(), &csi.Volume{}, &csi.Server{})
 	if err != nil {
@@ -296,7 +295,7 @@ func TestIdempotentServiceAttachAlreadyAttachedSameServer(t *testing.T) {
 		},
 	}
 
-	service := volumes.NewIdempotentService(log.NewNopLogger(), volumeService)
+	service := volumes.NewIdempotentService(testutil.NewNopLogger(), volumeService)
 
 	err := service.Attach(context.Background(), &csi.Volume{}, &csi.Server{ID: 1})
 	if err != nil {
@@ -319,7 +318,7 @@ func TestIdempotentServiceAttachAlreadyAttachedDifferentServer(t *testing.T) {
 		},
 	}
 
-	service := volumes.NewIdempotentService(log.NewNopLogger(), volumeService)
+	service := volumes.NewIdempotentService(testutil.NewNopLogger(), volumeService)
 
 	err := service.Attach(context.Background(), &csi.Volume{}, &csi.Server{ID: 1})
 	if err != volumes.ErrAttached {
@@ -334,7 +333,7 @@ func TestIdempotentServiceDetach(t *testing.T) {
 		},
 	}
 
-	service := volumes.NewIdempotentService(log.NewNopLogger(), volumeService)
+	service := volumes.NewIdempotentService(testutil.NewNopLogger(), volumeService)
 
 	err := service.Detach(context.Background(), &csi.Volume{}, &csi.Server{})
 	if err != nil {
@@ -349,7 +348,7 @@ func TestIdempotentServiceDetachNotAttached(t *testing.T) {
 		},
 	}
 
-	service := volumes.NewIdempotentService(log.NewNopLogger(), volumeService)
+	service := volumes.NewIdempotentService(testutil.NewNopLogger(), volumeService)
 
 	err := service.Detach(context.Background(), &csi.Volume{}, &csi.Server{})
 	if err != nil {
@@ -364,7 +363,7 @@ func TestIdempotentServiceDetachAttachedToDifferentServer(t *testing.T) {
 		},
 	}
 
-	service := volumes.NewIdempotentService(log.NewNopLogger(), volumeService)
+	service := volumes.NewIdempotentService(testutil.NewNopLogger(), volumeService)
 
 	err := service.Detach(context.Background(), &csi.Volume{}, &csi.Server{})
 	if err != nil {
@@ -380,7 +379,7 @@ func TestIdempotentServiceExpand(t *testing.T) {
 			},
 		}
 
-		service := volumes.NewIdempotentService(log.NewNopLogger(), volumeService)
+		service := volumes.NewIdempotentService(testutil.NewNopLogger(), volumeService)
 
 		err := service.Resize(context.Background(), &csi.Volume{}, 10)
 		if err != nil {

@@ -2,9 +2,8 @@ package volumes
 
 import (
 	"fmt"
+	"log/slog"
 
-	"github.com/go-kit/log"
-	"github.com/go-kit/log/level"
 	"k8s.io/mount-utils"
 	"k8s.io/utils/exec"
 )
@@ -16,12 +15,12 @@ type ResizeService interface {
 
 // LinuxResizeService resizes volumes on a Linux system.
 type LinuxResizeService struct {
-	logger     log.Logger
+	logger     *slog.Logger
 	resizer    *mount.ResizeFs
 	cryptSetup *CryptSetup
 }
 
-func NewLinuxResizeService(logger log.Logger) *LinuxResizeService {
+func NewLinuxResizeService(logger *slog.Logger) *LinuxResizeService {
 	return &LinuxResizeService{
 		logger: logger,
 		resizer: mount.NewResizeFs(mount.SafeFormatAndMount{
@@ -38,8 +37,8 @@ func (l *LinuxResizeService) Resize(volumePath string) error {
 		return fmt.Errorf("failed to determine mount path for %s: %s", volumePath, err)
 	}
 
-	level.Info(l.logger).Log(
-		"msg", "resizing volume",
+	l.logger.Info(
+		"resizing volume",
 		"volume-path", volumePath,
 		"device-path", devicePath,
 	)

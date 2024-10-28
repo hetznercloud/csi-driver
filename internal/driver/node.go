@@ -3,9 +3,9 @@ package driver
 import (
 	"context"
 	"fmt"
+	"log/slog"
 
 	proto "github.com/container-storage-interface/spec/lib/go/csi"
-	"github.com/go-kit/log"
 	"google.golang.org/grpc/codes"
 	"google.golang.org/grpc/status"
 
@@ -15,7 +15,7 @@ import (
 type NodeService struct {
 	proto.UnimplementedNodeServer
 
-	logger              log.Logger
+	logger              *slog.Logger
 	serverID            string
 	serverLocation      string
 	volumeMountService  volumes.MountService
@@ -24,7 +24,7 @@ type NodeService struct {
 }
 
 func NewNodeService(
-	logger log.Logger,
+	logger *slog.Logger,
 	serverID string,
 	serverLocation string,
 	volumeMountService volumes.MountService,

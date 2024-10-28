@@ -6,11 +6,11 @@ toolchain go1.23.2
 
 require (
 	github.com/container-storage-interface/spec v1.10.0
-	github.com/go-kit/log v0.2.1
 	github.com/golang/protobuf v1.5.4
 	github.com/grpc-ecosystem/go-grpc-middleware/providers/prometheus v1.0.1
 	github.com/hetznercloud/hcloud-go/v2 v2.14.0
 	github.com/kubernetes-csi/csi-test/v5 v5.3.1
+	github.com/moby/buildkit v0.16.0
 	github.com/prometheus/client_golang v1.20.5
 	github.com/stretchr/testify v1.9.0
 	golang.org/x/sys v0.26.0
@@ -24,7 +24,6 @@ require (
 	github.com/cespare/xxhash/v2 v2.3.0 // indirect
 	github.com/coreos/go-systemd/v22 v22.5.0 // indirect
 	github.com/davecgh/go-spew v1.1.2-0.20180830191138-d8f796af33cc // indirect
-	github.com/go-logfmt/logfmt v0.5.1 // indirect
 	github.com/go-logr/logr v1.4.2 // indirect
 	github.com/go-task/slim-sprig/v3 v3.0.0 // indirect
 	github.com/godbus/dbus/v5 v5.1.0 // indirect
@@ -34,7 +33,6 @@ require (
 	github.com/google/uuid v1.6.0 // indirect
 	github.com/grpc-ecosystem/go-grpc-middleware/v2 v2.1.0 // indirect
 	github.com/klauspost/compress v1.17.9 // indirect
-	github.com/moby/buildkit v0.16.0 // indirect
 	github.com/moby/sys/mountinfo v0.7.2 // indirect
 	github.com/munnerz/goautoneg v0.0.0-20191010083416-a7dc8b61c822 // indirect
 	github.com/onsi/ginkgo/v2 v2.19.0 // indirect
