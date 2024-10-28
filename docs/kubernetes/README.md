@@ -211,17 +211,17 @@ $ kubectl apply -f https://raw.githubusercontent.com/hetznercloud/csi-driver/v2.
 
 Root servers can be part of the cluster, but the CSI plugin doesn't work there and the current behaviour of the scheduler can cause Pods to be stuck in `Pending`. 
 
-Include topology key evaluation into storage class, by setting the helm chart value `includesRobotServers`:
+Setting `allowedTopologyCloudServer` to true prevents pods from being scheduled on nodes, specifically Robot servers, where Hetzner volumes are unavailable. This value can not be changed after the initial creation of a storage class.
 
 ```yaml
 storageClasses:
   - name: hcloud-volumes
     defaultStorageClass: true
     reclaimPolicy: Delete
-    includesRobotServers: true # <---
+    allowedTopologyCloudServer: true # <---
 ```
 
-Label the nodes according to their type:
+To ensure proper topology evaluation, labels are needed to indicate whether a node is a cloud VM or a dedicated server from Robot. If you are using the `hcloud-cloud-controller-manager` version 1.20.0 or later, these labels are added automatically. Otherwise, you will need to label the nodes manually.
 
 ### New Label
 

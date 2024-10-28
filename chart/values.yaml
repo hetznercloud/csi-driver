@@ -728,4 +728,5 @@ storageClasses:
   - name: hcloud-volumes
     defaultStorageClass: true
     reclaimPolicy: Delete
-    includesRobotServers: false 
+    ## @param storageClass.allowedTopologyCloudServer Prevents pods from being scheduled on nodes, specifically Robot servers, where Hetzner volumes are unavailable
+    allowedTopologyCloudServer: false 
