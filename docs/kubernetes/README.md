@@ -106,7 +106,7 @@ metadata:
 stringData:
  encryption-passphrase: foobar
 
---- 
+---
 
 apiVersion: storage.k8s.io/v1
 kind: StorageClass
@@ -209,7 +209,7 @@ $ kubectl apply -f https://raw.githubusercontent.com/hetznercloud/csi-driver/v2.
 
 ## Integration with Root Servers
 
-Root servers can be part of the cluster, but the CSI plugin doesn't work there and the current behaviour of the scheduler can cause Pods to be stuck in `Pending`. 
+Root servers can be part of the cluster, but the CSI plugin doesn't work there and the current behaviour of the scheduler can cause Pods to be stuck in `Pending`.
 
 In the Helm Chart you can set `allowedTopologyCloudServer` to true to prevent pods from being scheduled on nodes, specifically Robot servers, where Hetzner volumes are unavailable. This value can not be changed after the initial creation of a storage class.
 
@@ -238,7 +238,7 @@ kubectl label nodes <node name> instance.hetzner.cloud/provided-by=robot
 
 ### DEPRECATED: Old Label
 
-Please switch to the [new label](#new-label). The label `instance.hetzner.cloud/is-robot-server` will be removed in future releases.
+We prefer that you use our [new label](#new-label). The label `instance.hetzner.cloud/is-robot-server` will be deprecated in future releases.
 
 **Cloud Servers**
 ```bash
