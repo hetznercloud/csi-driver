@@ -1,5 +1,26 @@
 # Changelog
 
+## [2.10.0](https://github.com/hetznercloud/csi-driver/compare/v2.9.0...v2.10.0) (2024-10-29)
+
+
+### Features
+
+* add support & tests for Kubernetes 1.31 ([#721](https://github.com/hetznercloud/csi-driver/issues/721)) ([85035b9](https://github.com/hetznercloud/csi-driver/commit/85035b906613c40b9cff28e75429a70275b93c8b))
+* allow arbitrary length API tokens ([#724](https://github.com/hetznercloud/csi-driver/issues/724)) ([61c3a0e](https://github.com/hetznercloud/csi-driver/commit/61c3a0eb5309cdeac2613da5396d23fb86942ceb))
+* allow passing mkfs format options via storage class parameters ([#747](https://github.com/hetznercloud/csi-driver/issues/747)) ([4b9aa4e](https://github.com/hetznercloud/csi-driver/commit/4b9aa4efb65eb938600772b005699eed12b0555f))
+* change XFS default options to support older kernels ([#747](https://github.com/hetznercloud/csi-driver/issues/747)) ([4b9aa4e](https://github.com/hetznercloud/csi-driver/commit/4b9aa4efb65eb938600772b005699eed12b0555f))
+* drop tests for Kubernetes 1.27 ([#722](https://github.com/hetznercloud/csi-driver/issues/722)) ([d46a54b](https://github.com/hetznercloud/csi-driver/commit/d46a54b232336a4ed02458c0c40c8c7d6a8f003d))
+* force pods with volumes to be scheduled on Cloud servers ([#743](https://github.com/hetznercloud/csi-driver/issues/743)) ([702fe01](https://github.com/hetznercloud/csi-driver/commit/702fe01a6650ff3ca336b29b15d8b3291a4f5bd8))
+* fstype is directly passed to mkfs: mkfs.&lt;fstype&gt; ([#749](https://github.com/hetznercloud/csi-driver/issues/749)) ([173bf2f](https://github.com/hetznercloud/csi-driver/commit/173bf2f46e9d7ba482b46f4bc5446b20cdc2e5f5))
+* support for SELinux mount ([#756](https://github.com/hetznercloud/csi-driver/issues/756)) ([719247e](https://github.com/hetznercloud/csi-driver/commit/719247e4ae8ce7fe7f74064ed7073491f1129459)), closes [#582](https://github.com/hetznercloud/csi-driver/issues/582)
+* Support SINGLE_NODE_MULTI_WRITER capability ([#725](https://github.com/hetznercloud/csi-driver/issues/725)) ([cd53c23](https://github.com/hetznercloud/csi-driver/commit/cd53c23d500d555bf53ba423ea4081a9348e19ca)), closes [#327](https://github.com/hetznercloud/csi-driver/issues/327)
+* **swarm:** removed workaround support for mock staging/unstaging ([#746](https://github.com/hetznercloud/csi-driver/issues/746)) ([465ec21](https://github.com/hetznercloud/csi-driver/commit/465ec21147cba7a85deed0164b600d012fa9a8ae))
+
+
+### Bug Fixes
+
+* do not log sensitive mount options ([#755](https://github.com/hetznercloud/csi-driver/issues/755)) ([0b6e860](https://github.com/hetznercloud/csi-driver/commit/0b6e8602c5bc1efccab2132dece916936b53d67b))
+
 ## [2.9.0](https://github.com/hetznercloud/csi-driver/compare/v2.8.0...v2.9.0) (2024-08-08)
 
 
