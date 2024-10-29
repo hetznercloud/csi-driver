@@ -370,3 +370,5 @@ storageClasses:
   - name: foobar
     defaultStorageClass: false
     reclaimPolicy: Keep
+    allowedTopologyCloudServer: false
+

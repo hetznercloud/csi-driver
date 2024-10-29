@@ -106,7 +106,7 @@ metadata:
 stringData:
  encryption-passphrase: foobar
 
---- 
+---
 
 apiVersion: storage.k8s.io/v1
 kind: StorageClass
@@ -209,8 +209,43 @@ $ kubectl apply -f https://raw.githubusercontent.com/hetznercloud/csi-driver/v2.
 
 ## Integration with Root Servers
 
-Root servers can be part of the cluster, but the CSI plugin doesn't work there. Taint the root server as follows to skip that node for the DaemonSet.
+Root servers can be part of the cluster, but the CSI plugin doesn't work there and the current behaviour of the scheduler can cause Pods to be stuck in `Pending`.
 
+In the Helm Chart you can set `allowedTopologyCloudServer` to true to prevent pods from being scheduled on nodes, specifically Robot servers, where Hetzner volumes are unavailable. This value can not be changed after the initial creation of a storage class.
+
+```yaml
+storageClasses:
+  - name: hcloud-volumes
+    defaultStorageClass: true
+    reclaimPolicy: Delete
+    allowedTopologyCloudServer: true # <---
+```
+
+To ensure proper topology evaluation, labels are needed to indicate whether a node is a cloud VM or a dedicated server from Robot. If you are using the `hcloud-cloud-controller-manager` version 1.21.0 or later, these labels are added automatically. Otherwise, you will need to label the nodes manually.
+
+### Adding labels manually
+
+**Cloud Servers**
+```bash
+kubectl label nodes <node name> instance.hetzner.cloud/provided-by=cloud
+```
+
+**Root Servers**
+```bash
+kubectl label nodes <node name> instance.hetzner.cloud/provided-by=robot
+```
+
+
+### DEPRECATED: Old Label
+
+We prefer that you use our [new label](#new-label). The label `instance.hetzner.cloud/is-robot-server` will be deprecated in future releases.
+
+**Cloud Servers**
+```bash
+kubectl label nodes <node name> instance.hetzner.cloud/is-root-server=false
+```
+
+**Root Servers**
 ```bash
 kubectl label nodes <node name> instance.hetzner.cloud/is-root-server=true
 ```

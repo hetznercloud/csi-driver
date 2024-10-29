@@ -556,6 +556,10 @@ node:
                 operator: NotIn
                 values:
                   - "true"
+              - key: "instance.hetzner.cloud/provided-by"
+                operator: NotIn
+                values:
+                  - "robot"
 
   ## @param node.nodeSelector Node labels for node pods assignment
   ## ref: https://kubernetes.io/docs/user-guide/node-selection/
@@ -724,3 +728,5 @@ storageClasses:
   - name: hcloud-volumes
     defaultStorageClass: true
     reclaimPolicy: Delete
+    ## @param storageClass.allowedTopologyCloudServer Prevents pods from being scheduled on nodes, specifically Robot servers, where Hetzner volumes are unavailable
+    allowedTopologyCloudServer: false 
