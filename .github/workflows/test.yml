@@ -156,7 +156,7 @@ jobs:
       - name: Verify Snapshots
         run: |
           hack/update-helm-snapshots.sh
-          git diff --exit-code -- deploy/
+          git diff --exit-code -- chart/.snapshots/
 
       - name: Show warning
         if: failure()
