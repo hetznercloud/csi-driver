@@ -13,7 +13,7 @@ require (
 	github.com/moby/buildkit v0.17.1
 	github.com/prometheus/client_golang v1.20.5
 	github.com/stretchr/testify v1.9.0
-	golang.org/x/sys v0.26.0
+	golang.org/x/sys v0.27.0
 	google.golang.org/grpc v1.67.1
 	k8s.io/mount-utils v0.31.2
 	k8s.io/utils v0.0.0-20241104163129-6fe5fd82f078
