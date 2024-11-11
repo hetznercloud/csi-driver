@@ -49,8 +49,8 @@ func (s *ControllerService) CreateVolume(ctx context.Context, req *proto.CreateV
 	}
 
 	// Check if ALL volume capabilities are supported.
-	for i, cap := range req.VolumeCapabilities {
-		if !isCapabilitySupported(cap) {
+	for i, capability := range req.VolumeCapabilities {
+		if !isCapabilitySupported(capability) {
 			return nil, status.Error(codes.InvalidArgument, fmt.Sprintf("capability at index %d is not supported", i))
 		}
 	}
@@ -255,8 +255,8 @@ func (s *ControllerService) ValidateVolumeCapabilities(ctx context.Context, req 
 	}
 
 	confirmed := true
-	for _, cap := range req.VolumeCapabilities {
-		if !isCapabilitySupported(cap) {
+	for _, capability := range req.VolumeCapabilities {
+		if !isCapabilitySupported(capability) {
 			confirmed = false
 			break
 		}

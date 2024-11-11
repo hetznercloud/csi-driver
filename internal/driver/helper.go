@@ -45,11 +45,11 @@ func volumeSizeFromCapacityRange(cr *proto.CapacityRange) (int, int, bool) {
 	return minSize, maxSize, true
 }
 
-func isCapabilitySupported(cap *proto.VolumeCapability) bool {
-	if cap.AccessMode == nil {
+func isCapabilitySupported(capability *proto.VolumeCapability) bool {
+	if capability.AccessMode == nil {
 		return false
 	}
-	switch cap.AccessMode.Mode {
+	switch capability.AccessMode.Mode {
 	case proto.VolumeCapability_AccessMode_SINGLE_NODE_WRITER:
 		return true
 	case proto.VolumeCapability_AccessMode_SINGLE_NODE_MULTI_WRITER:
