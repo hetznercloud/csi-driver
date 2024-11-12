@@ -99,7 +99,7 @@ spec:
           resources: {{- toYaml .Values.node.resources.livenessProbe | nindent 12 }}
           {{- end }}
         - name: hcloud-csi-driver
-          image: {{ include "common.images.image" (dict "value" .Values.node.image.hcloudCSIDriver "context" .) }} # x-release-please-version
+          image: {{ include "common.images.image" (dict "value" .Values.node.image.hcloudCSIDriver "context" .) }} # x-releaser-pleaser-version
           imagePullPolicy: {{ .Values.node.image.hcloudCSIDriver.pullPolicy }}
           command: [/bin/hcloud-csi-driver-node]
           volumeMounts:
