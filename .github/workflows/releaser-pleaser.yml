@@ -1,0 +1,32 @@
+name: Releaser-pleaser
+
+on:
+  push:
+    branches: [main]
+  pull_request_target:
+    types:
+      - edited
+      - labeled
+      - unlabeled
+
+jobs:
+  releaser-pleaser:
+    # Do not run on forks.
+    if: github.repository == 'hetznercloud/csi-driver'
+
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write
+      pull-requests: write
+    steps:
+      - name: releaser-pleaser
+        uses: apricote/releaser-pleaser@v0.4.2
+        with:
+          token: ${{ secrets.HCLOUD_BOT_TOKEN }}
+          extra-files: |
+            internal/driver/driver.go
+            deploy/kubernetes/hcloud-csi.yml
+            chart/.snapshots/default.yaml
+            chart/.snapshots/example-prod.yaml
+            chart/.snapshots/full.yaml
+            chart/Chart.yaml
