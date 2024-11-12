@@ -53,10 +53,7 @@ func main() {
 	volumeStatsService := volumes.NewLinuxStatsService(logger.With("component", "linux-stats-service"))
 	identityService := driver.NewIdentityService(logger.With("component", "driver-identity-service"))
 
-	var enableProvidedByTopology bool
-	if featFlag, exists := os.LookupEnv("ENABLE_PROVIDED_BY_TOPOLOGY"); exists {
-		enableProvidedByTopology, _ = strconv.ParseBool(featFlag)
-	}
+	enableProvidedByTopology := app.GetEnableProvidedByTopology()
 
 	nodeService := driver.NewNodeService(
 		logger.With("component", "driver-node-service"),
