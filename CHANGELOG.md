@@ -1,5 +1,21 @@
 # Changelog
 
+## [v2.10.1](https://github.com/hetznercloud/csi-driver/releases/tag/v2.10.1)
+
+### ⚠️ Removed Feature from v2.10.0
+
+We have reverted a workaround for an upstream issue in the Kubernetes scheduler where nodes without the CSI Plugin (e.g. Robot servers) would still be considered for scheduling, but then creating and attaching the volume fails with no automatic reconciliation of the this error.
+
+Due to variations in the CSI specification implementation, these changes disrupted Nomad clusters, requiring us to revert them. We are actively working on placing this workaround behind a feature flag, allowing Kubernetes users to bypass the upstream issue.
+
+This affects you, if you have set the Helm value `allowedTopologyCloudServer` in v2.10.0. If you are affected by the Kubernetes upstream issue, we will provide a fix in the next minor version v2.11.0.
+
+Learn more about this in [#400](https://github.com/hetznercloud/csi-driver/issues/400) and [#771](https://github.com/hetznercloud/csi-driver/issues/771).
+
+### Bug Fixes
+
+- reverted NodeGetInfo response as it breaks Nomad clusters (#776)
+
 ## [2.10.0](https://github.com/hetznercloud/csi-driver/compare/v2.9.0...v2.10.0) (2024-10-29)
 
 

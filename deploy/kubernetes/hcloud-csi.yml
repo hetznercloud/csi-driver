@@ -212,7 +212,7 @@ spec:
             limits: {}
             requests: {}
         - name: hcloud-csi-driver
-          image: docker.io/hetznercloud/hcloud-csi-driver:v2.10.0 # x-releaser-pleaser-version
+          image: docker.io/hetznercloud/hcloud-csi-driver:v2.10.1 # x-releaser-pleaser-version
           imagePullPolicy: IfNotPresent
           command: [/bin/hcloud-csi-driver-node]
           volumeMounts:
@@ -346,7 +346,7 @@ spec:
             name: socket-dir
 
         - name: hcloud-csi-driver
-          image: docker.io/hetznercloud/hcloud-csi-driver:v2.10.0 # x-releaser-pleaser-version
+          image: docker.io/hetznercloud/hcloud-csi-driver:v2.10.1 # x-releaser-pleaser-version
           imagePullPolicy: IfNotPresent
           command: [/bin/hcloud-csi-driver-controller]
           env:
