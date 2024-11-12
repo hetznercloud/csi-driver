@@ -1,5 +1,12 @@
 # Changelog
 
+## [2.10.1](https://github.com/hetznercloud/csi-driver/compare/v2.10.0...v2.10.1) (2024-11-12)
+
+
+### Bug Fixes
+
+* reverted NodeGetInfo response as it breaks Nomad clusters ([#776](https://github.com/hetznercloud/csi-driver/issues/776)) ([417d201](https://github.com/hetznercloud/csi-driver/commit/417d2015cb680d5566ab22c8bbf8447e41ec7895))
+
 ## [2.10.0](https://github.com/hetznercloud/csi-driver/compare/v2.9.0...v2.10.0) (2024-10-29)
 
 
