@@ -18,20 +18,23 @@ import (
 type ControllerService struct {
 	proto.UnimplementedControllerServer
 
-	logger        *slog.Logger
-	volumeService volumes.Service
-	location      string
+	logger                   *slog.Logger
+	volumeService            volumes.Service
+	location                 string
+	enableProvidedByTopology bool
 }
 
 func NewControllerService(
 	logger *slog.Logger,
 	volumeService volumes.Service,
 	location string,
+	enableProvidedByTopology bool,
 ) *ControllerService {
 	return &ControllerService{
-		logger:        logger,
-		volumeService: volumeService,
-		location:      location,
+		logger:                   logger,
+		volumeService:            volumeService,
+		location:                 location,
+		enableProvidedByTopology: enableProvidedByTopology,
 	}
 }
 
@@ -88,16 +91,22 @@ func (s *ControllerService) CreateVolume(ctx context.Context, req *proto.CreateV
 		"volume-name", volume.Name,
 	)
 
+	topology := &proto.Topology{
+		Segments: map[string]string{
+			TopologySegmentLocation: volume.Location,
+		},
+	}
+
+	if s.enableProvidedByTopology {
+		topology.Segments[ProvidedByLabel] = "cloud"
+	}
+
 	resp := &proto.CreateVolumeResponse{
 		Volume: &proto.Volume{
 			VolumeId:      strconv.FormatInt(volume.ID, 10),
 			CapacityBytes: volume.SizeBytes(),
 			AccessibleTopology: []*proto.Topology{
-				{
-					Segments: map[string]string{
-						TopologySegmentLocation: volume.Location,
-					},
-				},
+				topology,
 			},
 			VolumeContext: map[string]string{
 				"fsFormatOptions": req.Parameters["fsFormatOptions"],

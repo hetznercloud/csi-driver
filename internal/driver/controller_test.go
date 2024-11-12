@@ -33,6 +33,7 @@ func newControllerServiceTestEnv() *controllerServiceTestEnv {
 			logger,
 			volumeService,
 			"testloc",
+			false,
 		),
 		volumeService: volumeService,
 	}
@@ -40,6 +41,8 @@ func newControllerServiceTestEnv() *controllerServiceTestEnv {
 
 func TestControllerServiceCreateVolume(t *testing.T) {
 	env := newControllerServiceTestEnv()
+
+	env.service.enableProvidedByTopology = true
 
 	env.volumeService.CreateFunc = func(ctx context.Context, opts volumes.CreateOpts) (*csi.Volume, error) {
 		if opts.Name != "testvol" {
@@ -93,6 +96,11 @@ func TestControllerServiceCreateVolume(t *testing.T) {
 		top := resp.Volume.AccessibleTopology[0]
 		if loc := top.Segments[TopologySegmentLocation]; loc != "testloc" {
 			t.Errorf("unexpected location segment in topology: %s", loc)
+		}
+		if env.service.enableProvidedByTopology {
+			if provider := top.Segments[ProvidedByLabel]; provider != "cloud" {
+				t.Errorf("unexpected provider segment in topology: %s", provider)
+			}
 		}
 	} else {
 		t.Errorf("unexpected number of topologies: %d", len(resp.Volume.AccessibleTopology))

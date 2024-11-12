@@ -63,10 +63,16 @@ func main() {
 	volumeResizeService := volumes.NewLinuxResizeService(logger.With("component", "linux-resize-service"))
 	volumeStatsService := volumes.NewLinuxStatsService(logger.With("component", "linux-stats-service"))
 
+	var enableProvidedByTopology bool
+	if featFlag, exists := os.LookupEnv("ENABLE_PROVIDED_BY_TOPOLOGY"); exists {
+		enableProvidedByTopology, _ = strconv.ParseBool(featFlag)
+	}
+
 	nodeService := driver.NewNodeService(
 		logger.With("component", "driver-node-service"),
 		strconv.FormatInt(serverID, 10),
 		serverLocation,
+		enableProvidedByTopology,
 		volumeMountService,
 		volumeResizeService,
 		volumeStatsService,
@@ -84,6 +90,7 @@ func main() {
 		logger.With("component", "driver-controller-service"),
 		volumeService,
 		serverLocation,
+		enableProvidedByTopology,
 	)
 
 	// common

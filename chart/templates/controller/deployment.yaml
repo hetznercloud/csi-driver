@@ -167,6 +167,10 @@ spec:
                   key: {{ .Values.controller.hcloudToken.existingSecret.key }}
                   {{- end }}
             {{- end }}
+            {{- if .Values.global.enableProvidedByTopology}}
+            - name: ENABLE_PROVIDED_BY_TOPOLOGY
+              value: "t"
+            {{ end }}
             {{- if .Values.controller.extraEnvVars }}
             {{- include "common.tplvalues.render" (dict "value" .Values.controller.extraEnvVars "context" $) | nindent 12 }}
             {{- end }}

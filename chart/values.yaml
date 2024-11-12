@@ -11,6 +11,9 @@ global:
   ##   - myRegistryKeySecretName
   ##
   imagePullSecrets: []
+  ## @param node.enableProvidedByTopology Enables workaround for upstream Kubernetes issue where nodes without the CSI plugin are still considered for scheduling.
+  ##
+  enableProvidedByTopology: false
 
 ## @section Common parameters
 ##
@@ -648,6 +651,7 @@ node:
   ## kubeletDir: /var/lib/k0s/kubelet
   ## For microk8s:
   ## kubeletDir: /var/snap/microk8s/common/var/lib/kubelet
+  ##
   kubeletDir: /var/lib/kubelet
 
 ## @section Other Parameters

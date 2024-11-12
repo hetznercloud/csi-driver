@@ -121,6 +121,10 @@ spec:
             {{- end }}
             - name: ENABLE_METRICS
               value: {{if .Values.metrics.enabled}}"true"{{ else }}"false"{{end}}
+            {{- if .Values.global.enableProvidedByTopology}}
+            - name: ENABLE_PROVIDED_BY_TOPOLOGY
+              value: "t"
+            {{ end }}
             {{- if .Values.node.extraEnvVars }}
             {{- include "common.tplvalues.render" (dict "value" .Values.node.extraEnvVars "context" $) | nindent 12 }}
             {{- end }}

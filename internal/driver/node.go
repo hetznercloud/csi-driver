@@ -15,29 +15,32 @@ import (
 type NodeService struct {
 	proto.UnimplementedNodeServer
 
-	logger              *slog.Logger
-	serverID            string
-	serverLocation      string
-	volumeMountService  volumes.MountService
-	volumeResizeService volumes.ResizeService
-	volumeStatsService  volumes.StatsService
+	logger                   *slog.Logger
+	serverID                 string
+	serverLocation           string
+	enableProvidedByTopology bool
+	volumeMountService       volumes.MountService
+	volumeResizeService      volumes.ResizeService
+	volumeStatsService       volumes.StatsService
 }
 
 func NewNodeService(
 	logger *slog.Logger,
 	serverID string,
 	serverLocation string,
+	enableProvidedByTopology bool,
 	volumeMountService volumes.MountService,
 	volumeResizeService volumes.ResizeService,
 	volumeStatsService volumes.StatsService,
 ) *NodeService {
 	return &NodeService{
-		logger:              logger,
-		serverID:            serverID,
-		serverLocation:      serverLocation,
-		volumeMountService:  volumeMountService,
-		volumeResizeService: volumeResizeService,
-		volumeStatsService:  volumeStatsService,
+		logger:                   logger,
+		serverID:                 serverID,
+		serverLocation:           serverLocation,
+		enableProvidedByTopology: enableProvidedByTopology,
+		volumeMountService:       volumeMountService,
+		volumeResizeService:      volumeResizeService,
+		volumeStatsService:       volumeStatsService,
 	}
 }
 
@@ -181,6 +184,11 @@ func (s *NodeService) NodeGetInfo(_ context.Context, _ *proto.NodeGetInfoRequest
 			},
 		},
 	}
+
+	if s.enableProvidedByTopology {
+		resp.AccessibleTopology.Segments[ProvidedByLabel] = "cloud"
+	}
+
 	return resp, nil
 }
 

@@ -3,6 +3,7 @@ package main
 import (
 	"log/slog"
 	"os"
+	"strconv"
 
 	proto "github.com/container-storage-interface/spec/lib/go/csi"
 
@@ -54,6 +55,11 @@ func main() {
 		location = server.Datacenter.Location.Name
 	}
 
+	var enableProvidedByTopology bool
+	if featFlag, exists := os.LookupEnv("ENABLE_PROVIDED_BY_TOPOLOGY"); exists {
+		enableProvidedByTopology, _ = strconv.ParseBool(featFlag)
+	}
+
 	volumeService := volumes.NewIdempotentService(
 		logger.With("component", "idempotent-volume-service"),
 		api.NewVolumeService(
@@ -65,6 +71,7 @@ func main() {
 		logger.With("component", "driver-controller-service"),
 		volumeService,
 		location,
+		enableProvidedByTopology,
 	)
 
 	identityService := driver.NewIdentityService(

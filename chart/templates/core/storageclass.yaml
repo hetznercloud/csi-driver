@@ -1,3 +1,4 @@
+{{ $global := .Values.global }}
 {{- if .Values.storageClasses }}
 {{- range $key, $val := .Values.storageClasses }}
 kind: StorageClass
@@ -10,6 +11,13 @@ provisioner: csi.hetzner.cloud
 volumeBindingMode: WaitForFirstConsumer
 allowVolumeExpansion: true
 reclaimPolicy: {{ $val.reclaimPolicy | quote }}
+{{- if $global.enableProvidedByTopology }}
+allowedTopologies:
+- matchLabelExpressions:
+  - key: instance.hetzner.cloud/provided-by
+    values:
+    - "cloud"
+{{- end}}
 ---
 {{- end }}
 {{- end }}

@@ -46,6 +46,7 @@ func TestSanity(t *testing.T) {
 		logger.With("component", "driver-controller-service"),
 		volumeService,
 		"testloc",
+		false,
 	)
 
 	identityService := NewIdentityService(
@@ -56,6 +57,7 @@ func TestSanity(t *testing.T) {
 		logger.With("component", "driver-node-service"),
 		"123456",
 		"loc",
+		false,
 		volumeMountService,
 		volumeResizeService,
 		volumeStatsService,
