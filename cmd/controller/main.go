@@ -54,6 +54,8 @@ func main() {
 		location = server.Datacenter.Location.Name
 	}
 
+	enableProvidedByTopology := app.GetEnableProvidedByTopology()
+
 	volumeService := volumes.NewIdempotentService(
 		logger.With("component", "idempotent-volume-service"),
 		api.NewVolumeService(
@@ -65,6 +67,7 @@ func main() {
 		logger.With("component", "driver-controller-service"),
 		volumeService,
 		location,
+		enableProvidedByTopology,
 	)
 
 	identityService := driver.NewIdentityService(

@@ -11,6 +11,14 @@ global:
   ##   - myRegistryKeySecretName
   ##
   imagePullSecrets: []
+  ## @param node.enableProvidedByTopology Enables workaround for upstream Kubernetes issue where nodes without the CSI plugin are still considered for scheduling.
+  ## ref: https://github.com/kubernetes-csi/external-provisioner/issues/544
+  ## Warning: Once enabled, this feature cannot be easily disabled.
+  ## It automatically adds required nodeAffinities to each volume and the topology keys to `csinode` objects.
+  ## If the feature is later disabled, the topology keys are removed from the `csinode` objects, leaving volumes with required affinities that cannot be satisfied.
+  ## Note: After enabling this feature, the workaround for the Kubernetes upstream issue only works on newly created volumes, as old volumes are not updated with the required node affinity.
+  ##
+  enableProvidedByTopology: false
 
 ## @section Common parameters
 ##
@@ -648,6 +656,7 @@ node:
   ## kubeletDir: /var/lib/k0s/kubelet
   ## For microk8s:
   ## kubeletDir: /var/snap/microk8s/common/var/lib/kubelet
+  ##
   kubeletDir: /var/lib/kubelet
 
 ## @section Other Parameters

@@ -35,6 +35,7 @@ func newNodeServerTestEnv() nodeServiceTestEnv {
 			testutil.NewNopLogger(),
 			"1",
 			"loc",
+			false,
 			volumeMountService,
 			volumeResizeService,
 			volumeStatsService,

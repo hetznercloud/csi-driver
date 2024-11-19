@@ -53,10 +53,13 @@ func main() {
 	volumeStatsService := volumes.NewLinuxStatsService(logger.With("component", "linux-stats-service"))
 	identityService := driver.NewIdentityService(logger.With("component", "driver-identity-service"))
 
+	enableProvidedByTopology := app.GetEnableProvidedByTopology()
+
 	nodeService := driver.NewNodeService(
 		logger.With("component", "driver-node-service"),
 		strconv.FormatInt(serverID, 10),
 		serverLocation,
+		enableProvidedByTopology,
 		volumeMountService,
 		volumeResizeService,
 		volumeStatsService,

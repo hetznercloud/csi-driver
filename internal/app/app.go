@@ -49,6 +49,15 @@ func CreateLogger() *slog.Logger {
 	return logger
 }
 
+// GetEnableProvidedByTopology parses the ENABLE_PROVIDED_BY_TOPOLOGY environment variable and returns false by default.
+func GetEnableProvidedByTopology() bool {
+	var enableProvidedByTopology bool
+	if featFlag, exists := os.LookupEnv("ENABLE_PROVIDED_BY_TOPOLOGY"); exists {
+		enableProvidedByTopology, _ = strconv.ParseBool(featFlag)
+	}
+	return enableProvidedByTopology
+}
+
 // CreateListener creates and binds the unix socket in location specified by the CSI_ENDPOINT environment variable.
 func CreateListener() (net.Listener, error) {
 	endpoint := os.Getenv("CSI_ENDPOINT")
