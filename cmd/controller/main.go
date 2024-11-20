@@ -42,7 +42,7 @@ func main() {
 		}
 
 		location, err = app.GetServerLocation(logger, hcloudClient, metadataClient)
-		if err != nil || location == "" {
+		if err != nil {
 			logger.Error(
 				"failed to fetch server",
 				"err", err,
@@ -55,6 +55,11 @@ func main() {
 		"evaluated default location for volumes",
 		"location", location,
 	)
+
+	if location == "" {
+		logger.Error("could not set a default location for volumes")
+		os.Exit(1)
+	}
 
 	enableProvidedByTopology := app.GetEnableProvidedByTopology()
 
