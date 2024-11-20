@@ -341,6 +341,15 @@ spec:
       serviceAccountName: hcloud-csi-controller
       
       affinity:
+        nodeAffinity:
+          preferredDuringSchedulingIgnoredDuringExecution:
+          - preference:
+              matchExpressions:
+              - key: instance.hetzner.cloud/provided-by
+                operator: In
+                values:
+                - cloud
+            weight: 1
         podAntiAffinity:
           requiredDuringSchedulingIgnoredDuringExecution:
           - labelSelector:

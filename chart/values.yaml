@@ -299,8 +299,19 @@ controller:
 
   ## @param controller.affinity Affinity for controller pods assignment
   ## ref: https://kubernetes.io/docs/concepts/configuration/assign-pod-node/#affinity-and-anti-affinity
+  ## If not otherwise configured, we retrieve the default location for volumes by the location of the node where the controller is scheduled.
+  ## For this reason we preferably want to schedule the controller on a cloud node.
   ##
-  affinity: {}
+  affinity:
+    nodeAffinity:
+      preferredDuringSchedulingIgnoredDuringExecution:
+        - weight: 1
+          preference:
+            matchExpressions:
+              - key: "instance.hetzner.cloud/provided-by"
+                operator: In
+                values:
+                  - "cloud"
 
   ## @param controller.nodeSelector Node labels for controller pods assignment
   ## ref: https://kubernetes.io/docs/concepts/scheduling-eviction/assign-pod-node/#nodeselector
