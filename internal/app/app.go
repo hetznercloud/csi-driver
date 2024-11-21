@@ -200,7 +200,7 @@ func getLocationByEnvID(logger *slog.Logger, hcloudClient *hcloud.Client) (bool,
 
 	id, err := strconv.ParseInt(envID, 10, 64)
 	if err != nil {
-		return true, "", fmt.Errorf("invalid server id in HCLOUD_SERVER_ID env var: %s", err)
+		return true, "", fmt.Errorf("invalid server id in HCLOUD_SERVER_ID env var: %s", envID)
 	}
 
 	logger.Debug(
