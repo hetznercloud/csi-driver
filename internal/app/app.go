@@ -167,69 +167,97 @@ func CreateHcloudClient(metricsRegistry *prometheus.Registry, logger *slog.Logge
 	return hcloud.NewClient(opts...), nil
 }
 
-// GetServer retrieves the hcloud server the application is running on.
-func GetServer(logger *slog.Logger, hcloudClient *hcloud.Client, metadataClient *metadata.Client) (*hcloud.Server, error) {
-	hcloudServerID, err := getServerID(logger, hcloudClient, metadataClient)
+// GetServerLocation retrieves the hcloud server the application is running on.
+func GetServerLocation(logger *slog.Logger, hcloudClient *hcloud.Client, metadataClient *metadata.Client) (string, error) {
+	// Option 1: Get from HCLOUD_SERVER_ID env
+	// This env would be set explicitly by the user
+	// If this is set and location can not be found we do not want a fallback
+	isSet, location, err := getLocationByEnvID(logger, hcloudClient)
+	if isSet {
+		return location, err
+	}
+
+	// Option 2: Get from node name and search server list
+	// This env is set by default via a fieldRef on spec.nodeName
+	// If this is set and server can not be found we fallback to the metadata fallback
+	location, err = getLocationByEnvNodeName(logger, hcloudClient)
 	if err != nil {
-		return nil, err
+		return "", err
 	}
-	logger.Debug("fetching server")
-	server, _, err := hcloudClient.Server.GetByID(context.Background(), hcloudServerID)
-	if err != nil {
-		return nil, err
+	if location != "" {
+		return location, nil
 	}
 
-	// Cover potential cases where the server is not found. This results in a
-	// nil server object and nil error. If we do not do this, we will panic
-	// when trying to log the server.Name.
-	if server == nil {
-		return nil, errors.New("could not determine server")
-	}
-
-	logger.Info("fetched server", "server-name", server.Name)
-
-	return server, nil
+	// Option 3: Metadata service as fallback
+	return getLocationFromMetadata(logger, metadataClient)
 }
 
-func getServerID(logger *slog.Logger, hcloudClient *hcloud.Client, metadataClient *metadata.Client) (int64, error) {
-	if s := os.Getenv("HCLOUD_SERVER_ID"); s != "" {
-		id, err := strconv.ParseInt(s, 10, 64)
-		if err != nil {
-			return 0, fmt.Errorf("invalid server id in HCLOUD_SERVER_ID env var: %s", err)
-		}
-		logger.Debug(
-			"using server id from HCLOUD_SERVER_ID env var",
-			"server-id", id,
-		)
-		return id, nil
+func getLocationByEnvID(logger *slog.Logger, hcloudClient *hcloud.Client) (bool, string, error) {
+	envID := os.Getenv("HCLOUD_SERVER_ID")
+	if envID == "" {
+		return false, "", nil
 	}
 
-	if s := os.Getenv("KUBE_NODE_NAME"); s != "" {
-		server, _, err := hcloudClient.Server.GetByName(context.Background(), s)
-		if err != nil {
-			return 0, fmt.Errorf("error while getting server through node name: %s", err)
-		}
-		if server != nil {
-			logger.Debug(
-				"using server name from KUBE_NODE_NAME env var",
-				"server-id", server.ID,
-			)
-			return server.ID, nil
-		}
-		logger.Debug(
-			"server not found by name, fallback to metadata service",
-			"err", err,
-		)
+	id, err := strconv.ParseInt(envID, 10, 64)
+	if err != nil {
+		return true, "", fmt.Errorf("invalid server id in HCLOUD_SERVER_ID env var: %s", envID)
 	}
 
 	logger.Debug(
-		"getting instance id from metadata service",
+		"using server id from HCLOUD_SERVER_ID env var",
+		"server-id", id,
 	)
-	id, err := metadataClient.InstanceID()
+
+	server, _, err := hcloudClient.Server.GetByID(context.Background(), id)
 	if err != nil {
-		return 0, fmt.Errorf("failed to get instance id from metadata service: %s", err)
+		return true, "", err
 	}
-	return id, nil
+	if server == nil {
+		return true, "", fmt.Errorf("HCLOUD_SERVER_ID is set to %d, but no server could be found", id)
+	}
+
+	return true, server.Datacenter.Location.Name, nil
+}
+
+func getLocationByEnvNodeName(logger *slog.Logger, hcloudClient *hcloud.Client) (string, error) {
+	nodeName := os.Getenv("KUBE_NODE_NAME")
+	if nodeName == "" {
+		return "", nil
+	}
+
+	server, _, err := hcloudClient.Server.GetByName(context.Background(), nodeName)
+	if err != nil {
+		return "", fmt.Errorf("error while getting server through node name: %s", err)
+	}
+	if server != nil {
+		logger.Debug(
+			"fetched server via server name from KUBE_NODE_NAME env var",
+			"server-id", server.ID,
+		)
+		return server.Datacenter.Location.Name, nil
+	}
+
+	logger.Info(
+		"KUBE_NODE_NAME is set, but no server could be found",
+		"KUBE_NODE_NAME", nodeName,
+	)
+
+	return "", nil
+}
+
+func getLocationFromMetadata(logger *slog.Logger, metadataClient *metadata.Client) (string, error) {
+	logger.Debug("getting location from metadata service")
+	availabilityZone, err := metadataClient.AvailabilityZone()
+	if err != nil {
+		return "", fmt.Errorf("failed to get location from metadata service: %s", err)
+	}
+
+	parts := strings.Split(availabilityZone, "-")
+	if len(parts) != 2 {
+		return "", fmt.Errorf("availability zone from metadata service is not in the correct format, got: %s", availabilityZone)
+	}
+
+	return parts[0], nil
 }
 
 func CreateGRPCServer(logger *slog.Logger, metricsInterceptor grpc.UnaryServerInterceptor) *grpc.Server {

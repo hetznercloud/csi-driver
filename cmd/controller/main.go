@@ -30,7 +30,6 @@ func main() {
 	}
 
 	var location string
-
 	if s := os.Getenv("HCLOUD_VOLUME_DEFAULT_LOCATION"); s != "" {
 		location = s
 	} else {
@@ -42,7 +41,7 @@ func main() {
 				"You can set HCLOUD_VOLUME_DEFAULT_LOCATION if you want to run it somewhere else.")
 		}
 
-		server, err := app.GetServer(logger, hcloudClient, metadataClient)
+		location, err = app.GetServerLocation(logger, hcloudClient, metadataClient)
 		if err != nil {
 			logger.Error(
 				"failed to fetch server",
@@ -50,8 +49,16 @@ func main() {
 			)
 			os.Exit(1)
 		}
+	}
 
-		location = server.Datacenter.Location.Name
+	logger.Debug(
+		"evaluated default location for volumes",
+		"location", location,
+	)
+
+	if location == "" {
+		logger.Error("could not set a default location for volumes")
+		os.Exit(1)
 	}
 
 	enableProvidedByTopology := app.GetEnableProvidedByTopology()
