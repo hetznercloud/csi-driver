@@ -145,7 +145,7 @@ If you set any options at all, it is your responsible to make sure that all defa
 
 ### Volume Location
 
-During the CSI controller's initialization, the default location for all volumes is determined through the following prioritized methods (in order of evaluation from 1 to 4):
+During the initialization of the CSI controller, the default location for all volumes is determined based on the following prioritized methods (evaluated in order from 1 to 4). However, when `volumeBindingMode: WaitForFirstConsumer` is used, the volume's location is determined by the node where the Pod is scheduled, and the default location is not applicable. For more details, refer to the official [Kubernetes documentation](https://kubernetes.io/docs/concepts/storage/storage-classes/#volume-binding-mode).
 
 1. The location is explicitly set using the `HCLOUD_VOLUME_DEFAULT_LOCATION` variable.
 2. The location is derived by querying a server specified by the `HCLOUD_SERVER_ID` variable.
