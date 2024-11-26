@@ -1,5 +1,20 @@
 # Changelog
 
+## [v2.11.0](https://github.com/hetznercloud/csi-driver/releases/tag/v2.11.0)
+
+### Features
+
+- Added new option enableProvidedByTopology (#780)
+- drop tests for kubernetes v1.28 (#796)
+
+### Bug Fixes
+
+- prefer scheduling the csi controller on cloud nodes (#786)
+
+### Kubernetes Support
+
+This version was tested with Kubernetes 1.29 - 1.31. Furthermore, we dropped v1.28 support.
+
 ## [v2.10.1](https://github.com/hetznercloud/csi-driver/releases/tag/v2.10.1)
 
 ### ⚠️ Removed Feature from v2.10.0
