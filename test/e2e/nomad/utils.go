@@ -8,6 +8,7 @@ import (
 	"time"
 
 	nomad "github.com/hashicorp/nomad/api"
+
 	"github.com/hetznercloud/hcloud-go/v2/hcloud"
 )
 
