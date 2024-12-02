@@ -163,6 +163,14 @@ jobs:
         with:
           version: ${{ matrix.nomad }}
 
+      - name: Setup consul binary
+        uses: jaxxstorm/action-install-gh-release@v1.10.0 # renovate: datasource=github-releases depName=jaxxstorm/action-install-gh-release
+        with:
+            repo: hashicorp/consul
+            tag: matrix.consul
+            platform: linux
+            arch: amd64
+
       - uses: hetznercloud/tps-action@main
 
       - name: Setup environment
