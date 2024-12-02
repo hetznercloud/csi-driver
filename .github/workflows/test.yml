@@ -131,8 +131,8 @@ jobs:
       fail-fast: false
       matrix:
         include:
-          - nomad: 1.8.7
-            consul: 1.18.4
+          - nomad: 1.9.3
+            consul: 1.20.1
 
     env:
       TF_VAR_nomad_version: ${{ matrix.nomad }}
