@@ -183,7 +183,7 @@ jobs:
       - name: Run tests
         run: |
           source nomad/dev/files/env.sh
-          go test -v -tags e2e test/e2e/nomad/...
+          go test -v -tags e2e ./test/e2e/nomad/...
 
       - name: Cleanup
         if: always()
