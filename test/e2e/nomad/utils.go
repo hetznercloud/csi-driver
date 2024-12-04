@@ -119,3 +119,4 @@ func (cluster *Cluster) DeleteVolume(externalVolID string, w *nomad.WriteOptions
 
 	return nil
 }
+
