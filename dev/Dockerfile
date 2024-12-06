@@ -17,7 +17,7 @@ ARG SKAFFOLD_GO_GCFLAGS
 RUN go build -gcflags="$SKAFFOLD_GO_GCFLAGS" -o controller.bin github.com/hetznercloud/csi-driver/cmd/controller
 RUN go build -gcflags="$SKAFFOLD_GO_GCFLAGS" -o node.bin github.com/hetznercloud/csi-driver/cmd/node
 
-FROM alpine:3.20
+FROM alpine:3.21
 
 RUN apk add --no-cache \
     blkid \

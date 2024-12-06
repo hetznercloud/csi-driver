@@ -11,7 +11,7 @@ RUN ls -al
 ARG CGO_ENABLED=0
 RUN go build -o aio.bin github.com/hetznercloud/csi-driver/cmd/aio
 
-FROM --platform=$TARGETPLATFORM alpine:3.20
+FROM --platform=$TARGETPLATFORM alpine:3.21
 
 RUN apk add --no-cache \
     blkid \
