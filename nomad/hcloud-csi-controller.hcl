@@ -5,11 +5,7 @@ job "hcloud-csi-controller" {
 
   group "controller" {
 
-    ### NOTE
-    # We define (at least) 2 allocations to increase the availability in case of a node failure with
-    # a controller allocation running on that node. On a "Single Node Cluster", the group stanzas
-    # might need modification or should be removed.
-    count = 2
+    count = 1
 
     constraint {
       distinct_hosts = true
