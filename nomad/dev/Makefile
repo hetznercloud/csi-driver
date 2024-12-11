@@ -24,7 +24,3 @@ port-forward:
 
 clean:
 	rm -Rf files/ .terraform/ terraform.tfstate* env.auto.tfvars
-
-deps: clean
-	sed -i -e 's|source = ".*"|source = "./.."|' main.tf
-	tofu init -upgrade
