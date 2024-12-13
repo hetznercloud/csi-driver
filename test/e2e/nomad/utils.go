@@ -169,7 +169,7 @@ func (cluster *Cluster) WaitForRunningJob(jobID string) (*nomad.AllocationListSt
 	return nil, fmt.Errorf("no running allocation for job %s", jobID)
 }
 
-func createVolumeSpec(id string) *nomad.CSIVolume {
+func CreateVolumeSpec(id string) *nomad.CSIVolume {
 	return &nomad.CSIVolume{
 		ID:                   id,
 		Name:                 id,
@@ -190,10 +190,9 @@ func createVolumeSpec(id string) *nomad.CSIVolume {
 			},
 		},
 	}
-
 }
 
-func createBusyboxWithVolumeJobSpec(id string, volumeID string, mountPath string) *nomad.Job {
+func CreateBusyboxWithVolumeJobSpec(id string, volumeID string, mountPath string) *nomad.Job {
 	job := nomad.NewServiceJob(id, id, "global", 50)
 	taskGroup := nomad.NewTaskGroup(id, 1)
 

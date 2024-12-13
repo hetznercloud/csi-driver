@@ -58,7 +58,7 @@ func TestGetPluginInfo(t *testing.T) {
 }
 
 func TestVolumeLifecycle(t *testing.T) {
-	volReq := createVolumeSpec("db-vol")
+	volReq := CreateVolumeSpec("db-vol")
 
 	var hcloudVolID int64
 	t.Run("volume creation", func(t *testing.T) {
@@ -124,8 +124,8 @@ func TestVolumeLifecycle(t *testing.T) {
 func TestVolumeWrite(t *testing.T) {
 	volID := "test-vol"
 	jobID := "test-writer"
-	volReq := createVolumeSpec(volID)
-	job := createBusyboxWithVolumeJobSpec(jobID, volID, "/test")
+	volReq := CreateVolumeSpec(volID)
+	job := CreateBusyboxWithVolumeJobSpec(jobID, volID, "/test")
 
 	t.Run("create volume", func(t *testing.T) {
 		vol, _, err := cluster.CreateVolume(volReq, &nomad.WriteOptions{})
