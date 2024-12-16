@@ -31,7 +31,7 @@ func NewCluster() (*Cluster, error) {
 
 	hcloudOpts := []hcloud.ClientOption{
 		hcloud.WithToken(token),
-		hcloud.WithApplication("nomad-csi-e2e", "v2.11.0"), // x-releaser-pleaser-version
+		hcloud.WithApplication("nomad-csi-e2e", ""),
 		hcloud.WithPollOpts(hcloud.PollOpts{
 			BackoffFunc: hcloud.ExponentialBackoffWithOpts(hcloud.ExponentialBackoffOpts{
 				Base:       time.Second,
