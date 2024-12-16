@@ -7,15 +7,14 @@ metadata:
     release: YOUR_RELEASE
 spec:
   endpoints:
-  - port: metrics
-    scheme: http
+    - port: metrics
+      scheme: http
   jobLabel: app
   selector:
     matchLabels:
       app: hcloud-csi-controller
 
 ---
-
 apiVersion: monitoring.coreos.com/v1
 kind: ServiceMonitor
 metadata:
@@ -25,8 +24,8 @@ metadata:
     release: YOUR_RELEASE
 spec:
   endpoints:
-  - port: metrics
-    scheme: http
+    - port: metrics
+      scheme: http
   jobLabel: app
   selector:
     matchLabels:

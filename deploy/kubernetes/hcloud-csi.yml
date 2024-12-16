@@ -33,55 +33,55 @@ metadata:
     app.kubernetes.io/instance: hcloud-csi
     app.kubernetes.io/component: controller
 rules:
-# attacher
-- apiGroups: [""]
-  resources: [persistentvolumes]
-  verbs: [get, list, watch, update, patch]
-- apiGroups: [""]
-  resources: [nodes]
-  verbs: [get, list, watch]
-- apiGroups: [csi.storage.k8s.io]
-  resources: [csinodeinfos]
-  verbs: [get, list, watch]
-- apiGroups: [storage.k8s.io]
-  resources: [csinodes]
-  verbs: [get, list, watch]
-- apiGroups: [storage.k8s.io]
-  resources: [volumeattachments]
-  verbs: [get, list, watch, update, patch]
-- apiGroups: [storage.k8s.io]
-  resources: [volumeattachments/status]
-  verbs: [patch]
-# provisioner
-- apiGroups: [""]
-  resources: [secrets]
-  verbs: [get, list]
-- apiGroups: [""]
-  resources: [persistentvolumes]
-  verbs: [get, list, watch, create, delete, patch]
-- apiGroups: [""]
-  resources: [persistentvolumeclaims, persistentvolumeclaims/status]
-  verbs: [get, list, watch, update, patch]
-- apiGroups: [storage.k8s.io]
-  resources: [storageclasses]
-  verbs: [get, list, watch]
-- apiGroups: [""]
-  resources: [events]
-  verbs: [list, watch, create, update, patch]
-- apiGroups: [snapshot.storage.k8s.io]
-  resources: [volumesnapshots]
-  verbs: [get, list]
-- apiGroups: [snapshot.storage.k8s.io]
-  resources: [volumesnapshotcontents]
-  verbs: [get, list]
-# resizer
-- apiGroups: [""]
-  resources: [pods]
-  verbs: [get, list, watch]
-# node
-- apiGroups: [""]
-  resources: [events]
-  verbs: [get, list, watch, create, update, patch]
+  # attacher
+  - apiGroups: [""]
+    resources: [persistentvolumes]
+    verbs: [get, list, watch, update, patch]
+  - apiGroups: [""]
+    resources: [nodes]
+    verbs: [get, list, watch]
+  - apiGroups: [csi.storage.k8s.io]
+    resources: [csinodeinfos]
+    verbs: [get, list, watch]
+  - apiGroups: [storage.k8s.io]
+    resources: [csinodes]
+    verbs: [get, list, watch]
+  - apiGroups: [storage.k8s.io]
+    resources: [volumeattachments]
+    verbs: [get, list, watch, update, patch]
+  - apiGroups: [storage.k8s.io]
+    resources: [volumeattachments/status]
+    verbs: [patch]
+  # provisioner
+  - apiGroups: [""]
+    resources: [secrets]
+    verbs: [get, list]
+  - apiGroups: [""]
+    resources: [persistentvolumes]
+    verbs: [get, list, watch, create, delete, patch]
+  - apiGroups: [""]
+    resources: [persistentvolumeclaims, persistentvolumeclaims/status]
+    verbs: [get, list, watch, update, patch]
+  - apiGroups: [storage.k8s.io]
+    resources: [storageclasses]
+    verbs: [get, list, watch]
+  - apiGroups: [""]
+    resources: [events]
+    verbs: [list, watch, create, update, patch]
+  - apiGroups: [snapshot.storage.k8s.io]
+    resources: [volumesnapshots]
+    verbs: [get, list]
+  - apiGroups: [snapshot.storage.k8s.io]
+    resources: [volumesnapshotcontents]
+    verbs: [get, list]
+  # resizer
+  - apiGroups: [""]
+    resources: [pods]
+    verbs: [get, list, watch]
+  # node
+  - apiGroups: [""]
+    resources: [events]
+    verbs: [get, list, watch, create, update, patch]
 ---
 # Source: hcloud-csi/templates/controller/clusterrolebinding.yaml
 kind: ClusterRoleBinding
@@ -149,7 +149,7 @@ metadata:
     app.kubernetes.io/name: hcloud-csi
     app.kubernetes.io/instance: hcloud-csi
     app.kubernetes.io/component: node
-    app: hcloud-csi 
+    app: hcloud-csi
 spec:
   updateStrategy:
     type: RollingUpdate
@@ -164,20 +164,19 @@ spec:
         app.kubernetes.io/component: node
         app: hcloud-csi
     spec:
-      
       affinity:
         nodeAffinity:
           requiredDuringSchedulingIgnoredDuringExecution:
             nodeSelectorTerms:
-            - matchExpressions:
-              - key: instance.hetzner.cloud/is-root-server
-                operator: NotIn
-                values:
-                - "true"
-              - key: instance.hetzner.cloud/provided-by
-                operator: NotIn
-                values:
-                - robot
+              - matchExpressions:
+                  - key: instance.hetzner.cloud/is-root-server
+                    operator: NotIn
+                    values:
+                      - "true"
+                  - key: instance.hetzner.cloud/provided-by
+                    operator: NotIn
+                    values:
+                      - robot
       tolerations:
         - effect: NoExecute
           operator: Exists
@@ -206,8 +205,8 @@ spec:
           image: registry.k8s.io/sig-storage/livenessprobe:v2.14.0
           imagePullPolicy: IfNotPresent
           volumeMounts:
-          - mountPath: /run/csi
-            name: plugin-dir
+            - mountPath: /run/csi
+              name: plugin-dir
           resources:
             limits: {}
             requests: {}
@@ -278,7 +277,7 @@ metadata:
     app.kubernetes.io/name: hcloud-csi
     app.kubernetes.io/instance: hcloud-csi
     app.kubernetes.io/component: controller
-    app: hcloud-csi-controller 
+    app: hcloud-csi-controller
 spec:
   replicas: 1
   strategy:
@@ -295,17 +294,17 @@ spec:
         app: hcloud-csi-controller
     spec:
       serviceAccountName: hcloud-csi-controller
-      
+
       affinity:
         nodeAffinity:
           preferredDuringSchedulingIgnoredDuringExecution:
-          - preference:
-              matchExpressions:
-              - key: instance.hetzner.cloud/provided-by
-                operator: In
-                values:
-                - cloud
-            weight: 1
+            - preference:
+                matchExpressions:
+                  - key: instance.hetzner.cloud/provided-by
+                    operator: In
+                    values:
+                      - cloud
+              weight: 1
       securityContext:
         fsGroup: 1001
       initContainers:
@@ -319,8 +318,8 @@ spec:
           args:
             - --default-fstype=ext4
           volumeMounts:
-          - name: socket-dir
-            mountPath: /run/csi
+            - name: socket-dir
+              mountPath: /run/csi
 
         - name: csi-resizer
           image: registry.k8s.io/sig-storage/csi-resizer:v1.12.0
@@ -329,8 +328,8 @@ spec:
             limits: {}
             requests: {}
           volumeMounts:
-          - name: socket-dir
-            mountPath: /run/csi
+            - name: socket-dir
+              mountPath: /run/csi
 
         - name: csi-provisioner
           image: registry.k8s.io/sig-storage/csi-provisioner:v5.1.0
@@ -342,8 +341,8 @@ spec:
             - --feature-gates=Topology=true
             - --default-fstype=ext4
           volumeMounts:
-          - name: socket-dir
-            mountPath: /run/csi
+            - name: socket-dir
+              mountPath: /run/csi
 
         - name: liveness-probe
           image: registry.k8s.io/sig-storage/livenessprobe:v2.14.0
@@ -352,8 +351,8 @@ spec:
             limits: {}
             requests: {}
           volumeMounts:
-          - mountPath: /run/csi
-            name: socket-dir
+            - mountPath: /run/csi
+              name: socket-dir
 
         - name: hcloud-csi-driver
           image: docker.io/hetznercloud/hcloud-csi-driver:v2.11.0 # x-releaser-pleaser-version
@@ -413,4 +412,4 @@ spec:
   podInfoOnMount: true
   seLinuxMount: true
   volumeLifecycleModes:
-  - Persistent
+    - Persistent

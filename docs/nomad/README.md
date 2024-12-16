@@ -186,6 +186,7 @@ mount_options {
   mount_flags = ["discard", "defaults"]
 }
 ```
+
 > [!IMPORTANT]
 > The volume will be created in the same Hetzner Cloud Location as the controller is deployed into.
 
@@ -207,7 +208,7 @@ nomad volume create db-vol.hcl
 ```
 
 > [!NOTE]
->  The hcloud cli provides a convenient way to verify if the volume was created: `hcloud volume list`.
+> The hcloud cli provides a convenient way to verify if the volume was created: `hcloud volume list`.
 
 ### Make use of the Volume
 
@@ -297,7 +298,6 @@ secrets {
   "encryption-passphrase" = "<your_encryption_value>"
 }
 ```
-
 
 > [!NOTE]
 > Consider using HashiCorp Vault for secrets management, see https://developer.hashicorp.com/nomad/docs/job-specification/template#vault-kv-api-v2

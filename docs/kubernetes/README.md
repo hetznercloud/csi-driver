@@ -18,6 +18,7 @@
    ```
 
    and apply it:
+
    ```
    kubectl apply -f <secret.yml>
    ```
@@ -41,6 +42,7 @@
    ```
    kubectl apply -f https://raw.githubusercontent.com/hetznercloud/csi-driver/v2.5.1/deploy/kubernetes/hcloud-csi.yml
    ```
+
    </details>
 
 4. To verify everything is working, create a persistent volume claim and a pod
@@ -128,6 +130,7 @@ Your nodes might need to have `cryptsetup` installed to mount the volumes with L
 You can specify extra formatting options which are passed directly to `mkfs.FSTYPE` via the `fsFormatOptions` parameter in the storage class.
 
 #### Example
+
 ```yaml
 parameters:
   csi.storage.k8s.io/fstype: xfs
@@ -223,31 +226,35 @@ Root servers can be part of the cluster, but the CSI plugin doesn't work there. 
 ### Adding labels manually
 
 **Cloud Servers**
+
 ```bash
 kubectl label nodes <node name> instance.hetzner.cloud/provided-by=cloud
 ```
 
 **Root Servers**
+
 ```bash
 kubectl label nodes <node name> instance.hetzner.cloud/provided-by=robot
 ```
-
 
 ### DEPRECATED: Old Label
 
 We prefer that you use our [new label](#new-label). The label `instance.hetzner.cloud/is-robot-server` will be deprecated in future releases.
 
 **Cloud Servers**
+
 ```bash
 kubectl label nodes <node name> instance.hetzner.cloud/is-root-server=false
 ```
 
 **Root Servers**
+
 ```bash
 kubectl label nodes <node name> instance.hetzner.cloud/is-root-server=true
 ```
 
 ### Pods stuck in pending
+
 The current behavior of the scheduler can cause Pods to be stuck in `Pending` when using the integration with Robot servers.
 
 To address this behavior, you can set `enableProvidedByTopology` to `true` in the Helm Chart configuration. This setting prevents pods from being scheduled on nodes — specifically, Robot servers — where Hetzner volumes are unavailable. Enabling this option adds the `instance.hetzner.cloud/provided-by` label to the [allowed topologies](https://kubernetes.io/docs/concepts/storage/storage-classes/#allowed-topologies) section of the storage classes that are created. Additionally, this label is included in the `topologyKeys` section of `csinode` objects, and a node affinity is set up for each persistent volume. This workaround does not work with the [old label](#deprecated-old-label).
@@ -275,17 +282,17 @@ not fix bugs related only to an unsupported version.
 
 Current Kubernetes Releases: https://kubernetes.io/releases/
 
-| Kubernetes | CSI Driver |                                                                                   Deployment File  |
-|------------|-----------:|---------------------------------------------------------------------------------------------------:|
-| 1.31       |     2.9.0+ | https://raw.githubusercontent.com/hetznercloud/csi-driver/v2.9.0/deploy/kubernetes/hcloud-csi.yml  |
-| 1.30       |     2.9.0+ | https://raw.githubusercontent.com/hetznercloud/csi-driver/v2.9.0/deploy/kubernetes/hcloud-csi.yml  |
-| 1.29       |     2.9.0+ | https://raw.githubusercontent.com/hetznercloud/csi-driver/v2.9.0/deploy/kubernetes/hcloud-csi.yml  |
+| Kubernetes | CSI Driver |                                                                                    Deployment File |
+| ---------- | ---------: | -------------------------------------------------------------------------------------------------: |
+| 1.31       |     2.9.0+ |  https://raw.githubusercontent.com/hetznercloud/csi-driver/v2.9.0/deploy/kubernetes/hcloud-csi.yml |
+| 1.30       |     2.9.0+ |  https://raw.githubusercontent.com/hetznercloud/csi-driver/v2.9.0/deploy/kubernetes/hcloud-csi.yml |
+| 1.29       |     2.9.0+ |  https://raw.githubusercontent.com/hetznercloud/csi-driver/v2.9.0/deploy/kubernetes/hcloud-csi.yml |
 | 1.28       |     2.10.1 | https://raw.githubusercontent.com/hetznercloud/csi-driver/v2.10.1/deploy/kubernetes/hcloud-csi.yml |
-| 1.27       |      2.9.0 | https://raw.githubusercontent.com/hetznercloud/csi-driver/v2.9.0/deploy/kubernetes/hcloud-csi.yml  |
-| 1.26       |      2.7.1 | https://raw.githubusercontent.com/hetznercloud/csi-driver/v2.7.1/deploy/kubernetes/hcloud-csi.yml  |
-| 1.25       |      2.6.0 | https://raw.githubusercontent.com/hetznercloud/csi-driver/v2.6.0/deploy/kubernetes/hcloud-csi.yml  |
-| 1.24       |      2.4.0 | https://raw.githubusercontent.com/hetznercloud/csi-driver/v2.4.0/deploy/kubernetes/hcloud-csi.yml  |
-| 1.23       |      2.2.0 | https://raw.githubusercontent.com/hetznercloud/csi-driver/v2.2.0/deploy/kubernetes/hcloud-csi.yml  |
-| 1.22       |      1.6.0 | https://raw.githubusercontent.com/hetznercloud/csi-driver/v1.6.0/deploy/kubernetes/hcloud-csi.yml  |
-| 1.21       |      1.6.0 | https://raw.githubusercontent.com/hetznercloud/csi-driver/v1.6.0/deploy/kubernetes/hcloud-csi.yml  |
-| 1.20       |      1.6.0 | https://raw.githubusercontent.com/hetznercloud/csi-driver/v1.6.0/deploy/kubernetes/hcloud-csi.yml  |
+| 1.27       |      2.9.0 |  https://raw.githubusercontent.com/hetznercloud/csi-driver/v2.9.0/deploy/kubernetes/hcloud-csi.yml |
+| 1.26       |      2.7.1 |  https://raw.githubusercontent.com/hetznercloud/csi-driver/v2.7.1/deploy/kubernetes/hcloud-csi.yml |
+| 1.25       |      2.6.0 |  https://raw.githubusercontent.com/hetznercloud/csi-driver/v2.6.0/deploy/kubernetes/hcloud-csi.yml |
+| 1.24       |      2.4.0 |  https://raw.githubusercontent.com/hetznercloud/csi-driver/v2.4.0/deploy/kubernetes/hcloud-csi.yml |
+| 1.23       |      2.2.0 |  https://raw.githubusercontent.com/hetznercloud/csi-driver/v2.2.0/deploy/kubernetes/hcloud-csi.yml |
+| 1.22       |      1.6.0 |  https://raw.githubusercontent.com/hetznercloud/csi-driver/v1.6.0/deploy/kubernetes/hcloud-csi.yml |
+| 1.21       |      1.6.0 |  https://raw.githubusercontent.com/hetznercloud/csi-driver/v1.6.0/deploy/kubernetes/hcloud-csi.yml |
+| 1.20       |      1.6.0 |  https://raw.githubusercontent.com/hetznercloud/csi-driver/v1.6.0/deploy/kubernetes/hcloud-csi.yml |

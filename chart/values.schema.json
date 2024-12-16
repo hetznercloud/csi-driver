@@ -1,738 +1,738 @@
 {
-    "$schema": "https://json-schema.org/draft/2020-12/schema",
-    "properties": {
-        "commonAnnotations": {
-            "properties": {},
-            "type": "object"
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "properties": {
+    "commonAnnotations": {
+      "properties": {},
+      "type": "object"
+    },
+    "commonLabels": {
+      "properties": {},
+      "type": "object"
+    },
+    "controller": {
+      "properties": {
+        "affinity": {
+          "properties": {},
+          "type": "object"
         },
-        "commonLabels": {
-            "properties": {},
-            "type": "object"
-        },
-        "controller": {
-            "properties": {
-                "affinity": {
-                    "properties": {},
-                    "type": "object"
-                },
-                "containerPorts": {
-                    "properties": {
-                        "healthz": {
-                            "type": "integer"
-                        },
-                        "metrics": {
-                            "type": "integer"
-                        }
-                    },
-                    "type": "object"
-                },
-                "customLivenessProbe": {
-                    "properties": {},
-                    "type": "object"
-                },
-                "customReadinessProbe": {
-                    "properties": {},
-                    "type": "object"
-                },
-                "customStartupProbe": {
-                    "properties": {},
-                    "type": "object"
-                },
-                "extraEnvVars": {
-                    "type": "array"
-                },
-                "extraVolumeMounts": {
-                    "type": "array"
-                },
-                "extraVolumes": {
-                    "type": "array"
-                },
-                "hcloudToken": {
-                    "properties": {
-                        "existingSecret": {
-                            "properties": {
-                                "key": {
-                                    "type": "string"
-                                },
-                                "name": {
-                                    "type": "string"
-                                }
-                            },
-                            "type": "object"
-                        },
-                        "file": {
-                            "type": "string"
-                        },
-                        "value": {
-                            "type": "string"
-                        }
-                    },
-                    "type": "object"
-                },
-                "hcloudVolumeDefaultLocation": {
-                    "type": "string"
-                },
-                "image": {
-                    "properties": {
-                        "csiAttacher": {
-                            "properties": {
-                                "name": {
-                                    "type": "string"
-                                },
-                                "pullPolicy": {
-                                    "type": "string"
-                                },
-                                "pullSecrets": {
-                                    "type": "array"
-                                },
-                                "tag": {
-                                    "type": "string"
-                                }
-                            },
-                            "type": "object"
-                        },
-                        "csiProvisioner": {
-                            "properties": {
-                                "name": {
-                                    "type": "string"
-                                },
-                                "pullPolicy": {
-                                    "type": "string"
-                                },
-                                "pullSecrets": {
-                                    "type": "array"
-                                },
-                                "tag": {
-                                    "type": "string"
-                                }
-                            },
-                            "type": "object"
-                        },
-                        "csiResizer": {
-                            "properties": {
-                                "name": {
-                                    "type": "string"
-                                },
-                                "pullPolicy": {
-                                    "type": "string"
-                                },
-                                "pullSecrets": {
-                                    "type": "array"
-                                },
-                                "tag": {
-                                    "type": "string"
-                                }
-                            },
-                            "type": "object"
-                        },
-                        "hcloudCSIDriver": {
-                            "properties": {
-                                "name": {
-                                    "type": "string"
-                                },
-                                "pullPolicy": {
-                                    "type": "string"
-                                },
-                                "pullSecrets": {
-                                    "type": "array"
-                                },
-                                "tag": {
-                                    "type": "string"
-                                }
-                            },
-                            "type": "object"
-                        },
-                        "livenessProbe": {
-                            "properties": {
-                                "name": {
-                                    "type": "string"
-                                },
-                                "pullPolicy": {
-                                    "type": "string"
-                                },
-                                "pullSecrets": {
-                                    "type": "array"
-                                },
-                                "tag": {
-                                    "type": "string"
-                                }
-                            },
-                            "type": "object"
-                        }
-                    },
-                    "type": "object"
-                },
-                "initContainers": {
-                    "type": "array"
-                },
-                "lifecycleHooks": {
-                    "properties": {},
-                    "type": "object"
-                },
-                "livenessProbe": {
-                    "properties": {
-                        "enabled": {
-                            "type": "boolean"
-                        },
-                        "failureThreshold": {
-                            "type": "integer"
-                        },
-                        "initialDelaySeconds": {
-                            "type": "integer"
-                        },
-                        "periodSeconds": {
-                            "type": "integer"
-                        },
-                        "successThreshold": {
-                            "type": "integer"
-                        },
-                        "timeoutSeconds": {
-                            "type": "integer"
-                        }
-                    },
-                    "type": "object"
-                },
-                "nodeSelector": {
-                    "properties": {},
-                    "type": "object"
-                },
-                "podAnnotations": {
-                    "properties": {},
-                    "type": "object"
-                },
-                "podDisruptionBudget": {
-                    "properties": {
-                        "create": {
-                            "type": "boolean"
-                        },
-                        "maxUnavailable": {
-                            "type": "string"
-                        },
-                        "minAvailable": {
-                            "type": "integer"
-                        }
-                    },
-                    "type": "object"
-                },
-                "podLabels": {
-                    "properties": {},
-                    "type": "object"
-                },
-                "podSecurityContext": {
-                    "properties": {
-                        "enabled": {
-                            "type": "boolean"
-                        },
-                        "fsGroup": {
-                            "type": "integer"
-                        }
-                    },
-                    "type": "object"
-                },
-                "priorityClassName": {
-                    "type": "string"
-                },
-                "rbac": {
-                    "properties": {
-                        "create": {
-                            "type": "boolean"
-                        },
-                        "rules": {
-                            "type": "array"
-                        }
-                    },
-                    "type": "object"
-                },
-                "replicaCount": {
-                    "type": "integer"
-                },
-                "resources": {
-                    "properties": {
-                        "csiAttacher": {
-                            "properties": {
-                                "limits": {
-                                    "properties": {},
-                                    "type": "object"
-                                },
-                                "requests": {
-                                    "properties": {},
-                                    "type": "object"
-                                }
-                            },
-                            "type": "object"
-                        },
-                        "csiProvisioner": {
-                            "properties": {
-                                "limits": {
-                                    "properties": {},
-                                    "type": "object"
-                                },
-                                "requests": {
-                                    "properties": {},
-                                    "type": "object"
-                                }
-                            },
-                            "type": "object"
-                        },
-                        "csiResizer": {
-                            "properties": {
-                                "limits": {
-                                    "properties": {},
-                                    "type": "object"
-                                },
-                                "requests": {
-                                    "properties": {},
-                                    "type": "object"
-                                }
-                            },
-                            "type": "object"
-                        },
-                        "hcloudCSIDriver": {
-                            "properties": {
-                                "limits": {
-                                    "properties": {},
-                                    "type": "object"
-                                },
-                                "requests": {
-                                    "properties": {},
-                                    "type": "object"
-                                }
-                            },
-                            "type": "object"
-                        },
-                        "livenessProbe": {
-                            "properties": {
-                                "limits": {
-                                    "properties": {},
-                                    "type": "object"
-                                },
-                                "requests": {
-                                    "properties": {},
-                                    "type": "object"
-                                }
-                            },
-                            "type": "object"
-                        }
-                    },
-                    "type": "object"
-                },
-                "schedulerName": {
-                    "type": "string"
-                },
-                "service": {
-                    "properties": {
-                        "annotations": {
-                            "properties": {},
-                            "type": "object"
-                        },
-                        "ports": {
-                            "properties": {
-                                "metrics": {
-                                    "type": "integer"
-                                }
-                            },
-                            "type": "object"
-                        }
-                    },
-                    "type": "object"
-                },
-                "sidecars": {
-                    "type": "array"
-                },
-                "tolerations": {
-                    "type": "array"
-                },
-                "topologySpreadConstraints": {
-                    "type": "array"
-                },
-                "updateStrategy": {
-                    "properties": {
-                        "type": {
-                            "type": "string"
-                        }
-                    },
-                    "type": "object"
-                }
+        "containerPorts": {
+          "properties": {
+            "healthz": {
+              "type": "integer"
             },
-            "type": "object"
+            "metrics": {
+              "type": "integer"
+            }
+          },
+          "type": "object"
         },
-        "fullnameOverride": {
-            "type": "string"
+        "customLivenessProbe": {
+          "properties": {},
+          "type": "object"
         },
-        "global": {
-            "properties": {
-                "imagePullSecrets": {
-                    "type": "array"
-                }
-            },
-            "type": "object"
+        "customReadinessProbe": {
+          "properties": {},
+          "type": "object"
         },
-        "metrics": {
-            "properties": {
-                "enabled": {
-                    "type": "boolean"
-                },
-                "serviceMonitor": {
-                    "properties": {
-                        "annotations": {
-                            "properties": {},
-                            "type": "object"
-                        },
-                        "enabled": {
-                            "type": "boolean"
-                        },
-                        "honorLabels": {
-                            "type": "boolean"
-                        },
-                        "interval": {
-                            "type": "string"
-                        },
-                        "jobLabel": {
-                            "type": "string"
-                        },
-                        "labels": {
-                            "properties": {},
-                            "type": "object"
-                        },
-                        "metricRelabelings": {
-                            "type": "array"
-                        },
-                        "namespace": {
-                            "type": "string"
-                        },
-                        "relabelings": {
-                            "type": "array"
-                        },
-                        "scrapeTimeout": {
-                            "type": "string"
-                        },
-                        "selector": {
-                            "properties": {},
-                            "type": "object"
-                        }
-                    },
-                    "type": "object"
-                }
-            },
-            "type": "object"
+        "customStartupProbe": {
+          "properties": {},
+          "type": "object"
         },
-        "nameOverride": {
-            "type": "string"
+        "extraEnvVars": {
+          "type": "array"
         },
-        "namespaceOverride": {
-            "type": "string"
+        "extraVolumeMounts": {
+          "type": "array"
         },
-        "node": {
-            "properties": {
-                "affinity": {
-                    "properties": {
-                        "nodeAffinity": {
-                            "properties": {
-                                "requiredDuringSchedulingIgnoredDuringExecution": {
-                                    "properties": {
-                                        "nodeSelectorTerms": {
-                                            "items": {
-                                                "properties": {
-                                                    "matchExpressions": {
-                                                        "items": {
-                                                            "properties": {
-                                                                "key": {
-                                                                    "type": "string"
-                                                                },
-                                                                "operator": {
-                                                                    "type": "string"
-                                                                },
-                                                                "values": {
-                                                                    "items": {
-                                                                        "type": "string"
-                                                                    },
-                                                                    "type": "array"
-                                                                }
-                                                            },
-                                                            "type": "object"
-                                                        },
-                                                        "type": "array"
-                                                    }
-                                                },
-                                                "type": "object"
-                                            },
-                                            "type": "array"
-                                        }
-                                    },
-                                    "type": "object"
-                                }
-                            },
-                            "type": "object"
-                        }
-                    },
-                    "type": "object"
-                },
-                "containerPorts": {
-                    "properties": {
-                        "healthz": {
-                            "type": "integer"
-                        },
-                        "metrics": {
-                            "type": "integer"
-                        }
-                    },
-                    "type": "object"
-                },
-                "customLivenessProbe": {
-                    "properties": {},
-                    "type": "object"
-                },
-                "customReadinessProbe": {
-                    "properties": {},
-                    "type": "object"
-                },
-                "customStartupProbe": {
-                    "properties": {},
-                    "type": "object"
-                },
-                "extraEnvVars": {
-                    "type": "array"
-                },
-                "extraVolumeMounts": {
-                    "type": "array"
-                },
-                "extraVolumes": {
-                    "type": "array"
-                },
-                "hostNetwork": {
-                    "type": "boolean"
-                },
-                "image": {
-                    "properties": {
-                        "csiNodeDriverRegistrar": {
-                            "properties": {
-                                "name": {
-                                    "type": "string"
-                                },
-                                "pullPolicy": {
-                                    "type": "string"
-                                },
-                                "pullSecrets": {
-                                    "type": "array"
-                                },
-                                "tag": {
-                                    "type": "string"
-                                }
-                            },
-                            "type": "object"
-                        },
-                        "hcloudCSIDriver": {
-                            "properties": {
-                                "name": {
-                                    "type": "string"
-                                },
-                                "pullPolicy": {
-                                    "type": "string"
-                                },
-                                "pullSecrets": {
-                                    "type": "array"
-                                },
-                                "tag": {
-                                    "type": "string"
-                                }
-                            },
-                            "type": "object"
-                        },
-                        "livenessProbe": {
-                            "properties": {
-                                "name": {
-                                    "type": "string"
-                                },
-                                "pullPolicy": {
-                                    "type": "string"
-                                },
-                                "pullSecrets": {
-                                    "type": "array"
-                                },
-                                "tag": {
-                                    "type": "string"
-                                }
-                            },
-                            "type": "object"
-                        }
-                    },
-                    "type": "object"
-                },
-                "initContainers": {
-                    "type": "array"
-                },
-                "kubeletDir": {
-                    "type": "string"
-                },
-                "lifecycleHooks": {
-                    "properties": {},
-                    "type": "object"
-                },
-                "livenessProbe": {
-                    "properties": {
-                        "enabled": {
-                            "type": "boolean"
-                        },
-                        "failureThreshold": {
-                            "type": "integer"
-                        },
-                        "initialDelaySeconds": {
-                            "type": "integer"
-                        },
-                        "periodSeconds": {
-                            "type": "integer"
-                        },
-                        "successThreshold": {
-                            "type": "integer"
-                        },
-                        "timeoutSeconds": {
-                            "type": "integer"
-                        }
-                    },
-                    "type": "object"
-                },
-                "nodeSelector": {
-                    "properties": {},
-                    "type": "object"
-                },
-                "podAnnotations": {
-                    "properties": {},
-                    "type": "object"
-                },
-                "podLabels": {
-                    "properties": {},
-                    "type": "object"
-                },
-                "podSecurityContext": {
-                    "properties": {
-                        "enabled": {
-                            "type": "boolean"
-                        },
-                        "fsGroup": {
-                            "type": "integer"
-                        }
-                    },
-                    "type": "object"
-                },
-                "priorityClassName": {
-                    "type": "string"
-                },
-                "resources": {
-                    "properties": {
-                        "csiNodeDriverRegistrar": {
-                            "properties": {
-                                "limits": {
-                                    "properties": {},
-                                    "type": "object"
-                                },
-                                "requests": {
-                                    "properties": {},
-                                    "type": "object"
-                                }
-                            },
-                            "type": "object"
-                        },
-                        "hcloudCSIDriver": {
-                            "properties": {
-                                "limits": {
-                                    "properties": {},
-                                    "type": "object"
-                                },
-                                "requests": {
-                                    "properties": {},
-                                    "type": "object"
-                                }
-                            },
-                            "type": "object"
-                        },
-                        "livenessProbe": {
-                            "properties": {
-                                "limits": {
-                                    "properties": {},
-                                    "type": "object"
-                                },
-                                "requests": {
-                                    "properties": {},
-                                    "type": "object"
-                                }
-                            },
-                            "type": "object"
-                        }
-                    },
-                    "type": "object"
-                },
-                "schedulerName": {
-                    "type": "string"
-                },
-                "service": {
-                    "properties": {
-                        "annotations": {
-                            "properties": {},
-                            "type": "object"
-                        },
-                        "ports": {
-                            "properties": {
-                                "metrics": {
-                                    "type": "integer"
-                                }
-                            },
-                            "type": "object"
-                        }
-                    },
-                    "type": "object"
-                },
-                "sidecars": {
-                    "type": "array"
-                },
-                "tolerations": {
-                    "type": "array"
-                },
-                "updateStrategy": {
-                    "properties": {
-                        "type": {
-                            "type": "string"
-                        }
-                    },
-                    "type": "object"
-                }
-            },
-            "type": "object"
+        "extraVolumes": {
+          "type": "array"
         },
-        "serviceAccount": {
-            "properties": {
-                "annotations": {
-                    "properties": {},
-                    "type": "object"
-                },
-                "automountServiceAccountToken": {
-                    "type": "boolean"
-                },
-                "create": {
-                    "type": "boolean"
+        "hcloudToken": {
+          "properties": {
+            "existingSecret": {
+              "properties": {
+                "key": {
+                  "type": "string"
                 },
                 "name": {
-                    "type": "string"
+                  "type": "string"
                 }
+              },
+              "type": "object"
             },
-            "type": "object"
+            "file": {
+              "type": "string"
+            },
+            "value": {
+              "type": "string"
+            }
+          },
+          "type": "object"
         },
-        "storageClasses": {
-            "items": {
-                "properties": {
-                    "defaultStorageClass": {
-                        "type": "boolean"
-                    },
-                    "name": {
-                        "type": "string"
-                    },
-                    "reclaimPolicy": {
-                        "type": "string"
-                    }
+        "hcloudVolumeDefaultLocation": {
+          "type": "string"
+        },
+        "image": {
+          "properties": {
+            "csiAttacher": {
+              "properties": {
+                "name": {
+                  "type": "string"
                 },
-                "type": "object"
+                "pullPolicy": {
+                  "type": "string"
+                },
+                "pullSecrets": {
+                  "type": "array"
+                },
+                "tag": {
+                  "type": "string"
+                }
+              },
+              "type": "object"
             },
-            "type": "array"
+            "csiProvisioner": {
+              "properties": {
+                "name": {
+                  "type": "string"
+                },
+                "pullPolicy": {
+                  "type": "string"
+                },
+                "pullSecrets": {
+                  "type": "array"
+                },
+                "tag": {
+                  "type": "string"
+                }
+              },
+              "type": "object"
+            },
+            "csiResizer": {
+              "properties": {
+                "name": {
+                  "type": "string"
+                },
+                "pullPolicy": {
+                  "type": "string"
+                },
+                "pullSecrets": {
+                  "type": "array"
+                },
+                "tag": {
+                  "type": "string"
+                }
+              },
+              "type": "object"
+            },
+            "hcloudCSIDriver": {
+              "properties": {
+                "name": {
+                  "type": "string"
+                },
+                "pullPolicy": {
+                  "type": "string"
+                },
+                "pullSecrets": {
+                  "type": "array"
+                },
+                "tag": {
+                  "type": "string"
+                }
+              },
+              "type": "object"
+            },
+            "livenessProbe": {
+              "properties": {
+                "name": {
+                  "type": "string"
+                },
+                "pullPolicy": {
+                  "type": "string"
+                },
+                "pullSecrets": {
+                  "type": "array"
+                },
+                "tag": {
+                  "type": "string"
+                }
+              },
+              "type": "object"
+            }
+          },
+          "type": "object"
+        },
+        "initContainers": {
+          "type": "array"
+        },
+        "lifecycleHooks": {
+          "properties": {},
+          "type": "object"
+        },
+        "livenessProbe": {
+          "properties": {
+            "enabled": {
+              "type": "boolean"
+            },
+            "failureThreshold": {
+              "type": "integer"
+            },
+            "initialDelaySeconds": {
+              "type": "integer"
+            },
+            "periodSeconds": {
+              "type": "integer"
+            },
+            "successThreshold": {
+              "type": "integer"
+            },
+            "timeoutSeconds": {
+              "type": "integer"
+            }
+          },
+          "type": "object"
+        },
+        "nodeSelector": {
+          "properties": {},
+          "type": "object"
+        },
+        "podAnnotations": {
+          "properties": {},
+          "type": "object"
+        },
+        "podDisruptionBudget": {
+          "properties": {
+            "create": {
+              "type": "boolean"
+            },
+            "maxUnavailable": {
+              "type": "string"
+            },
+            "minAvailable": {
+              "type": "integer"
+            }
+          },
+          "type": "object"
+        },
+        "podLabels": {
+          "properties": {},
+          "type": "object"
+        },
+        "podSecurityContext": {
+          "properties": {
+            "enabled": {
+              "type": "boolean"
+            },
+            "fsGroup": {
+              "type": "integer"
+            }
+          },
+          "type": "object"
+        },
+        "priorityClassName": {
+          "type": "string"
+        },
+        "rbac": {
+          "properties": {
+            "create": {
+              "type": "boolean"
+            },
+            "rules": {
+              "type": "array"
+            }
+          },
+          "type": "object"
+        },
+        "replicaCount": {
+          "type": "integer"
+        },
+        "resources": {
+          "properties": {
+            "csiAttacher": {
+              "properties": {
+                "limits": {
+                  "properties": {},
+                  "type": "object"
+                },
+                "requests": {
+                  "properties": {},
+                  "type": "object"
+                }
+              },
+              "type": "object"
+            },
+            "csiProvisioner": {
+              "properties": {
+                "limits": {
+                  "properties": {},
+                  "type": "object"
+                },
+                "requests": {
+                  "properties": {},
+                  "type": "object"
+                }
+              },
+              "type": "object"
+            },
+            "csiResizer": {
+              "properties": {
+                "limits": {
+                  "properties": {},
+                  "type": "object"
+                },
+                "requests": {
+                  "properties": {},
+                  "type": "object"
+                }
+              },
+              "type": "object"
+            },
+            "hcloudCSIDriver": {
+              "properties": {
+                "limits": {
+                  "properties": {},
+                  "type": "object"
+                },
+                "requests": {
+                  "properties": {},
+                  "type": "object"
+                }
+              },
+              "type": "object"
+            },
+            "livenessProbe": {
+              "properties": {
+                "limits": {
+                  "properties": {},
+                  "type": "object"
+                },
+                "requests": {
+                  "properties": {},
+                  "type": "object"
+                }
+              },
+              "type": "object"
+            }
+          },
+          "type": "object"
+        },
+        "schedulerName": {
+          "type": "string"
+        },
+        "service": {
+          "properties": {
+            "annotations": {
+              "properties": {},
+              "type": "object"
+            },
+            "ports": {
+              "properties": {
+                "metrics": {
+                  "type": "integer"
+                }
+              },
+              "type": "object"
+            }
+          },
+          "type": "object"
+        },
+        "sidecars": {
+          "type": "array"
+        },
+        "tolerations": {
+          "type": "array"
+        },
+        "topologySpreadConstraints": {
+          "type": "array"
+        },
+        "updateStrategy": {
+          "properties": {
+            "type": {
+              "type": "string"
+            }
+          },
+          "type": "object"
         }
+      },
+      "type": "object"
     },
-    "type": "object"
+    "fullnameOverride": {
+      "type": "string"
+    },
+    "global": {
+      "properties": {
+        "imagePullSecrets": {
+          "type": "array"
+        }
+      },
+      "type": "object"
+    },
+    "metrics": {
+      "properties": {
+        "enabled": {
+          "type": "boolean"
+        },
+        "serviceMonitor": {
+          "properties": {
+            "annotations": {
+              "properties": {},
+              "type": "object"
+            },
+            "enabled": {
+              "type": "boolean"
+            },
+            "honorLabels": {
+              "type": "boolean"
+            },
+            "interval": {
+              "type": "string"
+            },
+            "jobLabel": {
+              "type": "string"
+            },
+            "labels": {
+              "properties": {},
+              "type": "object"
+            },
+            "metricRelabelings": {
+              "type": "array"
+            },
+            "namespace": {
+              "type": "string"
+            },
+            "relabelings": {
+              "type": "array"
+            },
+            "scrapeTimeout": {
+              "type": "string"
+            },
+            "selector": {
+              "properties": {},
+              "type": "object"
+            }
+          },
+          "type": "object"
+        }
+      },
+      "type": "object"
+    },
+    "nameOverride": {
+      "type": "string"
+    },
+    "namespaceOverride": {
+      "type": "string"
+    },
+    "node": {
+      "properties": {
+        "affinity": {
+          "properties": {
+            "nodeAffinity": {
+              "properties": {
+                "requiredDuringSchedulingIgnoredDuringExecution": {
+                  "properties": {
+                    "nodeSelectorTerms": {
+                      "items": {
+                        "properties": {
+                          "matchExpressions": {
+                            "items": {
+                              "properties": {
+                                "key": {
+                                  "type": "string"
+                                },
+                                "operator": {
+                                  "type": "string"
+                                },
+                                "values": {
+                                  "items": {
+                                    "type": "string"
+                                  },
+                                  "type": "array"
+                                }
+                              },
+                              "type": "object"
+                            },
+                            "type": "array"
+                          }
+                        },
+                        "type": "object"
+                      },
+                      "type": "array"
+                    }
+                  },
+                  "type": "object"
+                }
+              },
+              "type": "object"
+            }
+          },
+          "type": "object"
+        },
+        "containerPorts": {
+          "properties": {
+            "healthz": {
+              "type": "integer"
+            },
+            "metrics": {
+              "type": "integer"
+            }
+          },
+          "type": "object"
+        },
+        "customLivenessProbe": {
+          "properties": {},
+          "type": "object"
+        },
+        "customReadinessProbe": {
+          "properties": {},
+          "type": "object"
+        },
+        "customStartupProbe": {
+          "properties": {},
+          "type": "object"
+        },
+        "extraEnvVars": {
+          "type": "array"
+        },
+        "extraVolumeMounts": {
+          "type": "array"
+        },
+        "extraVolumes": {
+          "type": "array"
+        },
+        "hostNetwork": {
+          "type": "boolean"
+        },
+        "image": {
+          "properties": {
+            "csiNodeDriverRegistrar": {
+              "properties": {
+                "name": {
+                  "type": "string"
+                },
+                "pullPolicy": {
+                  "type": "string"
+                },
+                "pullSecrets": {
+                  "type": "array"
+                },
+                "tag": {
+                  "type": "string"
+                }
+              },
+              "type": "object"
+            },
+            "hcloudCSIDriver": {
+              "properties": {
+                "name": {
+                  "type": "string"
+                },
+                "pullPolicy": {
+                  "type": "string"
+                },
+                "pullSecrets": {
+                  "type": "array"
+                },
+                "tag": {
+                  "type": "string"
+                }
+              },
+              "type": "object"
+            },
+            "livenessProbe": {
+              "properties": {
+                "name": {
+                  "type": "string"
+                },
+                "pullPolicy": {
+                  "type": "string"
+                },
+                "pullSecrets": {
+                  "type": "array"
+                },
+                "tag": {
+                  "type": "string"
+                }
+              },
+              "type": "object"
+            }
+          },
+          "type": "object"
+        },
+        "initContainers": {
+          "type": "array"
+        },
+        "kubeletDir": {
+          "type": "string"
+        },
+        "lifecycleHooks": {
+          "properties": {},
+          "type": "object"
+        },
+        "livenessProbe": {
+          "properties": {
+            "enabled": {
+              "type": "boolean"
+            },
+            "failureThreshold": {
+              "type": "integer"
+            },
+            "initialDelaySeconds": {
+              "type": "integer"
+            },
+            "periodSeconds": {
+              "type": "integer"
+            },
+            "successThreshold": {
+              "type": "integer"
+            },
+            "timeoutSeconds": {
+              "type": "integer"
+            }
+          },
+          "type": "object"
+        },
+        "nodeSelector": {
+          "properties": {},
+          "type": "object"
+        },
+        "podAnnotations": {
+          "properties": {},
+          "type": "object"
+        },
+        "podLabels": {
+          "properties": {},
+          "type": "object"
+        },
+        "podSecurityContext": {
+          "properties": {
+            "enabled": {
+              "type": "boolean"
+            },
+            "fsGroup": {
+              "type": "integer"
+            }
+          },
+          "type": "object"
+        },
+        "priorityClassName": {
+          "type": "string"
+        },
+        "resources": {
+          "properties": {
+            "csiNodeDriverRegistrar": {
+              "properties": {
+                "limits": {
+                  "properties": {},
+                  "type": "object"
+                },
+                "requests": {
+                  "properties": {},
+                  "type": "object"
+                }
+              },
+              "type": "object"
+            },
+            "hcloudCSIDriver": {
+              "properties": {
+                "limits": {
+                  "properties": {},
+                  "type": "object"
+                },
+                "requests": {
+                  "properties": {},
+                  "type": "object"
+                }
+              },
+              "type": "object"
+            },
+            "livenessProbe": {
+              "properties": {
+                "limits": {
+                  "properties": {},
+                  "type": "object"
+                },
+                "requests": {
+                  "properties": {},
+                  "type": "object"
+                }
+              },
+              "type": "object"
+            }
+          },
+          "type": "object"
+        },
+        "schedulerName": {
+          "type": "string"
+        },
+        "service": {
+          "properties": {
+            "annotations": {
+              "properties": {},
+              "type": "object"
+            },
+            "ports": {
+              "properties": {
+                "metrics": {
+                  "type": "integer"
+                }
+              },
+              "type": "object"
+            }
+          },
+          "type": "object"
+        },
+        "sidecars": {
+          "type": "array"
+        },
+        "tolerations": {
+          "type": "array"
+        },
+        "updateStrategy": {
+          "properties": {
+            "type": {
+              "type": "string"
+            }
+          },
+          "type": "object"
+        }
+      },
+      "type": "object"
+    },
+    "serviceAccount": {
+      "properties": {
+        "annotations": {
+          "properties": {},
+          "type": "object"
+        },
+        "automountServiceAccountToken": {
+          "type": "boolean"
+        },
+        "create": {
+          "type": "boolean"
+        },
+        "name": {
+          "type": "string"
+        }
+      },
+      "type": "object"
+    },
+    "storageClasses": {
+      "items": {
+        "properties": {
+          "defaultStorageClass": {
+            "type": "boolean"
+          },
+          "name": {
+            "type": "string"
+          },
+          "reclaimPolicy": {
+            "type": "string"
+          }
+        },
+        "type": "object"
+      },
+      "type": "array"
+    }
+  },
+  "type": "object"
 }
