@@ -40,9 +40,7 @@ dockers:
     dockerfile: Dockerfile
     goarch: arm64
     image_templates:
-      [
-        "hetznercloud/hcloud-csi-driver:{{ if not .IsSnapshot }}v{{ end }}{{ .Version }}-arm64v8",
-      ]
+      - "hetznercloud/hcloud-csi-driver:{{ if not .IsSnapshot }}v{{ end }}{{ .Version }}-arm64v8"
     use: buildx
 
   - build_flag_templates: [--platform=linux/arm/v6]
