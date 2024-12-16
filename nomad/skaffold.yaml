@@ -9,7 +9,7 @@ build:
         dockerfile: dev/Dockerfile
       hooks:
         after:
-          - command: ["sh", "./nomad/start_nomad.sh"]
+          - command: ["bash", "./nomad/start_nomad.sh"]
             os: [darwin, linux]
   local:
     useBuildkit: true
