@@ -48,9 +48,7 @@ dockers:
     goarch: arm
     goarm: 6
     image_templates:
-      [
-        "hetznercloud/hcloud-csi-driver:{{ if not .IsSnapshot }}v{{ end }}{{ .Version }}-armv6",
-      ]
+      - "hetznercloud/hcloud-csi-driver:{{ if not .IsSnapshot }}v{{ end }}{{ .Version }}-armv6"
     use: buildx
 
 docker_manifests:
