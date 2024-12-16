@@ -135,8 +135,8 @@ func TestVolumeWrite(t *testing.T) {
 		assert.Len(t, vol, 1)
 	})
 
-    // Used to ensure that the job for verifying the data is scheduled on another node
-    var previousNodeID string
+	// Used to ensure that the job for verifying the data is scheduled on another node
+	var previousNodeID string
 	t.Run("write to volume", func(t *testing.T) {
 		_, _, err := cluster.nomadClient.Jobs().Register(job, &nomad.WriteOptions{})
 		if err != nil {
@@ -155,7 +155,7 @@ func TestVolumeWrite(t *testing.T) {
 			return
 		}
 
-        previousNodeID = allocStub.NodeID
+		previousNodeID = allocStub.NodeID
 
 		alloc, _, err := cluster.nomadClient.Allocations().Info(allocStub.ID, &nomad.QueryOptions{})
 		if err != nil {
@@ -164,12 +164,12 @@ func TestVolumeWrite(t *testing.T) {
 		}
 
 		exitCode, err := cluster.ExecInAlloc(alloc, jobID, []string{
-            "dd",
-            "if=/dev/random",
-            "of=/test/data",
-            "bs=1M",
-            "count=1",
-        })
+			"dd",
+			"if=/dev/random",
+			"of=/test/data",
+			"bs=1M",
+			"count=1",
+		})
 		if err != nil {
 			t.Error(err)
 		}
@@ -177,13 +177,13 @@ func TestVolumeWrite(t *testing.T) {
 	})
 
 	t.Run("verify volume data", func(t *testing.T) {
-        // try to schedule job on another node
-        constraint := &nomad.Affinity{
-            LTarget: "${node.unique.id}",
-            RTarget: previousNodeID,
-            Operand: "!=",
-        }
-        job.Affinities = append(job.Affinities, constraint)
+		// try to schedule job on another node
+		constraint := &nomad.Affinity{
+			LTarget: "${node.unique.id}",
+			RTarget: previousNodeID,
+			Operand: "!=",
+		}
+		job.Affinities = append(job.Affinities, constraint)
 
 		_, _, err := cluster.nomadClient.Jobs().Register(job, &nomad.WriteOptions{})
 		if err != nil {
@@ -208,12 +208,12 @@ func TestVolumeWrite(t *testing.T) {
 			return
 		}
 
-        // verify that file exists and has a size greater than zero
+		// verify that file exists and has a size greater than zero
 		exitCode, err := cluster.ExecInAlloc(alloc, jobID, []string{
-            "test",
-            "-s",
-            "/test/data",
-        })
+			"test",
+			"-s",
+			"/test/data",
+		})
 		if err != nil {
 			t.Error(err)
 		}
@@ -221,8 +221,8 @@ func TestVolumeWrite(t *testing.T) {
 	})
 
 	t.Run("delete volume", func(t *testing.T) {
-        // with retries, as volume can still be in use for a couple of seconds after job got deleted,
-        // which results in a internal server error
+		// with retries, as volume can still be in use for a couple of seconds after job got deleted,
+		// which results in a internal server error
 		for i := range 10 {
 			if err := cluster.DeleteVolume(volReq.ID, &nomad.WriteOptions{}); err == nil {
 				break
