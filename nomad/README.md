@@ -1,4 +1,4 @@
-# Nomad Development
+# Nomad
 
 Hetzner Cloud does not provide official support for running the CSI driver in Nomad. Nonetheless, we would still like to offer a satisfying developer experience and have automated e2e tests to avoid breaking Nomad accidentally.
 
