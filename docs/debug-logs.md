@@ -49,15 +49,14 @@ spec:
   template:
     spec:
       containers:
-      - name: hcloud-csi-driver
-        env:
-        - name: LOG_LEVEL
-          value: debug
-        - name: HCLOUD_DEBUG
-          value: "true"
+        - name: hcloud-csi-driver
+          env:
+            - name: LOG_LEVEL
+              value: debug
+            - name: HCLOUD_DEBUG
+              value: "true"
 
 ---
-
 kind: DaemonSet
 apiVersion: apps/v1
 metadata:
@@ -67,12 +66,12 @@ spec:
   template:
     spec:
       containers:
-      - name: hcloud-csi-driver
-        env:
-        - name: LOG_LEVEL
-          value: debug
-        - name: HCLOUD_DEBUG
-          value: "true"
+        - name: hcloud-csi-driver
+          env:
+            - name: LOG_LEVEL
+              value: debug
+            - name: HCLOUD_DEBUG
+              value: "true"
 ```
 
 Once the new pods with the environment variable have started, you should see messages like this in the logs. If you do not, check that you set the environment variables in the right location:
@@ -132,4 +131,3 @@ X-Correlation-Id: 9e887c60182c28ad
   }
 }
 ```
-

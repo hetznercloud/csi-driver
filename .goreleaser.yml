@@ -32,20 +32,23 @@ dockers:
   - build_flag_templates: [--platform=linux/amd64]
     dockerfile: Dockerfile
     goarch: amd64
-    image_templates: ["hetznercloud/hcloud-csi-driver:{{ if not .IsSnapshot }}v{{ end }}{{ .Version }}-amd64"]
+    image_templates:
+      - "hetznercloud/hcloud-csi-driver:{{ if not .IsSnapshot }}v{{ end }}{{ .Version }}-amd64"
     use: buildx
 
   - build_flag_templates: [--platform=linux/arm64]
     dockerfile: Dockerfile
     goarch: arm64
-    image_templates: ["hetznercloud/hcloud-csi-driver:{{ if not .IsSnapshot }}v{{ end }}{{ .Version }}-arm64v8"]
+    image_templates:
+      - "hetznercloud/hcloud-csi-driver:{{ if not .IsSnapshot }}v{{ end }}{{ .Version }}-arm64v8"
     use: buildx
 
   - build_flag_templates: [--platform=linux/arm/v6]
     dockerfile: Dockerfile
     goarch: arm
     goarm: 6
-    image_templates: ["hetznercloud/hcloud-csi-driver:{{ if not .IsSnapshot }}v{{ end }}{{ .Version }}-armv6"]
+    image_templates:
+      - "hetznercloud/hcloud-csi-driver:{{ if not .IsSnapshot }}v{{ end }}{{ .Version }}-armv6"
     use: buildx
 
 docker_manifests:

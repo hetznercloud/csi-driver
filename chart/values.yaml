@@ -465,7 +465,6 @@ node:
       ##
       pullSecrets: []
 
-
   ## @param node.containerPorts.metrics node Metrics container port
   ## @param node.containerPorts.healthz node Health container port
   ##
@@ -484,7 +483,6 @@ node:
     ## @param node.service.annotations Additional custom annotations for node service
     ##
     annotations: {}
-
 
   ## Configure extra options for node containers' liveness and readiness probes
   ## ref: https://kubernetes.io/docs/tasks/configure-pod-container/configure-liveness-readiness-probes/#configure-probes
@@ -588,7 +586,8 @@ node:
   ## @param node.tolerations Tolerations for node pods assignment
   ## ref: https://kubernetes.io/docs/concepts/configuration/taint-and-toleration/
   ##
-  tolerations: []
+  tolerations:
+    []
     # - effect: NoExecute
     #   operator: Exists
     # - effect: NoSchedule

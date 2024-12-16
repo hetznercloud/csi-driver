@@ -24,6 +24,7 @@ labels.release: YOUR_RELEASE` with the value that you've configured in your `Pro
 This will ensure that the `ServiceMonitors` actually scrape the appropriate targets.
 
 > 💡 Learn more:
+>
 > - https://prometheus-operator.dev/docs/prologue/quick-start/
 > - https://prometheus-operator.dev/docs/operator/design/#servicemonitor
 
@@ -41,6 +42,7 @@ annotations:
 With these annotations in place, Prometheus should be able to scrape metrics from the csi-driver components.
 
 > 💡 Learn more:
+>
 > - https://prometheus.io/docs/prometheus/latest/getting_started/
 > - https://prometheus.io/docs/prometheus/latest/configuration/configuration/#kubernetes_sd_config
 
@@ -52,5 +54,6 @@ This dashboard has been confirmed to work with kube-prometheus-stack, but it may
 You can find the dashboard at [`deploy/monitoring/grafana-dashboard.json`](../deploy/monitoring/grafana-dashboard.json).
 
 > 💡 Learn more:
+>
 > - https://grafana.com/docs/grafana/latest/dashboards/
 > - https://grafana.com/docs/grafana/latest/dashboards/manage-dashboards/#import-a-dashboard

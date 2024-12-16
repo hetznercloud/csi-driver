@@ -54,59 +54,59 @@ metadata:
     app.kubernetes.io/managed-by: Helm
     app.kubernetes.io/component: controller
 rules:
-# leader election
-- apiGroups: [coordination.k8s.io]
-  resources: [leases]
-  verbs: [get, watch, list, delete, update, create]
-# attacher
-- apiGroups: [""]
-  resources: [persistentvolumes]
-  verbs: [get, list, watch, update, patch]
-- apiGroups: [""]
-  resources: [nodes]
-  verbs: [get, list, watch]
-- apiGroups: [csi.storage.k8s.io]
-  resources: [csinodeinfos]
-  verbs: [get, list, watch]
-- apiGroups: [storage.k8s.io]
-  resources: [csinodes]
-  verbs: [get, list, watch]
-- apiGroups: [storage.k8s.io]
-  resources: [volumeattachments]
-  verbs: [get, list, watch, update, patch]
-- apiGroups: [storage.k8s.io]
-  resources: [volumeattachments/status]
-  verbs: [patch]
-# provisioner
-- apiGroups: [""]
-  resources: [secrets]
-  verbs: [get, list]
-- apiGroups: [""]
-  resources: [persistentvolumes]
-  verbs: [get, list, watch, create, delete, patch]
-- apiGroups: [""]
-  resources: [persistentvolumeclaims, persistentvolumeclaims/status]
-  verbs: [get, list, watch, update, patch]
-- apiGroups: [storage.k8s.io]
-  resources: [storageclasses]
-  verbs: [get, list, watch]
-- apiGroups: [""]
-  resources: [events]
-  verbs: [list, watch, create, update, patch]
-- apiGroups: [snapshot.storage.k8s.io]
-  resources: [volumesnapshots]
-  verbs: [get, list]
-- apiGroups: [snapshot.storage.k8s.io]
-  resources: [volumesnapshotcontents]
-  verbs: [get, list]
-# resizer
-- apiGroups: [""]
-  resources: [pods]
-  verbs: [get, list, watch]
-# node
-- apiGroups: [""]
-  resources: [events]
-  verbs: [get, list, watch, create, update, patch]
+  # leader election
+  - apiGroups: [coordination.k8s.io]
+    resources: [leases]
+    verbs: [get, watch, list, delete, update, create]
+  # attacher
+  - apiGroups: [""]
+    resources: [persistentvolumes]
+    verbs: [get, list, watch, update, patch]
+  - apiGroups: [""]
+    resources: [nodes]
+    verbs: [get, list, watch]
+  - apiGroups: [csi.storage.k8s.io]
+    resources: [csinodeinfos]
+    verbs: [get, list, watch]
+  - apiGroups: [storage.k8s.io]
+    resources: [csinodes]
+    verbs: [get, list, watch]
+  - apiGroups: [storage.k8s.io]
+    resources: [volumeattachments]
+    verbs: [get, list, watch, update, patch]
+  - apiGroups: [storage.k8s.io]
+    resources: [volumeattachments/status]
+    verbs: [patch]
+  # provisioner
+  - apiGroups: [""]
+    resources: [secrets]
+    verbs: [get, list]
+  - apiGroups: [""]
+    resources: [persistentvolumes]
+    verbs: [get, list, watch, create, delete, patch]
+  - apiGroups: [""]
+    resources: [persistentvolumeclaims, persistentvolumeclaims/status]
+    verbs: [get, list, watch, update, patch]
+  - apiGroups: [storage.k8s.io]
+    resources: [storageclasses]
+    verbs: [get, list, watch]
+  - apiGroups: [""]
+    resources: [events]
+    verbs: [list, watch, create, update, patch]
+  - apiGroups: [snapshot.storage.k8s.io]
+    resources: [volumesnapshots]
+    verbs: [get, list]
+  - apiGroups: [snapshot.storage.k8s.io]
+    resources: [volumesnapshotcontents]
+    verbs: [get, list]
+  # resizer
+  - apiGroups: [""]
+    resources: [pods]
+    verbs: [get, list, watch]
+  # node
+  - apiGroups: [""]
+    resources: [events]
+    verbs: [get, list, watch, create, update, patch]
 ---
 # Source: hcloud-csi/templates/controller/clusterrolebinding.yaml
 kind: ClusterRoleBinding
@@ -178,7 +178,7 @@ metadata:
     app.kubernetes.io/instance: hcloud-csi
     app.kubernetes.io/managed-by: Helm
     app.kubernetes.io/component: node
-    app: hcloud-csi 
+    app: hcloud-csi
 spec:
   updateStrategy:
     type: RollingUpdate
@@ -320,7 +320,7 @@ metadata:
     app.kubernetes.io/instance: hcloud-csi
     app.kubernetes.io/managed-by: Helm
     app.kubernetes.io/component: controller
-    app: hcloud-csi-controller 
+    app: hcloud-csi-controller
 spec:
   replicas: 2
   strategy:

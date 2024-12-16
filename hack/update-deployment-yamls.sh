@@ -9,7 +9,7 @@ helm template hcloud-csi chart \
   --set controller.matchLabelsOverride.app=hcloud-csi-controller \
   --set controller.podLabels.app=hcloud-csi-controller \
   --set node.matchLabelsOverride.app=hcloud-csi \
-  --set node.podLabels.app=hcloud-csi \
-  | grep -v helm.sh/chart \
-  | grep -v app.kubernetes.io/managed-by \
-  > deploy/kubernetes/hcloud-csi.yml
+  --set node.podLabels.app=hcloud-csi |
+    grep -v helm.sh/chart |
+    grep -v app.kubernetes.io/managed-by \
+    > deploy/kubernetes/hcloud-csi.yml

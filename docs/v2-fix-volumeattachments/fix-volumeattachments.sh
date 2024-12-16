@@ -1,8 +1,7 @@
 #!/usr/bin/env bash
 set -e -o pipefail
 
-if [ "$DEBUG" != "" ];
-then
+if [ "$DEBUG" != "" ]; then
   set -x
 fi
 
@@ -20,8 +19,7 @@ write_log() {
 # Verify dependencies
 verify_installed() {
   cmd="$1"
-  if ! command -v "$cmd" &> /dev/null
-  then
+  if ! command -v "$cmd" &> /dev/null; then
     write_log "[ERR] For the script to run successfully, \"${cmd}\" is required, but it could not be found. Please make sure it is installed."
     exit
   fi
@@ -30,21 +28,20 @@ verify_installed() {
 verify_installed kubectl
 verify_installed grep
 
-VOLUME_ATTACHMENTS=($(
+mapfile -t VOLUME_ATTACHMENTS < <(
   kubectl get volumeattachment \
-    -o custom-columns=NAME:.metadata.name,ATTACHER:.spec.attacher,DEVICEPATH:.status.attachmentMetadata.devicePath \
-  | { grep -E 'csi\.hetzner\.cloud.*<none>' --color=never || true; } \
-  | cut -f 1 -d ' '
-))
+    -o custom-columns=NAME:.metadata.name,ATTACHER:.spec.attacher,DEVICEPATH:.status.attachmentMetadata.devicePath |
+    { grep -E 'csi\.hetzner\.cloud.*<none>' --color=never || true; } |
+    cut -f 1 -d ' '
+)
 
-if [[ -z "$VOLUME_ATTACHMENTS" ]]; then
+if [[ ${#VOLUME_ATTACHMENTS[@]} -eq 0 ]]; then
   write_log "[INFO] No affected VolumeAttachments found, exiting."
   exit 0
 fi
 
 for VOLUME_ATTACHMENT in "${VOLUME_ATTACHMENTS[@]}"; do
   write_log "[INFO] Processing VolumeAttachment $VOLUME_ATTACHMENT"
-
 
   PV_NAME=$(
     kubectl get volumeattachment \

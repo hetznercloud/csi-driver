@@ -5,4 +5,4 @@ kind: Kustomization
 # If you use this, please switch to the Helm Chart if possible.
 
 resources:
-- service-monitor.yaml
+  - service-monitor.yaml

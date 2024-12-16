@@ -2,18 +2,18 @@
 set -ueo pipefail
 
 helm template hcloud-csi chart \
-  --namespace kube-system \
-  | grep -v helm.sh/chart \
-  > chart/.snapshots/default.yaml
+  --namespace kube-system |
+    grep -v helm.sh/chart \
+    > chart/.snapshots/default.yaml
 
 helm template hcloud-csi chart \
   --namespace kube-system \
-  -f chart/example-prod.values.yaml \
-  | grep -v helm.sh/chart \
-  > chart/.snapshots/example-prod.yaml
+  -f chart/example-prod.values.yaml |
+    grep -v helm.sh/chart \
+    > chart/.snapshots/example-prod.yaml
 
 helm template hcloud-csi chart \
   --namespace kube-system \
-  -f chart/.snapshots/full.values.yaml \
-  | grep -v helm.sh/chart \
-  > chart/.snapshots/full.yaml
+  -f chart/.snapshots/full.values.yaml |
+    grep -v helm.sh/chart \
+    > chart/.snapshots/full.yaml

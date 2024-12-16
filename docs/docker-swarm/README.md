@@ -12,7 +12,7 @@ The simplest way to achieve this
 
 1. Create a read+write API token in the [Hetzner Cloud Console](https://console.hetzner.cloud/).
 
-2. Install the plugin 
+2. Install the plugin
 
 Note that docker plugins without a tag in the alias currently get `:latest` appended. To prevent this from happening, we will use
 the fake tag `:swarm` instead.
@@ -101,4 +101,3 @@ docker volume create --driver hetznercloud/hcloud-csi-driver:swarm --required-by
 ```
 docker volume ls --cluster
 ```
-

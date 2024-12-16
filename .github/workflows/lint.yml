@@ -9,6 +9,24 @@ env:
   GOTOOLCHAIN: local
 
 jobs:
+  pre-commit:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-python@v5
+        with:
+          python-version: 3.x
+
+      - uses: yokawasa/action-setup-kube-tools@v0.11.2
+        with:
+          # helm is needed to generate chart snapshots
+          setup-tools: |
+            helm
+          helm: v3.16.3 # renovate: datasource=github-releases depName=helm/helm
+
+      - uses: pre-commit/action@v3.0.1
+
   lint:
     runs-on: ubuntu-latest
     steps:
