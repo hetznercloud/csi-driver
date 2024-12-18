@@ -1,0 +1,17 @@
+apiVersion: skaffold/v4beta11
+kind: Config
+metadata:
+  name: csi-driver
+build:
+  artifacts:
+    - image: localhost:30666/hetznercloud/hcloud-csi-driver
+      docker:
+        dockerfile: dev/Dockerfile
+      hooks:
+        after:
+          - command: ["bash", "./nomad/start_nomad.sh"]
+            os: [darwin, linux]
+  local:
+    useBuildkit: true
+  insecureRegistries:
+    - localhost:30666
