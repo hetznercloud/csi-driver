@@ -227,6 +227,16 @@ func (s *VolumeService) Attach(ctx context.Context, volume *csi.Volume, server *
 		return volumes.ErrAttached
 	}
 
+	if _, _, err := s.client.Volume.Update(ctx, hcloudVolume, hcloud.VolumeUpdateOpts{Labels: volume.Labels}); err != nil {
+		s.logger.Info(
+			"failed to update labels on volume",
+			"volume-id", volume.ID,
+			"server-id", server.ID,
+			"err", err,
+		)
+		return err
+	}
+
 	action, _, err := s.client.Volume.Attach(ctx, hcloudVolume, hcloudServer)
 	if err != nil {
 		s.logger.Info(
