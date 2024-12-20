@@ -5,6 +5,7 @@ type Volume struct {
 	ID          int64
 	Name        string
 	Size        int // GB
+	Labels      map[string]string
 	Location    string
 	LinuxDevice string
 	Server      *Server
