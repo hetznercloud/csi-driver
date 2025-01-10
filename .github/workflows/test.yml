@@ -141,6 +141,14 @@ jobs:
         continue-on-error: true
         run: make -C dev down
 
+      - name: Persist debug artifacts
+        if: always()
+        continue-on-error: true
+        uses: actions/upload-artifact@v4
+        with:
+          name: debug-logs-k8s-${{ env.ENV }}
+          path: debug-logs/
+
   nomad:
     name: nomad ${{ matrix.nomad }}
     runs-on: ubuntu-latest
