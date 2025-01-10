@@ -230,19 +230,21 @@ jobs:
             # Fetch all allocations from a job
             ALLOC_IDS=$(nomad job allocs -json "$1" | jq -r ".[].ID")
 
-            # Fetch logs of all allocations and append it to the logs file
+            # Fetch logs of each allocation and dump them in a file
             for ALLOC_ID in $ALLOC_IDS; do
                 echo "::group::hcloud-csi.log::$1::$ALLOC_ID"
-                nomad alloc logs "$ALLOC_ID"
+                nomad alloc logs "$ALLOC_ID" | tee "debug-logs/$1-$ALLOC_ID.log"
                 echo "::endgroup::"
-            done | tee -a debug-logs/hcloud-csi.log
+            done
 
-            # Fetch events of all allocations and append it to the events file
+            # Fetch events of each allocation and dump them in a file
             for ALLOC_ID in $ALLOC_IDS; do
                 echo "::group::events.json::$1::$ALLOC_ID"
-                nomad alloc status -json $ALLOC_ID | jq -r ".TaskStates.plugin.Events"
+                nomad alloc status -json $ALLOC_ID \
+                  | jq -r ".TaskStates.plugin.Events" \
+                  | tee "debug-logs/$1-$ALLOC_ID.json"
                 echo "::endgroup::"
-            done | tee -a debug-logs/events.json
+            done
           }
 
           fetch_job_info hcloud-csi-controller
