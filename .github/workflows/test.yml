@@ -111,10 +111,43 @@ jobs:
           source dev/files/env.sh
           make -C test/e2e/kubernetes serial
 
+      - name: Dump logs & events
+        if: always()
+        continue-on-error: true
+        run: |
+          source dev/files/env.sh
+          mkdir -p debug-logs
+
+          echo "::group::hcloud-csi.log"
+          kubectl logs \
+            --namespace kube-system \
+            --selector app.kubernetes.io/name=hcloud-csi \
+            --all-containers \
+            --prefix=true \
+            --tail=-1 \
+            | tee debug-logs/hcloud-csi.log
+          echo "::endgroup::"
+
+          echo "::group::events.yaml"
+          kubectl get events \
+            --all-namespaces \
+            --sort-by=.firstTimestamp \
+            --output yaml \
+            | tee debug-logs/events.yaml
+          echo "::endgroup::"
+
       - name: Cleanup
         if: always()
         continue-on-error: true
         run: make -C dev down
+
+      - name: Persist debug artifacts
+        if: always()
+        continue-on-error: true
+        uses: actions/upload-artifact@v4
+        with:
+          name: debug-logs-k8s-${{ env.ENV }}
+          path: debug-logs/
 
   nomad:
     name: nomad ${{ matrix.nomad }}
@@ -137,6 +170,7 @@ jobs:
     env:
       TF_VAR_nomad_version: ${{ matrix.nomad }}
       TF_VAR_consul_version: ${{ matrix.consul }}
+      ENV: gha-${{ github.run_id }}-${{ github.run_attempt }}-${{ matrix.nomad }}
 
     steps:
       - uses: actions/checkout@v4
@@ -185,7 +219,46 @@ jobs:
           source nomad/dev/files/env.sh
           go test -v -tags e2e ./test/e2e/nomad/...
 
+      - name: Dump logs & events
+        if: always()
+        continue-on-error: true
+        run: |
+          source nomad/dev/files/env.sh
+          mkdir -p debug-logs
+
+          fetch_job_info () {
+            # Fetch all allocations from a job
+            ALLOC_IDS=$(nomad job allocs -json "$1" | jq -r ".[].ID")
+
+            # Fetch logs of each allocation and dump them in a file
+            for ALLOC_ID in $ALLOC_IDS; do
+                echo "::group::hcloud-csi.log::$1::$ALLOC_ID"
+                nomad alloc logs "$ALLOC_ID" | tee "debug-logs/$1-$ALLOC_ID.log"
+                echo "::endgroup::"
+            done
+
+            # Fetch events of each allocation and dump them in a file
+            for ALLOC_ID in $ALLOC_IDS; do
+                echo "::group::events.json::$1::$ALLOC_ID"
+                nomad alloc status -json $ALLOC_ID \
+                  | jq -r ".TaskStates.plugin.Events" \
+                  | tee "debug-logs/$1-$ALLOC_ID.json"
+                echo "::endgroup::"
+            done
+          }
+
+          fetch_job_info hcloud-csi-controller
+          fetch_job_info hcloud-csi-node
+
       - name: Cleanup
         if: always()
         continue-on-error: true
         run: make -C nomad/dev down
+
+      - name: Persist debug artifacts
+        if: always()
+        continue-on-error: true
+        uses: actions/upload-artifact@v4
+        with:
+          name: debug-logs-nomad-${{ env.ENV }}
+          path: debug-logs/
