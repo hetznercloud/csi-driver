@@ -247,17 +247,13 @@ jobs:
           }
 
           {
-              echo "::group::hcloud-csi.log"
               fetch_logs_from_job hcloud-csi-controller
               fetch_logs_from_job hcloud-csi-node
-              echo "::endgroup::"
           } | tee debug-logs/hcloud-csi.log
 
           {
-              echo "::group::events.json"
               fetch_events_from_job hcloud-csi-controller
               fetch_events_from_job hcloud-csi-node
-              echo "::endgroup::"
           } | tee debug-logs/events.json
 
       - name: Cleanup
