@@ -224,7 +224,7 @@ jobs:
         continue-on-error: true
         run: |
           source nomad/dev/files/env.sh
-          mkdir debug-logs
+          mkdir -p debug-logs
 
           fetch_logs_from_job () {
             ALLOC_IDS=$(nomad job allocs -json "$1" | jq -r ".[].ID")
