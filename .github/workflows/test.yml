@@ -223,7 +223,7 @@ jobs:
         if: always()
         continue-on-error: true
         run: |
-          source dev/files/env.sh
+          source nomad/dev/files/env.sh
           mkdir debug-logs
 
           fetch_logs_from_job () {
