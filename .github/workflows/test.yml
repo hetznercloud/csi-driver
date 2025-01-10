@@ -226,35 +226,27 @@ jobs:
           source nomad/dev/files/env.sh
           mkdir -p debug-logs
 
-          fetch_logs_from_job () {
+          fetch_job_info () {
+            # Fetch all allocations from a job
             ALLOC_IDS=$(nomad job allocs -json "$1" | jq -r ".[].ID")
 
+            # Fetch logs of all allocations and append it to the logs file
             for ALLOC_ID in $ALLOC_IDS; do
                 echo "::group::hcloud-csi.log::$1::$ALLOC_ID"
                 nomad alloc logs "$ALLOC_ID"
                 echo "::endgroup::"
-            done
-          }
+            done | tee -a debug-logs/hcloud-csi.log
 
-          fetch_events_from_job () {
-            ALLOC_IDS=$(nomad job allocs -json "$1" | jq -r ".[].ID")
-
+            # Fetch events of all allocations and append it to the events file
             for ALLOC_ID in $ALLOC_IDS; do
                 echo "::group::events.json::$1::$ALLOC_ID"
                 nomad alloc status -json $ALLOC_ID | jq -r ".TaskStates.plugin.Events"
                 echo "::endgroup::"
-            done
+            done | tee -a debug-logs/events.json
           }
 
-          {
-              fetch_logs_from_job hcloud-csi-controller
-              fetch_logs_from_job hcloud-csi-node
-          } | tee debug-logs/hcloud-csi.log
-
-          {
-              fetch_events_from_job hcloud-csi-controller
-              fetch_events_from_job hcloud-csi-node
-          } | tee debug-logs/events.json
+          fetch_job_info hcloud-csi-controller
+          fetch_job_info hcloud-csi-node
 
       - name: Cleanup
         if: always()
