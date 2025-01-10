@@ -111,6 +111,31 @@ jobs:
           source dev/files/env.sh
           make -C test/e2e/kubernetes serial
 
+      - name: Dump logs & events
+        if: always()
+        continue-on-error: true
+        run: |
+          source dev/files/env.sh
+          mkdir debug-logs
+
+          echo "::group::hcloud-csi.log"
+          kubectl logs \
+            --namespace kube-system \
+            --selector app.kubernetes.io/name=hcloud-csi \
+            --all-containers \
+            --prefix=true \
+            --tail=-1 \
+            | tee debug-logs/hcloud-csi.log
+          echo "::endgroup::"
+
+          echo "::group::events.yaml"
+          kubectl get events \
+            --all-namespaces \
+            --sort-by=.firstTimestamp \
+            --output yaml \
+            | tee debug-logs/events.yaml
+          echo "::endgroup::"
+
       - name: Cleanup
         if: always()
         continue-on-error: true
