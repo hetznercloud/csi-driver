@@ -116,7 +116,7 @@ jobs:
         continue-on-error: true
         run: |
           source dev/files/env.sh
-          mkdir debug-logs
+          mkdir -p debug-logs
 
           echo "::group::hcloud-csi.log"
           kubectl logs \
