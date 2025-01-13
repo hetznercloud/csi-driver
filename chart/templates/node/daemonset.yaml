@@ -83,8 +83,8 @@ spec:
               mountPath: /run/csi
             - name: registration-dir
               mountPath: /registration
-            {{- if .Values.controller.extraVolumeMounts }}
-            {{- include "common.tplvalues.render" (dict "value" .Values.controller.extraVolumeMounts "context" $) | nindent 12 }}
+            {{- if .Values.node.extraVolumeMounts }}
+            {{- include "common.tplvalues.render" (dict "value" .Values.node.extraVolumeMounts "context" $) | nindent 12 }}
             {{- end }}
           {{- if .Values.node.resources.csiNodeDriverRegistrar }}
           resources: {{- toYaml .Values.node.resources.csiNodeDriverRegistrar | nindent 12 }}
