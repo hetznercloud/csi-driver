@@ -1,5 +1,15 @@
 # Changelog
 
+## [v2.12.0](https://github.com/hetznercloud/csi-driver/releases/tag/v2.12.0)
+
+### Features
+
+- **nomad**: improved nomad support (#798)
+
+### Bug Fixes
+
+- use extraVolumeMounts for node in daemonset (#843)
+
 ## [v2.11.0](https://github.com/hetznercloud/csi-driver/releases/tag/v2.11.0)
 
 ### Features
