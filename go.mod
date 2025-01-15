@@ -1,6 +1,6 @@
 module github.com/hetznercloud/csi-driver
 
-go 1.22.7
+go 1.23.0
 
 toolchain go1.23.4
 
@@ -16,7 +16,7 @@ require (
 	github.com/stretchr/testify v1.10.0
 	golang.org/x/sys v0.29.0
 	google.golang.org/grpc v1.69.4
-	k8s.io/mount-utils v0.31.4
+	k8s.io/mount-utils v0.32.0
 	k8s.io/utils v0.0.0-20241210054802-24370beab758
 )
 
@@ -43,6 +43,7 @@ require (
 	github.com/mitchellh/go-homedir v1.1.0 // indirect
 	github.com/mitchellh/mapstructure v1.5.0 // indirect
 	github.com/moby/sys/mountinfo v0.7.2 // indirect
+	github.com/moby/sys/userns v0.1.0 // indirect
 	github.com/munnerz/goautoneg v0.0.0-20191010083416-a7dc8b61c822 // indirect
 	github.com/onsi/ginkgo/v2 v2.19.0 // indirect
 	github.com/onsi/gomega v1.33.1 // indirect
