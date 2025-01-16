@@ -1,6 +1,6 @@
 SHELL = bash
 
-K8S_TEST_VERSION ?= v1.29.0
+K8S_TEST_VERSION ?= v1.32.1
 
 GINKGO = bin/ginkgo
 GINKGO_ARGS = -v --flake-attempts=2
