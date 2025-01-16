@@ -16,7 +16,7 @@ require (
 	github.com/stretchr/testify v1.10.0
 	golang.org/x/sys v0.29.0
 	google.golang.org/grpc v1.69.4
-	k8s.io/mount-utils v0.32.0
+	k8s.io/mount-utils v0.32.1
 	k8s.io/utils v0.0.0-20241210054802-24370beab758
 )
 
