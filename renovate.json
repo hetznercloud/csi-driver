@@ -11,6 +11,11 @@
         "github.com/container-storage-interface/spec",
         "github.com/kubernetes-csi/csi-test"
       ]
+    },
+    {
+      "description": "search for nomad api updates on every Sunday",
+      "matchPackageNames": ["github.com/hashicorp/nomad/api"],
+      "schedule": ["* * * * 0"]
     }
   ],
   "kubernetes": {
