@@ -54,6 +54,8 @@ func isCapabilitySupported(capability *proto.VolumeCapability) bool {
 		return true
 	case proto.VolumeCapability_AccessMode_SINGLE_NODE_MULTI_WRITER:
 		return true
+	case proto.VolumeCapability_AccessMode_SINGLE_NODE_SINGLE_WRITER:
+		return true
 	default:
 		return false
 	}
