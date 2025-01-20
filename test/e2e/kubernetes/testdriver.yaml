@@ -32,7 +32,7 @@ DriverInfo:
     topology: true
     capacity: false
     FSResizeFromSourceNotSupported: false
-    readWriteOncePod: false # https://github.com/hetznercloud/csi-driver/issues/327
+    readWriteOncePod: true # https://github.com/hetznercloud/csi-driver/issues/327
     multiplePVsSameID: true # No need to disable according to comment on CapMultiplePVsSameID
     capReadOnlyMany: false
   SupportedFsType:
