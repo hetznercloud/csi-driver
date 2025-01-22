@@ -1,5 +1,19 @@
 # Changelog
 
+## [v2.12.0](https://github.com/hetznercloud/csi-driver/releases/tag/v2.12.0)
+
+We are pleased to announce improvements to our Nomad support. While official support is not available, we have developed end-to-end tests that cover the core features of a CSI driver. These tests are integrated into our CI pipeline and validate compatibility with the latest Nomad version.
+
+### Features
+
+- **nomad**: improved nomad support (#798)
+- support ReadWriteOncePod (#857)
+- add support and tests for Kubernetes 1.32 (#844)
+
+### Bug Fixes
+
+- use extraVolumeMounts for node in daemonset (#843)
+
 ## [v2.11.0](https://github.com/hetznercloud/csi-driver/releases/tag/v2.11.0)
 
 ### Features
