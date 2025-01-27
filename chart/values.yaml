@@ -747,3 +747,7 @@ storageClasses:
   - name: hcloud-volumes
     defaultStorageClass: true
     reclaimPolicy: Delete
+    ## extraParam: {
+    ##   csi.storage.k8s.io/node-publish-secret-name: encryption-secret,
+    ##   csi.storage.k8s.io/node-publish-secret-namespace: kube-system
+    ## }
