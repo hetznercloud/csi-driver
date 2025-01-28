@@ -8,7 +8,7 @@ This guide explains how to import an existing Hetzner Volume into your Kubernete
 hcloud volume detach <VOLUME-NAME>
 ```
 
-2. Find the ID of your volume by running
+2. Find the ID of your volume by running:
 
 ```bash
 hcloud volume describe <VOLUME-NAME>
