@@ -41,7 +41,7 @@ spec:
                 - <VOLUME-LOCATION>
 ```
 
-4. Create a new PersistentVolumeClaim and link it to the PersistentVolume via `volumeName`
+4. Create a new `PersistentVolumeClaim` and link it to the `PersistentVolume` via `volumeName`:
 
 ```yaml
 kind: PersistentVolumeClaim
