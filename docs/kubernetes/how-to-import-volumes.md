@@ -2,7 +2,7 @@
 
 This guide explains how to import an existing Hetzner Volume into your Kubernetes cluster with the csi-driver installed.
 
-1. Detach your volume by running
+1. Detach your volume by running:
 
 ```bash
 hcloud volume detach <VOLUME-NAME>
