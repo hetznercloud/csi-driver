@@ -14,7 +14,7 @@ hcloud volume detach <VOLUME-NAME>
 hcloud volume describe <VOLUME-NAME>
 ```
 
-3. Create a new PersistentVolume and insert the volume ID into the `<VOLUME-ID>` and your volume location into `<VOLUME-LOCATION>`. This ensures that the topology constraints are set up correctly.
+3. Create a new `PersistentVolume` and insert the volume ID into the `<VOLUME-ID>` and your volume location into `<VOLUME-LOCATION>`. This ensures that the topology constraints are set up correctly.
 
 ```yaml
 apiVersion: v1
