@@ -94,8 +94,11 @@ spec:
           {{- if .Values.controller.resources.csiResizer }}
           resources: {{- toYaml .Values.controller.resources.csiResizer | nindent 12 }}
           {{- end }}
-          {{- if $enableLeaderElection }}
           args:
+          {{- if semverCompare "<1.32-0" .Capabilities.KubeVersion.Version }}
+           - -feature-gates=RecoverVolumeExpansionFailure=false
+          {{- end }}
+          {{- if $enableLeaderElection }}
             - --leader-election
             - --leader-election-namespace={{ include "common.names.namespace" . }}
           {{- end}}
