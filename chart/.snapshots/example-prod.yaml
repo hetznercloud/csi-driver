@@ -393,6 +393,7 @@ spec:
               cpu: 10m
               memory: 20Mi
           args:
+            - -feature-gates=RecoverVolumeExpansionFailure=false
             - --leader-election
             - --leader-election-namespace=kube-system
           volumeMounts:

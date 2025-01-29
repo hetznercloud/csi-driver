@@ -12,7 +12,7 @@ build:
   insecureRegistries:
     - localhost:30666
 
-manifests:
+deploy:
   helm:
     releases:
       - name: hcloud-csi
