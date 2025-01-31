@@ -18,9 +18,9 @@ allowedTopologies:
     values:
     - "cloud"
 {{- end}}
-{{- if $val.extraParam }}
+{{- if $val.extraParameters }}
 parameters:
-  {{- $val.extraParam | toYaml | nindent 2 }}
+  {{- $val.extraParameters | toYaml | nindent 2 }}
 {{- end}}
 ---
 {{- end }}
