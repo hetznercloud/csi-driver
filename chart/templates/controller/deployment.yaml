@@ -99,7 +99,7 @@ spec:
           args:
           {{- end }}
           {{- if $isKubeVersionBelow132 }}
-            - -feature-gates=RecoverVolumeExpansionFailure=false
+            - --feature-gates=RecoverVolumeExpansionFailure=false
           {{- end }}
           {{- if $enableLeaderElection }}
             - --leader-election
