@@ -84,6 +84,8 @@ github.com/hetznercloud/hcloud-go/v2 v2.18.0 h1:BemrVGeWI8Kn/pvaC1jBsHZxQMnRqOyd
 github.com/hetznercloud/hcloud-go/v2 v2.18.0/go.mod h1:r5RTzv+qi8IbLcDIskTzxkFIji7Ovc8yNgepQR9M+UA=
 github.com/hetznercloud/hcloud-go/v2 v2.19.0 h1:crqbWMywudvlPLLczFf2hBpTPIATjrWMmwfiKSTpUt0=
 github.com/hetznercloud/hcloud-go/v2 v2.19.0/go.mod h1:r5RTzv+qi8IbLcDIskTzxkFIji7Ovc8yNgepQR9M+UA=
+github.com/hetznercloud/hcloud-go/v2 v2.19.1 h1:UU/7h3uc/rdgspM8xkQF7wokmwZXePWDXcLqrQRRzzY=
+github.com/hetznercloud/hcloud-go/v2 v2.19.1/go.mod h1:r5RTzv+qi8IbLcDIskTzxkFIji7Ovc8yNgepQR9M+UA=
 github.com/klauspost/compress v1.17.9 h1:6KIumPrER1LHsvBVuDa0r5xaG0Es51mhhB9BQB2qeMA=
 github.com/klauspost/compress v1.17.9/go.mod h1:Di0epgTjJY877eYKx5yC51cX2A2Vl2ibi7bDH9ttBbw=
 github.com/klauspost/compress v1.17.11 h1:In6xLpyWOi1+C7tXUUWv2ot1QvBjxevKAaI6IXrJmUc=
