@@ -166,7 +166,9 @@ func (s *ControllerService) ControllerPublishVolume(ctx context.Context, req *pr
 		return nil, status.Error(codes.InvalidArgument, "readonly volumes are not supported")
 	}
 
-	volume := &csi.Volume{ID: volumeID}
+	volume := &csi.Volume{ID: volumeID, Labels: map[string]string{
+		"hello": "world",
+	}}
 	server := &csi.Server{ID: serverID}
 
 	if err := s.volumeService.Attach(ctx, volume, server); err != nil {
