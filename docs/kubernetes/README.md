@@ -284,9 +284,10 @@ Current Kubernetes Releases: https://kubernetes.io/releases/
 
 | Kubernetes | CSI Driver |                                                                                    Deployment File |
 | ---------- | ---------: | -------------------------------------------------------------------------------------------------: |
-| 1.31       |   v2.11.0+ | https://raw.githubusercontent.com/hetznercloud/csi-driver/v2.11.0/deploy/kubernetes/hcloud-csi.yml |
-| 1.30       |   v2.11.0+ | https://raw.githubusercontent.com/hetznercloud/csi-driver/v2.11.0/deploy/kubernetes/hcloud-csi.yml |
-| 1.29       |   v2.11.0+ | https://raw.githubusercontent.com/hetznercloud/csi-driver/v2.11.0/deploy/kubernetes/hcloud-csi.yml |
+| 1.32       |   v2.12.0+ | https://raw.githubusercontent.com/hetznercloud/csi-driver/v2.12.0/deploy/kubernetes/hcloud-csi.yml |
+| 1.31       |   v2.12.0+ | https://raw.githubusercontent.com/hetznercloud/csi-driver/v2.12.0/deploy/kubernetes/hcloud-csi.yml |
+| 1.30       |   v2.12.0+ | https://raw.githubusercontent.com/hetznercloud/csi-driver/v2.12.0/deploy/kubernetes/hcloud-csi.yml |
+| 1.29       |   v2.12.0+ | https://raw.githubusercontent.com/hetznercloud/csi-driver/v2.12.0/deploy/kubernetes/hcloud-csi.yml |
 | 1.28       |     2.10.1 | https://raw.githubusercontent.com/hetznercloud/csi-driver/v2.10.1/deploy/kubernetes/hcloud-csi.yml |
 | 1.27       |      2.9.0 |  https://raw.githubusercontent.com/hetznercloud/csi-driver/v2.9.0/deploy/kubernetes/hcloud-csi.yml |
 | 1.26       |      2.7.1 |  https://raw.githubusercontent.com/hetznercloud/csi-driver/v2.7.1/deploy/kubernetes/hcloud-csi.yml |
