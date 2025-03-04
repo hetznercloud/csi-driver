@@ -2,7 +2,7 @@ module github.com/hetznercloud/csi-driver
 
 go 1.23.0
 
-toolchain go1.23.6
+toolchain go1.23.7
 
 require (
 	github.com/container-storage-interface/spec v1.11.0
