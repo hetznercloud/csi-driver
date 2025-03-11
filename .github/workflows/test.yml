@@ -166,7 +166,7 @@ jobs:
       fail-fast: false
       matrix:
         include:
-          - nomad: 1.9.6 # renovate: datasource=github-releases depName=hashicorp/nomad
+          - nomad: 1.9.7 # renovate: datasource=github-releases depName=hashicorp/nomad
             consul: 1.20.4 # renovate: datasource=github-releases depName=hashicorp/consul
 
     env:
