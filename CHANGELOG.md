@@ -1,5 +1,11 @@
 # Changelog
 
+## [v2.13.0](https://github.com/hetznercloud/csi-driver/releases/tag/v2.13.0)
+
+### Features
+
+- **helm-chart**: add extraParam for StorageClass (#865)
+
 ## [v2.12.0](https://github.com/hetznercloud/csi-driver/releases/tag/v2.12.0)
 
 We are pleased to announce improvements to our Nomad support. While official support is not available, we have developed end-to-end tests that cover the core features of a CSI driver. These tests are integrated into our CI pipeline and validate compatibility with the latest Nomad version.
