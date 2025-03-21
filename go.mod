@@ -17,7 +17,7 @@ require (
 	golang.org/x/sys v0.31.0
 	google.golang.org/grpc v1.71.0
 	k8s.io/mount-utils v0.32.3
-	k8s.io/utils v0.0.0-20241210054802-24370beab758
+	k8s.io/utils v0.0.0-20250321185631-1f6e0b77f77e
 )
 
 require (
