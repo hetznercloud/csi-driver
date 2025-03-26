@@ -11,7 +11,7 @@ require (
 	github.com/hashicorp/nomad/api v0.0.0-20250321175057-34ae5d5ae66b
 	github.com/hetznercloud/hcloud-go/v2 v2.20.1
 	github.com/kubernetes-csi/csi-test/v5 v5.3.1
-	github.com/moby/buildkit v0.20.1
+	github.com/moby/buildkit v0.20.2
 	github.com/prometheus/client_golang v1.21.1
 	github.com/stretchr/testify v1.10.0
 	golang.org/x/sys v0.31.0
