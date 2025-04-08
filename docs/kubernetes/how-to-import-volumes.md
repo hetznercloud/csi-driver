@@ -57,3 +57,35 @@ spec:
     requests:
       storage: 10Gi
 ```
+
+## Encrypted volumes
+
+If your volume was previously encrypted, you need to provide a reference to the encryption secret in the persistent volume spec.
+
+```yaml
+apiVersion: v1
+kind: PersistentVolume
+metadata:
+  name: imported-data
+spec:
+  storageClassName: hcloud-volumes
+  capacity:
+    storage: 10Gi
+  accessModes:
+    - ReadWriteOnce
+  csi:
+    fsType: ext4
+    driver: csi.hetzner.cloud
+    volumeHandle: "<VOLUME-ID>"
+    nodePublishSecretRef: # <-- encryption secret reference
+      name: <ENCRYPTION-SECRET-NAME>
+      namespace: <ENCRYPTION-SECRET-NAMESPACE>
+  nodeAffinity:
+    required:
+      nodeSelectorTerms:
+        - matchExpressions:
+            - key: csi.hetzner.cloud/location
+              operator: In
+              values:
+                - <VOLUME-LOCATION>
+```
