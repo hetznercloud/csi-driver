@@ -63,11 +63,17 @@ func main() {
 
 	enableProvidedByTopology := app.GetEnableProvidedByTopology()
 
+	defaultVolumesLabels, err := app.ParseEnvMap(os.Getenv("HCLOUD_VOLUME_DEFAULT_LABELS"))
+	if err != nil {
+		logger.Error("could not parse default labels for volumes")
+		os.Exit(1)
+	}
 	volumeService := volumes.NewIdempotentService(
 		logger.With("component", "idempotent-volume-service"),
 		api.NewVolumeService(
 			logger.With("component", "api-volume-service"),
 			hcloudClient,
+			defaultVolumesLabels,
 		),
 	)
 	controllerService := driver.NewControllerService(
