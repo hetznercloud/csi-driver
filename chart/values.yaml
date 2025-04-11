@@ -172,6 +172,10 @@ controller:
   ##
   hcloudVolumeDefaultLocation: ""
 
+  ## @param controller.hcloudVolumeDefaultLabels  Specifies default labels to apply to all newly created volumes. The value must be a comma-separated list of key:value pairs.
+  ##
+  hcloudVolumeDefaultLabels: ""
+
   ## @param controller.containerPorts.metrics controller metrics container port
   ## @param controller.containerPorts.healthz controller healthz container port
   ##

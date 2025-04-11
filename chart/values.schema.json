@@ -72,6 +72,9 @@
         "hcloudVolumeDefaultLocation": {
           "type": "string"
         },
+        "hcloudVolumeDefaultLabels": {
+          "type": "string"
+        },
         "image": {
           "properties": {
             "csiAttacher": {
