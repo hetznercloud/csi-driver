@@ -147,6 +147,10 @@ spec:
             - name: HCLOUD_VOLUME_DEFAULT_LOCATION
               value: {{ .Values.controller.hcloudVolumeDefaultLocation | quote }}
             {{- end }}
+            {{- if .Values.controller.hcloudVolumeDefaultLabels }}
+            - name: HCLOUD_VOLUME_DEFAULT_LABELS
+              value: {{ .Values.controller.hcloudVolumeDefaultLabels | quote }}
+            {{- end }}
             {{- if .Values.metrics.enabled }}
             - name: METRICS_ENDPOINT
               value: "0.0.0.0:{{ .Values.controller.containerPorts.metrics }}"
