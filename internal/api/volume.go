@@ -11,14 +11,16 @@ import (
 )
 
 type VolumeService struct {
-	logger *slog.Logger
-	client *hcloud.Client
+	logger       *slog.Logger
+	client       *hcloud.Client
+	commonLabels map[string]string
 }
 
-func NewVolumeService(logger *slog.Logger, client *hcloud.Client) *VolumeService {
+func NewVolumeService(logger *slog.Logger, client *hcloud.Client, commonLabels map[string]string) *VolumeService {
 	return &VolumeService{
-		logger: logger,
-		client: client,
+		logger:       logger,
+		client:       client,
+		commonLabels: commonLabels,
 	}
 }
 
@@ -51,7 +53,9 @@ func (s *VolumeService) Create(ctx context.Context, opts volumes.CreateOpts) (*c
 		Name:     opts.Name,
 		Size:     opts.MinSize,
 		Location: &hcloud.Location{Name: opts.Location},
+		Labels:   s.commonLabels,
 	})
+
 	if err != nil {
 		s.logger.Info(
 			"failed to create volume",
