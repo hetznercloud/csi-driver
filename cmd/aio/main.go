@@ -81,6 +81,7 @@ func main() {
 		api.NewVolumeService(
 			logger.With("component", "api-volume-service"),
 			hcloudClient,
+			map[string]string{},
 		),
 	)
 	controllerService := driver.NewControllerService(
