@@ -72,8 +72,11 @@
         "hcloudVolumeDefaultLocation": {
           "type": "string"
         },
-        "hcloudVolumeDefaultLabels": {
-          "type": "string"
+        "volumeExtraLabels": {
+          "type": "object",
+          "additionalProperties": {
+            "type": "string"
+          }
         },
         "image": {
           "properties": {

@@ -3,6 +3,7 @@ package volumes_test
 import (
 	"context"
 	"io"
+	"reflect"
 	"testing"
 
 	"github.com/hetznercloud/csi-driver/internal/csi"
@@ -29,7 +30,7 @@ func TestIdempotentServiceCreateNew(t *testing.T) {
 
 	volumeService := &mock.VolumeService{
 		CreateFunc: func(ctx context.Context, opts volumes.CreateOpts) (*csi.Volume, error) {
-			if opts != creatingOpts {
+			if !reflect.DeepEqual(opts, creatingOpts) {
 				t.Errorf("unexpected options: %v", opts)
 			}
 			return creatingVolume, nil

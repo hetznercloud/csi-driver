@@ -35,4 +35,5 @@ type CreateOpts struct {
 	MinSize  int
 	MaxSize  int
 	Location string
+	Labels   map[string]string
 }
