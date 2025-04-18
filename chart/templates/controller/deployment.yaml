@@ -118,6 +118,7 @@ spec:
           args:
             - --feature-gates=Topology=true
             - --default-fstype=ext4
+            - --extra-create-metadata
             {{- if $enableLeaderElection }}
             - --leader-election
             - --leader-election-namespace={{ include "common.names.namespace" . }}
@@ -147,9 +148,13 @@ spec:
             - name: HCLOUD_VOLUME_DEFAULT_LOCATION
               value: {{ .Values.controller.hcloudVolumeDefaultLocation | quote }}
             {{- end }}
-            {{- if .Values.controller.hcloudVolumeDefaultLabels }}
-            - name: HCLOUD_VOLUME_DEFAULT_LABELS
-              value: {{ .Values.controller.hcloudVolumeDefaultLabels | quote }}
+            {{- if .Values.controller.volumeExtraLabels }}
+            {{- $pairs := list }}
+            {{- range $key, $value := .Values.controller.volumeExtraLabels }}
+              {{- $pairs = append $pairs (printf "%s=%s" $key $value) }}
+            {{- end }}
+            - name: HCLOUD_VOLUME_EXTRA_LABELS
+              value: {{ join "," $pairs | quote }}
             {{- end }}
             {{- if .Values.metrics.enabled }}
             - name: METRICS_ENDPOINT

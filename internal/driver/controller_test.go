@@ -34,6 +34,7 @@ func newControllerServiceTestEnv() *controllerServiceTestEnv {
 			volumeService,
 			"testloc",
 			false,
+			map[string]string{"clusterName": "myCluster"},
 		),
 		volumeService: volumeService,
 	}

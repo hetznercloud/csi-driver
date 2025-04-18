@@ -28,7 +28,7 @@ func makeTestVolumeService(t *testing.T, requests []mockutil.Request) (*VolumeSe
 		hcloud.WithPollOpts(hcloud.PollOpts{BackoffFunc: hcloud.ConstantBackoff(0)}),
 	)
 
-	volumeService := NewVolumeService(testutil.NewNopLogger(), testClient, map[string]string{})
+	volumeService := NewVolumeService(testutil.NewNopLogger(), testClient)
 
 	return volumeService, testServer.Close
 }

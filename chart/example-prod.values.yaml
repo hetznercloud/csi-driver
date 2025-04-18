@@ -1,7 +1,10 @@
 controller:
   replicaCount: 2
   hcloudVolumeDefaultLocation: nbg1
-  hcloudVolumeDefaultLabels: env:production,team:devops,cluster:mycluster
+  volumeExtraLabels:
+    env: production
+    team: devops
+    cluster: mycluster
   priorityClassName: "system-cluster-critical"
   resources:
     csiAttacher:
