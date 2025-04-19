@@ -101,7 +101,7 @@ func (s *ControllerService) CreateVolume(ctx context.Context, req *proto.CreateV
 		case parameterKeyLabels:
 			customLabels, err := utils.ConvertLabelsToMap(value)
 			if err != nil {
-				return nil, status.Errorf(codes.InvalidArgument, "Invalid format of parameter labels", err)
+				return nil, status.Errorf(codes.InvalidArgument, "Invalid format of parameter labels: %s", err)
 			}
 			maps.Copy(volumeLabels, customLabels)
 		default:
