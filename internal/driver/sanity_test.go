@@ -47,6 +47,7 @@ func TestSanity(t *testing.T) {
 		volumeService,
 		"testloc",
 		false,
+		map[string]string{"clusterName": "myCluster"},
 	)
 
 	identityService := NewIdentityService(

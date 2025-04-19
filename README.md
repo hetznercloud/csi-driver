@@ -17,6 +17,19 @@ relevant to that Container Orchestrator behind the link:
 - [Docker Swarm](./docs/docker-swarm/README.md)️ _⚠️ Not officially supported_
 - [HashiCorp Nomad](./docs/nomad/README.md)️ _⚠️ Not officially supported_
 
+### Configuration
+
+The Hetzner Cloud CSI Driver can be configured using the following environment variables:
+
+- **`HCLOUD_VOLUME_EXTRA_LABELS`**:  
+  Specifies default labels to apply to all newly created volumes.  
+  The value must be a comma-separated list of key=value pairs.  
+  For example:
+
+  ```bash
+  HCLOUD_VOLUME_EXTRA_LABELS="env:production,team:devops,cluster:mycluster"
+  ```
+
 ## Development
 
 ### Setup a development environment

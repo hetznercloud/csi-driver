@@ -72,6 +72,12 @@
         "hcloudVolumeDefaultLocation": {
           "type": "string"
         },
+        "volumeExtraLabels": {
+          "type": "object",
+          "additionalProperties": {
+            "type": "string"
+          }
+        },
         "image": {
           "properties": {
             "csiAttacher": {
