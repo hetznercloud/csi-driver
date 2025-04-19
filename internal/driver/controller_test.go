@@ -58,6 +58,9 @@ func TestControllerServiceCreateVolume(t *testing.T) {
 		if opts.Location != "testloc" {
 			t.Errorf("unexpected location passed to volume service: %s", opts.Location)
 		}
+		if v, ok := opts.Labels["clusterName"]; !ok || v != "myCluster" {
+			t.Errorf("unexpected labels passed to volume service: %s", opts.Labels)
+		}
 		return &csi.Volume{
 			ID:       1,
 			Name:     opts.Name,
@@ -72,6 +75,80 @@ func TestControllerServiceCreateVolume(t *testing.T) {
 			RequiredBytes: MinVolumeSize*GB + 100,
 			LimitBytes:    2 * MinVolumeSize * GB,
 		},
+		VolumeCapabilities: []*proto.VolumeCapability{
+			{
+				AccessType: &proto.VolumeCapability_Mount{
+					Mount: &proto.VolumeCapability_MountVolume{},
+				},
+				AccessMode: &proto.VolumeCapability_AccessMode{
+					Mode: proto.VolumeCapability_AccessMode_SINGLE_NODE_WRITER,
+				},
+			},
+		},
+	}
+	resp, err := env.service.CreateVolume(env.ctx, req)
+	if err != nil {
+		t.Fatal(err)
+	}
+	if resp.Volume.VolumeId != "1" {
+		t.Errorf("unexpected value for VolumeId: %s", resp.Volume.VolumeId)
+	}
+	if resp.Volume.CapacityBytes != (MinVolumeSize+1)*1024*1024*1024 {
+		t.Errorf("unexpected value for CapacityBytes: %d", resp.Volume.CapacityBytes)
+	}
+	if len(resp.Volume.AccessibleTopology) == 1 {
+		top := resp.Volume.AccessibleTopology[0]
+		if loc := top.Segments[TopologySegmentLocation]; loc != "testloc" {
+			t.Errorf("unexpected location segment in topology: %s", loc)
+		}
+		if env.service.enableProvidedByTopology {
+			if provider := top.Segments[ProvidedByLabel]; provider != "cloud" {
+				t.Errorf("unexpected provider segment in topology: %s", provider)
+			}
+		}
+	} else {
+		t.Errorf("unexpected number of topologies: %d", len(resp.Volume.AccessibleTopology))
+	}
+}
+func TestControllerServiceCreateVolumeWithParameterLabels(t *testing.T) {
+	env := newControllerServiceTestEnv()
+
+	env.service.enableProvidedByTopology = true
+
+	env.volumeService.CreateFunc = func(ctx context.Context, opts volumes.CreateOpts) (*csi.Volume, error) {
+		if opts.Name != "testvol" {
+			t.Errorf("unexpected name passed to volume service: %s", opts.Name)
+		}
+		if opts.MinSize != MinVolumeSize+1 {
+			t.Errorf("unexpected min size passed to volume service: %d", opts.MinSize)
+		}
+		if opts.MaxSize != 2*MinVolumeSize {
+			t.Errorf("unexpected max size passed to volume service: %d", opts.MaxSize)
+		}
+		if opts.Location != "testloc" {
+			t.Errorf("unexpected location passed to volume service: %s", opts.Location)
+		}
+		if v, ok := opts.Labels["test"]; !ok || v != "test" {
+			t.Errorf("unexpected labels passed to volume service: %s", opts.Labels)
+		}
+		if v, ok := opts.Labels["clusterName"]; !ok || v != "myCluster" {
+			t.Errorf("unexpected labels passed to volume service: %s", opts.Labels)
+		}
+		return &csi.Volume{
+			ID:       1,
+			Name:     opts.Name,
+			Size:     opts.MinSize,
+			Location: opts.Location,
+		}, nil
+	}
+
+	req := &proto.CreateVolumeRequest{
+		Name: "testvol",
+		CapacityRange: &proto.CapacityRange{
+			RequiredBytes: MinVolumeSize*GB + 100,
+			LimitBytes:    2 * MinVolumeSize * GB,
+		},
+		Parameters: map[string]string{"labels": "test=test"},
 		VolumeCapabilities: []*proto.VolumeCapability{
 			{
 				AccessType: &proto.VolumeCapability_Mount{
