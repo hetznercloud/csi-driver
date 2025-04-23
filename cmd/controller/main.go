@@ -64,10 +64,6 @@ func main() {
 
 	enableProvidedByTopology := app.GetEnableProvidedByTopology()
 
-	if err != nil {
-		logger.Error("could not parse default labels for volumes")
-		os.Exit(1)
-	}
 	volumeService := volumes.NewIdempotentService(
 		logger.With("component", "idempotent-volume-service"),
 		api.NewVolumeService(
