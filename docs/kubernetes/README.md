@@ -155,6 +155,38 @@ During the initialization of the CSI controller, the default location for all vo
 3. If neither of the above is set, the `KUBE_NODE_NAME` environment variable defaults to the name of the node where the CSI controller is scheduled. This node name is then used to query the Hetzner API for a matching server and its location.
 4. As a final fallback, the [Hetzner metadata service](https://docs.hetzner.cloud/#server-metadata) is queried to obtain the server ID, which is then used to fetch the location from the Hetzner API.
 
+### Volume Labels
+
+It is possible to set labels for all newly created volumes. By default, all volumes are labeled as follows:
+
+* `kubernetes.io/created-for/pvc/name`
+* `kubernetes.io/created-for/pvc/namespace`
+* `kubernetes.io/created-for/pv/name`
+* `csi.hetzner.cloud/created-by=csi-driver`
+
+To add extra labels to all created volumes set `HCLOUD_VOLUME_EXTRA_LABELS` in the format `key=value,...`.
+This is also configurable from the helm chart by the value `controller.volumeExtraLabels`, e.g:
+
+```yaml
+controller:
+  volumeExtraLabels:
+    cluster: myCluster
+    env: prod
+```
+
+It is also possible to set only labels on specific volumes created by a storage class. To do this, you need to set `labels` in the format `key=value,...` as `extraParameters` inside the storage class.
+
+There is an example to set the `labels` for the storage class over the helm chart values:
+
+```yaml
+storageClasses:
+  - name: hcloud-volumes
+    defaultStorageClass: true
+    reclaimPolicy: Delete
+    extraParameters:
+      labels: cluster=myCluster,env=prod
+````
+
 ## Upgrading
 
 To upgrade the csi-driver version, you just need to apply the new manifests to your cluster.
