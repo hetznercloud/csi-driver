@@ -1,6 +1,6 @@
 module github.com/hetznercloud/csi-driver
 
-go 1.23.0
+go 1.24.0
 
 toolchain go1.24.2
 
@@ -16,7 +16,7 @@ require (
 	github.com/stretchr/testify v1.10.0
 	golang.org/x/sys v0.32.0
 	google.golang.org/grpc v1.72.0
-	k8s.io/mount-utils v0.32.4
+	k8s.io/mount-utils v0.33.0
 	k8s.io/utils v0.0.0-20250321185631-1f6e0b77f77e
 )
 
