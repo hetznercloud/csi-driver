@@ -1,5 +1,9 @@
 # HashiCorp Nomad Hetzner Cloud csi-driver
 
+⚠️ Nomad is not officially supported.
+
+Only [Kubernetes Hetzner Cloud csi-driver](./docs/kubernetes/README.md) is officially supported.
+
 ## Preconditions
 
 - Nomad >= 1.4.x cluster installed following the [Nomad Reference Architecture for production deployments](https://developer.hashicorp.com/nomad/tutorials/enterprise/production-reference-architecture-vm-with-consul). The setup was tested on Nomad Community, version 1.9.3.
