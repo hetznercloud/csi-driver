@@ -9,7 +9,11 @@ Orchestrators. Please note that this driver **requires Kubernetes 1.19 or newer*
 
 ## Getting Started
 
-- [Kubernetes Hetzner Cloud csi-driver](./docs/kubernetes/README.md#getting-started)
+Depending on your Container Orchestrator you need to follow different steps to
+get started with the Hetzner Cloud csi-driver. You can also find other docs
+relevant to that Container Orchestrator behind these links.
+
+- [Kubernetes](./docs/kubernetes/README.md#getting-started)
 
 #### Environments Outside Official Support
 
