@@ -1,5 +1,11 @@
 # Docker Swarm Hetzner Cloud CSI plugin
 
+⚠️ Docker Swarm is not officially supported.
+
+Only [Kubernetes](./docs/kubernetes/README.md) is officially supported.
+
+---
+
 Currently in Beta. Please consult the Docker Swarm documentation
 for cluster volumes (=CSI) support at https://github.com/moby/moby/blob/master/docs/cluster_volumes.md
 

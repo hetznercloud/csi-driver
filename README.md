@@ -11,11 +11,14 @@ Orchestrators. Please note that this driver **requires Kubernetes 1.19 or newer*
 
 Depending on your Container Orchestrator you need to follow different steps to
 get started with the Hetzner Cloud csi-driver. You can also find other docs
-relevant to that Container Orchestrator behind the link:
+relevant to that Container Orchestrator behind these links.
 
 - [Kubernetes](./docs/kubernetes/README.md#getting-started)
-- [Docker Swarm](./docs/docker-swarm/README.md)️ _⚠️ Not officially supported_
-- [HashiCorp Nomad](./docs/nomad/README.md)️ _⚠️ Not officially supported_
+
+#### Environments Outside Official Support
+
+- [Docker Swarm](./docs/docker-swarm/README.md)️
+- [HashiCorp Nomad](./docs/nomad/README.md)️
 
 ## Development
 
