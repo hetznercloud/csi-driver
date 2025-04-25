@@ -2,7 +2,7 @@
 
 ⚠️ Nomad is not officially supported.
 
-Only [Kubernetes Hetzner Cloud csi-driver](./docs/kubernetes/README.md) is officially supported.
+Only [Kubernetes](./docs/kubernetes/README.md) is officially supported.
 
 ## Preconditions
 
