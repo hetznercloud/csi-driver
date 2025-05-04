@@ -18,9 +18,9 @@ func TestConvertLabelsToMap(t *testing.T) {
 		{"empty", "", map[string]string{}, ""},
 		{"multiple colons", "test1=test1=test1", map[string]string{"test1": "test1=test1"}, ""},
 		{"space", "test1= test1", map[string]string{"test1": "test1"}, ""},
-		{"space value", "test1=", nil, "empty value"},
+		{"no value", "test1=", map[string]string{"test1": ""}, ""},
 		{"space key", "=test1", nil, "empty key"},
-		{"invalid value", "test1", nil, "invalid value test1"},
+		{"no equal sign", "test1", map[string]string{"test1": ""}, ""},
 	}
 
 	for _, test := range tests {
