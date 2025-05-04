@@ -73,7 +73,7 @@ func main() {
 	)
 	extraVolumeLabels, err := utils.ConvertLabelsToMap(os.Getenv("HCLOUD_VOLUME_EXTRA_LABELS"))
 	if err != nil {
-		logger.Error("could not parse extra labels for volumes")
+		logger.Error("could not parse extra labels for volumes", "error", err)
 		os.Exit(1)
 	}
 	controllerService := driver.NewControllerService(
