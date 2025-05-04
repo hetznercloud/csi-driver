@@ -165,7 +165,7 @@ It is possible to set labels for all newly created volumes. By default, all volu
 * `csi.hetzner.cloud/created-by=csi-driver`
 
 To add extra labels to all created volumes set `HCLOUD_VOLUME_EXTRA_LABELS` in the format `key=value,...`.
-This is also configurable from the helm chart by the value `controller.volumeExtraLabels`, e.g:
+This is also configurable from the Helm chart by the value `controller.volumeExtraLabels`, e.g:
 
 ```yaml
 controller:
@@ -176,7 +176,7 @@ controller:
 
 It is also possible to set only labels on specific volumes created by a storage class. To do this, you need to set `labels` in the format `key=value,...` as `extraParameters` inside the storage class.
 
-There is an example to set the `labels` for the storage class over the helm chart values:
+There is an example to set the `labels` for the storage class over the Helm chart values:
 
 ```yaml
 storageClasses:
