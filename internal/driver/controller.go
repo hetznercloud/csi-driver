@@ -24,9 +24,9 @@ const (
 	parameterKeyPVName       = "csi.storage.k8s.io/pv/name"
 	parameterKeyLabels       = "labels"
 
-	tagKeyCreatedForClaimName      = "kubernetes.io/created-for/pvc/name"
-	tagKeyCreatedForClaimNamespace = "kubernetes.io/created-for/pvc/namespace"
-	tagKeyCreatedForVolumeName     = "kubernetes.io/created-for/pv/name"
+	tagKeyCreatedForClaimName      = "csi.storage.k8s.io/pvc/name"
+	tagKeyCreatedForClaimNamespace = "csi.storage.k8s.io/pvc/namespace"
+	tagKeyCreatedForVolumeName     = "csi.storage.k8s.io/pv/name"
 	tagKeyCreatedBy                = "csi.hetzner.cloud/created-by"
 )
 

@@ -159,9 +159,9 @@ During the initialization of the CSI controller, the default location for all vo
 
 It is possible to set labels for all newly created volumes. By default, all volumes are labeled as follows:
 
-* `kubernetes.io/created-for/pvc/name`
-* `kubernetes.io/created-for/pvc/namespace`
-* `kubernetes.io/created-for/pv/name`
+* `csi.storage.k8s.io/pvc/name`
+* `csi.storage.k8s.io/pvc/namespace`
+* `csi.storage.k8s.io/pv/name`
 * `csi.hetzner.cloud/created-by=csi-driver`
 
 To add extra labels to all created volumes set `HCLOUD_VOLUME_EXTRA_LABELS` in the format `key=value,...`.
