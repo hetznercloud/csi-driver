@@ -105,7 +105,7 @@ func (s *ControllerService) CreateVolume(ctx context.Context, req *proto.CreateV
 			}
 			maps.Copy(volumeLabels, customLabels)
 		default:
-			return nil, status.Errorf(codes.InvalidArgument, "Invalid parameter key %s for CreateVolume", key)
+			s.logger.Warn(fmt.Sprintf("invalid parameter key %s for CreateVolume", key))
 		}
 	}
 
