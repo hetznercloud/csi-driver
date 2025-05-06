@@ -61,6 +61,15 @@ func TestControllerServiceCreateVolume(t *testing.T) {
 		if v, ok := opts.Labels["clusterName"]; !ok || v != "myCluster" {
 			t.Errorf("unexpected labels passed to volume service: %s", opts.Labels)
 		}
+		if v, ok := opts.Labels[tagKeyCreatedForClaimName]; !ok || v != "pvc-name" {
+			t.Errorf("unexpected labels passed to volume service: %s", opts.Labels)
+		}
+		if v, ok := opts.Labels[tagKeyCreatedForClaimNamespace]; !ok || v != "default" {
+			t.Errorf("unexpected labels passed to volume service: %s", opts.Labels)
+		}
+		if v, ok := opts.Labels[tagKeyCreatedForVolumeName]; !ok || v != "pv-name" {
+			t.Errorf("unexpected labels passed to volume service: %s", opts.Labels)
+		}
 		return &csi.Volume{
 			ID:       1,
 			Name:     opts.Name,
@@ -74,6 +83,11 @@ func TestControllerServiceCreateVolume(t *testing.T) {
 		CapacityRange: &proto.CapacityRange{
 			RequiredBytes: MinVolumeSize*GB + 100,
 			LimitBytes:    2 * MinVolumeSize * GB,
+		},
+		Parameters: map[string]string{
+			parameterKeyPVCName:      "pvc-name",
+			parameterKeyPVCNamespace: "default",
+			parameterKeyPVName:       "pv-name",
 		},
 		VolumeCapabilities: []*proto.VolumeCapability{
 			{
@@ -255,6 +269,28 @@ func TestControllerServiceCreateVolumeInputErrors(t *testing.T) {
 					RequiredBytes: 5*GB + 100,
 					LimitBytes:    10 * GB,
 				},
+				VolumeCapabilities: []*proto.VolumeCapability{
+					{
+						AccessType: &proto.VolumeCapability_Mount{
+							Mount: &proto.VolumeCapability_MountVolume{},
+						},
+						AccessMode: &proto.VolumeCapability_AccessMode{
+							Mode: proto.VolumeCapability_AccessMode_SINGLE_NODE_WRITER,
+						},
+					},
+				},
+			},
+			Code: codes.InvalidArgument,
+		},
+		{
+			Name: "invalid label",
+			Req: &proto.CreateVolumeRequest{
+				Name: "test",
+				CapacityRange: &proto.CapacityRange{
+					RequiredBytes: 5*GB + 100,
+					LimitBytes:    10 * GB,
+				},
+				Parameters: map[string]string{"labels": "=test"},
 				VolumeCapabilities: []*proto.VolumeCapability{
 					{
 						AccessType: &proto.VolumeCapability_Mount{
