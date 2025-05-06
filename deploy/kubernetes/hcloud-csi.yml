@@ -343,6 +343,7 @@ spec:
           args:
             - --feature-gates=Topology=true
             - --default-fstype=ext4
+            - --extra-create-metadata
           volumeMounts:
           - name: socket-dir
             mountPath: /run/csi

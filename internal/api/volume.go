@@ -11,9 +11,8 @@ import (
 )
 
 type VolumeService struct {
-	logger       *slog.Logger
-	client       *hcloud.Client
-	commonLabels map[string]string
+	logger *slog.Logger
+	client *hcloud.Client
 }
 
 func NewVolumeService(logger *slog.Logger, client *hcloud.Client) *VolumeService {
