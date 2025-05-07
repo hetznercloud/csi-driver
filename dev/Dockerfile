@@ -15,8 +15,8 @@ ARG CGO_ENABLED=0
 ARG SKAFFOLD_GO_GCFLAGS
 ARG GO_BUILDFLAGS
 
-RUN go build -gcflags="$SKAFFOLD_GO_GCFLAGS" $GO_BUILDFLAGS -o controller.bin github.com/hetznercloud/csi-driver/cmd/controller
-RUN go build -gcflags="$SKAFFOLD_GO_GCFLAGS" $GO_BUILDFLAGS -o node.bin github.com/hetznercloud/csi-driver/cmd/node
+RUN --mount=type=cache,target=/root/.cache/go-build go build -gcflags="$SKAFFOLD_GO_GCFLAGS" $GO_BUILDFLAGS -o controller.bin github.com/hetznercloud/csi-driver/cmd/controller
+RUN --mount=type=cache,target=/root/.cache/go-build go build -gcflags="$SKAFFOLD_GO_GCFLAGS" $GO_BUILDFLAGS -o node.bin github.com/hetznercloud/csi-driver/cmd/node
 
 FROM alpine:3.21
 
