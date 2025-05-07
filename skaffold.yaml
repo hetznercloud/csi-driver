@@ -34,3 +34,5 @@ deploy:
           node.extraVolumes[0].emptyDir: {}
           node.extraVolumeMounts[0].name: coverage
           node.extraVolumeMounts[0].mountPath: "/coverage"
+
+          metrics.enabled: "true"
