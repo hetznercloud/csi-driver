@@ -4,6 +4,7 @@ K8S_TEST_VERSION ?= v1.32.1
 
 GINKGO = bin/ginkgo
 GINKGO_ARGS = -v --flake-attempts=2
+GINKGO_EXTRA_ARGS ?= ""
 
 E2E = bin/e2e.test
 E2E_ARGS = -storage.testdriver=$(CURDIR)/testdriver.yaml
@@ -16,14 +17,14 @@ bin:
 			kubernetes/test/bin/ginkgo
 
 parallel: bin
-	$(GINKGO) $(GINKGO_ARGS) \
+	$(GINKGO) $(GINKGO_ARGS) $(GINKGO_EXTRA_ARGS) \
 		-nodes=12 \
 		-focus='External.Storage' \
 		-skip='\[Feature:|\[Disruptive\]|\[Serial\]' \
 		$(E2E) -- $(E2E_ARGS)
 
 serial: bin
-	$(GINKGO) $(GINKGO_ARGS) \
+	$(GINKGO) $(GINKGO_ARGS) $(GINKGO_EXTRA_ARGS) \
 		-focus='External.Storage.*(\[Feature:|\[Serial\])' \
 		$(E2E) -- $(E2E_ARGS)
 

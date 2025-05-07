@@ -58,6 +58,10 @@ jobs:
       K8S_TEST_VERSION: ${{ matrix.k8s-test }}
       ENV: gha-${{ github.run_id }}-${{ github.run_attempt }}-${{ matrix.k3s }}
 
+      # These ginkgo flags were only added in 2.17+2.18, which is available in Kubernetes v1.31+
+      # Can be simplified once we no longer test <1.31.
+      GINKGO_EXTRA_ARGS: ${{ (matrix.k3s != 'v1.29' && matrix.k3s != 'v1.30') && '--silence-skips --github-output' || '' }}
+
     steps:
       - uses: actions/checkout@v4
 
