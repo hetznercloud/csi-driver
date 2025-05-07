@@ -117,6 +117,31 @@ jobs:
           source dev/files/env.sh
           make -C test/e2e/kubernetes serial
 
+      - name: Get code coverage
+        run: |
+          source dev/files/env.sh
+          bash hack/get-coverage-from-k8s.sh
+
+      - name: Upload controller coverage reports to Codecov
+        if: >
+          !startsWith(github.head_ref, 'renovate/') &&
+          !startsWith(github.head_ref, 'releaser-pleaser--')
+        uses: codecov/codecov-action@v5
+        with:
+          token: ${{ secrets.CODECOV_TOKEN }}
+          files: ./coverage/controller/coverage.txt
+          flags: e2e-controller
+
+      - name: Upload node coverage reports to Codecov
+        if: >
+          !startsWith(github.head_ref, 'renovate/') &&
+          !startsWith(github.head_ref, 'releaser-pleaser--')
+        uses: codecov/codecov-action@v5
+        with:
+          token: ${{ secrets.CODECOV_TOKEN }}
+          files: ./coverage/node/coverage.txt
+          flags: e2e-node
+
       - name: Dump logs & events
         if: always()
         continue-on-error: true

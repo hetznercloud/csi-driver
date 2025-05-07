@@ -7,3 +7,5 @@ hcloud-csi-*.tgz
 
 # Test binary for integration tests
 test/integration/integration.tests
+
+coverage/

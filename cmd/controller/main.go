@@ -18,6 +18,7 @@ var logger *slog.Logger
 
 func main() {
 	logger = app.CreateLogger()
+	app.SetupCoverageSignalHandler(logger)
 
 	m := app.CreateMetrics(logger)
 
