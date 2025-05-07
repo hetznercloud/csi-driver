@@ -7,6 +7,8 @@ build:
     - image: docker.io/hetznercloud/hcloud-csi-driver
       docker:
         dockerfile: dev/Dockerfile
+        buildArgs:
+          GO_BUILDFLAGS: -covermode=atomic -coverpkg=github.com/hetznercloud/csi-driver/...
   local:
     useBuildkit: true
   insecureRegistries:
@@ -18,3 +20,17 @@ deploy:
       - name: hcloud-csi
         namespace: kube-system
         chartPath: chart
+        setValues:
+          controller.extraEnvVars[0].name: GOCOVERDIR
+          controller.extraEnvVars[0].value: "/coverage"
+          controller.extraVolumes[0].name: coverage
+          controller.extraVolumes[0].emptyDir: {}
+          controller.extraVolumeMounts[0].name: coverage
+          controller.extraVolumeMounts[0].mountPath: "/coverage"
+
+          node.extraEnvVars[0].name: GOCOVERDIR
+          node.extraEnvVars[0].value: "/coverage"
+          node.extraVolumes[0].name: coverage
+          node.extraVolumes[0].emptyDir: {}
+          node.extraVolumeMounts[0].name: coverage
+          node.extraVolumeMounts[0].mountPath: "/coverage"

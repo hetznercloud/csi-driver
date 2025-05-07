@@ -7,8 +7,11 @@ import (
 	"log/slog"
 	"net"
 	"os"
+	"os/signal"
+	"runtime/coverage"
 	"strconv"
 	"strings"
+	"syscall"
 	"time"
 
 	"github.com/prometheus/client_golang/prometheus"
@@ -34,6 +37,27 @@ func parseLogLevel(lvl string) slog.Level {
 	default:
 		return slog.LevelInfo
 	}
+}
+
+func SetupCoverageSignalHandler(logger *slog.Logger) {
+	coverDir, exists := os.LookupEnv("GOCOVERDIR")
+	if !exists {
+		return
+	}
+
+	c := make(chan os.Signal, 1)
+	signal.Notify(c, syscall.SIGUSR1)
+
+	go func() {
+		for {
+			<-c
+			logger.Info("Writing coverage profile")
+
+			if err := coverage.WriteCountersDir(coverDir); err != nil {
+				logger.Warn("failed to write coverage profile", "err", err)
+			}
+		}
+	}()
 }
 
 // CreateLogger prepares a logger according to LOG_LEVEL environment variable.
