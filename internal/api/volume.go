@@ -51,7 +51,9 @@ func (s *VolumeService) Create(ctx context.Context, opts volumes.CreateOpts) (*c
 		Name:     opts.Name,
 		Size:     opts.MinSize,
 		Location: &hcloud.Location{Name: opts.Location},
+		Labels:   opts.Labels,
 	})
+
 	if err != nil {
 		s.logger.Info(
 			"failed to create volume",

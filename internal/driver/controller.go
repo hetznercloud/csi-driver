@@ -5,14 +5,29 @@ import (
 	"errors"
 	"fmt"
 	"log/slog"
+	"maps"
 	"strconv"
+	"strings"
 
 	proto "github.com/container-storage-interface/spec/lib/go/csi"
 	"google.golang.org/grpc/codes"
 	"google.golang.org/grpc/status"
 
 	"github.com/hetznercloud/csi-driver/internal/csi"
+	"github.com/hetznercloud/csi-driver/internal/utils"
 	"github.com/hetznercloud/csi-driver/internal/volumes"
+)
+
+const (
+	parameterKeyPVCName      = "csi.storage.k8s.io/pvc/name"
+	parameterKeyPVCNamespace = "csi.storage.k8s.io/pvc/namespace"
+	parameterKeyPVName       = "csi.storage.k8s.io/pv/name"
+	parameterKeyLabels       = "labels"
+
+	tagKeyCreatedForClaimName      = "csi.storage.k8s.io/pvc/name"
+	tagKeyCreatedForClaimNamespace = "csi.storage.k8s.io/pvc/namespace"
+	tagKeyCreatedForVolumeName     = "csi.storage.k8s.io/pv/name"
+	tagKeyCreatedBy                = "csi.hetzner.cloud/created-by"
 )
 
 type ControllerService struct {
@@ -22,6 +37,7 @@ type ControllerService struct {
 	volumeService            volumes.Service
 	location                 string
 	enableProvidedByTopology bool
+	extraVolumeLabels        map[string]string
 }
 
 func NewControllerService(
@@ -29,12 +45,14 @@ func NewControllerService(
 	volumeService volumes.Service,
 	location string,
 	enableProvidedByTopology bool,
+	extraVolumeLabels map[string]string,
 ) *ControllerService {
 	return &ControllerService{
 		logger:                   logger,
 		volumeService:            volumeService,
 		location:                 location,
 		enableProvidedByTopology: enableProvidedByTopology,
+		extraVolumeLabels:        extraVolumeLabels,
 	}
 }
 
@@ -66,12 +84,38 @@ func (s *ControllerService) CreateVolume(ctx context.Context, req *proto.CreateV
 		location = *loc
 	}
 
+	var volumeLabels = map[string]string{
+		tagKeyCreatedBy: "csi-driver",
+	}
+
+	maps.Copy(volumeLabels, s.extraVolumeLabels)
+
+	for key, value := range req.GetParameters() {
+		switch strings.ToLower(key) {
+		case parameterKeyPVCName:
+			volumeLabels[tagKeyCreatedForClaimName] = value
+		case parameterKeyPVCNamespace:
+			volumeLabels[tagKeyCreatedForClaimNamespace] = value
+		case parameterKeyPVName:
+			volumeLabels[tagKeyCreatedForVolumeName] = value
+		case parameterKeyLabels:
+			customLabels, err := utils.ConvertLabelsToMap(value)
+			if err != nil {
+				return nil, status.Errorf(codes.InvalidArgument, "Invalid format of parameter labels: %s", err)
+			}
+			maps.Copy(volumeLabels, customLabels)
+		default:
+			s.logger.Warn(fmt.Sprintf("invalid parameter key %s for CreateVolume", key))
+		}
+	}
+
 	// Create the volume. The service handles idempotency as required by the CSI spec.
 	volume, err := s.volumeService.Create(ctx, volumes.CreateOpts{
 		Name:     req.Name,
 		MinSize:  minSize,
 		MaxSize:  maxSize,
 		Location: location,
+		Labels:   volumeLabels,
 	})
 	if err != nil {
 		s.logger.Error(

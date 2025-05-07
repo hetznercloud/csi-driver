@@ -12,6 +12,7 @@ import (
 	"github.com/hetznercloud/csi-driver/internal/api"
 	"github.com/hetznercloud/csi-driver/internal/app"
 	"github.com/hetznercloud/csi-driver/internal/driver"
+	"github.com/hetznercloud/csi-driver/internal/utils"
 	"github.com/hetznercloud/csi-driver/internal/volumes"
 	"github.com/hetznercloud/hcloud-go/v2/hcloud/metadata"
 )
@@ -83,11 +84,18 @@ func main() {
 			hcloudClient,
 		),
 	)
+
+	extraVolumeLabels, err := utils.ConvertLabelsToMap(os.Getenv("HCLOUD_VOLUME_EXTRA_LABELS"))
+	if err != nil {
+		logger.Error("could not parse extra labels for volumes", "error", err)
+		os.Exit(1)
+	}
 	controllerService := driver.NewControllerService(
 		logger.With("component", "driver-controller-service"),
 		volumeService,
 		serverLocation,
 		enableProvidedByTopology,
+		extraVolumeLabels,
 	)
 
 	// common
