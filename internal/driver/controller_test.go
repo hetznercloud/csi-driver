@@ -3,6 +3,7 @@ package driver
 import (
 	"context"
 	"io"
+	"log/slog"
 	"testing"
 
 	proto "github.com/container-storage-interface/spec/lib/go/csi"
@@ -11,7 +12,6 @@ import (
 
 	"github.com/hetznercloud/csi-driver/internal/csi"
 	"github.com/hetznercloud/csi-driver/internal/mock"
-	"github.com/hetznercloud/csi-driver/internal/testutil"
 	"github.com/hetznercloud/csi-driver/internal/volumes"
 )
 
@@ -24,7 +24,7 @@ type controllerServiceTestEnv struct {
 }
 
 func newControllerServiceTestEnv() *controllerServiceTestEnv {
-	logger := testutil.NewNopLogger()
+	logger := slog.New(slog.DiscardHandler)
 	volumeService := &mock.VolumeService{}
 
 	return &controllerServiceTestEnv{
