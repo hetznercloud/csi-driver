@@ -3,6 +3,7 @@ package driver
 import (
 	"context"
 	"io"
+	"log/slog"
 	"testing"
 
 	proto "github.com/container-storage-interface/spec/lib/go/csi"
@@ -10,7 +11,6 @@ import (
 	"google.golang.org/grpc/status"
 
 	"github.com/hetznercloud/csi-driver/internal/mock"
-	"github.com/hetznercloud/csi-driver/internal/testutil"
 	"github.com/hetznercloud/csi-driver/internal/volumes"
 )
 
@@ -32,7 +32,7 @@ func newNodeServerTestEnv() nodeServiceTestEnv {
 	return nodeServiceTestEnv{
 		ctx: context.Background(),
 		service: NewNodeService(
-			testutil.NewNopLogger(),
+			slog.New(slog.DiscardHandler),
 			"1",
 			"loc",
 			false,

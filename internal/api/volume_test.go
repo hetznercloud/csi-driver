@@ -2,13 +2,13 @@ package api
 
 import (
 	"context"
+	"log/slog"
 	"net/http/httptest"
 	"testing"
 
 	"github.com/stretchr/testify/assert"
 
 	"github.com/hetznercloud/csi-driver/internal/csi"
-	"github.com/hetznercloud/csi-driver/internal/testutil"
 	"github.com/hetznercloud/csi-driver/internal/volumes"
 	"github.com/hetznercloud/hcloud-go/v2/hcloud"
 	"github.com/hetznercloud/hcloud-go/v2/hcloud/exp/mockutil"
@@ -28,7 +28,7 @@ func makeTestVolumeService(t *testing.T, requests []mockutil.Request) (*VolumeSe
 		hcloud.WithPollOpts(hcloud.PollOpts{BackoffFunc: hcloud.ConstantBackoff(0)}),
 	)
 
-	volumeService := NewVolumeService(testutil.NewNopLogger(), testClient)
+	volumeService := NewVolumeService(slog.New(slog.DiscardHandler), testClient)
 
 	return volumeService, testServer.Close
 }
