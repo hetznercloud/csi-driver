@@ -278,8 +278,6 @@ spec:
               mountPath: /run/csi
             - name: registration-dir
               mountPath: /registration
-            - mountPath: /tmp/extra-volume
-              name: extra-volume
           resources:
             limits:
               cpu: 51m
@@ -312,6 +310,8 @@ spec:
               mountPath: /run/csi
             - name: device-dir
               mountPath: /dev
+            - mountPath: /tmp/extra-volume
+              name: extra-volume
           securityContext:
             privileged: true
           env:
