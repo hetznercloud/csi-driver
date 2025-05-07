@@ -83,9 +83,6 @@ spec:
               mountPath: /run/csi
             - name: registration-dir
               mountPath: /registration
-            {{- if .Values.node.extraVolumeMounts }}
-            {{- include "common.tplvalues.render" (dict "value" .Values.node.extraVolumeMounts "context" $) | nindent 12 }}
-            {{- end }}
           {{- if .Values.node.resources.csiNodeDriverRegistrar }}
           resources: {{- toYaml .Values.node.resources.csiNodeDriverRegistrar | nindent 12 }}
           {{- end }}
@@ -110,6 +107,9 @@ spec:
               mountPath: /run/csi
             - name: device-dir
               mountPath: /dev
+            {{- if .Values.node.extraVolumeMounts }}
+            {{- include "common.tplvalues.render" (dict "value" .Values.node.extraVolumeMounts "context" $) | nindent 12 }}
+            {{- end }}
           securityContext:
             privileged: true
           env:
