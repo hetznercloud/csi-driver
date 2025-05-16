@@ -7,4 +7,4 @@ maintainers:
   - name: Hetzner Cloud
     email: support@hetzner.com
     url: https://github.com/hetznercloud
-version: 2.13.0 # x-releaser-pleaser-version
+version: 2.14.0 # x-releaser-pleaser-version

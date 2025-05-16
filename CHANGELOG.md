@@ -1,5 +1,15 @@
 # Changelog
 
+## [v2.14.0](https://github.com/hetznercloud/csi-driver/releases/tag/v2.14.0)
+
+### Features
+
+- allow to set labels for all volumes (#932)
+
+### Bug Fixes
+
+- **helm**: node extraVolumeMounts are added to wrong container (#957)
+
 ## [v2.13.0](https://github.com/hetznercloud/csi-driver/releases/tag/v2.13.0)
 
 ### Features
