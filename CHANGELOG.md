@@ -1,5 +1,25 @@
 # Changelog
 
+## [v2.14.0](https://github.com/hetznercloud/csi-driver/releases/tag/v2.14.0)
+
+With this release, you can now assign Hetzner Cloud labels to all newly created volumes. For a brief guide, visit [this page](https://github.com/hetznercloud/csi-driver/tree/main/docs/kubernetes#volume-labels).
+
+By default, all volumes are labeled as follows:
+
+- `csi.storage.k8s.io/pvc/name`
+- `csi.storage.k8s.io/pvc/namespace`
+- `csi.storage.k8s.io/pv/name`
+- `csi.hetzner.cloud/created-by=csi-driver`
+
+### Features
+
+- allow to set labels for all volumes (#932)
+- add Kubernetes v1.33 and remove EOL version v1.29 (#971)
+
+### Bug Fixes
+
+- **helm**: node extraVolumeMounts are added to wrong container (#957)
+
 ## [v2.13.0](https://github.com/hetznercloud/csi-driver/releases/tag/v2.13.0)
 
 ### Features
