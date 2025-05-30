@@ -18,7 +18,7 @@ ARG GO_BUILDFLAGS
 RUN --mount=type=cache,target=/root/.cache/go-build go build -gcflags="$SKAFFOLD_GO_GCFLAGS" $GO_BUILDFLAGS -o controller.bin github.com/hetznercloud/csi-driver/cmd/controller
 RUN --mount=type=cache,target=/root/.cache/go-build go build -gcflags="$SKAFFOLD_GO_GCFLAGS" $GO_BUILDFLAGS -o node.bin github.com/hetznercloud/csi-driver/cmd/node
 
-FROM alpine:3.21
+FROM alpine:3.22
 
 RUN apk add --no-cache \
     blkid \
