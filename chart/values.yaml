@@ -69,7 +69,7 @@ controller:
   image:
     csiAttacher:
       name: registry.k8s.io/sig-storage/csi-attacher
-      tag: v4.8.1 # renovate: datasource=docker depName=registry.k8s.io/sig-storage/csi-attacher
+      tag: v4.9.0 # renovate: datasource=docker depName=registry.k8s.io/sig-storage/csi-attacher
       ## Specify a imagePullPolicy
       ## Defaults to 'Always' if image tag is 'latest', else set to 'IfNotPresent'
       ## ref: http://kubernetes.io/docs/user-guide/images/#pre-pulling-images
