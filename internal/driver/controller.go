@@ -81,7 +81,7 @@ func (s *ControllerService) CreateVolume(ctx context.Context, req *proto.CreateV
 	}
 
 	var volumeLabels = map[string]string{
-		KeyManagedBy: fmt.Sprintf("csi-driver-%s", PluginVersion),
+		KeyManagedBy: "csi-driver",
 	}
 
 	maps.Copy(volumeLabels, s.extraVolumeLabels)
