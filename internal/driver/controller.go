@@ -19,15 +19,11 @@ import (
 )
 
 const (
-	parameterKeyPVCName      = "csi.storage.k8s.io/pvc/name"
-	parameterKeyPVCNamespace = "csi.storage.k8s.io/pvc/namespace"
-	parameterKeyPVName       = "csi.storage.k8s.io/pv/name"
-	parameterKeyLabels       = "labels"
-
-	tagKeyCreatedForClaimName      = "csi.storage.k8s.io/pvc/name"
-	tagKeyCreatedForClaimNamespace = "csi.storage.k8s.io/pvc/namespace"
-	tagKeyCreatedForVolumeName     = "csi.storage.k8s.io/pv/name"
-	tagKeyCreatedBy                = "csi.hetzner.cloud/created-by"
+	KeyPVCName      = "csi.storage.k8s.io/pvc/name"
+	KeyPVCNamespace = "csi.storage.k8s.io/pvc/namespace"
+	KeyPVName       = "csi.storage.k8s.io/pv/name"
+	KeyLabels       = "labels"
+	KeyManagedBy    = "managed-by"
 )
 
 type ControllerService struct {
@@ -85,20 +81,20 @@ func (s *ControllerService) CreateVolume(ctx context.Context, req *proto.CreateV
 	}
 
 	var volumeLabels = map[string]string{
-		tagKeyCreatedBy: "csi-driver",
+		KeyManagedBy: fmt.Sprintf("csi-driver-%s", PluginVersion),
 	}
 
 	maps.Copy(volumeLabels, s.extraVolumeLabels)
 
 	for key, value := range req.GetParameters() {
 		switch strings.ToLower(key) {
-		case parameterKeyPVCName:
-			volumeLabels[tagKeyCreatedForClaimName] = value
-		case parameterKeyPVCNamespace:
-			volumeLabels[tagKeyCreatedForClaimNamespace] = value
-		case parameterKeyPVName:
-			volumeLabels[tagKeyCreatedForVolumeName] = value
-		case parameterKeyLabels:
+		case KeyPVCName:
+			volumeLabels[KeyPVCName] = value
+		case KeyPVCNamespace:
+			volumeLabels[KeyPVCNamespace] = value
+		case KeyPVName:
+			volumeLabels[KeyPVName] = value
+		case KeyLabels:
 			customLabels, err := utils.ConvertLabelsToMap(value)
 			if err != nil {
 				return nil, status.Errorf(codes.InvalidArgument, "Invalid format of parameter labels: %s", err)
