@@ -286,7 +286,7 @@ spec:
               cpu: 11m
               memory: 21Mi
         - name: liveness-probe
-          image: registry.k8s.io/sig-storage/livenessprobe:v2.15.0
+          image: registry.k8s.io/sig-storage/livenessprobe:v2.16.0
           imagePullPolicy: Always
           volumeMounts:
           - mountPath: /run/csi
@@ -543,7 +543,7 @@ spec:
             mountPath: /run/csi
 
         - name: liveness-probe
-          image: registry.k8s.io/sig-storage/livenessprobe:v2.15.0
+          image: registry.k8s.io/sig-storage/livenessprobe:v2.16.0
           imagePullPolicy: Always
           resources:
             limits:
