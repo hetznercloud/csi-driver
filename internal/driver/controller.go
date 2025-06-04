@@ -19,11 +19,15 @@ import (
 )
 
 const (
-	KeyPVCName      = "csi.storage.k8s.io/pvc/name"
-	KeyPVCNamespace = "csi.storage.k8s.io/pvc/namespace"
-	KeyPVName       = "csi.storage.k8s.io/pv/name"
-	KeyLabels       = "labels"
-	KeyManagedBy    = "managed-by"
+	parameterKeyPVCName      = "csi.storage.k8s.io/pvc/name"
+	parameterKeyPVCNamespace = "csi.storage.k8s.io/pvc/namespace"
+	parameterKeyPVName       = "csi.storage.k8s.io/pv/name"
+	parameterKeyLabels       = "labels"
+
+	labelKeyPVCName      = "pvc-name"
+	labelKeyPVCNamespace = "pvc-namespace"
+	labelKeyPVName       = "pv-name"
+	labelKeyManagedBy    = "managed-by"
 )
 
 type ControllerService struct {
@@ -81,20 +85,20 @@ func (s *ControllerService) CreateVolume(ctx context.Context, req *proto.CreateV
 	}
 
 	var volumeLabels = map[string]string{
-		KeyManagedBy: "csi-driver",
+		labelKeyManagedBy: "csi-driver",
 	}
 
 	maps.Copy(volumeLabels, s.extraVolumeLabels)
 
 	for key, value := range req.GetParameters() {
 		switch strings.ToLower(key) {
-		case KeyPVCName:
-			volumeLabels[KeyPVCName] = value
-		case KeyPVCNamespace:
-			volumeLabels[KeyPVCNamespace] = value
-		case KeyPVName:
-			volumeLabels[KeyPVName] = value
-		case KeyLabels:
+		case parameterKeyPVCName:
+			volumeLabels[labelKeyPVCName] = value
+		case parameterKeyPVCNamespace:
+			volumeLabels[labelKeyPVCNamespace] = value
+		case parameterKeyPVName:
+			volumeLabels[labelKeyPVName] = value
+		case parameterKeyLabels:
 			customLabels, err := utils.ConvertLabelsToMap(value)
 			if err != nil {
 				return nil, status.Errorf(codes.InvalidArgument, "Invalid format of parameter labels: %s", err)

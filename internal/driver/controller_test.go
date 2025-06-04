@@ -61,13 +61,13 @@ func TestControllerServiceCreateVolume(t *testing.T) {
 		if v, ok := opts.Labels["clusterName"]; !ok || v != "myCluster" {
 			t.Errorf("unexpected labels passed to volume service: %s", opts.Labels)
 		}
-		if v, ok := opts.Labels[KeyPVCName]; !ok || v != "pvc-name" {
+		if v, ok := opts.Labels[labelKeyPVCName]; !ok || v != "pvc-name" {
 			t.Errorf("unexpected labels passed to volume service: %s", opts.Labels)
 		}
-		if v, ok := opts.Labels[KeyPVCNamespace]; !ok || v != "default" {
+		if v, ok := opts.Labels[labelKeyPVCNamespace]; !ok || v != "default" {
 			t.Errorf("unexpected labels passed to volume service: %s", opts.Labels)
 		}
-		if v, ok := opts.Labels[KeyPVName]; !ok || v != "pv-name" {
+		if v, ok := opts.Labels[labelKeyPVName]; !ok || v != "pv-name" {
 			t.Errorf("unexpected labels passed to volume service: %s", opts.Labels)
 		}
 		return &csi.Volume{
@@ -85,9 +85,9 @@ func TestControllerServiceCreateVolume(t *testing.T) {
 			LimitBytes:    2 * MinVolumeSize * GB,
 		},
 		Parameters: map[string]string{
-			KeyPVCName:      "pvc-name",
-			KeyPVCNamespace: "default",
-			KeyPVName:       "pv-name",
+			parameterKeyPVCName:      "pvc-name",
+			parameterKeyPVCNamespace: "default",
+			parameterKeyPVName:       "pv-name",
 		},
 		VolumeCapabilities: []*proto.VolumeCapability{
 			{
