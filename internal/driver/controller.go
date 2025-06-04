@@ -24,9 +24,9 @@ const (
 	parameterKeyPVName       = "csi.storage.k8s.io/pv/name"
 	parameterKeyLabels       = "labels"
 
-	labelKeyPVCName      = "csi.storage.k8s.io/pvc-name"
-	labelKeyPVCNamespace = "csi.storage.k8s.io/pvc-namespace"
-	labelKeyPVName       = "csi.storage.k8s.io/pv-name"
+	labelKeyPVCName      = "pvc-name"
+	labelKeyPVCNamespace = "pvc-namespace"
+	labelKeyPVName       = "pv-name"
 	labelKeyManagedBy    = "managed-by"
 )
 
