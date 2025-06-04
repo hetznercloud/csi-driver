@@ -1,5 +1,23 @@
 # Changelog
 
+## [v2.15.0](https://github.com/hetznercloud/csi-driver/releases/tag/v2.15.0)
+
+In release v2.14.0, we introduced default labels that are automatically applied to every newly created volume. However, we have identified a bug in the Hetzner Cloud API that allowed invalid label keys during Volume creation. This issue affects the following labels:
+
+1. Labels with the key prefix `csi.hetzner.cloud/` are not permitted.
+2. Labels using the pattern `csi.storage.k8s.io/*/*` are invalid due to the use of double slashes in the key.
+
+These labels are informational only and not used by the CSI driver itself. Volumes with incorrect or broken label values will still function as expected; however, editing or updating the labels may not work correctly. To comply with API requirements, Hetzner Cloud will edit the labels for every Volume and replace them with the new labels:
+
+- `csi.hetzner.cloud/created-by` - `managed-by`
+- `csi.storage.k8s.io/pvc/name` - `pvc-name`
+- `csi.storage.k8s.io/pvc/namespace` - `pvc-namespace`
+- `csi.storage.k8s.io/pv/name` - `pv-name`
+
+### Features
+
+- rename default labels on Volumes (#988)
+
 ## [v2.14.0](https://github.com/hetznercloud/csi-driver/releases/tag/v2.14.0)
 
 With this release, you can now assign Hetzner Cloud labels to all newly created volumes. For a brief guide, visit [this page](https://github.com/hetznercloud/csi-driver/tree/main/docs/kubernetes#volume-labels).
