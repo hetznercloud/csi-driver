@@ -24,10 +24,10 @@ const (
 	parameterKeyPVName       = "csi.storage.k8s.io/pv/name"
 	parameterKeyLabels       = "labels"
 
-	tagKeyCreatedForClaimName      = "csi.storage.k8s.io/pvc/name"
-	tagKeyCreatedForClaimNamespace = "csi.storage.k8s.io/pvc/namespace"
-	tagKeyCreatedForVolumeName     = "csi.storage.k8s.io/pv/name"
-	tagKeyCreatedBy                = "csi.hetzner.cloud/created-by"
+	labelKeyPVCName      = "pvc-name"
+	labelKeyPVCNamespace = "pvc-namespace"
+	labelKeyPVName       = "pv-name"
+	labelKeyManagedBy    = "managed-by"
 )
 
 type ControllerService struct {
@@ -85,7 +85,7 @@ func (s *ControllerService) CreateVolume(ctx context.Context, req *proto.CreateV
 	}
 
 	var volumeLabels = map[string]string{
-		tagKeyCreatedBy: "csi-driver",
+		labelKeyManagedBy: "csi-driver",
 	}
 
 	maps.Copy(volumeLabels, s.extraVolumeLabels)
@@ -93,11 +93,11 @@ func (s *ControllerService) CreateVolume(ctx context.Context, req *proto.CreateV
 	for key, value := range req.GetParameters() {
 		switch strings.ToLower(key) {
 		case parameterKeyPVCName:
-			volumeLabels[tagKeyCreatedForClaimName] = value
+			volumeLabels[labelKeyPVCName] = value
 		case parameterKeyPVCNamespace:
-			volumeLabels[tagKeyCreatedForClaimNamespace] = value
+			volumeLabels[labelKeyPVCNamespace] = value
 		case parameterKeyPVName:
-			volumeLabels[tagKeyCreatedForVolumeName] = value
+			volumeLabels[labelKeyPVName] = value
 		case parameterKeyLabels:
 			customLabels, err := utils.ConvertLabelsToMap(value)
 			if err != nil {
