@@ -20,6 +20,9 @@ These labels are informational only and not used by the CSI driver itself. Volum
 
 ## [v2.14.0](https://github.com/hetznercloud/csi-driver/releases/tag/v2.14.0)
 
+> [!CAUTION]
+> Please do not install the version v2.14.0 of the `csi-driver`, install the version v2.15.0 or later instead.
+
 With this release, you can now assign Hetzner Cloud labels to all newly created volumes. For a brief guide, visit [this page](https://github.com/hetznercloud/csi-driver/tree/main/docs/kubernetes#volume-labels).
 
 By default, all volumes are labeled as follows:
