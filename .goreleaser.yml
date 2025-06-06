@@ -5,8 +5,8 @@ before:
     - ./hack/release-generate-deployment-yamls.sh {{ .Version }}
 
 builds:
-  - id: controller
-    main: ./cmd/controller
+  - id: csi-driver
+    main: ./cmd
     env:
       - CGO_ENABLED=0
     goos:
@@ -15,18 +15,7 @@ builds:
       - amd64
       - arm64
       - arm
-    binary: controller.bin
-  - id: node
-    main: ./cmd/node
-    env:
-      - CGO_ENABLED=0
-    goos:
-      - linux
-    goarch:
-      - amd64
-      - arm64
-      - arm
-    binary: node.bin
+    binary: hcloud-csi-driver.bin
 
 dockers:
   - build_flag_templates: [--platform=linux/amd64]
