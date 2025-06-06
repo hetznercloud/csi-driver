@@ -19,19 +19,25 @@ import (
 )
 
 var logger *slog.Logger
-var controller, node bool
-
-func init() {
-	flag.BoolVar(&controller, "controller", false, "Run the csi controller. Can be used with `-node` to run as an AIO binary (e.g., for docker swarm).")
-	flag.BoolVar(&node, "node", false, "Run the csi node driver. Can be used with `-controller` to run as an AIO binary (e.g., for docker swarm).")
-	flag.Parse()
-}
 
 func main() {
 	logger = app.CreateLogger()
 
-	if !controller && !node {
-		logger.Error("application must be started with -controller and/or -node.")
+	controller := flag.Bool(
+		"controller",
+		false,
+		"Run the csi controller. Can be used with `-node` to run as an AIO binary (e.g., for docker swarm).",
+	)
+	node := flag.Bool(
+		"node",
+		false,
+		"Run the csi node driver. Can be used with `-controller` to run as an AIO binary (e.g., for docker swarm).",
+	)
+	flag.Parse()
+
+	if !*controller && !*node {
+		logger.Error("neither -controller nor -node was specified")
+		flag.PrintDefaults()
 		os.Exit(1)
 	}
 
@@ -67,7 +73,7 @@ func main() {
 		m.UnaryServerInterceptor(),
 	)
 
-	if node {
+	if *node {
 		serverID, err := metadataClient.InstanceID()
 		if err != nil {
 			logger.Error("failed to fetch server ID from metadata service", "err", err)
@@ -91,7 +97,7 @@ func main() {
 		proto.RegisterNodeServer(grpcServer, nodeService)
 	}
 
-	if controller {
+	if *controller {
 		extraVolumeLabels, err := utils.ConvertLabelsToMap(os.Getenv("HCLOUD_VOLUME_EXTRA_LABELS"))
 		if err != nil {
 			logger.Error("could not parse extra labels for volumes", "error", err)
