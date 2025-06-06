@@ -251,7 +251,9 @@ spec:
         - name: hcloud-csi-driver
           image: docker.io/hetznercloud/hcloud-csi-driver:v2.15.0 # x-releaser-pleaser-version
           imagePullPolicy: IfNotPresent
-          command: [/bin/hcloud-csi-driver-node]
+          command: [/bin/hcloud-csi-driver]
+          args:
+            - -node
           volumeMounts:
             - name: kubelet-dir
               mountPath: /var/lib/kubelet
@@ -437,7 +439,9 @@ spec:
         - name: hcloud-csi-driver
           image: docker.io/hetznercloud/hcloud-csi-driver:v2.15.0 # x-releaser-pleaser-version
           imagePullPolicy: IfNotPresent
-          command: [/bin/hcloud-csi-driver-controller]
+          command: [/bin/hcloud-csi-driver]
+          args:
+            - -controller
           env:
             - name: CSI_ENDPOINT
               value: unix:///run/csi/socket
