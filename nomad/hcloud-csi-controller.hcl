@@ -24,7 +24,8 @@ job "hcloud-csi-controller" {
 
       config {
         image   = "$SKAFFOLD_IMAGE"
-        command = "bin/hcloud-csi-driver-controller"
+        command = "bin/hcloud-csi-driver"
+        args    = [ "-controller" ]
       }
 
       env {
