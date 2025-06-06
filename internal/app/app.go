@@ -213,7 +213,7 @@ func GetServerLocation(logger *slog.Logger, hcloudClient *hcloud.Client, metadat
 	}
 
 	// Option 3: Metadata service as fallback
-	return getLocationFromMetadata(logger, metadataClient)
+	return GetLocationFromMetadata(logger, metadataClient)
 }
 
 func getLocationByEnvID(logger *slog.Logger, hcloudClient *hcloud.Client) (bool, string, error) {
@@ -269,7 +269,7 @@ func getLocationByEnvNodeName(logger *slog.Logger, hcloudClient *hcloud.Client) 
 	return "", nil
 }
 
-func getLocationFromMetadata(logger *slog.Logger, metadataClient *metadata.Client) (string, error) {
+func GetLocationFromMetadata(logger *slog.Logger, metadataClient *metadata.Client) (string, error) {
 	logger.Debug("getting location from metadata service")
 	availabilityZone, err := metadataClient.AvailabilityZone()
 	if err != nil {

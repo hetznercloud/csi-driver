@@ -140,7 +140,9 @@ spec:
         - name: hcloud-csi-driver
           image: {{ include "common.images.image" (dict "value" .Values.controller.image.hcloudCSIDriver "context" .) }} # x-releaser-pleaser-version
           imagePullPolicy: {{ .Values.controller.image.hcloudCSIDriver.pullPolicy }}
-          command: [/bin/hcloud-csi-driver-controller]
+          command: [/bin/hcloud-csi-driver]
+          args:
+            - -controller
           env:
             - name: CSI_ENDPOINT
               value: unix:///run/csi/socket

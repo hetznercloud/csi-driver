@@ -9,7 +9,8 @@ job "hcloud-csi-node" {
 
       config {
         image      = "$SKAFFOLD_IMAGE"
-        command    = "bin/hcloud-csi-driver-node"
+        command    = "bin/hcloud-csi-driver"
+        args       = [ "-node" ]
         privileged = true
       }
 
