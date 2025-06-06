@@ -10,4 +10,4 @@ RUN apk add --no-cache \
     xfsprogs \
     xfsprogs-extra
 
-COPY ./hcloud-csi-driver.bin /bin/hcloud-csi-driver
+COPY ./hcloud-csi-driver /bin/hcloud-csi-driver

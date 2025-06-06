@@ -9,7 +9,7 @@ ADD . /build/
 RUN ls -al
 
 ARG CGO_ENABLED=0
-RUN go build -o hcloud-csi-driver.bin github.com/hetznercloud/csi-driver/cmd
+RUN go build -o hcloud-csi-driver github.com/hetznercloud/csi-driver/cmd
 
 FROM --platform=$TARGETPLATFORM alpine:3.22
 
@@ -25,7 +25,7 @@ RUN apk add --no-cache \
 
 ENV GOTRACEBACK=all
 RUN mkdir -p /plugin
-COPY --from=builder /build/hcloud-csi-driver.bin /plugin
+COPY --from=builder /build/hcloud-csi-driver /plugin
 
-ENTRYPOINT [ "/plugin/hcloud-csi-driver.bin" ]
+ENTRYPOINT [ "/plugin/hcloud-csi-driver" ]
 CMD [ "-controller", "-node" ]

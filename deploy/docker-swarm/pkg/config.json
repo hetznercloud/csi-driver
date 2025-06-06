@@ -1,7 +1,7 @@
 {
   "description": "Hetzner csi-driver plugin for Docker",
   "documentation": "https://github.com/hetznercloud/csi-driver",
-  "entrypoint": ["/plugin/hcloud-csi-driver.bin", "-controller", "-node"],
+  "entrypoint": ["/plugin/hcloud-csi-driver", "-controller", "-node"],
   "env": [
     {
       "name": "HCLOUD_TOKEN",
