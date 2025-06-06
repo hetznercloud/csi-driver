@@ -27,23 +27,6 @@ func init() {
 	flag.Parse()
 }
 
-func getLocation(logger *slog.Logger, metadataClient *metadata.Client) (string, error) {
-	if location, ok := os.LookupEnv("HCLOUD_VOLUME_DEFAULT_LOCATION"); ok {
-		return location, nil
-	}
-
-	if !metadataClient.IsHcloudServer() {
-		return "", errors.New("HCLOUD_VOLUME_DEFAULT_LOCATION not set and not running on a cloud server")
-	}
-
-	location, err := app.GetLocationFromMetadata(logger, metadataClient)
-	if err != nil {
-		return "", fmt.Errorf("failed to get location from metadata: %w", err)
-	}
-
-	return location, nil
-}
-
 func main() {
 	logger = app.CreateLogger()
 
@@ -160,4 +143,21 @@ func main() {
 		)
 		os.Exit(1)
 	}
+}
+
+func getLocation(logger *slog.Logger, metadataClient *metadata.Client) (string, error) {
+	if location, ok := os.LookupEnv("HCLOUD_VOLUME_DEFAULT_LOCATION"); ok {
+		return location, nil
+	}
+
+	if !metadataClient.IsHcloudServer() {
+		return "", errors.New("HCLOUD_VOLUME_DEFAULT_LOCATION not set and not running on a cloud server")
+	}
+
+	location, err := app.GetLocationFromMetadata(logger, metadataClient)
+	if err != nil {
+		return "", fmt.Errorf("failed to get location from metadata: %w", err)
+	}
+
+	return location, nil
 }

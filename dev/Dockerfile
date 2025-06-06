@@ -15,7 +15,7 @@ ARG CGO_ENABLED=0
 ARG SKAFFOLD_GO_GCFLAGS
 ARG GO_BUILDFLAGS
 
-RUN --mount=type=cache,target=/root/.cache/go-build go build -gcflags="$SKAFFOLD_GO_GCFLAGS" $GO_BUILDFLAGS -o hcloud-csi-driver.bin github.com/hetznercloud/csi-driver/cmd
+RUN --mount=type=cache,target=/root/.cache/go-build go build -gcflags="$SKAFFOLD_GO_GCFLAGS" $GO_BUILDFLAGS -o hcloud-csi-driver.bin github.com/hetznercloud/csi-driver/
 
 FROM alpine:3.22
 
