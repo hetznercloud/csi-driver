@@ -195,7 +195,7 @@ jobs:
       fail-fast: false
       matrix:
         include:
-          - nomad: 1.10.1 # renovate: datasource=github-releases depName=hashicorp/nomad extractVersion=v(?<version>.+)
+          - nomad: 1.10.2 # renovate: datasource=github-releases depName=hashicorp/nomad extractVersion=v(?<version>.+)
             consul: 1.21.1 # renovate: datasource=github-releases depName=hashicorp/consul extractVersion=v(?<version>.+)
 
     env:
