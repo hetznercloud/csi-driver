@@ -38,4 +38,4 @@ RUN echo -e '#!/bin/sh\nexec /bin/hcloud-csi-driver -node "$@"' > /bin/hcloud-cs
     echo -e '#!/bin/sh\nexec /bin/hcloud-csi-driver -controller "$@"' > /bin/hcloud-csi-driver-controller && \
     chmod +x /bin/hcloud-csi-driver-node /bin/hcloud-csi-driver-controller
 
-ENTRYPOINT /bin/hcloud-csi-driver
+ENTRYPOINT ["/bin/hcloud-csi-driver"]
