@@ -214,7 +214,6 @@ spec:
         - name: hcloud-csi-driver
           image: docker.io/hetznercloud/hcloud-csi-driver:v2.15.0 # x-releaser-pleaser-version
           imagePullPolicy: IfNotPresent
-          command: [/bin/hcloud-csi-driver]
           args:
             - -node
           volumeMounts:
@@ -363,7 +362,6 @@ spec:
         - name: hcloud-csi-driver
           image: docker.io/hetznercloud/hcloud-csi-driver:v2.15.0 # x-releaser-pleaser-version
           imagePullPolicy: IfNotPresent
-          command: [/bin/hcloud-csi-driver]
           args:
             - -controller
           env:
