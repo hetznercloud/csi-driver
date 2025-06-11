@@ -105,7 +105,7 @@ jobs:
       - name: Check XFS config file existence
         run: |
           DOCKER_IMAGE_ID=$(docker images --format "{{.ID}} {{.CreatedAt}}" localhost:30666/docker_io_hetznercloud_hcloud-csi-driver | sort -k2 -r | head -n1 | awk '{print $1}')
-          docker run --rm -i $DOCKER_IMAGE_ID test -f /usr/share/xfsprogs/mkfs/lts_4.19.conf
+          docker run --rm -i --entrypoint test $DOCKER_IMAGE_ID -f /usr/share/xfsprogs/mkfs/lts_4.19.conf
 
       - name: Run parallel tests
         run: |
