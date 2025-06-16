@@ -1,5 +1,16 @@
 # Changelog
 
+## [v2.16.0](https://github.com/hetznercloud/csi-driver/releases/tag/v2.16.0)
+
+We’ve merged our two separate binaries into a single, unified binary. This change reduces the overall container image size. Additionally, the new binary is now published as a release artifact.
+
+The Docker image includes two compatibility scripts to support seamless image tag upgrades. However, it is still recommended to update your manifests or Helm chart to reflect the changes.
+
+### Features
+
+- single binary (#996)
+- publish binary (#1003)
+
 ## [v2.15.0](https://github.com/hetznercloud/csi-driver/releases/tag/v2.15.0)
 
 In release v2.14.0, we introduced default labels that are automatically applied to every newly created volume. However, we have identified a bug in the Hetzner Cloud API that allowed invalid label keys during Volume creation. This issue affects the following labels:
