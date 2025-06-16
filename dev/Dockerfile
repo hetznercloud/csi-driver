@@ -15,8 +15,7 @@ ARG CGO_ENABLED=0
 ARG SKAFFOLD_GO_GCFLAGS
 ARG GO_BUILDFLAGS
 
-RUN --mount=type=cache,target=/root/.cache/go-build go build -gcflags="$SKAFFOLD_GO_GCFLAGS" $GO_BUILDFLAGS -o controller.bin github.com/hetznercloud/csi-driver/cmd/controller
-RUN --mount=type=cache,target=/root/.cache/go-build go build -gcflags="$SKAFFOLD_GO_GCFLAGS" $GO_BUILDFLAGS -o node.bin github.com/hetznercloud/csi-driver/cmd/node
+RUN --mount=type=cache,target=/root/.cache/go-build go build -gcflags="$SKAFFOLD_GO_GCFLAGS" $GO_BUILDFLAGS -o hcloud-csi-driver github.com/hetznercloud/csi-driver/cmd
 
 FROM alpine:3.22
 
@@ -31,5 +30,12 @@ RUN apk add --no-cache \
     xfsprogs-extra
 
 ENV GOTRACEBACK=all
-COPY --from=builder /build/controller.bin /bin/hcloud-csi-driver-controller
-COPY --from=builder /build/node.bin /bin/hcloud-csi-driver-node
+COPY --from=builder /build/hcloud-csi-driver /bin/hcloud-csi-driver
+
+# Creating compatibility wrapper scripts to avoid breaking existing installations
+# that rely on separate entrypoints. This ensures upgrading only the image tag is possible.
+RUN echo -e '#!/bin/sh\nexec /bin/hcloud-csi-driver -node "$@"' > /bin/hcloud-csi-driver-node && \
+    echo -e '#!/bin/sh\nexec /bin/hcloud-csi-driver -controller "$@"' > /bin/hcloud-csi-driver-controller && \
+    chmod +x /bin/hcloud-csi-driver-node /bin/hcloud-csi-driver-controller
+
+ENTRYPOINT ["/bin/hcloud-csi-driver"]
