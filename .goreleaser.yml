@@ -5,7 +5,7 @@ before:
     - ./hack/release-generate-deployment-yamls.sh {{ .Version }}
 
 builds:
-  - id: csi-driver
+  - id: hcloud-csi-driver
     main: ./cmd
     env:
       - CGO_ENABLED=0
@@ -47,8 +47,18 @@ docker_manifests:
       - hetznercloud/hcloud-csi-driver:{{ if not .IsSnapshot }}v{{ end }}{{ .Version }}-arm64v8
       - hetznercloud/hcloud-csi-driver:{{ if not .IsSnapshot }}v{{ end }}{{ .Version }}-armv6
 
+archives:
+  - id: hcloud-csi-driver-archive
+    builds:
+      - hcloud-csi-driver
+    name_template: "{{ .Binary }}-{{ .Os }}-{{ .Arch }}{{ if .Arm }}v{{ .Arm }}{{ end }}"
+    files:
+      - LICENSE
+      - README.md
+
 release:
-  ids: [""]
+  ids:
+    - hcloud-csi-driver-archive
   extra_files:
     - glob: "./hcloud-csi-*.tgz"
 
