@@ -1,5 +1,5 @@
 module "dev" {
-  source = "github.com/hetznercloud/kubernetes-dev-env?ref=v0.9.0"
+  source = "github.com/hetznercloud/kubernetes-dev-env?ref=v0.9.1"
 
   name         = "csi-driver-${replace(var.name, "/[^a-zA-Z0-9-_]/", "-")}"
   hcloud_token = var.hcloud_token
