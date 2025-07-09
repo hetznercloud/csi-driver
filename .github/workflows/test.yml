@@ -87,7 +87,11 @@ jobs:
           skaffold: v2.16.1 # renovate: datasource=github-releases depName=GoogleContainerTools/skaffold
 
       - name: Setup k3sup
-        run: curl -sLS https://get.k3sup.dev | sh
+        env:
+          K3SUP_VERSION: 0.13.10 # renovate: datasource=github-releases depName=alexellis/k3sup
+        run: |
+          curl https://github.com/alexellis/k3sup/releases/download/$K3SUP_VERSION/k3sup -sSL -o /usr/local/bin/k3sup
+          chmod +x /usr/local/bin/k3sup
 
       - name: Setup k8s test binaries
         run: make -C test/e2e/kubernetes bin
