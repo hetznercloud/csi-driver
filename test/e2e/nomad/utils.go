@@ -115,8 +115,10 @@ func (cluster *Cluster) CreateVolume(volReq *nomad.CSIVolume, w *nomad.WriteOpti
 }
 
 func (cluster *Cluster) DeleteVolume(externalVolID string, w *nomad.WriteOptions) error {
-	err := cluster.nomadClient.CSIVolumes().Delete(externalVolID, w)
-	if err != nil {
+	req := &nomad.CSIVolumeDeleteRequest{
+		ExternalVolumeID: externalVolID,
+	}
+	if err := cluster.nomadClient.CSIVolumes().DeleteOpts(req, w); err != nil {
 		return err
 	}
 
