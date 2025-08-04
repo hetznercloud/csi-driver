@@ -751,6 +751,13 @@ storageClasses:
   - name: hcloud-volumes
     defaultStorageClass: true
     reclaimPolicy: Delete
+    ## @param storageClasses[].annotations Additional annotations for the StorageClass
+    ## Optionally, specify StorageClass annotations to be added.
+    ## e.g.:
+    ## annotations:
+    ##   resize.autoresize.io/enabled: "true"
+    ##
+    annotations: {}
     ## Optionally, specify StorageClass parameters to be added.
     ## e.g.:
     ## extraParameters:
