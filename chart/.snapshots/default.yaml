@@ -180,7 +180,7 @@ spec:
             limits: {}
             requests: {}
         - name: hcloud-csi-driver
-          image: docker.io/hetznercloud/hcloud-csi-driver:v2.16.0 # x-releaser-pleaser-version
+          image: docker.io/hetznercloud/hcloud-csi-driver:v2.17.0 # x-releaser-pleaser-version
           imagePullPolicy: IfNotPresent
           args:
             - -node
@@ -327,7 +327,7 @@ spec:
             name: socket-dir
 
         - name: hcloud-csi-driver
-          image: docker.io/hetznercloud/hcloud-csi-driver:v2.16.0 # x-releaser-pleaser-version
+          image: docker.io/hetznercloud/hcloud-csi-driver:v2.17.0 # x-releaser-pleaser-version
           imagePullPolicy: IfNotPresent
           args:
             - -controller

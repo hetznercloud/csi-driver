@@ -1,5 +1,11 @@
 # Changelog
 
+## [v2.17.0](https://github.com/hetznercloud/csi-driver/releases/tag/v2.17.0)
+
+### Features
+
+- **helm**: add extra annotations for StorageClass  (#1042)
+
 ## [v2.16.0](https://github.com/hetznercloud/csi-driver/releases/tag/v2.16.0)
 
 We’ve merged our two separate binaries into a single, unified binary. This change reduces the overall container image size. Additionally, the new binary is now published as a release artifact.
