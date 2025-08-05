@@ -7,6 +7,9 @@ metadata:
   name: {{ $val.name }}
   annotations:
     storageclass.kubernetes.io/is-default-class: {{ $val.defaultStorageClass | default "false" | quote }}
+    {{- if $val.annotations }}
+    {{- $val.annotations | toYaml | nindent 4 }}
+    {{- end}}
 provisioner: csi.hetzner.cloud
 volumeBindingMode: WaitForFirstConsumer
 allowVolumeExpansion: true
