@@ -8,7 +8,7 @@ require (
 	github.com/container-storage-interface/spec v1.11.0
 	github.com/golang/protobuf v1.5.4
 	github.com/grpc-ecosystem/go-grpc-middleware/providers/prometheus v1.1.0
-	github.com/hashicorp/nomad/api v0.0.0-20250822210455-33a72c2d01eb
+	github.com/hashicorp/nomad/api v0.0.0-20250829163458-87be37e8cced
 	github.com/hetznercloud/hcloud-go/v2 v2.22.0
 	github.com/kubernetes-csi/csi-test/v5 v5.3.1
 	github.com/moby/buildkit v0.23.2
