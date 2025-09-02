@@ -14,7 +14,7 @@ hcloud volume detach <VOLUME-NAME>
 hcloud volume describe <VOLUME-NAME>
 ```
 
-3. Define a new volume and provide values for `<VOLUME-NAME>`, `<VOLUME-ID>`, and `<VOLUME-LOCATION>`:
+3. Define a new volume and provide values for `<VOLUME-NAME>`, `<VOLUME-ID>`, and `<VOLUME-LOCATION>` (see the [Nomad CSI Volume Specification](https://developer.hashicorp.com/nomad/docs/other-specifications/volume/csi) for details).
 
 ```yaml
 # volume.hcl
