@@ -13,6 +13,8 @@ jobs:
           fetch-depth: 0
 
       - uses: actions/setup-go@v6
+        with:
+          go-version-file: go.mod
 
       - name: Set up QEMU
         uses: docker/setup-qemu-action@v3
