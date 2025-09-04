@@ -12,6 +12,8 @@ jobs:
       - uses: actions/checkout@v5
 
       - uses: actions/setup-go@v6
+        with:
+          go-version-file: go.mod
 
       - name: Run tests
         run: go test -v -tags integration -race -coverprofile=coverage.txt ./...
@@ -61,6 +63,8 @@ jobs:
       - uses: actions/checkout@v5
 
       - uses: actions/setup-go@v6
+        with:
+          go-version-file: go.mod
 
       - uses: opentofu/setup-opentofu@v1
         with:
@@ -204,6 +208,8 @@ jobs:
       - uses: actions/checkout@v5
 
       - uses: actions/setup-go@v6
+        with:
+          go-version-file: go.mod
 
       - uses: opentofu/setup-opentofu@v1
         with:
