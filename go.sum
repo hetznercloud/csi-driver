@@ -140,6 +140,8 @@ github.com/hashicorp/nomad/api v0.0.0-20250822210455-33a72c2d01eb h1:s4+dPJDlLtu
 github.com/hashicorp/nomad/api v0.0.0-20250822210455-33a72c2d01eb/go.mod h1:y4olHzVXiQolzyk6QD/gqJxQTnnchlTf/QtczFFKwOI=
 github.com/hashicorp/nomad/api v0.0.0-20250829163458-87be37e8cced h1:c+6BViR7Pgyhpd0ikP39Tpuv8a8Z0vU0m9TROo6FGr0=
 github.com/hashicorp/nomad/api v0.0.0-20250829163458-87be37e8cced/go.mod h1:y4olHzVXiQolzyk6QD/gqJxQTnnchlTf/QtczFFKwOI=
+github.com/hashicorp/nomad/api v0.0.0-20250905185308-0e9eb5ae43fd h1:c7R1U2k62dtDscg2eZsPtynrfzTWchc9DB7VTCqhGqA=
+github.com/hashicorp/nomad/api v0.0.0-20250905185308-0e9eb5ae43fd/go.mod h1:y4olHzVXiQolzyk6QD/gqJxQTnnchlTf/QtczFFKwOI=
 github.com/hetznercloud/hcloud-go/v2 v2.14.0 h1:WQW72DuOGqT486F0eNp92lDH5cwDTmyn9Mhin93m1To=
 github.com/hetznercloud/hcloud-go/v2 v2.14.0/go.mod h1:h8sHav+27Xa+48cVMAvAUMELov5h298Ilg2vflyTHgg=
 github.com/hetznercloud/hcloud-go/v2 v2.15.0 h1:6mpMJ/RuX1woZj+MCJdyKNEX9129KDkEIDeeyfr4GD4=
