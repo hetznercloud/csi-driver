@@ -14,7 +14,7 @@ require (
 	github.com/moby/buildkit v0.24.0
 	github.com/prometheus/client_golang v1.23.1
 	github.com/stretchr/testify v1.11.1
-	golang.org/x/sys v0.35.0
+	golang.org/x/sys v0.36.0
 	google.golang.org/grpc v1.75.0
 	k8s.io/mount-utils v0.34.0
 	k8s.io/utils v0.0.0-20250820121507-0af2bda4dd1d
