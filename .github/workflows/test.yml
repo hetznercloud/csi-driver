@@ -73,7 +73,7 @@ jobs:
 
       - uses: docker/setup-buildx-action@v3
 
-      - uses: yokawasa/action-setup-kube-tools@v0.11.2
+      - uses: yokawasa/action-setup-kube-tools@v0.11.3
         with:
           setup-tools: |
             helm
@@ -218,7 +218,7 @@ jobs:
 
       - uses: docker/setup-buildx-action@v3
 
-      - uses: yokawasa/action-setup-kube-tools@v0.11.2
+      - uses: yokawasa/action-setup-kube-tools@v0.11.3
         with:
           setup-tools: |
             skaffold
