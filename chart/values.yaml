@@ -398,6 +398,24 @@ controller:
   ##
   initContainers: []
 
+  ## @param controller.networkPolicy.enabled Enable NetworkPolicy for controller pods
+  networkPolicy:
+    ## @param controller.networkPolicy.enabled Enable NetworkPolicy for controller pods
+    ##
+    enabled: false
+    ## @param controller.networkPolicy.ingress Ingress rules for controller pods
+    ## ref: https://kubernetes.io/docs/concepts/services-networking/network-policies/#networkpolicy-resource
+    ##
+    ingress:
+      # Health
+      - ports:
+        - port: 9808
+          protocol: TCP
+    ## @param controller.networkPolicy.egress Egress rules for controller pods
+    ## ref: https://kubernetes.io/docs/concepts/services-networking/network-policies/#networkpolicy-resource
+    ##
+    egress: {}
+
 ## @section Node Parameters
 ##
 
@@ -672,6 +690,33 @@ node:
   ## kubeletDir: /var/snap/microk8s/common/var/lib/kubelet
   ##
   kubeletDir: /var/lib/kubelet
+
+  ## @param node.networkPolicy.enabled Enable NetworkPolicy for node pods
+  networkPolicy:
+    ## @param node.networkPolicy.enabled Enable NetworkPolicy for node pods
+    ##
+    enabled: false
+    ## @param node.networkPolicy.ingress Ingress rules for node pods
+    ## ref: https://kubernetes.io/docs/concepts/services-networking/network-policies/#networkpolicy-resource
+    ##
+    ingress:
+      # Health
+      - ports:
+        - port: 9808
+          protocol: TCP
+    ## @param node.networkPolicy.egress Egress rules for node pods
+    ## ref: https://kubernetes.io/docs/concepts/services-networking/network-policies/#networkpolicy-resource
+    ##
+    egress:
+      # Hetzner Cloud Metadata
+      - to:
+        - ipBlock:
+            cidr: 169.254.169.254/32
+        ports:
+          - port: 80
+            protocol: TCP
+          - port: 443
+            protocol: TCP
 
 ## @section Other Parameters
 ##
