@@ -197,7 +197,7 @@ jobs:
       matrix:
         include:
           - nomad: 1.10.5 # renovate: datasource=github-releases depName=hashicorp/nomad extractVersion=v(?<version>.+)
-            consul: 1.21.4 # renovate: datasource=github-releases depName=hashicorp/consul extractVersion=v(?<version>.+)
+            consul: 1.21.5 # renovate: datasource=github-releases depName=hashicorp/consul extractVersion=v(?<version>.+)
 
     env:
       TF_VAR_nomad_version: ${{ matrix.nomad }}
