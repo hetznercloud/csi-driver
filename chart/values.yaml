@@ -120,7 +120,7 @@ controller:
 
     livenessProbe:
       name: registry.k8s.io/sig-storage/livenessprobe
-      tag: v2.16.0 # renovate: datasource=docker depName=registry.k8s.io/sig-storage/livenessprobe
+      tag: v2.17.0 # renovate: datasource=docker depName=registry.k8s.io/sig-storage/livenessprobe
       ## Specify a imagePullPolicy
       ## Defaults to 'Always' if image tag is 'latest', else set to 'IfNotPresent'
       ## ref: http://kubernetes.io/docs/user-guide/images/#pre-pulling-images
@@ -437,7 +437,7 @@ node:
 
     livenessProbe:
       name: registry.k8s.io/sig-storage/livenessprobe
-      tag: v2.16.0 # renovate: datasource=docker depName=registry.k8s.io/sig-storage/livenessprobe
+      tag: v2.17.0 # renovate: datasource=docker depName=registry.k8s.io/sig-storage/livenessprobe
       ## Specify a imagePullPolicy
       ## Defaults to 'Always' if image tag is 'latest', else set to 'IfNotPresent'
       ## ref: http://kubernetes.io/docs/user-guide/images/#pre-pulling-images
