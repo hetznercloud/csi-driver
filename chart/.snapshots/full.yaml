@@ -269,7 +269,7 @@ spec:
           name: your-image-name
       containers:
         - name: csi-node-driver-registrar
-          image: registry.k8s.io/sig-storage/csi-node-driver-registrar:v2.14.0
+          image: registry.k8s.io/sig-storage/csi-node-driver-registrar:v2.15.0
           imagePullPolicy: Always
           args:
             - --kubelet-registration-path=/var/lib/k0s/kubelet/plugins/csi.hetzner.cloud/socket
