@@ -1,5 +1,11 @@
 # Changelog
 
+## [v2.18.0](https://github.com/hetznercloud/csi-driver/releases/tag/v2.18.0)
+
+### Features
+
+- support Kubernetes v1.34 and drop v1.30 (#1105)
+
 ## [v2.17.0](https://github.com/hetznercloud/csi-driver/releases/tag/v2.17.0)
 
 ### Features
