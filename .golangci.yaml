@@ -1,40 +1,88 @@
----
-linters-settings:
-  misspell:
-    locale: US
-  gci:
-    sections:
-      - standard
-      - default
-      - prefix(github.com/hetznercloud)
+version: "2"
+
+run:
+  timeout: 5m
 
 linters:
-  disable-all: true
   enable:
+    - asasalint
+    - asciicheck
+    - bidichk
     - bodyclose
+    - contextcheck
     - copyloopvar
+    - durationcheck
     - errcheck
-    - gci
+    - errchkjson
+    - errorlint
+    - exhaustive
+    - gocheckcompilerdirectives
+    - gochecksumtype
     - gocritic
-    - gofmt
-    - goimports
-    - gosimple
+    - gomoddirectives
+    - gomodguard
+    - gosec
+    - gosmopolitan
     - govet
     - ineffassign
+    - loggercheck
+    - makezero
     - misspell
+    - musttag
+    - nilerr
+    - nilnesserr
+    - noctx
     - prealloc
+    - protogetter
+    - reassign
+    - recvcheck
     - revive
     - rowserrcheck
+    - spancheck
+    - sqlclosecheck
     - staticcheck
-    - typecheck
+    - testifylint
     - unparam
     - unused
     - whitespace
+    - zerologlint
 
-issues:
-  exclude-rules:
-    - path: _test\.go
-      linters:
-        - errcheck
-    - path: _test\.go
-      text: unused-parameter
+  settings:
+    exhaustive:
+      default-signifies-exhaustive: true
+
+    staticcheck:
+      checks: ["all", "-QF1008"]
+
+  exclusions:
+    generated: lax
+    presets:
+      - comments
+      - common-false-positives
+      - std-error-handling
+    rules:
+      - linters:
+          - errcheck
+        path: _test\.go
+      - path: _test\.go
+        text: unused-parameter
+      - linters:
+          - revive
+        path: internal/utils/.+\.go
+        text: var-naming
+
+formatters:
+  enable:
+    - gci
+    - gofmt
+    - goimports
+
+  settings:
+    gci:
+      sections:
+        - standard
+        - default
+        - prefix(github.com/hetznercloud)
+
+  exclusions:
+    generated: lax
