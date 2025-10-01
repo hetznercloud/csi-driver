@@ -2,6 +2,7 @@ package volumes_test
 
 import (
 	"context"
+	"errors"
 	"io"
 	"log/slog"
 	"reflect"
@@ -99,7 +100,7 @@ func TestIdempotentServiceCreateExistingError(t *testing.T) {
 		MaxSize:  0,
 		Location: "loc",
 	})
-	if err != io.EOF {
+	if !errors.Is(err, io.EOF) {
 		t.Fatal(err)
 	}
 }
@@ -223,7 +224,7 @@ func TestIdempotentServiceDelete(t *testing.T) {
 			}
 
 			err := service.Delete(context.Background(), &csi.Volume{})
-			if err != testCase.ServiceErr {
+			if !errors.Is(err, testCase.ServiceErr) {
 				t.Fatalf("unexpected error: %v", err)
 			}
 		})
@@ -261,7 +262,7 @@ func TestIdempotentServiceDeleteError(t *testing.T) {
 	service := volumes.NewIdempotentService(slog.New(slog.DiscardHandler), volumeService)
 
 	err := service.Delete(context.Background(), &csi.Volume{})
-	if err != io.EOF {
+	if !errors.Is(err, io.EOF) {
 		t.Fatal(err)
 	}
 }
@@ -322,7 +323,7 @@ func TestIdempotentServiceAttachAlreadyAttachedDifferentServer(t *testing.T) {
 	service := volumes.NewIdempotentService(slog.New(slog.DiscardHandler), volumeService)
 
 	err := service.Attach(context.Background(), &csi.Volume{}, &csi.Server{ID: 1})
-	if err != volumes.ErrAttached {
+	if !errors.Is(err, volumes.ErrAttached) {
 		t.Fatal(err)
 	}
 }

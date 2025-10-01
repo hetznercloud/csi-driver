@@ -94,7 +94,7 @@ func CreateListener() (net.Listener, error) {
 	endpoint = endpoint[7:] // strip unix://
 
 	if err := os.Remove(endpoint); err != nil && !os.IsNotExist(err) {
-		return nil, fmt.Errorf("failed to remove socket file at %s: %s", endpoint, err)
+		return nil, fmt.Errorf("failed to remove socket file at %s: %w", endpoint, err)
 	}
 
 	return net.Listen("unix", endpoint)
@@ -251,7 +251,7 @@ func getLocationByEnvNodeName(logger *slog.Logger, hcloudClient *hcloud.Client) 
 
 	server, _, err := hcloudClient.Server.GetByName(context.Background(), nodeName)
 	if err != nil {
-		return "", fmt.Errorf("error while getting server through node name: %s", err)
+		return "", fmt.Errorf("error while getting server through node name: %w", err)
 	}
 	if server != nil {
 		logger.Debug(
@@ -273,7 +273,7 @@ func GetLocationFromMetadata(logger *slog.Logger, metadataClient *metadata.Clien
 	logger.Debug("getting location from metadata service")
 	availabilityZone, err := metadataClient.AvailabilityZone()
 	if err != nil {
-		return "", fmt.Errorf("failed to get location from metadata service: %s", err)
+		return "", fmt.Errorf("failed to get location from metadata service: %w", err)
 	}
 
 	parts := strings.Split(availabilityZone, "-")

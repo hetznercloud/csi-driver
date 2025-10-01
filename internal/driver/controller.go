@@ -123,8 +123,8 @@ func (s *ControllerService) CreateVolume(ctx context.Context, req *proto.CreateV
 			"err", err,
 		)
 		code := codes.Internal
-		switch err { //nolint:gocritic
-		case volumes.ErrVolumeAlreadyExists:
+		switch {
+		case errors.Is(err, volumes.ErrVolumeAlreadyExists):
 			code = codes.AlreadyExists
 		}
 		return nil, status.Error(code, fmt.Sprintf("failed to create volume: %s", err))
@@ -215,16 +215,16 @@ func (s *ControllerService) ControllerPublishVolume(ctx context.Context, req *pr
 
 	if err := s.volumeService.Attach(ctx, volume, server); err != nil {
 		code := codes.Internal
-		switch err {
-		case volumes.ErrVolumeNotFound:
+		switch {
+		case errors.Is(err, volumes.ErrVolumeNotFound):
 			code = codes.NotFound
-		case volumes.ErrServerNotFound:
+		case errors.Is(err, volumes.ErrServerNotFound):
 			code = codes.NotFound
-		case volumes.ErrAttached:
+		case errors.Is(err, volumes.ErrAttached):
 			code = codes.FailedPrecondition
-		case volumes.ErrAttachLimitReached:
+		case errors.Is(err, volumes.ErrAttachLimitReached):
 			code = codes.ResourceExhausted
-		case volumes.ErrLockedServer:
+		case errors.Is(err, volumes.ErrLockedServer):
 			code = codes.Unavailable
 		}
 		return nil, status.Error(code, fmt.Sprintf("failed to publish volume: %s", err))
@@ -232,8 +232,8 @@ func (s *ControllerService) ControllerPublishVolume(ctx context.Context, req *pr
 
 	volume, err = s.volumeService.GetByID(ctx, volumeID)
 	if err != nil {
-		switch err {
-		case volumes.ErrVolumeNotFound:
+		switch {
+		case errors.Is(err, volumes.ErrVolumeNotFound):
 			return nil, status.Error(codes.NotFound, "volume not found")
 		default:
 			return nil, status.Error(codes.Internal, fmt.Sprintf("failed to get volume: %s", err))
@@ -270,13 +270,13 @@ func (s *ControllerService) ControllerUnpublishVolume(ctx context.Context, req *
 
 	if err := s.volumeService.Detach(ctx, volume, server); err != nil {
 		code := codes.Internal
-		switch err {
-		case volumes.ErrVolumeNotFound: // Based on the spec it is save to assume that the call was successful if the volume is not found
+		switch {
+		case errors.Is(err, volumes.ErrVolumeNotFound): // Based on the spec it is save to assume that the call was successful if the volume is not found
 			resp := &proto.ControllerUnpublishVolumeResponse{}
 			return resp, nil
-		case volumes.ErrServerNotFound:
+		case errors.Is(err, volumes.ErrServerNotFound):
 			code = codes.NotFound
-		case volumes.ErrLockedServer:
+		case errors.Is(err, volumes.ErrLockedServer):
 			code = codes.Unavailable
 		}
 		return nil, status.Error(code, fmt.Sprintf("failed to unpublish volume: %s", err))
@@ -416,8 +416,8 @@ func (s *ControllerService) ControllerExpandVolume(ctx context.Context, req *pro
 
 	if err := s.volumeService.Resize(ctx, volume, minSize); err != nil {
 		code := codes.Internal
-		switch err { //nolint:gocritic
-		case volumes.ErrVolumeNotFound:
+		switch {
+		case errors.Is(err, volumes.ErrVolumeNotFound):
 			code = codes.NotFound
 		}
 		return nil, status.Error(code, fmt.Sprintf("failed to expand volume: %s", err))
@@ -425,8 +425,8 @@ func (s *ControllerService) ControllerExpandVolume(ctx context.Context, req *pro
 
 	if volume, err = s.volumeService.GetByID(ctx, volumeID); err != nil {
 		code := codes.Internal
-		switch err { //nolint:gocritic
-		case volumes.ErrVolumeNotFound:
+		switch {
+		case errors.Is(err, volumes.ErrVolumeNotFound):
 			code = codes.NotFound
 		}
 		return nil, status.Error(code, fmt.Sprintf("failed to expand volume: %s", err))

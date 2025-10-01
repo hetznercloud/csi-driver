@@ -1,6 +1,7 @@
 package volumes
 
 import (
+	"errors"
 	"fmt"
 	"log/slog"
 	"os/exec"
@@ -112,8 +113,8 @@ func commandWithStdin(stdin string, name string, args ...string) (string, int, e
 	outputBytes, err := cmd.CombinedOutput()
 	output := string(outputBytes)
 	if err != nil {
-		exitError, ok := err.(*exec.ExitError)
-		if !ok {
+		exitError := &exec.ExitError{}
+		if !errors.As(err, &exitError) {
 			return output, 0, err
 		}
 		return output, exitError.ExitCode(), fmt.Errorf("%w\n%s", exitError, output)
