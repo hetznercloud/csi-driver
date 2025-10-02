@@ -1,6 +1,7 @@
 package volumes
 
 import (
+	"context"
 	"errors"
 	"fmt"
 	"log/slog"
@@ -19,7 +20,7 @@ func NewCryptSetup(logger *slog.Logger) *CryptSetup {
 }
 
 func (cs *CryptSetup) IsActive(luksDeviceName string) (bool, error) {
-	output, code, err := command(cryptsetupExecuable, "status", luksDeviceName)
+	output, code, err := command(context.Background(), cryptsetupExecuable, "status", luksDeviceName)
 	if err != nil {
 		if code == 4 {
 			return false, nil
@@ -34,7 +35,7 @@ func (cs *CryptSetup) Format(devicePath string, passphrase string) error {
 		"formatting LUKS device",
 		"devicePath", devicePath,
 	)
-	output, _, err := commandWithStdin(passphrase, cryptsetupExecuable, "luksFormat", "--type", "luks1", devicePath)
+	output, _, err := commandWithStdin(context.Background(), passphrase, cryptsetupExecuable, "luksFormat", "--type", "luks1", devicePath)
 	if err != nil {
 		return fmt.Errorf("unable to format device %s with LUKS: %s", devicePath, output)
 	}
@@ -54,7 +55,7 @@ func (cs *CryptSetup) Open(devicePath string, luksDeviceName string, passphrase 
 		"devicePath", devicePath,
 		"luksDeviceName", luksDeviceName,
 	)
-	output, _, err := commandWithStdin(passphrase, cryptsetupExecuable, "luksOpen", "--allow-discards", devicePath, luksDeviceName)
+	output, _, err := commandWithStdin(context.Background(), passphrase, cryptsetupExecuable, "luksOpen", "--allow-discards", devicePath, luksDeviceName)
 	if err != nil {
 		return fmt.Errorf("unable to open LUKS device %s: %s", devicePath, output)
 	}
@@ -73,7 +74,7 @@ func (cs *CryptSetup) Close(luksDeviceName string) error {
 		"closing LUKS device",
 		"luksDeviceName", luksDeviceName,
 	)
-	output, _, err := command(cryptsetupExecuable, "luksClose", luksDeviceName)
+	output, _, err := command(context.Background(), cryptsetupExecuable, "luksClose", luksDeviceName)
 	if err != nil {
 		return fmt.Errorf("unable to close LUKS device %s: %s", luksDeviceName, output)
 	}
@@ -85,7 +86,7 @@ func (cs *CryptSetup) Resize(luksDeviceName string) error {
 		"resizing LUKS device",
 		"luksDeviceName", luksDeviceName,
 	)
-	output, _, err := command(cryptsetupExecuable, "resize", luksDeviceName)
+	output, _, err := command(context.Background(), cryptsetupExecuable, "resize", luksDeviceName)
 	if err != nil {
 		return fmt.Errorf("unable to resize LUKS device %s: %s", luksDeviceName, output)
 	}
@@ -101,12 +102,12 @@ func GenerateLUKSDevicePath(luksDeviceName string) string {
 	return "/dev/mapper/" + luksDeviceName
 }
 
-func command(name string, args ...string) (string, int, error) {
-	return commandWithStdin("", name, args...)
+func command(ctx context.Context, name string, args ...string) (string, int, error) {
+	return commandWithStdin(ctx, "", name, args...)
 }
 
-func commandWithStdin(stdin string, name string, args ...string) (string, int, error) {
-	cmd := exec.Command(name, args...)
+func commandWithStdin(ctx context.Context, stdin string, name string, args ...string) (string, int, error) {
+	cmd := exec.CommandContext(ctx, name, args...)
 	if stdin != "" {
 		cmd.Stdin = strings.NewReader(stdin)
 	}

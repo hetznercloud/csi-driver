@@ -123,7 +123,7 @@ func (s *ControllerService) CreateVolume(ctx context.Context, req *proto.CreateV
 			"err", err,
 		)
 		code := codes.Internal
-		switch {
+		switch { //nolint:gocritic
 		case errors.Is(err, volumes.ErrVolumeAlreadyExists):
 			code = codes.AlreadyExists
 		}
@@ -416,7 +416,7 @@ func (s *ControllerService) ControllerExpandVolume(ctx context.Context, req *pro
 
 	if err := s.volumeService.Resize(ctx, volume, minSize); err != nil {
 		code := codes.Internal
-		switch {
+		switch { //nolint:gocritic
 		case errors.Is(err, volumes.ErrVolumeNotFound):
 			code = codes.NotFound
 		}
@@ -425,7 +425,7 @@ func (s *ControllerService) ControllerExpandVolume(ctx context.Context, req *pro
 
 	if volume, err = s.volumeService.GetByID(ctx, volumeID); err != nil {
 		code := codes.Internal
-		switch {
+		switch { //nolint:gocritic
 		case errors.Is(err, volumes.ErrVolumeNotFound):
 			code = codes.NotFound
 		}

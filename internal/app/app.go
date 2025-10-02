@@ -96,8 +96,8 @@ func CreateListener() (net.Listener, error) {
 	if err := os.Remove(endpoint); err != nil && !os.IsNotExist(err) {
 		return nil, fmt.Errorf("failed to remove socket file at %s: %w", endpoint, err)
 	}
-
-	return net.Listen("unix", endpoint)
+	var l net.ListenConfig
+	return l.Listen(context.Background(), "unix", endpoint)
 }
 
 // CreateMetrics prepares a metrics client pointing at METRICS_ENDPOINT environment variable (will fallback)

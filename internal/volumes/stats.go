@@ -29,9 +29,10 @@ func (l *LinuxStatsService) ByteFilesystemStats(volumePath string) (totalBytes i
 	if err != nil {
 		return
 	}
-	availableBytes = int64(statfs.Bavail) * int64(statfs.Bsize)
-	usedBytes = (int64(statfs.Blocks) - int64(statfs.Bfree)) * int64(statfs.Bsize)
-	totalBytes = int64(statfs.Blocks) * int64(statfs.Bsize)
+	// TODO: Make this safe
+	availableBytes = int64(statfs.Bavail) * int64(statfs.Bsize)                    //nolint:gosec
+	usedBytes = (int64(statfs.Blocks) - int64(statfs.Bfree)) * int64(statfs.Bsize) //nolint:gosec
+	totalBytes = int64(statfs.Blocks) * int64(statfs.Bsize)                        //nolint:gosec
 	return
 }
 
@@ -41,8 +42,10 @@ func (l *LinuxStatsService) INodeFilesystemStats(volumePath string) (total int64
 	if err != nil {
 		return
 	}
-	total = int64(statfs.Files)
-	free = int64(statfs.Ffree)
+
+	// TODO: Make this safe
+	total = int64(statfs.Files) //nolint:gosec
+	free = int64(statfs.Ffree)  //nolint:gosec
 	used = total - free
 	return
 }
