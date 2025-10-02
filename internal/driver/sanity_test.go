@@ -25,7 +25,8 @@ func TestSanity(t *testing.T) {
 	if err := os.Remove(endpoint); err != nil && !os.IsNotExist(err) {
 		t.Fatal(err)
 	}
-	listener, err := net.Listen("unix", endpoint)
+	var l net.ListenConfig
+	listener, err := l.Listen(t.Context(), "unix", endpoint)
 	if err != nil {
 		t.Fatal(err)
 	}

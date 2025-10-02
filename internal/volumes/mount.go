@@ -155,7 +155,7 @@ func (s *LinuxMountService) Publish(targetPath string, devicePath string, opts M
 func (s *LinuxMountService) Unpublish(targetPath string) error {
 	devicePath, _, err := mount.GetDeviceNameFromMount(mount.New(""), targetPath)
 	if err != nil {
-		return fmt.Errorf("failed to determine mount path for %s: %s", targetPath, err)
+		return fmt.Errorf("failed to determine mount path for %s: %w", targetPath, err)
 	}
 
 	s.logger.Info(

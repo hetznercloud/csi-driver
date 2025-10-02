@@ -3,6 +3,7 @@ package metrics
 import (
 	"log/slog"
 	"net/http"
+	"time"
 
 	grpcprom "github.com/grpc-ecosystem/go-grpc-middleware/providers/prometheus"
 	"github.com/prometheus/client_golang/prometheus"
@@ -64,7 +65,12 @@ func (s *Metrics) Registry() *prometheus.Registry {
 	return s.reg
 }
 func (s *Metrics) Serve() {
-	httpServer := &http.Server{Handler: promhttp.HandlerFor(s.reg, promhttp.HandlerOpts{}), Addr: s.addr}
+	httpServer := &http.Server{
+		Handler:      promhttp.HandlerFor(s.reg, promhttp.HandlerOpts{}),
+		Addr:         s.addr,
+		ReadTimeout:  15 * time.Second,
+		WriteTimeout: 15 * time.Second,
+	}
 
 	s.logger.Debug(
 		"starting prometheus http server",

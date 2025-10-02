@@ -2,6 +2,7 @@ package volumes
 
 import (
 	"context"
+	"errors"
 	"log/slog"
 
 	"github.com/hetznercloud/csi-driver/internal/csi"
@@ -39,7 +40,7 @@ func (s *IdempotentService) Create(ctx context.Context, opts CreateOpts) (*csi.V
 		return volume, nil
 	}
 
-	if err == ErrVolumeAlreadyExists {
+	if errors.Is(err, ErrVolumeAlreadyExists) {
 		s.logger.Info(
 			"another volume with that name does already exist",
 			"name", opts.Name,
@@ -106,17 +107,17 @@ func (s *IdempotentService) GetByName(ctx context.Context, name string) (*csi.Vo
 }
 
 func (s *IdempotentService) Delete(ctx context.Context, volume *csi.Volume) error {
-	switch err := s.volumeService.Detach(ctx, volume, nil); err {
-	case ErrVolumeNotFound, ErrNotAttached, nil:
+	switch err := s.volumeService.Detach(ctx, volume, nil); {
+	case errors.Is(err, ErrVolumeNotFound), errors.Is(err, ErrNotAttached), err == nil:
 		break
 	default:
 		return err
 	}
 
-	switch err := s.volumeService.Delete(ctx, volume); err {
-	case ErrVolumeNotFound:
+	switch err := s.volumeService.Delete(ctx, volume); {
+	case errors.Is(err, ErrVolumeNotFound):
 		return nil
-	case nil:
+	case err == nil:
 		return nil
 	default:
 		return err
@@ -140,13 +141,13 @@ func (s *IdempotentService) Attach(ctx context.Context, volume *csi.Volume, serv
 }
 
 func (s *IdempotentService) Detach(ctx context.Context, volume *csi.Volume, server *csi.Server) error {
-	switch err := s.volumeService.Detach(ctx, volume, server); err {
-	case ErrNotAttached:
+	switch err := s.volumeService.Detach(ctx, volume, server); {
+	case errors.Is(err, ErrNotAttached):
 		return nil
-	case ErrAttached:
+	case errors.Is(err, ErrAttached):
 		// Volume is attached to another server
 		return nil
-	case nil:
+	case err == nil:
 		return nil
 	default:
 		return err
@@ -154,13 +155,13 @@ func (s *IdempotentService) Detach(ctx context.Context, volume *csi.Volume, serv
 }
 
 func (s *IdempotentService) Resize(ctx context.Context, volume *csi.Volume, size int) error {
-	switch err := s.volumeService.Resize(ctx, volume, size); err {
-	case ErrVolumeSizeAlreadyReached:
+	switch err := s.volumeService.Resize(ctx, volume, size); {
+	case errors.Is(err, ErrVolumeSizeAlreadyReached):
 		// If a previous rescale attempt failed (rate limit, network connectivity, ...), the volume might already have the target size.
 		// In the Hetzner Cloud API, a resize must always be larger than the current size, so this
 		// would manifest as a "volume size is too small (invalid_input)" error.
 		return nil
-	case nil:
+	case err == nil:
 		return nil
 	default:
 		return err

@@ -17,12 +17,12 @@ func volumeSizeFromCapacityRange(cr *proto.CapacityRange) (int, int, bool) {
 
 	var minSize int
 	switch {
-	case cr.RequiredBytes == 0:
+	case cr.GetRequiredBytes() == 0:
 		minSize = DefaultVolumeSize
-	case cr.RequiredBytes < 0:
+	case cr.GetRequiredBytes() < 0:
 		return 0, 0, false
 	default:
-		minSize = int(math.Ceil(float64(cr.RequiredBytes) / 1024 / 1024 / 1024))
+		minSize = int(math.Ceil(float64(cr.GetRequiredBytes()) / 1024 / 1024 / 1024))
 		if minSize < MinVolumeSize {
 			minSize = MinVolumeSize
 		}
@@ -30,12 +30,12 @@ func volumeSizeFromCapacityRange(cr *proto.CapacityRange) (int, int, bool) {
 
 	var maxSize int
 	switch {
-	case cr.LimitBytes == 0:
+	case cr.GetLimitBytes() == 0:
 		break // ignore
-	case cr.LimitBytes < 0:
+	case cr.GetLimitBytes() < 0:
 		return 0, 0, false
 	default:
-		maxSize = int(math.Floor(float64(cr.LimitBytes) / 1024 / 1024 / 1024))
+		maxSize = int(math.Floor(float64(cr.GetLimitBytes()) / 1024 / 1024 / 1024))
 	}
 
 	if maxSize != 0 && minSize > maxSize {
@@ -46,10 +46,10 @@ func volumeSizeFromCapacityRange(cr *proto.CapacityRange) (int, int, bool) {
 }
 
 func isCapabilitySupported(capability *proto.VolumeCapability) bool {
-	if capability.AccessMode == nil {
+	if capability.GetAccessMode() == nil {
 		return false
 	}
-	switch capability.AccessMode.Mode {
+	switch capability.GetAccessMode().GetMode() {
 	case proto.VolumeCapability_AccessMode_SINGLE_NODE_WRITER:
 		return true
 	case proto.VolumeCapability_AccessMode_SINGLE_NODE_MULTI_WRITER:
@@ -65,13 +65,13 @@ func locationFromTopologyRequirement(tr *proto.TopologyRequirement) *string {
 	if tr == nil {
 		return nil
 	}
-	for _, top := range tr.Preferred {
-		if location, ok := top.Segments[TopologySegmentLocation]; ok {
+	for _, top := range tr.GetPreferred() {
+		if location, ok := top.GetSegments()[TopologySegmentLocation]; ok {
 			return &location
 		}
 	}
-	for _, top := range tr.Requisite {
-		if location, ok := top.Segments[TopologySegmentLocation]; ok {
+	for _, top := range tr.GetRequisite() {
+		if location, ok := top.GetSegments()[TopologySegmentLocation]; ok {
 			return &location
 		}
 	}

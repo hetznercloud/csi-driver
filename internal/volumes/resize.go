@@ -34,7 +34,7 @@ func NewLinuxResizeService(logger *slog.Logger) *LinuxResizeService {
 func (l *LinuxResizeService) Resize(volumePath string) error {
 	devicePath, _, err := mount.GetDeviceNameFromMount(mount.New(""), volumePath)
 	if err != nil {
-		return fmt.Errorf("failed to determine mount path for %s: %s", volumePath, err)
+		return fmt.Errorf("failed to determine mount path for %s: %w", volumePath, err)
 	}
 
 	l.logger.Info(

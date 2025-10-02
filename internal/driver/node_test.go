@@ -291,24 +291,24 @@ func TestNodeServiceNodeGetCapabilities(t *testing.T) {
 	if err != nil {
 		t.Fatal(err)
 	}
-	if c := len(resp.Capabilities); c != 2 {
+	if c := len(resp.GetCapabilities()); c != 2 {
 		t.Fatalf("unexpected number of capabilities: %d", c)
 	}
 
-	caprpc := resp.Capabilities[0].GetRpc()
+	caprpc := resp.GetCapabilities()[0].GetRpc()
 	if caprpc == nil {
 		t.Fatal("unexpected capability at index 0")
 	}
-	if caprpc.Type != proto.NodeServiceCapability_RPC_EXPAND_VOLUME {
-		t.Errorf("unexpected type: %s", caprpc.Type)
+	if caprpc.GetType() != proto.NodeServiceCapability_RPC_EXPAND_VOLUME {
+		t.Errorf("unexpected type: %s", caprpc.GetType())
 	}
 
-	caprpc = resp.Capabilities[1].GetRpc()
+	caprpc = resp.GetCapabilities()[1].GetRpc()
 	if caprpc == nil {
 		t.Fatal("unexpected capability at index 1")
 	}
-	if caprpc.Type != proto.NodeServiceCapability_RPC_GET_VOLUME_STATS {
-		t.Errorf("unexpected type: %s", caprpc.Type)
+	if caprpc.GetType() != proto.NodeServiceCapability_RPC_GET_VOLUME_STATS {
+		t.Errorf("unexpected type: %s", caprpc.GetType())
 	}
 }
 
@@ -320,11 +320,11 @@ func TestNodeServiceNodeGetInfo(t *testing.T) {
 	if err != nil {
 		t.Fatal(err)
 	}
-	if resp.NodeId != "1" {
-		t.Errorf("unexpected node id: %s", resp.NodeId)
+	if resp.GetNodeId() != "1" {
+		t.Errorf("unexpected node id: %s", resp.GetNodeId())
 	}
-	if resp.MaxVolumesPerNode != MaxVolumesPerNode {
-		t.Errorf("unexpected max volumes per node: %d", resp.MaxVolumesPerNode)
+	if resp.GetMaxVolumesPerNode() != MaxVolumesPerNode {
+		t.Errorf("unexpected max volumes per node: %d", resp.GetMaxVolumesPerNode())
 	}
 }
 

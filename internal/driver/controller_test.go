@@ -104,24 +104,24 @@ func TestControllerServiceCreateVolume(t *testing.T) {
 	if err != nil {
 		t.Fatal(err)
 	}
-	if resp.Volume.VolumeId != "1" {
-		t.Errorf("unexpected value for VolumeId: %s", resp.Volume.VolumeId)
+	if resp.GetVolume().GetVolumeId() != "1" {
+		t.Errorf("unexpected value for VolumeId: %s", resp.GetVolume().GetVolumeId())
 	}
-	if resp.Volume.CapacityBytes != (MinVolumeSize+1)*1024*1024*1024 {
-		t.Errorf("unexpected value for CapacityBytes: %d", resp.Volume.CapacityBytes)
+	if resp.GetVolume().GetCapacityBytes() != (MinVolumeSize+1)*1024*1024*1024 {
+		t.Errorf("unexpected value for CapacityBytes: %d", resp.GetVolume().GetCapacityBytes())
 	}
-	if len(resp.Volume.AccessibleTopology) == 1 {
-		top := resp.Volume.AccessibleTopology[0]
-		if loc := top.Segments[TopologySegmentLocation]; loc != "testloc" {
+	if len(resp.GetVolume().GetAccessibleTopology()) == 1 {
+		top := resp.GetVolume().GetAccessibleTopology()[0]
+		if loc := top.GetSegments()[TopologySegmentLocation]; loc != "testloc" {
 			t.Errorf("unexpected location segment in topology: %s", loc)
 		}
 		if env.service.enableProvidedByTopology {
-			if provider := top.Segments[ProvidedByLabel]; provider != "cloud" {
+			if provider := top.GetSegments()[ProvidedByLabel]; provider != "cloud" {
 				t.Errorf("unexpected provider segment in topology: %s", provider)
 			}
 		}
 	} else {
-		t.Errorf("unexpected number of topologies: %d", len(resp.Volume.AccessibleTopology))
+		t.Errorf("unexpected number of topologies: %d", len(resp.GetVolume().GetAccessibleTopology()))
 	}
 }
 func TestControllerServiceCreateVolumeWithParameterLabels(t *testing.T) {
@@ -178,24 +178,24 @@ func TestControllerServiceCreateVolumeWithParameterLabels(t *testing.T) {
 	if err != nil {
 		t.Fatal(err)
 	}
-	if resp.Volume.VolumeId != "1" {
-		t.Errorf("unexpected value for VolumeId: %s", resp.Volume.VolumeId)
+	if resp.GetVolume().GetVolumeId() != "1" {
+		t.Errorf("unexpected value for VolumeId: %s", resp.GetVolume().GetVolumeId())
 	}
-	if resp.Volume.CapacityBytes != (MinVolumeSize+1)*1024*1024*1024 {
-		t.Errorf("unexpected value for CapacityBytes: %d", resp.Volume.CapacityBytes)
+	if resp.GetVolume().GetCapacityBytes() != (MinVolumeSize+1)*1024*1024*1024 {
+		t.Errorf("unexpected value for CapacityBytes: %d", resp.GetVolume().GetCapacityBytes())
 	}
-	if len(resp.Volume.AccessibleTopology) == 1 {
-		top := resp.Volume.AccessibleTopology[0]
-		if loc := top.Segments[TopologySegmentLocation]; loc != "testloc" {
+	if len(resp.GetVolume().GetAccessibleTopology()) == 1 {
+		top := resp.GetVolume().GetAccessibleTopology()[0]
+		if loc := top.GetSegments()[TopologySegmentLocation]; loc != "testloc" {
 			t.Errorf("unexpected location segment in topology: %s", loc)
 		}
 		if env.service.enableProvidedByTopology {
-			if provider := top.Segments[ProvidedByLabel]; provider != "cloud" {
+			if provider := top.GetSegments()[ProvidedByLabel]; provider != "cloud" {
 				t.Errorf("unexpected provider segment in topology: %s", provider)
 			}
 		}
 	} else {
-		t.Errorf("unexpected number of topologies: %d", len(resp.Volume.AccessibleTopology))
+		t.Errorf("unexpected number of topologies: %d", len(resp.GetVolume().GetAccessibleTopology()))
 	}
 }
 
@@ -244,13 +244,13 @@ func TestControllerServiceCreateVolumeWithLocation(t *testing.T) {
 	if err != nil {
 		t.Fatal(err)
 	}
-	if len(resp.Volume.AccessibleTopology) == 1 {
-		top := resp.Volume.AccessibleTopology[0]
-		if loc := top.Segments[TopologySegmentLocation]; loc != "explicit" {
+	if len(resp.GetVolume().GetAccessibleTopology()) == 1 {
+		top := resp.GetVolume().GetAccessibleTopology()[0]
+		if loc := top.GetSegments()[TopologySegmentLocation]; loc != "explicit" {
 			t.Errorf("unexpected location segment in topology: %s", loc)
 		}
 	} else {
-		t.Errorf("unexpected number of topologies: %d", len(resp.Volume.AccessibleTopology))
+		t.Errorf("unexpected number of topologies: %d", len(resp.GetVolume().GetAccessibleTopology()))
 	}
 }
 
@@ -544,7 +544,7 @@ func TestControllerServicePublishVolume(t *testing.T) {
 		t.Fatal(err)
 	}
 
-	if devicePath := resp.PublishContext["devicePath"]; devicePath != "foopath" {
+	if devicePath := resp.GetPublishContext()["devicePath"]; devicePath != "foopath" {
 		t.Errorf("unexpected devicePath returned from publish: %s", devicePath)
 	}
 }
@@ -851,8 +851,8 @@ func TestControllerServiceControllerGetCapabilities(t *testing.T) {
 		t.Fatal(err)
 	}
 
-	if len(resp.Capabilities) != 5 {
-		t.Fatalf("unexpected number of capabilities: %d", len(resp.Capabilities))
+	if len(resp.GetCapabilities()) != 5 {
+		t.Fatalf("unexpected number of capabilities: %d", len(resp.GetCapabilities()))
 	}
 }
 
@@ -1030,7 +1030,7 @@ func TestControllerServiceValidateVolumeCapabilitiesUnsupportedCapability(t *tes
 	if err != nil {
 		t.Fatal(err)
 	}
-	if resp.Confirmed != nil {
-		t.Errorf("unexpected confirmation: %v", resp.Confirmed)
+	if resp.GetConfirmed() != nil {
+		t.Errorf("unexpected confirmation: %v", resp.GetConfirmed())
 	}
 }

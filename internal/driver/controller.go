@@ -57,10 +57,10 @@ func NewControllerService(
 }
 
 func (s *ControllerService) CreateVolume(ctx context.Context, req *proto.CreateVolumeRequest) (*proto.CreateVolumeResponse, error) {
-	if req.Name == "" {
+	if req.GetName() == "" {
 		return nil, status.Error(codes.InvalidArgument, "missing name")
 	}
-	if len(req.VolumeCapabilities) == 0 {
+	if len(req.GetVolumeCapabilities()) == 0 {
 		return nil, status.Error(codes.InvalidArgument, "missing volume capabilities")
 	}
 
@@ -70,7 +70,7 @@ func (s *ControllerService) CreateVolume(ctx context.Context, req *proto.CreateV
 	}
 
 	// Check if ALL volume capabilities are supported.
-	for i, capability := range req.VolumeCapabilities {
+	for i, capability := range req.GetVolumeCapabilities() {
 		if !isCapabilitySupported(capability) {
 			return nil, status.Error(codes.InvalidArgument, fmt.Sprintf("capability at index %d is not supported", i))
 		}
@@ -80,7 +80,7 @@ func (s *ControllerService) CreateVolume(ctx context.Context, req *proto.CreateV
 	// accessibility requirements, falling back to the location where the
 	// controller pod has been scheduled if no requirements have been provided.
 	var location = s.location
-	if loc := locationFromTopologyRequirement(req.AccessibilityRequirements); loc != nil {
+	if loc := locationFromTopologyRequirement(req.GetAccessibilityRequirements()); loc != nil {
 		location = *loc
 	}
 
@@ -111,7 +111,7 @@ func (s *ControllerService) CreateVolume(ctx context.Context, req *proto.CreateV
 
 	// Create the volume. The service handles idempotency as required by the CSI spec.
 	volume, err := s.volumeService.Create(ctx, volumes.CreateOpts{
-		Name:     req.Name,
+		Name:     req.GetName(),
 		MinSize:  minSize,
 		MaxSize:  maxSize,
 		Location: location,
@@ -123,8 +123,8 @@ func (s *ControllerService) CreateVolume(ctx context.Context, req *proto.CreateV
 			"err", err,
 		)
 		code := codes.Internal
-		switch err { //nolint:gocritic
-		case volumes.ErrVolumeAlreadyExists:
+		switch { //nolint:gocritic
+		case errors.Is(err, volumes.ErrVolumeAlreadyExists):
 			code = codes.AlreadyExists
 		}
 		return nil, status.Error(code, fmt.Sprintf("failed to create volume: %s", err))
@@ -153,7 +153,7 @@ func (s *ControllerService) CreateVolume(ctx context.Context, req *proto.CreateV
 				topology,
 			},
 			VolumeContext: map[string]string{
-				"fsFormatOptions": req.Parameters["fsFormatOptions"],
+				"fsFormatOptions": req.GetParameters()["fsFormatOptions"],
 			},
 		},
 	}
@@ -161,11 +161,11 @@ func (s *ControllerService) CreateVolume(ctx context.Context, req *proto.CreateV
 }
 
 func (s *ControllerService) DeleteVolume(ctx context.Context, req *proto.DeleteVolumeRequest) (*proto.DeleteVolumeResponse, error) {
-	if req.VolumeId == "" {
+	if req.GetVolumeId() == "" {
 		return nil, status.Error(codes.InvalidArgument, "invalid volume id")
 	}
 
-	if volumeID, err := parseVolumeID(req.VolumeId); err == nil {
+	if volumeID, err := parseVolumeID(req.GetVolumeId()); err == nil {
 		volume := &csi.Volume{ID: volumeID}
 		if err := s.volumeService.Delete(ctx, volume); err != nil {
 			if errors.Is(err, volumes.ErrVolumeNotFound) {
@@ -183,30 +183,30 @@ func (s *ControllerService) DeleteVolume(ctx context.Context, req *proto.DeleteV
 }
 
 func (s *ControllerService) ControllerPublishVolume(ctx context.Context, req *proto.ControllerPublishVolumeRequest) (*proto.ControllerPublishVolumeResponse, error) {
-	if req.VolumeId == "" {
+	if req.GetVolumeId() == "" {
 		return nil, status.Error(codes.InvalidArgument, "missing volume id")
 	}
-	if req.NodeId == "" {
+	if req.GetNodeId() == "" {
 		return nil, status.Error(codes.InvalidArgument, "missing node id")
 	}
-	if req.VolumeCapability == nil {
+	if req.GetVolumeCapability() == nil {
 		return nil, status.Error(codes.InvalidArgument, "missing volume capabilities")
 	}
 
-	volumeID, err := parseVolumeID(req.VolumeId)
+	volumeID, err := parseVolumeID(req.GetVolumeId())
 	if err != nil {
 		return nil, status.Error(codes.NotFound, "volume not found")
 	}
 
-	serverID, err := parseNodeID(req.NodeId)
+	serverID, err := parseNodeID(req.GetNodeId())
 	if err != nil {
 		return nil, status.Error(codes.NotFound, "node not found")
 	}
 
-	if !isCapabilitySupported(req.VolumeCapability) {
+	if !isCapabilitySupported(req.GetVolumeCapability()) {
 		return nil, status.Error(codes.InvalidArgument, "capability is not supported")
 	}
-	if req.Readonly {
+	if req.GetReadonly() {
 		return nil, status.Error(codes.InvalidArgument, "readonly volumes are not supported")
 	}
 
@@ -215,16 +215,16 @@ func (s *ControllerService) ControllerPublishVolume(ctx context.Context, req *pr
 
 	if err := s.volumeService.Attach(ctx, volume, server); err != nil {
 		code := codes.Internal
-		switch err {
-		case volumes.ErrVolumeNotFound:
+		switch {
+		case errors.Is(err, volumes.ErrVolumeNotFound):
 			code = codes.NotFound
-		case volumes.ErrServerNotFound:
+		case errors.Is(err, volumes.ErrServerNotFound):
 			code = codes.NotFound
-		case volumes.ErrAttached:
+		case errors.Is(err, volumes.ErrAttached):
 			code = codes.FailedPrecondition
-		case volumes.ErrAttachLimitReached:
+		case errors.Is(err, volumes.ErrAttachLimitReached):
 			code = codes.ResourceExhausted
-		case volumes.ErrLockedServer:
+		case errors.Is(err, volumes.ErrLockedServer):
 			code = codes.Unavailable
 		}
 		return nil, status.Error(code, fmt.Sprintf("failed to publish volume: %s", err))
@@ -232,8 +232,8 @@ func (s *ControllerService) ControllerPublishVolume(ctx context.Context, req *pr
 
 	volume, err = s.volumeService.GetByID(ctx, volumeID)
 	if err != nil {
-		switch err {
-		case volumes.ErrVolumeNotFound:
+		switch {
+		case errors.Is(err, volumes.ErrVolumeNotFound):
 			return nil, status.Error(codes.NotFound, "volume not found")
 		default:
 			return nil, status.Error(codes.Internal, fmt.Sprintf("failed to get volume: %s", err))
@@ -249,19 +249,19 @@ func (s *ControllerService) ControllerPublishVolume(ctx context.Context, req *pr
 }
 
 func (s *ControllerService) ControllerUnpublishVolume(ctx context.Context, req *proto.ControllerUnpublishVolumeRequest) (*proto.ControllerUnpublishVolumeResponse, error) {
-	if req.VolumeId == "" {
+	if req.GetVolumeId() == "" {
 		return nil, status.Error(codes.InvalidArgument, "invalid volume id")
 	}
 
-	volumeID, err := parseVolumeID(req.VolumeId)
+	volumeID, err := parseVolumeID(req.GetVolumeId())
 	if err != nil {
 		return nil, status.Error(codes.NotFound, "volume not found")
 	}
 	volume := &csi.Volume{ID: volumeID}
 
 	var server *csi.Server
-	if req.NodeId != "" {
-		serverID, err := parseNodeID(req.NodeId)
+	if req.GetNodeId() != "" {
+		serverID, err := parseNodeID(req.GetNodeId())
 		if err != nil {
 			return nil, status.Error(codes.NotFound, "node not found")
 		}
@@ -270,13 +270,13 @@ func (s *ControllerService) ControllerUnpublishVolume(ctx context.Context, req *
 
 	if err := s.volumeService.Detach(ctx, volume, server); err != nil {
 		code := codes.Internal
-		switch err {
-		case volumes.ErrVolumeNotFound: // Based on the spec it is save to assume that the call was successful if the volume is not found
+		switch {
+		case errors.Is(err, volumes.ErrVolumeNotFound): // Based on the spec it is save to assume that the call was successful if the volume is not found
 			resp := &proto.ControllerUnpublishVolumeResponse{}
 			return resp, nil
-		case volumes.ErrServerNotFound:
+		case errors.Is(err, volumes.ErrServerNotFound):
 			code = codes.NotFound
-		case volumes.ErrLockedServer:
+		case errors.Is(err, volumes.ErrLockedServer):
 			code = codes.Unavailable
 		}
 		return nil, status.Error(code, fmt.Sprintf("failed to unpublish volume: %s", err))
@@ -287,14 +287,14 @@ func (s *ControllerService) ControllerUnpublishVolume(ctx context.Context, req *
 }
 
 func (s *ControllerService) ValidateVolumeCapabilities(ctx context.Context, req *proto.ValidateVolumeCapabilitiesRequest) (*proto.ValidateVolumeCapabilitiesResponse, error) {
-	if req.VolumeId == "" {
+	if req.GetVolumeId() == "" {
 		return nil, status.Error(codes.InvalidArgument, "invalid volume id")
 	}
-	if len(req.VolumeCapabilities) == 0 {
+	if len(req.GetVolumeCapabilities()) == 0 {
 		return nil, status.Error(codes.InvalidArgument, "missing volume capabilities")
 	}
 
-	volumeID, err := parseVolumeID(req.VolumeId)
+	volumeID, err := parseVolumeID(req.GetVolumeId())
 	if err != nil {
 		return nil, status.Error(codes.NotFound, "volume not found")
 	}
@@ -308,7 +308,7 @@ func (s *ControllerService) ValidateVolumeCapabilities(ctx context.Context, req 
 	}
 
 	confirmed := true
-	for _, capability := range req.VolumeCapabilities {
+	for _, capability := range req.GetVolumeCapabilities() {
 		if !isCapabilitySupported(capability) {
 			confirmed = false
 			break
@@ -318,14 +318,14 @@ func (s *ControllerService) ValidateVolumeCapabilities(ctx context.Context, req 
 	resp := &proto.ValidateVolumeCapabilitiesResponse{}
 	if confirmed {
 		resp.Confirmed = &proto.ValidateVolumeCapabilitiesResponse_Confirmed{
-			VolumeCapabilities: req.VolumeCapabilities,
+			VolumeCapabilities: req.GetVolumeCapabilities(),
 		}
 	}
 	return resp, nil
 }
 
 func (s *ControllerService) ListVolumes(ctx context.Context, req *proto.ListVolumesRequest) (*proto.ListVolumesResponse, error) {
-	if req.StartingToken != "" {
+	if req.GetStartingToken() != "" {
 		return nil, status.Error(codes.Aborted, "Starting token is not implemented")
 	}
 
@@ -399,11 +399,11 @@ func (s *ControllerService) ControllerGetCapabilities(context.Context, *proto.Co
 }
 
 func (s *ControllerService) ControllerExpandVolume(ctx context.Context, req *proto.ControllerExpandVolumeRequest) (*proto.ControllerExpandVolumeResponse, error) {
-	if req.VolumeId == "" {
+	if req.GetVolumeId() == "" {
 		return nil, status.Error(codes.InvalidArgument, "invalid volume id")
 	}
 
-	volumeID, err := parseVolumeID(req.VolumeId)
+	volumeID, err := parseVolumeID(req.GetVolumeId())
 	if err != nil {
 		return nil, status.Error(codes.NotFound, "volume not found")
 	}
@@ -416,8 +416,8 @@ func (s *ControllerService) ControllerExpandVolume(ctx context.Context, req *pro
 
 	if err := s.volumeService.Resize(ctx, volume, minSize); err != nil {
 		code := codes.Internal
-		switch err { //nolint:gocritic
-		case volumes.ErrVolumeNotFound:
+		switch { //nolint:gocritic
+		case errors.Is(err, volumes.ErrVolumeNotFound):
 			code = codes.NotFound
 		}
 		return nil, status.Error(code, fmt.Sprintf("failed to expand volume: %s", err))
@@ -425,8 +425,8 @@ func (s *ControllerService) ControllerExpandVolume(ctx context.Context, req *pro
 
 	if volume, err = s.volumeService.GetByID(ctx, volumeID); err != nil {
 		code := codes.Internal
-		switch err { //nolint:gocritic
-		case volumes.ErrVolumeNotFound:
+		switch { //nolint:gocritic
+		case errors.Is(err, volumes.ErrVolumeNotFound):
 			code = codes.NotFound
 		}
 		return nil, status.Error(code, fmt.Sprintf("failed to expand volume: %s", err))
