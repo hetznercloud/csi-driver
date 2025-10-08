@@ -33,6 +33,8 @@ func (l *LinuxStatsService) ByteFilesystemStats(volumePath string) (totalBytes i
 		return
 	}
 
+	bsize := int64(statfs.Bsize)
+
 	bavail, err := utils.UInt64ToInt64(statfs.Bavail)
 	if err != nil {
 		err = fmt.Errorf("error converting available blocks: %w", err)
@@ -51,9 +53,9 @@ func (l *LinuxStatsService) ByteFilesystemStats(volumePath string) (totalBytes i
 		return
 	}
 
-	availableBytes = bavail * statfs.Bsize
-	usedBytes = (blocks - bfree) * statfs.Bsize
-	totalBytes = blocks * statfs.Bsize
+	availableBytes = bavail * bsize
+	usedBytes = (blocks - bfree) * bsize
+	totalBytes = blocks * bsize
 
 	return
 }
