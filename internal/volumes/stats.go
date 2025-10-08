@@ -25,13 +25,6 @@ func NewLinuxStatsService(logger *slog.Logger) *LinuxStatsService {
 	}
 }
 
-func Uint64ToInt64(u uint64) (int64, error) {
-	if u > math.MaxInt64 {
-		return 0, fmt.Errorf("value %d overflows int64", u)
-	}
-	return int64(u), nil
-}
-
 func (l *LinuxStatsService) ByteFilesystemStats(volumePath string) (totalBytes int64, availableBytes int64, usedBytes int64, err error) {
 	statfs := &unix.Statfs_t{}
 	err = unix.Statfs(volumePath, statfs)
@@ -39,19 +32,19 @@ func (l *LinuxStatsService) ByteFilesystemStats(volumePath string) (totalBytes i
 		return
 	}
 
-	bavail, err := Uint64ToInt64(statfs.Bavail)
+	bavail, err := uint64ToInt64(statfs.Bavail)
 	if err != nil {
 		err = fmt.Errorf("error converting available blocks: %w", err)
 		return
 	}
 
-	blocks, err := Uint64ToInt64(statfs.Blocks)
+	blocks, err := uint64ToInt64(statfs.Blocks)
 	if err != nil {
 		err = fmt.Errorf("error converting blocks: %w", err)
 		return
 	}
 
-	bfree, err := Uint64ToInt64(statfs.Bfree)
+	bfree, err := uint64ToInt64(statfs.Bfree)
 	if err != nil {
 		err = fmt.Errorf("error converting free blocks: %w", err)
 		return
@@ -71,13 +64,13 @@ func (l *LinuxStatsService) INodeFilesystemStats(volumePath string) (total int64
 		return
 	}
 
-	total, err = Uint64ToInt64(statfs.Files)
+	total, err = uint64ToInt64(statfs.Files)
 	if err != nil {
 		err = fmt.Errorf("error converting total inodes: %w", err)
 		return
 	}
 
-	free, err = Uint64ToInt64(statfs.Ffree)
+	free, err = uint64ToInt64(statfs.Ffree)
 	if err != nil {
 		err = fmt.Errorf("error converting free inodes: %w", err)
 		return
@@ -86,4 +79,11 @@ func (l *LinuxStatsService) INodeFilesystemStats(volumePath string) (total int64
 	used = total - free
 
 	return
+}
+
+func uint64ToInt64(u uint64) (int64, error) {
+	if u > math.MaxInt64 {
+		return 0, fmt.Errorf("value %d overflows int64", u)
+	}
+	return int64(u), nil
 }
