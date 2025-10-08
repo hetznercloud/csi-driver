@@ -1,9 +1,12 @@
 package volumes
 
 import (
+	"fmt"
 	"log/slog"
 
 	"golang.org/x/sys/unix"
+
+	"github.com/hetznercloud/csi-driver/internal/utils"
 )
 
 // StatsService get statistics about mounted volumes.
@@ -29,10 +32,29 @@ func (l *LinuxStatsService) ByteFilesystemStats(volumePath string) (totalBytes i
 	if err != nil {
 		return
 	}
-	// TODO: Make this safe
-	availableBytes = int64(statfs.Bavail) * int64(statfs.Bsize)                    //nolint:gosec
-	usedBytes = (int64(statfs.Blocks) - int64(statfs.Bfree)) * int64(statfs.Bsize) //nolint:gosec
-	totalBytes = int64(statfs.Blocks) * int64(statfs.Bsize)                        //nolint:gosec
+
+	bavail, err := utils.UInt64ToInt64(statfs.Bavail)
+	if err != nil {
+		err = fmt.Errorf("error converting available blocks: %w", err)
+		return
+	}
+
+	blocks, err := utils.UInt64ToInt64(statfs.Blocks)
+	if err != nil {
+		err = fmt.Errorf("error converting blocks: %w", err)
+		return
+	}
+
+	bfree, err := utils.UInt64ToInt64(statfs.Bfree)
+	if err != nil {
+		err = fmt.Errorf("error converting free blocks: %w", err)
+		return
+	}
+
+	availableBytes = bavail * statfs.Bsize
+	usedBytes = (blocks - bfree) * statfs.Bsize
+	totalBytes = blocks * statfs.Bsize
+
 	return
 }
 
@@ -43,9 +65,19 @@ func (l *LinuxStatsService) INodeFilesystemStats(volumePath string) (total int64
 		return
 	}
 
-	// TODO: Make this safe
-	total = int64(statfs.Files) //nolint:gosec
-	free = int64(statfs.Ffree)  //nolint:gosec
+	total, err = utils.UInt64ToInt64(statfs.Files)
+	if err != nil {
+		err = fmt.Errorf("error converting total inodes: %w", err)
+		return
+	}
+
+	free, err = utils.UInt64ToInt64(statfs.Ffree)
+	if err != nil {
+		err = fmt.Errorf("error converting free inodes: %w", err)
+		return
+	}
+
 	used = total - free
+
 	return
 }
