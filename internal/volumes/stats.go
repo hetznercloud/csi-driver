@@ -3,9 +3,10 @@ package volumes
 import (
 	"fmt"
 	"log/slog"
-	"math"
 
 	"golang.org/x/sys/unix"
+
+	"github.com/hetznercloud/csi-driver/internal/utils"
 )
 
 // StatsService get statistics about mounted volumes.
@@ -32,19 +33,19 @@ func (l *LinuxStatsService) ByteFilesystemStats(volumePath string) (totalBytes i
 		return
 	}
 
-	bavail, err := uint64ToInt64(statfs.Bavail)
+	bavail, err := utils.UInt64ToInt64(statfs.Bavail)
 	if err != nil {
 		err = fmt.Errorf("error converting available blocks: %w", err)
 		return
 	}
 
-	blocks, err := uint64ToInt64(statfs.Blocks)
+	blocks, err := utils.UInt64ToInt64(statfs.Blocks)
 	if err != nil {
 		err = fmt.Errorf("error converting blocks: %w", err)
 		return
 	}
 
-	bfree, err := uint64ToInt64(statfs.Bfree)
+	bfree, err := utils.UInt64ToInt64(statfs.Bfree)
 	if err != nil {
 		err = fmt.Errorf("error converting free blocks: %w", err)
 		return
@@ -64,13 +65,13 @@ func (l *LinuxStatsService) INodeFilesystemStats(volumePath string) (total int64
 		return
 	}
 
-	total, err = uint64ToInt64(statfs.Files)
+	total, err = utils.UInt64ToInt64(statfs.Files)
 	if err != nil {
 		err = fmt.Errorf("error converting total inodes: %w", err)
 		return
 	}
 
-	free, err = uint64ToInt64(statfs.Ffree)
+	free, err = utils.UInt64ToInt64(statfs.Ffree)
 	if err != nil {
 		err = fmt.Errorf("error converting free inodes: %w", err)
 		return
@@ -79,11 +80,4 @@ func (l *LinuxStatsService) INodeFilesystemStats(volumePath string) (total int64
 	used = total - free
 
 	return
-}
-
-func uint64ToInt64(u uint64) (int64, error) {
-	if u > math.MaxInt64 {
-		return 0, fmt.Errorf("value %d overflows int64", u)
-	}
-	return int64(u), nil
 }
