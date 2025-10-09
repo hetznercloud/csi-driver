@@ -33,6 +33,10 @@ func (l *LinuxStatsService) ByteFilesystemStats(volumePath string) (totalBytes i
 		return
 	}
 
+	// golang.org/x/sys/unix returns a 32-bit integer on 32-bit systems (ARMv6)
+	// ensure it is converted to int64
+	bsize := int64(statfs.Bsize)
+
 	bavail, err := utils.UInt64ToInt64(statfs.Bavail)
 	if err != nil {
 		err = fmt.Errorf("error converting available blocks: %w", err)
@@ -51,9 +55,9 @@ func (l *LinuxStatsService) ByteFilesystemStats(volumePath string) (totalBytes i
 		return
 	}
 
-	availableBytes = bavail * statfs.Bsize
-	usedBytes = (blocks - bfree) * statfs.Bsize
-	totalBytes = blocks * statfs.Bsize
+	availableBytes = bavail * bsize
+	usedBytes = (blocks - bfree) * bsize
+	totalBytes = blocks * bsize
 
 	return
 }
