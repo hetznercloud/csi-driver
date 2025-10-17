@@ -6,6 +6,8 @@ github.com/container-storage-interface/spec v1.10.0 h1:YkzWPV39x+ZMTa6Ax2czJLLwp
 github.com/container-storage-interface/spec v1.10.0/go.mod h1:DtUvaQszPml1YJfIK7c00mlv6/g4wNMLanLgiUbKFRI=
 github.com/container-storage-interface/spec v1.11.0 h1:H/YKTOeUZwHtyPOr9raR+HgFmGluGCklulxDYxSdVNM=
 github.com/container-storage-interface/spec v1.11.0/go.mod h1:DtUvaQszPml1YJfIK7c00mlv6/g4wNMLanLgiUbKFRI=
+github.com/container-storage-interface/spec v1.12.0 h1:zrFOEqpR5AghNaaDG4qyedwPBqU2fU0dWjLQMP/azK0=
+github.com/container-storage-interface/spec v1.12.0/go.mod h1:txsm+MA2B2WDa5kW69jNbqPnvTtfvZma7T/zsAZ9qX8=
 github.com/coreos/go-systemd/v22 v22.5.0 h1:RrqgGjYQKalulkV8NGVIfkXQf6YYmOyiJKk8iXXhfZs=
 github.com/coreos/go-systemd/v22 v22.5.0/go.mod h1:Y58oyj3AT4RCenI/lSvhwexgC+NSVTIJ3seZv2GcEnc=
 github.com/davecgh/go-spew v1.1.0/go.mod h1:J7Y8YcW2NihsgmVo/mv3lAwl/skON4iLHjSsI+c5H38=
