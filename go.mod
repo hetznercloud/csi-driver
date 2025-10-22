@@ -10,7 +10,7 @@ require (
 	github.com/grpc-ecosystem/go-grpc-middleware/providers/prometheus v1.1.0
 	github.com/hashicorp/nomad/api v0.0.0-20251017113449-5eb75535197a
 	github.com/hetznercloud/hcloud-go/v2 v2.28.0
-	github.com/kubernetes-csi/csi-test/v5 v5.3.1
+	github.com/kubernetes-csi/csi-test/v5 v5.4.0
 	github.com/moby/buildkit v0.25.1
 	github.com/prometheus/client_golang v1.23.2
 	github.com/stretchr/testify v1.11.1
@@ -46,8 +46,8 @@ require (
 	github.com/moby/sys/mountinfo v0.7.2 // indirect
 	github.com/moby/sys/userns v0.1.0 // indirect
 	github.com/munnerz/goautoneg v0.0.0-20191010083416-a7dc8b61c822 // indirect
-	github.com/onsi/ginkgo/v2 v2.19.0 // indirect
-	github.com/onsi/gomega v1.33.1 // indirect
+	github.com/onsi/ginkgo/v2 v2.22.0 // indirect
+	github.com/onsi/gomega v1.36.1 // indirect
 	github.com/opencontainers/runc v1.1.13 // indirect
 	github.com/opencontainers/runtime-spec v1.2.1 // indirect
 	github.com/pkg/errors v0.9.1 // indirect
