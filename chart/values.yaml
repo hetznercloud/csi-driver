@@ -103,7 +103,7 @@ controller:
 
     csiProvisioner:
       name: registry.k8s.io/sig-storage/csi-provisioner
-      tag: v5.3.0 # renovate: datasource=docker depName=registry.k8s.io/sig-storage/csi-provisioner
+      tag: v6.0.0 # renovate: datasource=docker depName=registry.k8s.io/sig-storage/csi-provisioner
       ## Specify a imagePullPolicy
       ## Defaults to 'Always' if image tag is 'latest', else set to 'IfNotPresent'
       ## ref: http://kubernetes.io/docs/user-guide/images/#pre-pulling-images
