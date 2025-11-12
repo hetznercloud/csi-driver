@@ -9,7 +9,7 @@ require (
 	github.com/golang/protobuf v1.5.4
 	github.com/grpc-ecosystem/go-grpc-middleware/providers/prometheus v1.1.0
 	github.com/hashicorp/nomad/api v0.0.0-20251111223019-f626dee323f3
-	github.com/hetznercloud/hcloud-go/v2 v2.29.0
+	github.com/hetznercloud/hcloud-go/v2 v2.30.0
 	github.com/kubernetes-csi/csi-test/v5 v5.4.0
 	github.com/moby/buildkit v0.25.2
 	github.com/prometheus/client_golang v1.23.2
