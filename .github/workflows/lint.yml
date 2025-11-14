@@ -35,4 +35,4 @@ jobs:
 
       - uses: golangci/golangci-lint-action@v9
         with:
-          version: v2.6.1 # renovate: datasource=github-releases depName=golangci/golangci-lint
+          version: v2.6.2 # renovate: datasource=github-releases depName=golangci/golangci-lint
