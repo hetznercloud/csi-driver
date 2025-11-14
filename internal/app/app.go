@@ -192,27 +192,39 @@ func CreateHcloudClient(metricsRegistry *prometheus.Registry, logger *slog.Logge
 }
 
 // GetServerLocation retrieves the hcloud server the application is running on.
-func GetServerLocation(logger *slog.Logger, hcloudClient *hcloud.Client, metadataClient *metadata.Client) (string, error) {
-	// Option 1: Get from HCLOUD_SERVER_ID env
-	// This env would be set explicitly by the user
-	// If this is set and location can not be found we do not want a fallback
-	isSet, location, err := getLocationByEnvID(logger, hcloudClient)
-	if isSet {
-		return location, err
-	}
-
-	// Option 2: Get from node name and search server list
-	// This env is set by default via a fieldRef on spec.nodeName
-	// If this is set and server can not be found we fallback to the metadata fallback
-	location, err = getLocationByEnvNodeName(logger, hcloudClient)
-	if err != nil {
-		return "", err
-	}
-	if location != "" {
+func GetServerLocation(
+	logger *slog.Logger,
+	metadataClient *metadata.Client,
+	hcloudClient *hcloud.Client,
+	isController bool,
+) (string, error) {
+	// Set explicitly via environment variable
+	if location, ok := os.LookupEnv("HCLOUD_VOLUME_DEFAULT_LOCATION"); ok {
 		return location, nil
 	}
 
-	// Option 3: Metadata service as fallback
+	if isController {
+		// Get from HCLOUD_SERVER_ID env
+		// This env would be set explicitly by the user
+		// If this is set and location can not be found we do not want a fallback
+		isSet, location, err := getLocationByEnvID(logger, hcloudClient)
+		if isSet {
+			return location, err
+		}
+
+		// Get from node name and search server list
+		// This env is set by default via a fieldRef on spec.nodeName
+		// If this is set and server can not be found we fallback to the metadata fallback
+		location, err = getLocationByEnvNodeName(logger, hcloudClient)
+		if err != nil {
+			return "", err
+		}
+		if location != "" {
+			return location, nil
+		}
+	}
+
+	// Metadata service as fallback
 	return GetLocationFromMetadata(logger, metadataClient)
 }
 

@@ -28,12 +28,18 @@ jobs:
 
   integration:
     runs-on: ubuntu-latest
+
+    permissions:
+      id-token: write
+
     steps:
       - uses: actions/checkout@v5
 
       - uses: actions/setup-go@v6
         with:
           go-version-file: go.mod
+
+      - uses: hetznercloud/tps-action@main
 
       - name: Run tests
         run: go test -v -tags integration -race -coverprofile=coverage.txt ./test/integration
