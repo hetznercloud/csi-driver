@@ -18,7 +18,7 @@ import (
 	"github.com/stretchr/testify/require"
 )
 
-func TestLocationFromEnv(t *testing.T) {
+func TestGetServerLocation(t *testing.T) {
 	token := os.Getenv("HCLOUD_TOKEN")
 	require.NotEmpty(t, token, "HCLOUD_TOKEN is not set")
 
