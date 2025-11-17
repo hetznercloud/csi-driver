@@ -20,7 +20,7 @@ jobs:
           # helm is needed to generate chart snapshots
           setup-tools: |
             helm
-          helm: v3.19.1 # renovate: datasource=github-releases depName=helm/helm
+          helm: v3.19.2 # renovate: datasource=github-releases depName=helm/helm
 
       - uses: pre-commit/action@v3.0.1
 
