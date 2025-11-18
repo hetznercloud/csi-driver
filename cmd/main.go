@@ -2,26 +2,27 @@ package main
 
 import (
 	"flag"
+	"fmt"
 	"log/slog"
 	"os"
 	"strconv"
 
 	proto "github.com/container-storage-interface/spec/lib/go/csi"
+	"google.golang.org/grpc"
 
 	"github.com/hetznercloud/csi-driver/internal/api"
 	"github.com/hetznercloud/csi-driver/internal/app"
 	"github.com/hetznercloud/csi-driver/internal/driver"
+	"github.com/hetznercloud/csi-driver/internal/metrics"
 	"github.com/hetznercloud/csi-driver/internal/utils"
 	"github.com/hetznercloud/csi-driver/internal/volumes"
 	"github.com/hetznercloud/hcloud-go/v2/hcloud/metadata"
 )
 
-var logger *slog.Logger
-
 func main() {
 	var controller, node bool
 
-	logger = app.CreateLogger()
+	logger := app.CreateLogger()
 
 	flag.BoolVar(
 		&controller,
@@ -50,18 +51,9 @@ func main() {
 
 	metadataClient := metadata.NewClient(metadata.WithInstrumentation(m.Registry()))
 
-	if !metadataClient.IsHcloudServer() {
-		logger.Warn("unable to connect to the metadata service")
-	}
-
-	enableProvidedByTopology := app.GetEnableProvidedByTopology()
-
 	listener, err := app.CreateListener()
 	if err != nil {
-		logger.Error(
-			"failed to create listener",
-			"err", err,
-		)
+		logger.Error("failed to create listener", "error", err)
 		os.Exit(1)
 	}
 
@@ -70,17 +62,39 @@ func main() {
 		m.UnaryServerInterceptor(),
 	)
 
+	if err := setup(logger, controller, node, grpcServer, m, metadataClient); err != nil {
+		logger.Error("failed to setup CSI driver", "error", err)
+		os.Exit(1)
+	}
+
+	if err := grpcServer.Serve(listener); err != nil {
+		logger.Error("failed to run CSI driver", "error", err)
+		os.Exit(1)
+	}
+}
+
+func setup(
+	logger *slog.Logger,
+	controller, node bool,
+	grpcServer *grpc.Server,
+	m *metrics.Metrics,
+	metadataClient *metadata.Client,
+) error {
+	enableProvidedByTopology := app.GetEnableProvidedByTopology()
+
+	if !metadataClient.IsHcloudServer() {
+		logger.Warn("unable to connect to the metadata service")
+	}
+
 	if node {
 		location, err := app.GetServerLocation(logger, metadataClient, nil, false)
 		if err != nil {
-			logger.Error("could not determine default volume location", "error", err)
-			os.Exit(1)
+			return fmt.Errorf("could not determine default volume location: %w", err)
 		}
 
 		serverID, err := metadataClient.InstanceID()
 		if err != nil {
-			logger.Error("failed to fetch server ID from metadata service", "err", err)
-			os.Exit(1)
+			return fmt.Errorf("failed to fetch server ID from metadata service: %w", err)
 		}
 
 		volumeMountService := volumes.NewLinuxMountService(logger.With("component", "linux-mount-service"))
@@ -103,23 +117,17 @@ func main() {
 	if controller {
 		hcloudClient, err := app.CreateHcloudClient(m.Registry(), logger)
 		if err != nil {
-			logger.Error(
-				"failed to initialize hcloud client",
-				"err", err,
-			)
-			os.Exit(1)
+			return fmt.Errorf("failed to initialize hcloud client: %w", err)
 		}
 
 		location, err := app.GetServerLocation(logger, metadataClient, hcloudClient, true)
 		if err != nil {
-			logger.Error("could not determine default volume location", "error", err)
-			os.Exit(1)
+			return fmt.Errorf("could not determine default volume location: %w", err)
 		}
 
 		extraVolumeLabels, err := utils.ConvertLabelsToMap(os.Getenv("HCLOUD_VOLUME_EXTRA_LABELS"))
 		if err != nil {
-			logger.Error("could not parse extra labels for volumes", "error", err)
-			os.Exit(1)
+			return fmt.Errorf("could not parse extra labels for volumes: %w", err)
 		}
 
 		volumeService := volumes.NewIdempotentService(
@@ -151,11 +159,5 @@ func main() {
 
 	identityService.SetReady(true)
 
-	if err := grpcServer.Serve(listener); err != nil {
-		logger.Error(
-			"grpc server failed",
-			"err", err,
-		)
-		os.Exit(1)
-	}
+	return nil
 }
