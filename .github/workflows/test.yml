@@ -43,7 +43,7 @@ jobs:
       - uses: hetznercloud/tps-action@main
 
       - name: Run tests
-        run: go test -v -tags integration -race -coverprofile=coverage.txt ./test/integration
+        run: go test -v -tags integration -race -coverpkg=./... -coverprofile=coverage.txt ./test/integration
 
       - name: Upload coverage reports to Codecov
         if: >
