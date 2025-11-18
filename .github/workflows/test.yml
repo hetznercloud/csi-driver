@@ -24,6 +24,7 @@ jobs:
           !startsWith(github.head_ref, 'releaser-pleaser--')
         uses: codecov/codecov-action@v5
         with:
+          flags: unit
           token: ${{ secrets.CODECOV_TOKEN }}
 
   integration:
@@ -50,6 +51,7 @@ jobs:
           !startsWith(github.head_ref, 'releaser-pleaser--')
         uses: codecov/codecov-action@v5
         with:
+          flags: integration
           token: ${{ secrets.CODECOV_TOKEN }}
 
   kubernetes:
