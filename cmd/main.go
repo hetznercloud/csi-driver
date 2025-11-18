@@ -1,9 +1,7 @@
 package main
 
 import (
-	"errors"
 	"flag"
-	"fmt"
 	"log/slog"
 	"os"
 	"strconv"
@@ -56,12 +54,6 @@ func main() {
 		logger.Warn("unable to connect to the metadata service")
 	}
 
-	location, err := getLocation(logger, metadataClient)
-	if err != nil {
-		logger.Error("could not determine default volume location", "error", err)
-		os.Exit(1)
-	}
-
 	enableProvidedByTopology := app.GetEnableProvidedByTopology()
 
 	listener, err := app.CreateListener()
@@ -79,6 +71,12 @@ func main() {
 	)
 
 	if node {
+		location, err := app.GetServerLocation(logger, metadataClient, nil, false)
+		if err != nil {
+			logger.Error("could not determine default volume location", "error", err)
+			os.Exit(1)
+		}
+
 		serverID, err := metadataClient.InstanceID()
 		if err != nil {
 			logger.Error("failed to fetch server ID from metadata service", "err", err)
@@ -103,18 +101,24 @@ func main() {
 	}
 
 	if controller {
-		extraVolumeLabels, err := utils.ConvertLabelsToMap(os.Getenv("HCLOUD_VOLUME_EXTRA_LABELS"))
-		if err != nil {
-			logger.Error("could not parse extra labels for volumes", "error", err)
-			os.Exit(1)
-		}
-
 		hcloudClient, err := app.CreateHcloudClient(m.Registry(), logger)
 		if err != nil {
 			logger.Error(
 				"failed to initialize hcloud client",
 				"err", err,
 			)
+			os.Exit(1)
+		}
+
+		location, err := app.GetServerLocation(logger, metadataClient, hcloudClient, true)
+		if err != nil {
+			logger.Error("could not determine default volume location", "error", err)
+			os.Exit(1)
+		}
+
+		extraVolumeLabels, err := utils.ConvertLabelsToMap(os.Getenv("HCLOUD_VOLUME_EXTRA_LABELS"))
+		if err != nil {
+			logger.Error("could not parse extra labels for volumes", "error", err)
 			os.Exit(1)
 		}
 
@@ -154,21 +158,4 @@ func main() {
 		)
 		os.Exit(1)
 	}
-}
-
-func getLocation(logger *slog.Logger, metadataClient *metadata.Client) (string, error) {
-	if location, ok := os.LookupEnv("HCLOUD_VOLUME_DEFAULT_LOCATION"); ok {
-		return location, nil
-	}
-
-	if !metadataClient.IsHcloudServer() {
-		return "", errors.New("HCLOUD_VOLUME_DEFAULT_LOCATION not set and not running on a cloud server")
-	}
-
-	location, err := app.GetLocationFromMetadata(logger, metadataClient)
-	if err != nil {
-		return "", fmt.Errorf("failed to get location from metadata: %w", err)
-	}
-
-	return location, nil
 }
