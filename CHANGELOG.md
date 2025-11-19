@@ -1,5 +1,11 @@
 # Changelog
 
+## [v2.18.1](https://github.com/hetznercloud/csi-driver/releases/tag/v2.18.1)
+
+### Bug Fixes
+
+- missing location config via node name and server id (#1158)
+
 ## [v2.18.0](https://github.com/hetznercloud/csi-driver/releases/tag/v2.18.0)
 
 ### Features
