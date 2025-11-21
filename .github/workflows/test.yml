@@ -9,7 +9,7 @@ jobs:
   unit:
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v5
+      - uses: actions/checkout@v6
 
       - uses: actions/setup-go@v6
         with:
@@ -34,7 +34,7 @@ jobs:
       id-token: write
 
     steps:
-      - uses: actions/checkout@v5
+      - uses: actions/checkout@v6
 
       - uses: actions/setup-go@v6
         with:
@@ -88,7 +88,7 @@ jobs:
       GINKGO_EXTRA_ARGS: ${{ (matrix.k3s != 'v1.29' && matrix.k3s != 'v1.30') && '--silence-skips --github-output' || '' }}
 
     steps:
-      - uses: actions/checkout@v5
+      - uses: actions/checkout@v6
 
       - uses: actions/setup-go@v6
         with:
@@ -233,7 +233,7 @@ jobs:
       ENV: gha-${{ github.run_id }}-${{ github.run_attempt }}-${{ matrix.nomad }}
 
     steps:
-      - uses: actions/checkout@v5
+      - uses: actions/checkout@v6
 
       - uses: actions/setup-go@v6
         with:
