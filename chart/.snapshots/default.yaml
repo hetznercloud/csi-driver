@@ -296,8 +296,6 @@ spec:
           resources:
             limits: {}
             requests: {}
-          args:
-            - --feature-gates=RecoverVolumeExpansionFailure=false
           volumeMounts:
           - name: socket-dir
             mountPath: /run/csi

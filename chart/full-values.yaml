@@ -79,7 +79,6 @@ controller:
       initialDelaySeconds: 5
       periodSeconds: 5
 
-
   resources:
     csiAttacher:
       limits:
@@ -170,10 +169,20 @@ controller:
   lifecycleHooks:
     postStart:
       exec:
-        command: [ "/bin/sh", "-c", "echo Hello from the postStart handler > /usr/share/message" ]
+        command:
+          [
+            "/bin/sh",
+            "-c",
+            "echo Hello from the postStart handler > /usr/share/message",
+          ]
     preStop:
       exec:
-        command: [ "/bin/sh","-c","nginx -s quit; while killall -0 nginx; do sleep 1; done" ]
+        command:
+          [
+            "/bin/sh",
+            "-c",
+            "nginx -s quit; while killall -0 nginx; do sleep 1; done",
+          ]
 
   extraEnvVars:
     - name: HCLOUD_DEBUG
@@ -199,7 +208,7 @@ controller:
     - name: your-image-name
       image: your-image
       imagePullPolicy: Always
-      command: ['sh', '-c', 'echo "hello world"']
+      command: ["sh", "-c", 'echo "hello world"']
 
 node:
   image:
@@ -214,12 +223,11 @@ node:
     hcloudCSIDriver:
       pullPolicy: Always
       pullSecrets:
-          - hcloudCSIDriver
+        - hcloudCSIDriver
 
   service:
     annotations:
       node-svc: node-svc
-
 
   customLivenessProbe:
     exec:
@@ -302,10 +310,20 @@ node:
   lifecycleHooks:
     postStart:
       exec:
-        command: [ "/bin/sh", "-c", "echo Hello from the postStart handler > /usr/share/message" ]
+        command:
+          [
+            "/bin/sh",
+            "-c",
+            "echo Hello from the postStart handler > /usr/share/message",
+          ]
     preStop:
       exec:
-        command: [ "/bin/sh","-c","nginx -s quit; while killall -0 nginx; do sleep 1; done" ]
+        command:
+          [
+            "/bin/sh",
+            "-c",
+            "nginx -s quit; while killall -0 nginx; do sleep 1; done",
+          ]
 
   extraEnvVars:
     - name: HCLOUD_DEBUG
@@ -313,7 +331,7 @@ node:
 
   extraVolumes:
     - name: extra-volume
-      emptyDir: { }
+      emptyDir: {}
 
   extraVolumeMounts:
     - name: extra-volume
@@ -331,7 +349,7 @@ node:
     - name: your-image-name
       image: your-image
       imagePullPolicy: Always
-      command: [ 'sh', '-c', 'echo "hello world"' ]
+      command: ["sh", "-c", 'echo "hello world"']
 
   kubeletDir: /var/lib/k0s/kubelet
 
@@ -349,18 +367,18 @@ metrics:
     annotations:
       service-monitor-annotation: service-monitor-annotation
     labels:
-        service-monitor-label: service-monitor-label
+      service-monitor-label: service-monitor-label
     jobLabel: service-monitor-job-label
     honorLabels: true
     interval: 15s
     scrapeTimeout: 15s
     metricRelabelings:
       - sourceLabels:
-        - bar
+          - bar
         action: Drop
     relabelings:
       - sourceLabels:
-        - foo
+          - foo
         action: Keep
 
     selector:
