@@ -20,4 +20,7 @@
 .idea/
 *.tmproj
 
+# Various artifacts in our charts dir
 .snapshots
+.helmignore
+example-prod.values.yaml
