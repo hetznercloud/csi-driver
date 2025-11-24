@@ -516,7 +516,6 @@ spec:
               cpu: 12m
               memory: 22Mi
           args:
-            - --feature-gates=RecoverVolumeExpansionFailure=false
             - --leader-election
             - --leader-election-namespace=namespace-override
           volumeMounts:
