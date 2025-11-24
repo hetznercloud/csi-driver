@@ -69,8 +69,6 @@ jobs:
       fail-fast: false # Continue tests matrix if a flaky run occur.
       matrix:
         include:
-          - k3s: v1.31
-            k8s-test: v1.31.1
           - k3s: v1.32
             k8s-test: v1.32.1
           - k3s: v1.33
