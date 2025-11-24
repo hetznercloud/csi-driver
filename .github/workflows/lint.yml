@@ -23,16 +23,3 @@ jobs:
           helm: v3.19.2 # renovate: datasource=github-releases depName=helm/helm
 
       - uses: pre-commit/action@v3.0.1
-
-  lint:
-    runs-on: ubuntu-latest
-    steps:
-      - uses: actions/checkout@v6
-
-      - uses: actions/setup-go@v6
-        with:
-          go-version-file: go.mod
-
-      - uses: golangci/golangci-lint-action@v9
-        with:
-          version: v2.6.2 # renovate: datasource=github-releases depName=golangci/golangci-lint
