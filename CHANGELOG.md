@@ -1,5 +1,11 @@
 # Changelog
 
+## [v2.18.2](https://github.com/hetznercloud/csi-driver/releases/tag/v2.18.2)
+
+### Bug Fixes
+
+- drop Kubernetes v1.31 support
+
 ## [v2.18.1](https://github.com/hetznercloud/csi-driver/releases/tag/v2.18.1)
 
 ### Bug Fixes
