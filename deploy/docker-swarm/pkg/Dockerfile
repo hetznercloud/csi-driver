@@ -11,7 +11,7 @@ RUN ls -al
 ARG CGO_ENABLED=0
 RUN go build -o hcloud-csi-driver github.com/hetznercloud/csi-driver/cmd
 
-FROM --platform=$TARGETPLATFORM alpine:3.22
+FROM --platform=$TARGETPLATFORM alpine:3.23
 
 RUN apk add --no-cache \
     blkid \
