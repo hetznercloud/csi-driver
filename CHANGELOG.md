@@ -1,5 +1,11 @@
 # Changelog
 
+## [v2.18.3](https://github.com/hetznercloud/csi-driver/releases/tag/v2.18.3)
+
+### Bug Fixes
+
+- missing volumeattributesclasses permissions for csi-resizer (#1193)
+
 ## [v2.18.2](https://github.com/hetznercloud/csi-driver/releases/tag/v2.18.2)
 
 ### Bug Fixes
