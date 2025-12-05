@@ -10,11 +10,11 @@ import (
 	proto "github.com/container-storage-interface/spec/lib/go/csi"
 	"google.golang.org/grpc"
 
-	"github.com/hetznercloud/csi-driver/internal/api"
 	"github.com/hetznercloud/csi-driver/internal/app"
 	"github.com/hetznercloud/csi-driver/internal/driver"
 	"github.com/hetznercloud/csi-driver/internal/metrics"
 	"github.com/hetznercloud/csi-driver/internal/utils"
+	"github.com/hetznercloud/csi-driver/internal/volsrv"
 	"github.com/hetznercloud/csi-driver/internal/volumes"
 	"github.com/hetznercloud/hcloud-go/v2/hcloud/metadata"
 )
@@ -132,7 +132,7 @@ func setup(
 
 		volumeService := volumes.NewIdempotentService(
 			logger.With("component", "idempotent-volume-service"),
-			api.NewVolumeService(
+			volsrv.NewVolumeService(
 				logger.With("component", "api-volume-service"),
 				hcloudClient,
 			),
