@@ -1,4 +1,4 @@
-package api
+package volsrv
 
 import (
 	"github.com/hetznercloud/csi-driver/internal/csi"
