@@ -202,7 +202,7 @@ jobs:
       - name: Persist debug artifacts
         if: always()
         continue-on-error: true
-        uses: actions/upload-artifact@v5
+        uses: actions/upload-artifact@v6
         with:
           name: debug-logs-k8s-${{ env.ENV }}
           path: debug-logs/
@@ -316,7 +316,7 @@ jobs:
       - name: Persist debug artifacts
         if: always()
         continue-on-error: true
-        uses: actions/upload-artifact@v5
+        uses: actions/upload-artifact@v6
         with:
           name: debug-logs-nomad-${{ env.ENV }}
           path: debug-logs/
