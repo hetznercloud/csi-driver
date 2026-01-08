@@ -107,7 +107,7 @@ jobs:
             skaffold
           helm: v4.0.4 # renovate: datasource=github-releases depName=helm/helm
           kubectl: v1.35.0 # renovate: datasource=github-releases depName=kubernetes/kubernetes
-          skaffold: v2.17.0 # renovate: datasource=github-releases depName=GoogleContainerTools/skaffold
+          skaffold: v2.17.1 # renovate: datasource=github-releases depName=GoogleContainerTools/skaffold
 
       - name: Setup k3sup
         env:
@@ -248,7 +248,7 @@ jobs:
         with:
           setup-tools: |
             skaffold
-          skaffold: v2.17.0 # renovate: datasource=github-releases depName=GoogleContainerTools/skaffold
+          skaffold: v2.17.1 # renovate: datasource=github-releases depName=GoogleContainerTools/skaffold
 
       - uses: hashicorp/setup-nomad@main
         id: setup
