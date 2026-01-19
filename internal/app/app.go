@@ -252,7 +252,7 @@ func getLocationByEnvID(logger *slog.Logger, hcloudClient *hcloud.Client) (bool,
 		return true, "", fmt.Errorf("HCLOUD_SERVER_ID is set to %d, but no server could be found", id)
 	}
 
-	return true, server.Datacenter.Location.Name, nil
+	return true, server.Location.Name, nil
 }
 
 func getLocationByEnvNodeName(logger *slog.Logger, hcloudClient *hcloud.Client) (string, error) {
@@ -270,7 +270,7 @@ func getLocationByEnvNodeName(logger *slog.Logger, hcloudClient *hcloud.Client) 
 			"fetched server via server name from KUBE_NODE_NAME env var",
 			"server-id", server.ID,
 		)
-		return server.Datacenter.Location.Name, nil
+		return server.Location.Name, nil
 	}
 
 	logger.Info(
