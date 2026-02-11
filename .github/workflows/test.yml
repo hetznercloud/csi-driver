@@ -75,6 +75,8 @@ jobs:
             k8s-test: v1.33.1
           - k3s: v1.34
             k8s-test: v1.34.1
+          - k3s: v1.35
+            k8s-test: v1.35.1
 
     env:
       K3S_CHANNEL: ${{ matrix.k3s }}
