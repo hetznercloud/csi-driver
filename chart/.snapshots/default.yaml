@@ -304,7 +304,7 @@ spec:
             mountPath: /run/csi
 
         - name: csi-provisioner
-          image: registry.k8s.io/sig-storage/csi-provisioner:v6.1.0
+          image: registry.k8s.io/sig-storage/csi-provisioner:v6.1.1
           imagePullPolicy: IfNotPresent
           resources:
             limits: {}
