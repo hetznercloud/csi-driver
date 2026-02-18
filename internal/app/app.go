@@ -8,6 +8,7 @@ import (
 	"net"
 	"os"
 	"os/signal"
+	"path/filepath"
 	"runtime/coverage"
 	"strconv"
 	"strings"
@@ -91,9 +92,10 @@ func CreateListener() (net.Listener, error) {
 	if !strings.HasPrefix(endpoint, "unix://") {
 		return nil, errors.New("endpoint must start with unix://")
 	}
-	endpoint = endpoint[7:] // strip unix://
 
-	if err := os.Remove(endpoint); err != nil && !os.IsNotExist(err) {
+	endpoint = filepath.Clean(endpoint[7:]) // strip unix://
+
+	if err := os.Remove(endpoint); err != nil && !os.IsNotExist(err) { //nolint:gosec // G703: endpoint is from a trusted env var, validated with unix:// prefix, and cleaned with filepath.Clean
 		return nil, fmt.Errorf("failed to remove socket file at %s: %w", endpoint, err)
 	}
 	var l net.ListenConfig
