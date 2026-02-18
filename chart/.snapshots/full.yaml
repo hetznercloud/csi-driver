@@ -509,7 +509,7 @@ spec:
             mountPath: /run/csi
 
         - name: csi-resizer
-          image: registry.k8s.io/sig-storage/csi-resizer:v2.0.0
+          image: registry.k8s.io/sig-storage/csi-resizer:v2.1.0
           imagePullPolicy: Always
           resources:
             limits:
