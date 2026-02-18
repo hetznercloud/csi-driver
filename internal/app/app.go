@@ -6,6 +6,7 @@ import (
 	"fmt"
 	"log/slog"
 	"net"
+	"net/http"
 	"os"
 	"os/signal"
 	"runtime/coverage"
@@ -23,6 +24,8 @@ import (
 	"github.com/hetznercloud/hcloud-go/v2/hcloud/exp/kit/envutil"
 	"github.com/hetznercloud/hcloud-go/v2/hcloud/metadata"
 )
+
+const APIClientTimeout = 15 * time.Second
 
 func parseLogLevel(lvl string) slog.Level {
 	switch strings.ToLower(lvl) {
@@ -156,6 +159,9 @@ func CreateHcloudClient(metricsRegistry *prometheus.Registry, logger *slog.Logge
 		hcloud.WithToken(apiToken),
 		hcloud.WithApplication("csi-driver", driver.PluginVersion),
 		hcloud.WithInstrumentation(metricsRegistry),
+		hcloud.WithHTTPClient(&http.Client{
+			Timeout: APIClientTimeout,
+		}),
 	}
 	hcloudEndpoint := os.Getenv("HCLOUD_ENDPOINT")
 	if hcloudEndpoint != "" {
