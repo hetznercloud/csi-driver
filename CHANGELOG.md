@@ -1,5 +1,11 @@
 # Changelog
 
+## [v2.19.1](https://github.com/hetznercloud/csi-driver/releases/tag/v2.19.1)
+
+### Bug Fixes
+
+- add api client timeout
+
 ## [v2.19.0](https://github.com/hetznercloud/csi-driver/releases/tag/v2.19.0)
 
 ### Features
