@@ -54,6 +54,11 @@ linters:
     staticcheck:
       checks: ["all", "-QF1008"]
 
+    revive:
+      rules:
+        - name: var-naming
+          arguments: [[], [], [{ skipPackageNameCollisionWithGoStd: true }]]
+
   exclusions:
     generated: lax
     presets:
@@ -70,9 +75,6 @@ linters:
           - revive
         path: internal/utils/.+\.go
         text: var-naming
-      - linters:
-          - revive
-        text: "var-naming: avoid package names that conflict with Go standard library package names"
 
 formatters:
   enable:
