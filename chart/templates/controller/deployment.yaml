@@ -72,65 +72,6 @@ spec:
           {{- include "common.tplvalues.render" (dict "value" .Values.controller.initContainers "context" $) | nindent 8 }}
         {{- end }}
       containers:
-        - name: csi-attacher
-          image: {{ include "common.images.image" (dict "value" .Values.controller.image.csiAttacher "context" .) }}
-          imagePullPolicy: {{ .Values.controller.image.csiAttacher.pullPolicy }}
-          {{- if .Values.controller.resources.csiAttacher }}
-          resources: {{- toYaml .Values.controller.resources.csiAttacher | nindent 12 }}
-          {{- end }}
-          args:
-            - --default-fstype=ext4
-            {{- if $enableLeaderElection }}
-            - --leader-election
-            - --leader-election-namespace={{ include "common.names.namespace" . }}
-            {{- end}}
-          volumeMounts:
-          - name: socket-dir
-            mountPath: /run/csi
-
-        - name: csi-resizer
-          image: {{ include "common.images.image" (dict "value" .Values.controller.image.csiResizer "context" .) }}
-          imagePullPolicy: {{ .Values.controller.image.csiResizer.pullPolicy }}
-          {{- if .Values.controller.resources.csiResizer }}
-          resources: {{- toYaml .Values.controller.resources.csiResizer | nindent 12 }}
-          {{- end }}
-          {{- if $enableLeaderElection }}
-          args:
-            - --leader-election
-            - --leader-election-namespace={{ include "common.names.namespace" . }}
-          {{- end}}
-          volumeMounts:
-          - name: socket-dir
-            mountPath: /run/csi
-
-        - name: csi-provisioner
-          image: {{ include "common.images.image" (dict "value" .Values.controller.image.csiProvisioner "context" .) }}
-          imagePullPolicy: {{ .Values.controller.image.csiProvisioner.pullPolicy }}
-          {{- if .Values.controller.resources.csiProvisioner }}
-          resources: {{- toYaml .Values.controller.resources.csiProvisioner | nindent 12 }}
-          {{- end }}
-          args:
-            - --feature-gates=Topology=true
-            - --default-fstype=ext4
-            - --extra-create-metadata
-            {{- if $enableLeaderElection }}
-            - --leader-election
-            - --leader-election-namespace={{ include "common.names.namespace" . }}
-            {{- end}}
-          volumeMounts:
-          - name: socket-dir
-            mountPath: /run/csi
-
-        - name: liveness-probe
-          image: {{ include "common.images.image" (dict "value" .Values.controller.image.livenessProbe "context" .) }}
-          imagePullPolicy: {{ .Values.controller.image.livenessProbe.pullPolicy }}
-          {{- if .Values.controller.resources.livenessProbe }}
-          resources: {{- toYaml .Values.controller.resources.livenessProbe | nindent 12 }}
-          {{- end }}
-          volumeMounts:
-          - mountPath: /run/csi
-            name: socket-dir
-
         - name: hcloud-csi-driver
           image: {{ include "common.images.image" (dict "value" .Values.controller.image.hcloudCSIDriver "context" .) }} # x-releaser-pleaser-version
           imagePullPolicy: {{ .Values.controller.image.hcloudCSIDriver.pullPolicy }}
@@ -218,6 +159,64 @@ spec:
           {{- if .Values.controller.extraVolumeMounts }}
           {{- include "common.tplvalues.render" (dict "value" .Values.controller.extraVolumeMounts "context" $) | nindent 12 }}
           {{- end }}
+        - name: csi-attacher
+          image: {{ include "common.images.image" (dict "value" .Values.controller.image.csiAttacher "context" .) }}
+          imagePullPolicy: {{ .Values.controller.image.csiAttacher.pullPolicy }}
+          {{- if .Values.controller.resources.csiAttacher }}
+          resources: {{- toYaml .Values.controller.resources.csiAttacher | nindent 12 }}
+          {{- end }}
+          args:
+            - --default-fstype=ext4
+            {{- if $enableLeaderElection }}
+            - --leader-election
+            - --leader-election-namespace={{ include "common.names.namespace" . }}
+            {{- end}}
+          volumeMounts:
+          - name: socket-dir
+            mountPath: /run/csi
+
+        - name: csi-resizer
+          image: {{ include "common.images.image" (dict "value" .Values.controller.image.csiResizer "context" .) }}
+          imagePullPolicy: {{ .Values.controller.image.csiResizer.pullPolicy }}
+          {{- if .Values.controller.resources.csiResizer }}
+          resources: {{- toYaml .Values.controller.resources.csiResizer | nindent 12 }}
+          {{- end }}
+          {{- if $enableLeaderElection }}
+          args:
+            - --leader-election
+            - --leader-election-namespace={{ include "common.names.namespace" . }}
+          {{- end}}
+          volumeMounts:
+          - name: socket-dir
+            mountPath: /run/csi
+
+        - name: csi-provisioner
+          image: {{ include "common.images.image" (dict "value" .Values.controller.image.csiProvisioner "context" .) }}
+          imagePullPolicy: {{ .Values.controller.image.csiProvisioner.pullPolicy }}
+          {{- if .Values.controller.resources.csiProvisioner }}
+          resources: {{- toYaml .Values.controller.resources.csiProvisioner | nindent 12 }}
+          {{- end }}
+          args:
+            - --feature-gates=Topology=true
+            - --default-fstype=ext4
+            - --extra-create-metadata
+            {{- if $enableLeaderElection }}
+            - --leader-election
+            - --leader-election-namespace={{ include "common.names.namespace" . }}
+            {{- end}}
+          volumeMounts:
+          - name: socket-dir
+            mountPath: /run/csi
+
+        - name: liveness-probe
+          image: {{ include "common.images.image" (dict "value" .Values.controller.image.livenessProbe "context" .) }}
+          imagePullPolicy: {{ .Values.controller.image.livenessProbe.pullPolicy }}
+          {{- if .Values.controller.resources.livenessProbe }}
+          resources: {{- toYaml .Values.controller.resources.livenessProbe | nindent 12 }}
+          {{- end }}
+          volumeMounts:
+          - mountPath: /run/csi
+            name: socket-dir
 
         {{- if .Values.controller.sidecars }}
         {{- include "common.tplvalues.render" ( dict "value" .Values.controller.sidecars "context" $) | nindent 8 }}

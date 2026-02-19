@@ -368,6 +368,57 @@ spec:
         fsGroup: 1001
       initContainers:
       containers:
+        - name: hcloud-csi-driver
+          image: docker.io/hetznercloud/hcloud-csi-driver:v2.19.1 # x-releaser-pleaser-version
+          imagePullPolicy: IfNotPresent
+          args:
+            - -controller
+          env:
+            - name: CSI_ENDPOINT
+              value: unix:///run/csi/socket
+            - name: HCLOUD_VOLUME_DEFAULT_LOCATION
+              value: "nbg1"
+            - name: HCLOUD_VOLUME_EXTRA_LABELS
+              value: "cluster=mycluster,env=production,team=devops"
+            - name: METRICS_ENDPOINT
+              value: "0.0.0.0:9189"
+            - name: ENABLE_METRICS
+              value: "true"
+            - name: KUBE_NODE_NAME
+              valueFrom:
+                fieldRef:
+                  apiVersion: v1
+                  fieldPath: spec.nodeName
+            - name: HCLOUD_TOKEN
+              valueFrom:
+                secretKeyRef:
+                  name: hcloud
+                  key: token
+          resources:
+            limits:
+              cpu: 100m
+              memory: 80Mi
+            requests:
+              cpu: 10m
+              memory: 40Mi
+          ports:
+            - name: metrics
+              containerPort: 9189
+            - name: healthz
+              protocol: TCP
+              containerPort: 9808
+          livenessProbe:
+            failureThreshold: 5
+            initialDelaySeconds: 10
+            periodSeconds: 2
+            successThreshold: 1
+            timeoutSeconds: 3
+            httpGet:
+              path: /healthz
+              port: healthz
+          volumeMounts:
+            - name: socket-dir
+              mountPath: /run/csi
         - name: csi-attacher
           image: registry.k8s.io/sig-storage/csi-attacher:v4.11.0
           imagePullPolicy: IfNotPresent
@@ -436,58 +487,6 @@ spec:
           volumeMounts:
           - mountPath: /run/csi
             name: socket-dir
-
-        - name: hcloud-csi-driver
-          image: docker.io/hetznercloud/hcloud-csi-driver:v2.19.1 # x-releaser-pleaser-version
-          imagePullPolicy: IfNotPresent
-          args:
-            - -controller
-          env:
-            - name: CSI_ENDPOINT
-              value: unix:///run/csi/socket
-            - name: HCLOUD_VOLUME_DEFAULT_LOCATION
-              value: "nbg1"
-            - name: HCLOUD_VOLUME_EXTRA_LABELS
-              value: "cluster=mycluster,env=production,team=devops"
-            - name: METRICS_ENDPOINT
-              value: "0.0.0.0:9189"
-            - name: ENABLE_METRICS
-              value: "true"
-            - name: KUBE_NODE_NAME
-              valueFrom:
-                fieldRef:
-                  apiVersion: v1
-                  fieldPath: spec.nodeName
-            - name: HCLOUD_TOKEN
-              valueFrom:
-                secretKeyRef:
-                  name: hcloud
-                  key: token
-          resources:
-            limits:
-              cpu: 100m
-              memory: 80Mi
-            requests:
-              cpu: 10m
-              memory: 40Mi
-          ports:
-            - name: metrics
-              containerPort: 9189
-            - name: healthz
-              protocol: TCP
-              containerPort: 9808
-          livenessProbe:
-            failureThreshold: 5
-            initialDelaySeconds: 10
-            periodSeconds: 2
-            successThreshold: 1
-            timeoutSeconds: 3
-            httpGet:
-              path: /healthz
-              port: healthz
-          volumeMounts:
-            - name: socket-dir
-              mountPath: /run/csi
 
       volumes:
         - name: socket-dir
