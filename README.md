@@ -7,15 +7,14 @@ This is a [Container Storage Interface](https://github.com/container-storage-int
 enabling you to use ReadWriteOnce Volumes within Kubernetes & other Container
 Orchestrators. Please note that this driver **requires Kubernetes 1.19 or newer**.
 
-## Getting Started
+## Docs
 
-Depending on your Container Orchestrator you need to follow different steps to
-get started with the Hetzner Cloud csi-driver. You can also find other docs
-relevant to that Container Orchestrator behind these links.
+- :rocket: See the [quick start guide](docs/kubernetes/quickstart.md) to get you started.
+- :book: See the [CSI driver architecture](docs/kubernetes/csi-driver-architecture.md) for the involved components.
 
-- [Kubernetes](./docs/kubernetes/README.md#getting-started)
+#### Other Container Orchestrators
 
-#### Environments Outside Official Support
+**These environments are not officially supported**. However, thanks to their compatibility with the CSI spec and community contributions, quick start guides are available for the following:
 
 - [Docker Swarm](./docs/docker-swarm/README.md)️
 - [HashiCorp Nomad](./docs/nomad/README.md)️
