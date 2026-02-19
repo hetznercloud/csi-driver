@@ -490,75 +490,6 @@ spec:
           imagePullPolicy: Always
           name: your-image-name
       containers:
-        - name: csi-attacher
-          image: registry.k8s.io/sig-storage/csi-attacher:v4.11.0
-          imagePullPolicy: Always
-          resources:
-            limits:
-              cpu: 51m
-              memory: 81Mi
-            requests:
-              cpu: 11m
-              memory: 21Mi
-          args:
-            - --default-fstype=ext4
-            - --leader-election
-            - --leader-election-namespace=namespace-override
-          volumeMounts:
-          - name: socket-dir
-            mountPath: /run/csi
-
-        - name: csi-resizer
-          image: registry.k8s.io/sig-storage/csi-resizer:v2.1.0
-          imagePullPolicy: Always
-          resources:
-            limits:
-              cpu: 52m
-              memory: 82Mi
-            requests:
-              cpu: 12m
-              memory: 22Mi
-          args:
-            - --leader-election
-            - --leader-election-namespace=namespace-override
-          volumeMounts:
-          - name: socket-dir
-            mountPath: /run/csi
-
-        - name: csi-provisioner
-          image: registry.k8s.io/sig-storage/csi-provisioner:v6.1.1
-          imagePullPolicy: Always
-          resources:
-            limits:
-              cpu: 53m
-              memory: 83Mi
-            requests:
-              cpu: 13m
-              memory: 23Mi
-          args:
-            - --feature-gates=Topology=true
-            - --default-fstype=ext4
-            - --extra-create-metadata
-            - --leader-election
-            - --leader-election-namespace=namespace-override
-          volumeMounts:
-          - name: socket-dir
-            mountPath: /run/csi
-
-        - name: liveness-probe
-          image: registry.k8s.io/sig-storage/livenessprobe:v2.18.0
-          imagePullPolicy: Always
-          resources:
-            limits:
-              cpu: 54m
-              memory: 84Mi
-            requests:
-              cpu: 14m
-              memory: 24Mi
-          volumeMounts:
-          - mountPath: /run/csi
-            name: socket-dir
-
         - name: hcloud-csi-driver
           image: docker.io/hetznercloud/hcloud-csi-driver:v2.19.1 # x-releaser-pleaser-version
           imagePullPolicy: Always
@@ -637,6 +568,74 @@ spec:
               mountPath: /run/csi
             - mountPath: /tmp/extra-volume
               name: extra-volume
+        - name: csi-attacher
+          image: registry.k8s.io/sig-storage/csi-attacher:v4.11.0
+          imagePullPolicy: Always
+          resources:
+            limits:
+              cpu: 51m
+              memory: 81Mi
+            requests:
+              cpu: 11m
+              memory: 21Mi
+          args:
+            - --default-fstype=ext4
+            - --leader-election
+            - --leader-election-namespace=namespace-override
+          volumeMounts:
+          - name: socket-dir
+            mountPath: /run/csi
+
+        - name: csi-resizer
+          image: registry.k8s.io/sig-storage/csi-resizer:v2.1.0
+          imagePullPolicy: Always
+          resources:
+            limits:
+              cpu: 52m
+              memory: 82Mi
+            requests:
+              cpu: 12m
+              memory: 22Mi
+          args:
+            - --leader-election
+            - --leader-election-namespace=namespace-override
+          volumeMounts:
+          - name: socket-dir
+            mountPath: /run/csi
+
+        - name: csi-provisioner
+          image: registry.k8s.io/sig-storage/csi-provisioner:v6.1.1
+          imagePullPolicy: Always
+          resources:
+            limits:
+              cpu: 53m
+              memory: 83Mi
+            requests:
+              cpu: 13m
+              memory: 23Mi
+          args:
+            - --feature-gates=Topology=true
+            - --default-fstype=ext4
+            - --extra-create-metadata
+            - --leader-election
+            - --leader-election-namespace=namespace-override
+          volumeMounts:
+          - name: socket-dir
+            mountPath: /run/csi
+
+        - name: liveness-probe
+          image: registry.k8s.io/sig-storage/livenessprobe:v2.18.0
+          imagePullPolicy: Always
+          resources:
+            limits:
+              cpu: 54m
+              memory: 84Mi
+            requests:
+              cpu: 14m
+              memory: 24Mi
+          volumeMounts:
+          - mountPath: /run/csi
+            name: socket-dir
         - image: your-image
           imagePullPolicy: Always
           name: your-image-name
