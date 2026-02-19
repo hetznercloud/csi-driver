@@ -45,6 +45,8 @@ func main() {
 		os.Exit(1)
 	}
 
+	logger.Info("starting csi-driver controller", "version", driver.PluginVersion)
+
 	app.SetupCoverageSignalHandler(logger)
 
 	m := app.CreateMetrics(logger)
@@ -124,6 +126,8 @@ func setup(
 		if err != nil {
 			return fmt.Errorf("could not determine default volume location: %w", err)
 		}
+
+		logger.Info("resolved default volume location", "location", location)
 
 		extraVolumeLabels, err := utils.ConvertLabelsToMap(os.Getenv("HCLOUD_VOLUME_EXTRA_LABELS"))
 		if err != nil {
