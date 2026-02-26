@@ -1,5 +1,27 @@
 # Changelog
 
+## [v2.20.0](https://github.com/hetznercloud/csi-driver/releases/tag/v2.20.0)
+
+### Container Reordering
+
+The `hcloud-csi-controller` Pod contains multiple containers: one developed by us and several
+Kubernetes sidecars. In this release, we reordered the containers so that the `hcloud-csi-driver`
+container now comes first. As a result, it starts first and is selected by default when running
+`kubectl logs`. Previously, the default was the `csi-attacher` container. If your tooling relies
+on this default behavior, please update it accordingly. We made this change to improve
+debuggability, especially for newcomers to the ecosystem.
+
+### Init Logs
+
+The `hcloud-csi-driver` container in the `hcloud-csi-controller` Pod now logs info messages on
+startup, including when the default location is selected. Previously, no output was emitted
+until the first volume operation was processed. Since location evaluation may involve calls to the
+Hetzner Cloud API, these logs should help with debugging networking issues.
+
+### Features
+
+- move container startup order and add init log messages (#1266)
+
 ## [v2.19.1](https://github.com/hetznercloud/csi-driver/releases/tag/v2.19.1)
 
 ### Bug Fixes
