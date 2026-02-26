@@ -17,7 +17,7 @@ helm repo update hcloud
 helm install hcloud-csi hcloud/hcloud-csi -n kube-system
 ```
 
-Please note that a secret containing the Hetzner Cloud token is necessary. See the main [Kubernetes Deployment](../docs/kubernetes/README.md) guide.
+Please note that a secret containing the Hetzner Cloud token is necessary. See the main [Kubernetes Deployment](../docs/kubernetes/getting-started.md) guide.
 
 If you're unfamiliar with Helm it would behoove you to peep around the documentation. Perhaps start with the [Quickstart Guide](https://helm.sh/docs/intro/quickstart/)?
 
