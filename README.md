@@ -9,7 +9,7 @@ Orchestrators. Please note that this driver **requires Kubernetes 1.19 or newer*
 
 ## Kubernetes Docs
 
-- :rocket: See the [quick start guide](docs/kubernetes/quickstart.md) to get you started.
+- :rocket: See the [getting started guide](./docs/kubernetes/getting-started.md).
 - :book: See the [CSI driver architecture](docs/kubernetes/csi-driver-architecture.md) for the involved components.
 
 ### Other Container Orchestrators
