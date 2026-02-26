@@ -7,12 +7,12 @@ This is a [Container Storage Interface](https://github.com/container-storage-int
 enabling you to use ReadWriteOnce Volumes within Kubernetes & other Container
 Orchestrators. Please note that this driver **requires Kubernetes 1.19 or newer**.
 
-## Docs
+## Kubernetes Docs
 
 - :rocket: See the [quick start guide](docs/kubernetes/quickstart.md) to get you started.
 - :book: See the [CSI driver architecture](docs/kubernetes/csi-driver-architecture.md) for the involved components.
 
-#### Other Container Orchestrators
+### Other Container Orchestrators
 
 **These environments are not officially supported**. However, thanks to their compatibility with the CSI spec and community contributions, quick start guides are available for the following:
 
