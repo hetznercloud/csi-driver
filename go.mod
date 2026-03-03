@@ -1,6 +1,6 @@
 module github.com/hetznercloud/csi-driver
 
-go 1.25.0
+go 1.25.5
 
 toolchain go1.25.7
 
@@ -11,7 +11,7 @@ require (
 	github.com/hashicorp/nomad/api v0.0.0-20260226211936-d304b7de5d67
 	github.com/hetznercloud/hcloud-go/v2 v2.36.0
 	github.com/kubernetes-csi/csi-test/v5 v5.4.0
-	github.com/moby/buildkit v0.27.1
+	github.com/moby/buildkit v0.28.0
 	github.com/prometheus/client_golang v1.23.2
 	github.com/stretchr/testify v1.11.1
 	golang.org/x/sys v0.41.0
@@ -50,10 +50,10 @@ require (
 	github.com/prometheus/common v0.66.1 // indirect
 	github.com/prometheus/procfs v0.17.0 // indirect
 	go.yaml.in/yaml/v2 v2.4.3 // indirect
-	golang.org/x/net v0.49.0 // indirect
-	golang.org/x/text v0.33.0 // indirect
-	golang.org/x/tools v0.40.0 // indirect
-	google.golang.org/genproto/googleapis/rpc v0.0.0-20251202230838-ff82c1b0f217 // indirect
+	golang.org/x/net v0.51.0 // indirect
+	golang.org/x/text v0.34.0 // indirect
+	golang.org/x/tools v0.41.0 // indirect
+	google.golang.org/genproto/googleapis/rpc v0.0.0-20251222181119-0a764e51fe1b // indirect
 	google.golang.org/protobuf v1.36.11 // indirect
 	gopkg.in/yaml.v2 v2.4.0 // indirect
 	gopkg.in/yaml.v3 v3.0.1 // indirect
