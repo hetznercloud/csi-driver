@@ -54,11 +54,6 @@ linters:
     staticcheck:
       checks: ["all", "-QF1008"]
 
-    revive:
-      rules:
-        - name: var-naming
-          arguments: [[], [], [{ skipPackageNameCollisionWithGoStd: true }]]
-
   exclusions:
     generated: lax
     presets:
