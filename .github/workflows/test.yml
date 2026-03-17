@@ -94,7 +94,7 @@ jobs:
         with:
           go-version-file: go.mod
 
-      - uses: opentofu/setup-opentofu@v1
+      - uses: opentofu/setup-opentofu@v2
         with:
           tofu_version: v1.11.5 # renovate: datasource=github-releases depName=opentofu/opentofu
           tofu_wrapper: false
@@ -239,7 +239,7 @@ jobs:
         with:
           go-version-file: go.mod
 
-      - uses: opentofu/setup-opentofu@v1
+      - uses: opentofu/setup-opentofu@v2
         with:
           tofu_version: v1.11.5 # renovate: datasource=github-releases depName=opentofu/opentofu
           tofu_wrapper: false
