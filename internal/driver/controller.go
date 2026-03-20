@@ -16,6 +16,7 @@ import (
 	"github.com/hetznercloud/csi-driver/internal/csi"
 	"github.com/hetznercloud/csi-driver/internal/utils"
 	"github.com/hetznercloud/csi-driver/internal/volumes"
+	"github.com/hetznercloud/hcloud-go/v2/hcloud"
 )
 
 const (
@@ -107,6 +108,15 @@ func (s *ControllerService) CreateVolume(ctx context.Context, req *proto.CreateV
 		default:
 			s.logger.Warn(fmt.Sprintf("invalid parameter key %s for CreateVolume", key))
 		}
+	}
+
+	// Validate all labels before sending to the API.
+	labelsIface := make(map[string]any, len(volumeLabels))
+	for k, v := range volumeLabels {
+		labelsIface[k] = v
+	}
+	if _, err := hcloud.ValidateResourceLabels(labelsIface); err != nil {
+		return nil, status.Errorf(codes.InvalidArgument, "invalid volume labels: %s", err)
 	}
 
 	// Create the volume. The service handles idempotency as required by the CSI spec.

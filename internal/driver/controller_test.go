@@ -305,6 +305,28 @@ func TestControllerServiceCreateVolumeInputErrors(t *testing.T) {
 			Code: codes.InvalidArgument,
 		},
 		{
+			Name: "label value too long",
+			Req: &proto.CreateVolumeRequest{
+				Name: "test",
+				CapacityRange: &proto.CapacityRange{
+					RequiredBytes: 5*GB + 100,
+					LimitBytes:    10 * GB,
+				},
+				Parameters: map[string]string{"labels": "key=aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa"},
+				VolumeCapabilities: []*proto.VolumeCapability{
+					{
+						AccessType: &proto.VolumeCapability_Mount{
+							Mount: &proto.VolumeCapability_MountVolume{},
+						},
+						AccessMode: &proto.VolumeCapability_AccessMode{
+							Mode: proto.VolumeCapability_AccessMode_SINGLE_NODE_WRITER,
+						},
+					},
+				},
+			},
+			Code: codes.InvalidArgument,
+		},
+		{
 			Name: "empty capabilities",
 			Req: &proto.CreateVolumeRequest{
 				Name: "test",
