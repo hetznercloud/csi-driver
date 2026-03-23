@@ -22,7 +22,7 @@ jobs:
         with:
           python-version: 3.x
 
-      - uses: yokawasa/action-setup-kube-tools@v0.13.1
+      - uses: yokawasa/action-setup-kube-tools@v0.13.3
         with:
           setup-tools: |
             helm
@@ -51,7 +51,7 @@ jobs:
         with:
           python-version: 3.x
 
-      - uses: yokawasa/action-setup-kube-tools@v0.13.1
+      - uses: yokawasa/action-setup-kube-tools@v0.13.3
         with:
           # helm is needed to generate chart snapshots
           setup-tools: |
