@@ -6,7 +6,7 @@ import (
 	"sync"
 
 	proto "github.com/container-storage-interface/spec/lib/go/csi"
-	"github.com/golang/protobuf/ptypes/wrappers"
+	"google.golang.org/protobuf/types/known/wrapperspb"
 )
 
 type IdentityService struct {
@@ -83,7 +83,7 @@ func (s *IdentityService) GetPluginCapabilities(context.Context, *proto.GetPlugi
 
 func (s *IdentityService) Probe(context.Context, *proto.ProbeRequest) (*proto.ProbeResponse, error) {
 	resp := &proto.ProbeResponse{
-		Ready: &wrappers.BoolValue{Value: s.isReady()},
+		Ready: &wrapperspb.BoolValue{Value: s.isReady()},
 	}
 	return resp, nil
 }
