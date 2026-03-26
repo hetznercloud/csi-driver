@@ -22,7 +22,7 @@ jobs:
         if: >
           !startsWith(github.head_ref, 'renovate/') &&
           !startsWith(github.head_ref, 'releaser-pleaser--')
-        uses: codecov/codecov-action@v5
+        uses: codecov/codecov-action@v6
         with:
           flags: unit
           token: ${{ secrets.CODECOV_TOKEN }}
@@ -49,7 +49,7 @@ jobs:
         if: >
           !startsWith(github.head_ref, 'renovate/') &&
           !startsWith(github.head_ref, 'releaser-pleaser--')
-        uses: codecov/codecov-action@v5
+        uses: codecov/codecov-action@v6
         with:
           flags: integration
           token: ${{ secrets.CODECOV_TOKEN }}
@@ -155,7 +155,7 @@ jobs:
         if: >
           !startsWith(github.head_ref, 'renovate/') &&
           !startsWith(github.head_ref, 'releaser-pleaser--')
-        uses: codecov/codecov-action@v5
+        uses: codecov/codecov-action@v6
         with:
           token: ${{ secrets.CODECOV_TOKEN }}
           files: ./coverage/controller/coverage.txt
@@ -165,7 +165,7 @@ jobs:
         if: >
           !startsWith(github.head_ref, 'renovate/') &&
           !startsWith(github.head_ref, 'releaser-pleaser--')
-        uses: codecov/codecov-action@v5
+        uses: codecov/codecov-action@v6
         with:
           token: ${{ secrets.CODECOV_TOKEN }}
           files: ./coverage/node/coverage.txt
