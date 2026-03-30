@@ -29,6 +29,8 @@ const (
 	labelKeyPVCNamespace = "pvc-namespace"
 	labelKeyPVName       = "pv-name"
 	labelKeyManagedBy    = "managed-by"
+
+	MaxLabelValueLength = 63
 )
 
 type ControllerService struct {
@@ -85,7 +87,7 @@ func (s *ControllerService) CreateVolume(ctx context.Context, req *proto.CreateV
 		location = *loc
 	}
 
-	var volumeLabels = map[string]string{
+	volumeLabels := map[string]string{
 		labelKeyManagedBy: "csi-driver",
 	}
 
@@ -111,6 +113,13 @@ func (s *ControllerService) CreateVolume(ctx context.Context, req *proto.CreateV
 	}
 
 	// Validate all labels before sending to the API.
+	for k, v := range volumeLabels {
+		// Truncate label values to fit API requirements
+		if len(v) > MaxLabelValueLength {
+			volumeLabels[k] = v[len(v)-MaxLabelValueLength:]
+		}
+	}
+
 	labelsIface := make(map[string]any, len(volumeLabels))
 	for k, v := range volumeLabels {
 		labelsIface[k] = v
