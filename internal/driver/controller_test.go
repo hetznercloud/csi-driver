@@ -124,6 +124,7 @@ func TestControllerServiceCreateVolume(t *testing.T) {
 		t.Errorf("unexpected number of topologies: %d", len(resp.GetVolume().GetAccessibleTopology()))
 	}
 }
+
 func TestControllerServiceCreateVolumeWithParameterLabels(t *testing.T) {
 	env := newControllerServiceTestEnv()
 
@@ -142,7 +143,7 @@ func TestControllerServiceCreateVolumeWithParameterLabels(t *testing.T) {
 		if opts.Location != "testloc" {
 			t.Errorf("unexpected location passed to volume service: %s", opts.Location)
 		}
-		if v, ok := opts.Labels["test"]; !ok || v != "test" {
+		if v, ok := opts.Labels["test"]; !ok || v != "bel-which-needs-to-be-truncated-with-important-infos-at-the-end" {
 			t.Errorf("unexpected labels passed to volume service: %s", opts.Labels)
 		}
 		if v, ok := opts.Labels["clusterName"]; !ok || v != "myCluster" {
@@ -162,7 +163,7 @@ func TestControllerServiceCreateVolumeWithParameterLabels(t *testing.T) {
 			RequiredBytes: MinVolumeSize*GB + 100,
 			LimitBytes:    2 * MinVolumeSize * GB,
 		},
-		Parameters: map[string]string{"labels": "test=test"},
+		Parameters: map[string]string{"labels": "test=this-is-a-very-long-label-which-needs-to-be-truncated-with-important-infos-at-the-end"},
 		VolumeCapabilities: []*proto.VolumeCapability{
 			{
 				AccessType: &proto.VolumeCapability_Mount{

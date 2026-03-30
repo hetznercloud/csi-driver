@@ -16,6 +16,7 @@ import (
 	"github.com/hetznercloud/csi-driver/internal/csi"
 	"github.com/hetznercloud/csi-driver/internal/utils"
 	"github.com/hetznercloud/csi-driver/internal/volumes"
+	"github.com/hetznercloud/hcloud-go/v2/hcloud"
 )
 
 const (
@@ -28,6 +29,8 @@ const (
 	labelKeyPVCNamespace = "pvc-namespace"
 	labelKeyPVName       = "pv-name"
 	labelKeyManagedBy    = "managed-by"
+
+	MaxLabelValueLength = 63
 )
 
 type ControllerService struct {
@@ -79,12 +82,12 @@ func (s *ControllerService) CreateVolume(ctx context.Context, req *proto.CreateV
 	// Take the location where to create the volume from the request's
 	// accessibility requirements, falling back to the location where the
 	// controller pod has been scheduled if no requirements have been provided.
-	var location = s.location
+	location := s.location
 	if loc := locationFromTopologyRequirement(req.GetAccessibilityRequirements()); loc != nil {
 		location = *loc
 	}
 
-	var volumeLabels = map[string]string{
+	volumeLabels := map[string]string{
 		labelKeyManagedBy: "csi-driver",
 	}
 
@@ -107,6 +110,30 @@ func (s *ControllerService) CreateVolume(ctx context.Context, req *proto.CreateV
 		default:
 			s.logger.Warn(fmt.Sprintf("invalid parameter key %s for CreateVolume", key))
 		}
+	}
+
+	// Validate all labels before sending to the API.
+	for k, v := range volumeLabels {
+		// Truncate label values to fit API requirements
+		if len(v) > MaxLabelValueLength {
+			truncated := v[len(v)-MaxLabelValueLength:]
+			s.logger.Warn(
+				"volume label value truncated",
+				"volume", req.GetName(),
+				"key", k,
+				"original", v,
+				"truncated", truncated,
+			)
+			volumeLabels[k] = truncated
+		}
+	}
+
+	labelsIface := make(map[string]any, len(volumeLabels))
+	for k, v := range volumeLabels {
+		labelsIface[k] = v
+	}
+	if _, err := hcloud.ValidateResourceLabels(labelsIface); err != nil {
+		return nil, status.Errorf(codes.InvalidArgument, "invalid volume labels: %s", err)
 	}
 
 	// Create the volume. The service handles idempotency as required by the CSI spec.
@@ -330,7 +357,6 @@ func (s *ControllerService) ListVolumes(ctx context.Context, req *proto.ListVolu
 	}
 
 	vols, err := s.volumeService.All(ctx)
-
 	if err != nil {
 		return nil, status.Error(codes.Internal, err.Error())
 	}

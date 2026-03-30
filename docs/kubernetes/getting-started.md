@@ -184,3 +184,9 @@ storageClasses:
     extraParameters:
       labels: cluster=myCluster,env=prod
 ```
+
+### Label Validation and Truncation
+
+All volume labels are validated against the [Hetzner Cloud API requirements](https://docs.hetzner.cloud/reference/cloud#description/labels) before a volume is created. If any label does not pass validation, the volume creation will fail with an `InvalidArgument` error.
+
+Label values that exceed the maximum length of 63 characters are automatically truncated from the left, keeping the last 63 characters. This is especially relevant for automatically set labels like `pvc-name`, `pvc-namespace`, and `pv-name`, which may contain long Kubernetes resource names.
