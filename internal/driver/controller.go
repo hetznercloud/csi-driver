@@ -82,7 +82,7 @@ func (s *ControllerService) CreateVolume(ctx context.Context, req *proto.CreateV
 	// Take the location where to create the volume from the request's
 	// accessibility requirements, falling back to the location where the
 	// controller pod has been scheduled if no requirements have been provided.
-	var location = s.location
+	location := s.location
 	if loc := locationFromTopologyRequirement(req.GetAccessibilityRequirements()); loc != nil {
 		location = *loc
 	}
@@ -117,7 +117,7 @@ func (s *ControllerService) CreateVolume(ctx context.Context, req *proto.CreateV
 		// Truncate label values to fit API requirements
 		if len(v) > MaxLabelValueLength {
 			truncated := v[len(v)-MaxLabelValueLength:]
-			s.logger.Info(
+			s.logger.Warn(
 				"volume label value truncated",
 				"volume", req.GetName(),
 				"key", k,
@@ -357,7 +357,6 @@ func (s *ControllerService) ListVolumes(ctx context.Context, req *proto.ListVolu
 	}
 
 	vols, err := s.volumeService.All(ctx)
-
 	if err != nil {
 		return nil, status.Error(codes.Internal, err.Error())
 	}
