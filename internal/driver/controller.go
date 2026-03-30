@@ -116,7 +116,15 @@ func (s *ControllerService) CreateVolume(ctx context.Context, req *proto.CreateV
 	for k, v := range volumeLabels {
 		// Truncate label values to fit API requirements
 		if len(v) > MaxLabelValueLength {
-			volumeLabels[k] = v[len(v)-MaxLabelValueLength:]
+			truncated := v[len(v)-MaxLabelValueLength:]
+			s.logger.Info(
+				"volume label value truncated",
+				"volume", req.GetName(),
+				"key", k,
+				"original", v,
+				"truncated", truncated,
+			)
+			volumeLabels[k] = truncated
 		}
 	}
 
