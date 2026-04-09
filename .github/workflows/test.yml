@@ -96,7 +96,7 @@ jobs:
 
       - uses: opentofu/setup-opentofu@v2
         with:
-          tofu_version: v1.11.5 # renovate: datasource=github-releases depName=opentofu/opentofu
+          tofu_version: v1.11.6 # renovate: datasource=github-releases depName=opentofu/opentofu
           tofu_wrapper: false
 
       - uses: docker/setup-buildx-action@v4
@@ -241,7 +241,7 @@ jobs:
 
       - uses: opentofu/setup-opentofu@v2
         with:
-          tofu_version: v1.11.5 # renovate: datasource=github-releases depName=opentofu/opentofu
+          tofu_version: v1.11.6 # renovate: datasource=github-releases depName=opentofu/opentofu
           tofu_wrapper: false
 
       - uses: docker/setup-buildx-action@v4
