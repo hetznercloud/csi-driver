@@ -1,5 +1,17 @@
 # Changelog
 
+## [v2.20.1](https://github.com/hetznercloud/csi-driver/releases/tag/v2.20.1)
+
+### Validate Volume Labels
+
+With this release, volume labels are validated against [Hetzner Cloud API requirements](https://docs.hetzner.cloud/reference/cloud#description/labels) before a volume is created.
+
+To avoid breaking existing setups, label values that exceed the maximum length of 63 characters are automatically truncated from the left, keeping the last 63 characters. This is especially relevant for automatically set labels like `pvc-name`, `pvc-namespace`, and `pv-name`, which may contain long Kubernetes resource names.
+
+### Bug Fixes
+
+- validate hcloud volume labels (#1304)
+
 ## [v2.20.0](https://github.com/hetznercloud/csi-driver/releases/tag/v2.20.0)
 
 ### Container Reordering
