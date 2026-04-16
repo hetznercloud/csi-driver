@@ -200,6 +200,52 @@ func TestControllerServiceCreateVolumeWithParameterLabels(t *testing.T) {
 	}
 }
 
+func TestControllerServiceCreateVolumeWithTruncatedLabelStartingWithDash(t *testing.T) {
+	env := newControllerServiceTestEnv()
+
+	env.service.enableProvidedByTopology = true
+
+	env.volumeService.CreateFunc = func(ctx context.Context, opts volumes.CreateOpts) (*csi.Volume, error) {
+		// Input: "a" + 63x"-" + "b" (65 chars). After truncating to last 63: 62x"-" + "b".
+		// After stripping leading non-alphanumeric chars: "b".
+		if v, ok := opts.Labels["test"]; !ok || v != "b" {
+			t.Errorf("unexpected label value after truncation: %q", v)
+		}
+		return &csi.Volume{
+			ID:       1,
+			Name:     opts.Name,
+			Size:     opts.MinSize,
+			Location: opts.Location,
+		}, nil
+	}
+
+	req := &proto.CreateVolumeRequest{
+		Name: "testvol",
+		CapacityRange: &proto.CapacityRange{
+			RequiredBytes: MinVolumeSize*GB + 100,
+			LimitBytes:    2 * MinVolumeSize * GB,
+		},
+		Parameters: map[string]string{"labels": "test=a---------------------------------------------------------------b"},
+		VolumeCapabilities: []*proto.VolumeCapability{
+			{
+				AccessType: &proto.VolumeCapability_Mount{
+					Mount: &proto.VolumeCapability_MountVolume{},
+				},
+				AccessMode: &proto.VolumeCapability_AccessMode{
+					Mode: proto.VolumeCapability_AccessMode_SINGLE_NODE_WRITER,
+				},
+			},
+		},
+	}
+	resp, err := env.service.CreateVolume(env.ctx, req)
+	if err != nil {
+		t.Fatal(err)
+	}
+	if resp.GetVolume().GetVolumeId() != "1" {
+		t.Errorf("unexpected value for VolumeId: %s", resp.GetVolume().GetVolumeId())
+	}
+}
+
 func TestControllerServiceCreateVolumeWithLocation(t *testing.T) {
 	env := newControllerServiceTestEnv()
 

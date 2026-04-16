@@ -117,6 +117,12 @@ func (s *ControllerService) CreateVolume(ctx context.Context, req *proto.CreateV
 		// Truncate label values to fit API requirements
 		if len(v) > MaxLabelValueLength {
 			truncated := v[len(v)-MaxLabelValueLength:]
+			// After truncation the first character might not be alphanumeric
+			// (e.g. a dash), which violates the label spec. Strip any
+			// leading non-alphanumeric characters.
+			truncated = strings.TrimLeftFunc(truncated, func(r rune) bool {
+				return !((r >= 'a' && r <= 'z') || (r >= 'A' && r <= 'Z') || (r >= '0' && r <= '9'))
+			})
 			s.logger.Warn(
 				"volume label value truncated",
 				"volume", req.GetName(),
