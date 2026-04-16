@@ -1,5 +1,19 @@
 # Changelog
 
+## [v2.20.2](https://github.com/hetznercloud/csi-driver/releases/tag/v2.20.2)
+
+### Volume Label Truncation Issue
+
+The label value truncation introduced in v2.20.1 could produce values
+starting with a non-alphanumeric character (e.g. -), which is invalid
+per the https://docs.hetzner.cloud/reference/cloud#description/labels.
+Truncated values are now stripped of leading non-alphanumeric characters
+to ensure they remain valid.
+
+### Bug Fixes
+
+- strip leading non-alphanumeric characters after truncating volume label (#1328)
+
 ## [v2.20.1](https://github.com/hetznercloud/csi-driver/releases/tag/v2.20.1)
 
 ### Validate Volume Labels
