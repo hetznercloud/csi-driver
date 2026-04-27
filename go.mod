@@ -8,7 +8,7 @@ require (
 	github.com/container-storage-interface/spec v1.12.0
 	github.com/grpc-ecosystem/go-grpc-middleware/providers/prometheus v1.1.0
 	github.com/hashicorp/nomad/api v0.0.0-20260424131904-f96ce14ea060
-	github.com/hetznercloud/hcloud-go/v2 v2.37.0
+	github.com/hetznercloud/hcloud-go/v2 v2.38.0
 	github.com/kubernetes-csi/csi-test/v5 v5.4.0
 	github.com/moby/buildkit v0.29.0
 	github.com/prometheus/client_golang v1.23.2
@@ -49,9 +49,9 @@ require (
 	github.com/prometheus/common v0.66.1 // indirect
 	github.com/prometheus/procfs v0.17.0 // indirect
 	go.yaml.in/yaml/v2 v2.4.3 // indirect
-	golang.org/x/net v0.52.0 // indirect
-	golang.org/x/text v0.35.0 // indirect
-	golang.org/x/tools v0.42.0 // indirect
+	golang.org/x/net v0.53.0 // indirect
+	golang.org/x/text v0.36.0 // indirect
+	golang.org/x/tools v0.44.0 // indirect
 	google.golang.org/genproto/googleapis/rpc v0.0.0-20260128011058-8636f8732409 // indirect
 	gopkg.in/yaml.v2 v2.4.0 // indirect
 	gopkg.in/yaml.v3 v3.0.1 // indirect
