@@ -22,10 +22,7 @@ func volumeSizeFromCapacityRange(cr *proto.CapacityRange) (int, int, bool) {
 	case cr.GetRequiredBytes() < 0:
 		return 0, 0, false
 	default:
-		minSize = int(math.Ceil(float64(cr.GetRequiredBytes()) / 1024 / 1024 / 1024))
-		if minSize < MinVolumeSize {
-			minSize = MinVolumeSize
-		}
+		minSize = max(int(math.Ceil(float64(cr.GetRequiredBytes())/1024/1024/1024)), MinVolumeSize)
 	}
 
 	var maxSize int
