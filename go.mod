@@ -1,6 +1,6 @@
 module github.com/hetznercloud/csi-driver
 
-go 1.25.5
+go 1.26.0
 
 toolchain go1.26.3
 
@@ -16,7 +16,7 @@ require (
 	golang.org/x/sys v0.43.0
 	google.golang.org/grpc v1.81.0
 	google.golang.org/protobuf v1.36.11
-	k8s.io/mount-utils v0.35.4
+	k8s.io/mount-utils v0.36.0
 	k8s.io/utils v0.0.0-20260507154919-ff6756f316d2
 )
 
@@ -55,5 +55,5 @@ require (
 	google.golang.org/genproto/googleapis/rpc v0.0.0-20260226221140-a57be14db171 // indirect
 	gopkg.in/yaml.v2 v2.4.0 // indirect
 	gopkg.in/yaml.v3 v3.0.1 // indirect
-	k8s.io/klog/v2 v2.130.1 // indirect
+	k8s.io/klog/v2 v2.140.0 // indirect
 )
