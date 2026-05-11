@@ -305,7 +305,7 @@ func GetLocationFromMetadata(logger *slog.Logger, metadataClient *metadata.Clien
 }
 
 func CreateGRPCServer(logger *slog.Logger, metricsInterceptor grpc.UnaryServerInterceptor) *grpc.Server {
-	requestLogger := func(ctx context.Context, req interface{}, info *grpc.UnaryServerInfo, handler grpc.UnaryHandler) (interface{}, error) {
+	requestLogger := func(ctx context.Context, req any, info *grpc.UnaryServerInfo, handler grpc.UnaryHandler) (any, error) {
 		isProbe := info.FullMethod == "/csi.v1.Identity/Probe"
 
 		if !isProbe {
