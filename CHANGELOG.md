@@ -1,5 +1,12 @@
 # Changelog
 
+## [v2.21.0](https://github.com/hetznercloud/csi-driver/releases/tag/v2.21.0)
+
+### Features
+
+- support Kubernetes v1.36
+- drop support for Kubernetes v1.32
+
 ## [v2.20.2](https://github.com/hetznercloud/csi-driver/releases/tag/v2.20.2)
 
 ### Volume Label Truncation Issue
