@@ -3,16 +3,16 @@
 apiVersion: apps/v1
 kind: Deployment
 metadata:
-  name: {{ template "common.names.fullname" . }}-controller
-  namespace: {{ include "common.names.namespace" . | quote }}
-  labels: {{- include "common.labels.standard" . | nindent 4 }}
+  name: {{ template "hetzner.common.names.fullname" . }}-controller
+  namespace: {{ include "hetzner.common.names.namespace" . | quote }}
+  labels: {{- include "hetzner.common.labels.standard" . | nindent 4 }}
     app.kubernetes.io/component: controller
     app: hcloud-csi-controller {{- /* Compatibility with old manifests */}}
     {{- if .Values.commonLabels }}
-    {{- include "common.tplvalues.render" ( dict "value" .Values.commonLabels "context" $ ) | nindent 4 }}
+    {{- include "hetzner.common.tplvalues.render" ( dict "value" .Values.commonLabels "context" $ ) | nindent 4 }}
     {{- end }}
   {{- if .Values.commonAnnotations }}
-  annotations: {{- include "common.tplvalues.render" ( dict "value" .Values.commonAnnotations "context" $ ) | nindent 4 }}
+  annotations: {{- include "hetzner.common.tplvalues.render" ( dict "value" .Values.commonAnnotations "context" $ ) | nindent 4 }}
   {{- end }}
 spec:
   replicas: {{ .Values.controller.replicaCount }}
@@ -24,33 +24,33 @@ spec:
       {{- if .Values.controller.matchLabelsOverride }}
       {{- toYaml .Values.controller.matchLabelsOverride | nindent 6 }}
       {{- else }}
-      {{- include "common.labels.matchLabels" . | nindent 6 }}
+      {{- include "hetzner.common.labels.matchLabels" . | nindent 6 }}
       app.kubernetes.io/component: controller
       {{- end }}
   template:
     metadata:
       {{- if .Values.controller.podAnnotations }}
-      annotations: {{- include "common.tplvalues.render" (dict "value" .Values.controller.podAnnotations "context" $) | nindent 8 }}
+      annotations: {{- include "hetzner.common.tplvalues.render" (dict "value" .Values.controller.podAnnotations "context" $) | nindent 8 }}
       {{- end }}
-      labels: {{- include "common.labels.standard" . | nindent 8 }}
+      labels: {{- include "hetzner.common.labels.standard" . | nindent 8 }}
         app.kubernetes.io/component: controller
         {{- if .Values.controller.podLabels }}
-        {{- include "common.tplvalues.render" (dict "value" .Values.controller.podLabels "context" $) | nindent 8 }}
+        {{- include "hetzner.common.tplvalues.render" (dict "value" .Values.controller.podLabels "context" $) | nindent 8 }}
         {{- end }}
         {{- if .Values.commonLabels }}
-        {{- include "common.tplvalues.render" ( dict "value" .Values.commonLabels "context" $ ) | nindent 8 }}
+        {{- include "hetzner.common.tplvalues.render" ( dict "value" .Values.commonLabels "context" $ ) | nindent 8 }}
         {{- end }}
     spec:
-      serviceAccountName: {{ template "common.names.serviceAccountName" . }}-controller
-      {{- include "common.images.pullSecrets" (dict "images" .Values.controller.image "context" .) | nindent 6 }}
+      serviceAccountName: {{ template "hetzner.common.names.serviceAccountName" . }}-controller
+      {{- include "hetzner.common.images.pullSecrets" (dict "images" .Values.controller.image "context" .) | nindent 6 }}
       {{- if .Values.controller.affinity }}
-      affinity: {{- include "common.tplvalues.render" ( dict "value" .Values.controller.affinity "context" $) | nindent 8 }}
+      affinity: {{- include "hetzner.common.tplvalues.render" ( dict "value" .Values.controller.affinity "context" $) | nindent 8 }}
       {{- end }}
       {{- if .Values.controller.nodeSelector }}
-      nodeSelector: {{- include "common.tplvalues.render" ( dict "value" .Values.controller.nodeSelector "context" $) | nindent 8 }}
+      nodeSelector: {{- include "hetzner.common.tplvalues.render" ( dict "value" .Values.controller.nodeSelector "context" $) | nindent 8 }}
       {{- end }}
       {{- if .Values.controller.tolerations }}
-      tolerations: {{- include "common.tplvalues.render" (dict "value" .Values.controller.tolerations "context" .) | nindent 8 }}
+      tolerations: {{- include "hetzner.common.tplvalues.render" (dict "value" .Values.controller.tolerations "context" .) | nindent 8 }}
       {{- end }}
       {{- if .Values.controller.priorityClassName }}
       priorityClassName: {{ .Values.controller.priorityClassName | quote }}
@@ -59,7 +59,7 @@ spec:
       schedulerName: {{ .Values.controller.schedulerName | quote }}
       {{- end }}
       {{- if .Values.controller.topologySpreadConstraints }}
-      topologySpreadConstraints: {{- include "common.tplvalues.render" (dict "value" .Values.controller.topologySpreadConstraints "context" .) | nindent 8 }}
+      topologySpreadConstraints: {{- include "hetzner.common.tplvalues.render" (dict "value" .Values.controller.topologySpreadConstraints "context" .) | nindent 8 }}
       {{- end }}
       {{- if .Values.controller.podSecurityContext.enabled }}
       securityContext: {{- omit .Values.controller.podSecurityContext "enabled" | toYaml | nindent 8 }}
@@ -69,11 +69,11 @@ spec:
       {{- end }}
       initContainers:
         {{- if .Values.controller.initContainers }}
-          {{- include "common.tplvalues.render" (dict "value" .Values.controller.initContainers "context" $) | nindent 8 }}
+          {{- include "hetzner.common.tplvalues.render" (dict "value" .Values.controller.initContainers "context" $) | nindent 8 }}
         {{- end }}
       containers:
         - name: hcloud-csi-driver
-          image: {{ include "common.images.image" (dict "value" .Values.controller.image.hcloudCSIDriver "context" .) }} # x-releaser-pleaser-version
+          image: {{ include "hetzner.common.images.image" (dict "value" .Values.controller.image.hcloudCSIDriver "context" .) }} # x-releaser-pleaser-version
           imagePullPolicy: {{ .Values.controller.image.hcloudCSIDriver.pullPolicy }}
           args:
             - -controller
@@ -111,7 +111,7 @@ spec:
               valueFrom:
                 secretKeyRef:
                   {{- if .Values.controller.hcloudToken.value }}
-                  name: {{ template "common.names.fullname" . }}-hcloud-token
+                  name: {{ template "hetzner.common.names.fullname" . }}-hcloud-token
                   key: token
                   {{- else }}
                   name: {{ .Values.controller.hcloudToken.existingSecret.name }}
@@ -123,7 +123,7 @@ spec:
               value: "t"
             {{ end }}
             {{- if .Values.controller.extraEnvVars }}
-            {{- include "common.tplvalues.render" (dict "value" .Values.controller.extraEnvVars "context" $) | nindent 12 }}
+            {{- include "hetzner.common.tplvalues.render" (dict "value" .Values.controller.extraEnvVars "context" $) | nindent 12 }}
             {{- end }}
           {{- if .Values.controller.resources.hcloudCSIDriver }}
           resources: {{- toYaml .Values.controller.resources.hcloudCSIDriver | nindent 12 }}
@@ -137,30 +137,30 @@ spec:
               protocol: TCP
               containerPort: {{ .Values.controller.containerPorts.healthz }}
           {{- if .Values.controller.customLivenessProbe }}
-          livenessProbe: {{- include "common.tplvalues.render" (dict "value" .Values.controller.customLivenessProbe "context" $) | nindent 12 }}
+          livenessProbe: {{- include "hetzner.common.tplvalues.render" (dict "value" .Values.controller.customLivenessProbe "context" $) | nindent 12 }}
           {{- else if .Values.controller.livenessProbe.enabled }}
-          livenessProbe: {{- include "common.tplvalues.render" (dict "value" (omit .Values.controller.livenessProbe "enabled") "context" $) | nindent 12 }}
+          livenessProbe: {{- include "hetzner.common.tplvalues.render" (dict "value" (omit .Values.controller.livenessProbe "enabled") "context" $) | nindent 12 }}
             httpGet:
               path: /healthz
               port: healthz
           {{- end }}
           {{- if .Values.controller.customReadinessProbe }}
-          readinessProbe: {{- include "common.tplvalues.render" (dict "value" .Values.controller.customReadinessProbe "context" $) | nindent 12 }}
+          readinessProbe: {{- include "hetzner.common.tplvalues.render" (dict "value" .Values.controller.customReadinessProbe "context" $) | nindent 12 }}
           {{- end }}
           {{- if .Values.controller.customStartupProbe }}
-          startupProbe: {{- include "common.tplvalues.render" (dict "value" .Values.controller.customStartupProbe "context" $) | nindent 12 }}
+          startupProbe: {{- include "hetzner.common.tplvalues.render" (dict "value" .Values.controller.customStartupProbe "context" $) | nindent 12 }}
           {{- end }}
           {{- if .Values.controller.lifecycleHooks }}
-          lifecycle: {{- include "common.tplvalues.render" (dict "value" .Values.controller.lifecycleHooks "context" $) | nindent 12 }}
+          lifecycle: {{- include "hetzner.common.tplvalues.render" (dict "value" .Values.controller.lifecycleHooks "context" $) | nindent 12 }}
           {{- end }}
           volumeMounts:
             - name: socket-dir
               mountPath: /run/csi
           {{- if .Values.controller.extraVolumeMounts }}
-          {{- include "common.tplvalues.render" (dict "value" .Values.controller.extraVolumeMounts "context" $) | nindent 12 }}
+          {{- include "hetzner.common.tplvalues.render" (dict "value" .Values.controller.extraVolumeMounts "context" $) | nindent 12 }}
           {{- end }}
         - name: csi-attacher
-          image: {{ include "common.images.image" (dict "value" .Values.controller.image.csiAttacher "context" .) }}
+          image: {{ include "hetzner.common.images.image" (dict "value" .Values.controller.image.csiAttacher "context" .) }}
           imagePullPolicy: {{ .Values.controller.image.csiAttacher.pullPolicy }}
           {{- if .Values.controller.resources.csiAttacher }}
           resources: {{- toYaml .Values.controller.resources.csiAttacher | nindent 12 }}
@@ -169,14 +169,14 @@ spec:
             - --default-fstype=ext4
             {{- if $enableLeaderElection }}
             - --leader-election
-            - --leader-election-namespace={{ include "common.names.namespace" . }}
+            - --leader-election-namespace={{ include "hetzner.common.names.namespace" . }}
             {{- end}}
           volumeMounts:
           - name: socket-dir
             mountPath: /run/csi
 
         - name: csi-resizer
-          image: {{ include "common.images.image" (dict "value" .Values.controller.image.csiResizer "context" .) }}
+          image: {{ include "hetzner.common.images.image" (dict "value" .Values.controller.image.csiResizer "context" .) }}
           imagePullPolicy: {{ .Values.controller.image.csiResizer.pullPolicy }}
           {{- if .Values.controller.resources.csiResizer }}
           resources: {{- toYaml .Values.controller.resources.csiResizer | nindent 12 }}
@@ -184,14 +184,14 @@ spec:
           {{- if $enableLeaderElection }}
           args:
             - --leader-election
-            - --leader-election-namespace={{ include "common.names.namespace" . }}
+            - --leader-election-namespace={{ include "hetzner.common.names.namespace" . }}
           {{- end}}
           volumeMounts:
           - name: socket-dir
             mountPath: /run/csi
 
         - name: csi-provisioner
-          image: {{ include "common.images.image" (dict "value" .Values.controller.image.csiProvisioner "context" .) }}
+          image: {{ include "hetzner.common.images.image" (dict "value" .Values.controller.image.csiProvisioner "context" .) }}
           imagePullPolicy: {{ .Values.controller.image.csiProvisioner.pullPolicy }}
           {{- if .Values.controller.resources.csiProvisioner }}
           resources: {{- toYaml .Values.controller.resources.csiProvisioner | nindent 12 }}
@@ -202,14 +202,14 @@ spec:
             - --extra-create-metadata
             {{- if $enableLeaderElection }}
             - --leader-election
-            - --leader-election-namespace={{ include "common.names.namespace" . }}
+            - --leader-election-namespace={{ include "hetzner.common.names.namespace" . }}
             {{- end}}
           volumeMounts:
           - name: socket-dir
             mountPath: /run/csi
 
         - name: liveness-probe
-          image: {{ include "common.images.image" (dict "value" .Values.controller.image.livenessProbe "context" .) }}
+          image: {{ include "hetzner.common.images.image" (dict "value" .Values.controller.image.livenessProbe "context" .) }}
           imagePullPolicy: {{ .Values.controller.image.livenessProbe.pullPolicy }}
           {{- if .Values.controller.resources.livenessProbe }}
           resources: {{- toYaml .Values.controller.resources.livenessProbe | nindent 12 }}
@@ -219,12 +219,12 @@ spec:
             name: socket-dir
 
         {{- if .Values.controller.sidecars }}
-        {{- include "common.tplvalues.render" ( dict "value" .Values.controller.sidecars "context" $) | nindent 8 }}
+        {{- include "hetzner.common.tplvalues.render" ( dict "value" .Values.controller.sidecars "context" $) | nindent 8 }}
         {{- end }}
 
       volumes:
         - name: socket-dir
           emptyDir: {}
         {{- if .Values.controller.extraVolumes }}
-        {{- include "common.tplvalues.render" (dict "value" .Values.controller.extraVolumes "context" $) | nindent 8 }}
+        {{- include "hetzner.common.tplvalues.render" (dict "value" .Values.controller.extraVolumes "context" $) | nindent 8 }}
         {{- end }}

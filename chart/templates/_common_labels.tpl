@@ -1,9 +1,9 @@
 {{- /*
 Kubernetes standard labels
 */}}
-{{- define "common.labels.standard" -}}
-app.kubernetes.io/name: {{ include "common.names.name" . }}
-helm.sh/chart: {{ include "common.names.chart" . }}
+{{- define "hetzner.common.labels.standard" -}}
+app.kubernetes.io/name: {{ include "hetzner.common.names.name" . }}
+helm.sh/chart: {{ include "hetzner.common.names.chart" . }}
 app.kubernetes.io/instance: {{ .Release.Name }}
 app.kubernetes.io/managed-by: {{ .Release.Service }}
 {{- end -}}
@@ -11,7 +11,7 @@ app.kubernetes.io/managed-by: {{ .Release.Service }}
 {{- /*
 Labels to use on deploy.spec.selector.matchLabels and svc.spec.selector
 */}}
-{{- define "common.labels.matchLabels" -}}
-app.kubernetes.io/name: {{ include "common.names.name" . }}
+{{- define "hetzner.common.labels.matchLabels" -}}
+app.kubernetes.io/name: {{ include "hetzner.common.names.name" . }}
 app.kubernetes.io/instance: {{ .Release.Name }}
 {{- end -}}

@@ -23,13 +23,13 @@ global:
 ## @section Common parameters
 ##
 
-## @param nameOverride String to partially override common.names.name
+## @param nameOverride String to partially override hetzner.common.names.name
 ##
 nameOverride: ""
-## @param fullnameOverride String to fully override common.names.fullname
+## @param fullnameOverride String to fully override hetzner.common.names.fullname
 ##
 fullnameOverride: ""
-## @param namespaceOverride String to fully override common.names.namespace
+## @param namespaceOverride String to fully override hetzner.common.names.namespace
 ##
 namespaceOverride: ""
 ## @param commonLabels Labels to add to all deployed objects
@@ -683,7 +683,7 @@ serviceAccount:
   ##
   create: true
   ## @param serviceAccount.name The name of the ServiceAccount to use.
-  ## If not set and create is true, a name is generated using the common.names.fullname template
+  ## If not set and create is true, a name is generated using the hetzner.common.names.fullname template
   ##
   name: ""
   ## @param serviceAccount.annotations Additional Service Account annotations (evaluated as a template)
