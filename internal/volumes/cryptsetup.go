@@ -11,13 +11,13 @@ import (
 
 const cryptsetupExecuable = "cryptsetup"
 
-type Status struct {
+type LUKSDeviceStatus struct {
 	Device string
 	Type   string
 	Active bool
 }
 
-func (s Status) IsZombie() bool {
+func (s LUKSDeviceStatus) IsZombie() bool {
 	if !s.Active {
 		return false
 	}
@@ -32,8 +32,8 @@ func NewCryptSetup(logger *slog.Logger) *CryptSetup {
 	return &CryptSetup{logger: logger}
 }
 
-func (cs *CryptSetup) Status(ctx context.Context, device string) (Status, error) {
-	status := Status{Active: false}
+func (cs *CryptSetup) Status(ctx context.Context, device string) (LUKSDeviceStatus, error) {
+	status := LUKSDeviceStatus{Active: false}
 	output, code, err := cryptsetup(ctx, "status", device)
 	if err != nil {
 		if code == 4 {
