@@ -46,11 +46,11 @@ func (l *LinuxResizeService) Resize(ctx context.Context, volumePath string, volu
 	)
 
 	luksDeviceName := GenerateLUKSDeviceName(devicePath)
-	active, err := l.cryptSetup.IsActive(ctx, luksDeviceName)
+	status, err := l.cryptSetup.Status(ctx, luksDeviceName)
 	if err != nil {
 		return err
 	}
-	if active {
+	if status.Active {
 		luksDevicePath := GenerateLUKSDevicePath(luksDeviceName)
 		if err := l.cryptSetup.Resize(ctx, luksDeviceName); err != nil {
 			return err
