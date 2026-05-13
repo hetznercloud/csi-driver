@@ -11,6 +11,19 @@ import (
 
 const cryptsetupExecuable = "cryptsetup"
 
+type Status struct {
+	Device string
+	Type   string
+	Active bool
+}
+
+func (s Status) IsZombie() bool {
+	if !s.Active {
+		return false
+	}
+	return s.Device == "" || s.Type == "" || s.Device == "(null)" || s.Type == "n/a"
+}
+
 type CryptSetup struct {
 	logger *slog.Logger
 }
@@ -19,74 +32,113 @@ func NewCryptSetup(logger *slog.Logger) *CryptSetup {
 	return &CryptSetup{logger: logger}
 }
 
-func (cs *CryptSetup) IsActive(luksDeviceName string) (bool, error) {
-	output, code, err := command(context.Background(), cryptsetupExecuable, "status", luksDeviceName)
+func (cs *CryptSetup) Status(ctx context.Context, device string) (Status, error) {
+	status := Status{Active: false}
+	output, code, err := cryptsetup(ctx, "status", device)
 	if err != nil {
 		if code == 4 {
-			return false, nil
+			return status, nil
 		}
-		return false, fmt.Errorf("unable to check LUKS device %s activity: %s", luksDeviceName, output)
+		return status, fmt.Errorf("unable to check LUKS device %s activity: %w", device, err)
 	}
-	return true, nil
+
+	status.Active = true
+	for line := range strings.SplitSeq(output, "\n") {
+		key, value, ok := strings.Cut(strings.TrimSpace(line), ":")
+		if !ok {
+			continue
+		}
+		value = strings.TrimSpace(value)
+		switch key {
+		case "type":
+			status.Type = value
+		case "device":
+			status.Device = value
+		}
+	}
+
+	return status, nil
 }
 
-func (cs *CryptSetup) Format(devicePath string, passphrase string) error {
+func (cs *CryptSetup) Format(ctx context.Context, devicePath string, passphrase string) error {
 	cs.logger.Info(
 		"formatting LUKS device",
 		"devicePath", devicePath,
 	)
-	output, _, err := commandWithStdin(context.Background(), passphrase, cryptsetupExecuable, "luksFormat", "--type", "luks1", devicePath)
+	output, _, err := cryptsetupWithStdin(ctx, passphrase, "luksFormat", "--type", "luks1", devicePath)
 	if err != nil {
 		return fmt.Errorf("unable to format device %s with LUKS: %s", devicePath, output)
 	}
 	return nil
 }
 
-func (cs *CryptSetup) Open(devicePath string, luksDeviceName string, passphrase string) error {
-	active, err := cs.IsActive(luksDeviceName)
+func (cs *CryptSetup) Open(ctx context.Context, devicePath string, luksDeviceName string, passphrase string) error {
+	status, err := cs.Status(ctx, luksDeviceName)
 	if err != nil {
 		return err
 	}
-	if active {
-		return nil
+	if status.Active {
+		if !status.IsZombie() {
+			cs.logger.Debug(
+				"luks device already active",
+				"devicePath", devicePath,
+				"luksDeviceName", luksDeviceName,
+			)
+			return nil
+		}
+
+		// If the volume is not correctly unpublished, a prior attach might leave a dm-crypt
+		// target whose backing block device disappeared. Reusing this mapper would mount
+		// on a dead device so we have to close it first.
+		cs.logger.Warn(
+			"detected zombie luks device; cleaning up",
+			"devicePath", devicePath,
+			"luksDeviceName", luksDeviceName,
+			"type", status.Type,
+			"device", status.Device,
+		)
+		if err := cs.Close(ctx, luksDeviceName); err != nil {
+			return fmt.Errorf("failed to close zombie LUKS device %s: %w", luksDeviceName, err)
+		}
 	}
+
 	cs.logger.Info(
 		"opening LUKS device",
 		"devicePath", devicePath,
 		"luksDeviceName", luksDeviceName,
 	)
-	output, _, err := commandWithStdin(context.Background(), passphrase, cryptsetupExecuable, "luksOpen", "--allow-discards", devicePath, luksDeviceName)
+	output, _, err := cryptsetupWithStdin(ctx, passphrase, "luksOpen", "--allow-discards", devicePath, luksDeviceName)
 	if err != nil {
 		return fmt.Errorf("unable to open LUKS device %s: %s", devicePath, output)
 	}
 	return nil
 }
 
-func (cs *CryptSetup) Close(luksDeviceName string) error {
-	active, err := cs.IsActive(luksDeviceName)
+func (cs *CryptSetup) Close(ctx context.Context, luksDeviceName string) error {
+	status, err := cs.Status(ctx, luksDeviceName)
 	if err != nil {
 		return err
 	}
-	if !active {
+	if !status.Active {
 		return nil
 	}
 	cs.logger.Info(
 		"closing LUKS device",
 		"luksDeviceName", luksDeviceName,
 	)
-	output, _, err := command(context.Background(), cryptsetupExecuable, "luksClose", luksDeviceName)
+	output, _, err := cryptsetup(ctx, "luksClose", luksDeviceName)
 	if err != nil {
 		return fmt.Errorf("unable to close LUKS device %s: %s", luksDeviceName, output)
 	}
 	return nil
 }
 
-func (cs *CryptSetup) Resize(luksDeviceName string) error {
+func (cs *CryptSetup) Resize(ctx context.Context, luksDeviceName string) error {
 	cs.logger.Info(
 		"resizing LUKS device",
 		"luksDeviceName", luksDeviceName,
 	)
-	output, _, err := command(context.Background(), cryptsetupExecuable, "resize", luksDeviceName)
+	output, _, err := cryptsetup(ctx, "resize", luksDeviceName)
 	if err != nil {
 		return fmt.Errorf("unable to resize LUKS device %s: %s", luksDeviceName, output)
 	}
@@ -102,12 +154,12 @@ func GenerateLUKSDevicePath(luksDeviceName string) string {
 	return "/dev/mapper/" + luksDeviceName
 }
 
-func command(ctx context.Context, name string, args ...string) (string, int, error) {
-	return commandWithStdin(ctx, "", name, args...)
+func cryptsetup(ctx context.Context, args ...string) (string, int, error) {
+	return cryptsetupWithStdin(ctx, "", args...)
 }
 
-func commandWithStdin(ctx context.Context, stdin string, name string, args ...string) (string, int, error) {
-	cmd := exec.CommandContext(ctx, name, args...)
+func cryptsetupWithStdin(ctx context.Context, stdin string, args ...string) (string, int, error) {
+	cmd := exec.CommandContext(ctx, cryptsetupExecuable, args...)
 	if stdin != "" {
 		cmd.Stdin = strings.NewReader(stdin)
 	}

@@ -1,6 +1,7 @@
 package volumes
 
 import (
+	"context"
 	"fmt"
 	"log/slog"
 	"os"
@@ -30,8 +31,8 @@ type MountOpts struct {
 
 // MountService mounts volumes.
 type MountService interface {
-	Publish(targetPath string, devicePath string, opts MountOpts) error
-	Unpublish(targetPath string) error
+	Publish(ctx context.Context, targetPath string, devicePath string, opts MountOpts) error
+	Unpublish(ctx context.Context, targetPath string) error
 	PathExists(path string) (bool, error)
 }
 
@@ -53,7 +54,7 @@ func NewLinuxMountService(logger *slog.Logger) *LinuxMountService {
 	}
 }
 
-func (s *LinuxMountService) Publish(targetPath string, devicePath string, opts MountOpts) error {
+func (s *LinuxMountService) Publish(ctx context.Context, targetPath string, devicePath string, opts MountOpts) error {
 	isMountPoint, err := s.mounter.IsMountPoint(targetPath)
 	if err != nil {
 		if os.IsNotExist(err) {
@@ -109,13 +110,13 @@ func (s *LinuxMountService) Publish(targetPath string, devicePath string, opts M
 			if opts.Readonly {
 				return fmt.Errorf("cannot publish unformatted disk %s in read-only mode", devicePath)
 			}
-			if err = s.cryptSetup.Format(devicePath, opts.EncryptionPassphrase); err != nil {
+			if err = s.cryptSetup.Format(ctx, devicePath, opts.EncryptionPassphrase); err != nil {
 				return err
 			}
 		} else if existingFSType != "crypto_LUKS" {
 			return fmt.Errorf("requested encrypted volume, but disk %s already is formatted with %s", devicePath, existingFSType)
 		}
-		if err := s.cryptSetup.Open(devicePath, luksDeviceName, opts.EncryptionPassphrase); err != nil {
+		if err := s.cryptSetup.Open(ctx, devicePath, luksDeviceName, opts.EncryptionPassphrase); err != nil {
 			return err
 		}
 		luksDevicePath := GenerateLUKSDevicePath(luksDeviceName)
@@ -152,7 +153,7 @@ func (s *LinuxMountService) Publish(targetPath string, devicePath string, opts M
 	return s.mounter.FormatAndMountSensitiveWithFormatOptions(devicePath, targetPath, opts.FSType, mountOptions, opts.Additional, formatOptions)
 }
 
-func (s *LinuxMountService) Unpublish(targetPath string) error {
+func (s *LinuxMountService) Unpublish(ctx context.Context, targetPath string) error {
 	devicePath, _, err := mount.GetDeviceNameFromMount(mount.New(""), targetPath)
 	if err != nil {
 		return fmt.Errorf("failed to determine mount path for %s: %w", targetPath, err)
@@ -170,7 +171,7 @@ func (s *LinuxMountService) Unpublish(targetPath string) error {
 
 	luksDeviceName := GenerateLUKSDeviceName(devicePath)
 
-	return s.cryptSetup.Close(luksDeviceName)
+	return s.cryptSetup.Close(ctx, luksDeviceName)
 }
 
 func (s *LinuxMountService) PathExists(path string) (bool, error) {

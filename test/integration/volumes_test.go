@@ -67,7 +67,7 @@ func TestVolumePublishUnpublish(t *testing.T) {
 			name:      "encrypted-correct-formatted-1",
 			mountOpts: volumes.MountOpts{EncryptionPassphrase: "passphrase"},
 			prepare: func(mounter *mount.SafeFormatAndMount, cs *volumes.CryptSetup, device string) error {
-				return cs.Format(device, "passphrase")
+				return cs.Format(t.Context(), device, "passphrase")
 			},
 			expectedError: nil,
 		},
@@ -75,15 +75,16 @@ func TestVolumePublishUnpublish(t *testing.T) {
 			name:      "encrypted-correct-formatted-2",
 			mountOpts: volumes.MountOpts{EncryptionPassphrase: "passphrase"},
 			prepare: func(mounter *mount.SafeFormatAndMount, cs *volumes.CryptSetup, device string) error {
-				if err := cs.Format(device, "passphrase"); err != nil {
+				ctx := t.Context()
+				if err := cs.Format(ctx, device, "passphrase"); err != nil {
 					return err
 				}
 
 				luksDeviceName := volumes.GenerateLUKSDeviceName(device)
-				if err := cs.Open(device, luksDeviceName, "passphrase"); err != nil {
+				if err := cs.Open(ctx, device, luksDeviceName, "passphrase"); err != nil {
 					return err
 				}
-				defer cs.Close(luksDeviceName)
+				defer cs.Close(ctx, luksDeviceName)
 
 				luksDevicePath := volumes.GenerateLUKSDevicePath(luksDeviceName)
 
@@ -129,9 +130,10 @@ func TestVolumePublishUnpublish(t *testing.T) {
 			// Required as FS volumes require target dir, but block volumes require
 			// target file
 			targetPath = path.Join(targetPath, "target-path")
-			publishErr := mountService.Publish(targetPath, device, test.mountOpts)
+			ctx := t.Context()
+			publishErr := mountService.Publish(ctx, targetPath, device, test.mountOpts)
 			defer func() {
-				err := mountService.Unpublish(targetPath)
+				err := mountService.Unpublish(ctx, targetPath)
 				if err != nil {
 					t.Fatal(err)
 				} else {
@@ -193,7 +195,7 @@ func TestVolumePublishUnpublish(t *testing.T) {
 					t.Fatalf("expected device to have fs type '%s', but device is formatted with '%s'", expectedFSType, fsType)
 				}
 
-				if err := mountService.Unpublish(targetPath); err != nil {
+				if err := mountService.Unpublish(ctx, targetPath); err != nil {
 					t.Fatal(err)
 				}
 			}
@@ -220,6 +222,7 @@ func TestVolumeResize(t *testing.T) {
 
 	for _, test := range tests {
 		t.Run(test.name, func(t *testing.T) {
+			ctx := t.Context()
 			logger := slog.New(slog.NewTextHandler(os.Stdout, nil))
 			mountService := volumes.NewLinuxMountService(logger)
 			resizeService := volumes.NewLinuxResizeService(logger)
@@ -240,18 +243,18 @@ func TestVolumeResize(t *testing.T) {
 				}
 			} else {
 				decryptedName := test.name + "-decrypted"
-				if err := cryptSetup.Format(device, test.passphrase); err != nil {
+				if err := cryptSetup.Format(ctx, device, test.passphrase); err != nil {
 					t.Fatal()
 				}
-				if err := cryptSetup.Open(device, decryptedName, test.passphrase); err != nil {
+				if err := cryptSetup.Open(ctx, device, decryptedName, test.passphrase); err != nil {
 					t.Fatal()
 				}
-				defer cryptSetup.Close(decryptedName)
+				defer cryptSetup.Close(ctx, decryptedName)
 				decryptedDevice := "/dev/mapper/" + decryptedName
 				if _, err := runCmd("mkfs.ext4", decryptedDevice); err != nil {
 					t.Fatal(err)
 				}
-				if err := cryptSetup.Close(decryptedName); err != nil {
+				if err := cryptSetup.Close(ctx, decryptedName); err != nil {
 					t.Fatal(err)
 				}
 			}
@@ -260,19 +263,19 @@ func TestVolumeResize(t *testing.T) {
 				t.Fatal()
 			}
 
-			if err := mountService.Publish(targetPath, device, volumes.MountOpts{
+			if err := mountService.Publish(ctx, targetPath, device, volumes.MountOpts{
 				EncryptionPassphrase: test.passphrase,
 			}); err != nil {
 				t.Fatal(err)
 			}
-			defer mountService.Unpublish(targetPath)
+			defer mountService.Unpublish(ctx, targetPath)
 
 			initialSize, err := getFakeDeviceSizeKilobytes(targetPath)
 			if err != nil {
 				t.Fatal(err)
 			}
 
-			if err := resizeService.Resize(targetPath); err != nil {
+			if err := resizeService.Resize(ctx, targetPath); err != nil {
 				t.Fatal(err)
 			}
 
@@ -285,7 +288,7 @@ func TestVolumeResize(t *testing.T) {
 				t.Fatal(fmt.Errorf("expected final size to be roughly double of initial size (final size %d KB, initial size %d KB)", finalSize, initialSize))
 			}
 
-			if err := mountService.Unpublish(targetPath); err != nil {
+			if err := mountService.Unpublish(ctx, targetPath); err != nil {
 				t.Fatal(err)
 			}
 		})
@@ -326,7 +329,7 @@ func TestDetectDiskFormat(t *testing.T) {
 			prepare: func(mounter *mount.SafeFormatAndMount, device string) error {
 				logger := slog.New(slog.NewTextHandler(os.Stdout, nil))
 				cryptSetup := volumes.NewCryptSetup(logger)
-				err := cryptSetup.Format(device, "passphrase")
+				err := cryptSetup.Format(t.Context(), device, "passphrase")
 				return err
 			},
 			expectedFormat: "crypto_LUKS",

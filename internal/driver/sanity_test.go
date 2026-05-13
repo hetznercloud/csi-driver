@@ -198,11 +198,11 @@ func (s *sanityVolumeService) Detach(_ context.Context, _ *csi.Volume, _ *csi.Se
 
 type sanityMountService struct{}
 
-func (s *sanityMountService) Publish(_ string, _ string, _ volumes.MountOpts) error {
+func (s *sanityMountService) Publish(_ context.Context, _ string, _ string, _ volumes.MountOpts) error {
 	return nil
 }
 
-func (s *sanityMountService) Unpublish(_ string) error {
+func (s *sanityMountService) Unpublish(_ context.Context, _ string) error {
 	return nil
 }
 
@@ -215,7 +215,7 @@ func (s *sanityMountService) PathExists(path string) (bool, error) {
 
 type sanityResizeService struct{}
 
-func (s *sanityResizeService) Resize(volumePath string) error {
+func (s *sanityResizeService) Resize(_ context.Context, volumePath string) error {
 	if volumePath == "some/path" {
 		return errors.New("path not found")
 	}
