@@ -15,6 +15,7 @@ func TestCryptSetup(t *testing.T) {
 		return
 	}
 
+	ctx := t.Context()
 	logger := slog.New(slog.NewTextHandler(os.Stdout, nil))
 	cryptSetup := volumes.NewCryptSetup(logger)
 	name := "fake"
