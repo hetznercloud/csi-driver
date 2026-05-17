@@ -222,12 +222,43 @@ func (s *VolumeService) Attach(ctx context.Context, volume *csi.Volume, server *
 			)
 			return nil
 		}
+
 		s.logger.Info(
-			"volume is already attached to another server",
+			"volume is attached to another server, detaching first",
 			"volume-id", volume.ID,
-			"server-id", hcloudVolume.Server.ID,
+			"from-server-id", hcloudVolume.Server.ID,
+			"to-server-id", server.ID,
 		)
-		return volumes.ErrAttached
+
+		detachAction, _, err := s.client.Volume.Detach(ctx, hcloudVolume)
+		if err != nil {
+			s.logger.Info(
+				"failed to detach volume from previous server",
+				"volume-id", volume.ID,
+				"server-id", hcloudVolume.Server.ID,
+				"err", errutil.LogValue(err),
+			)
+			if hcloud.IsError(err, hcloud.ErrorCodeLocked) {
+				return volumes.ErrLockedServer
+			}
+			return err
+		}
+		if err := s.client.Action.WaitFor(ctx, detachAction); err != nil {
+			s.logger.Info(
+				"failed to detach volume from previous server",
+				"volume-id", volume.ID,
+				"server-id", hcloudVolume.Server.ID,
+				"err", errutil.LogValue(err),
+			)
+			return err
+		}
+
+		s.logger.Info(
+			"volume detached from previous server, proceeding with attach",
+			"volume-id", volume.ID,
+			"from-server-id", hcloudVolume.Server.ID,
+			"to-server-id", server.ID,
+		)
 	}
 
 	action, _, err := s.client.Volume.Attach(ctx, hcloudVolume, hcloudServer)
