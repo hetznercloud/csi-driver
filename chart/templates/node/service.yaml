@@ -2,26 +2,26 @@
 apiVersion: v1
 kind: Service
 metadata:
-  name: {{ template "hetzner.common.names.fullname" . }}-node-metrics
-  namespace: {{ include "hetzner.common.names.namespace" . | quote }}
-  labels: {{- include "hetzner.common.labels.standard" . | nindent 4 }}
+  name: {{ template "hcloud-csi.names.fullname" . }}-node-metrics
+  namespace: {{ include "hcloud-csi.names.namespace" . | quote }}
+  labels: {{- include "hcloud-csi.labels.standard" . | nindent 4 }}
     app.kubernetes.io/component: node
     {{- if .Values.commonLabels }}
-    {{- include "hetzner.common.tplvalues.render" ( dict "value" .Values.commonLabels "context" $ ) | nindent 4 }}
+    {{- include "hcloud-csi.tplvalues.render" ( dict "value" .Values.commonLabels "context" $ ) | nindent 4 }}
     {{- end }}
   {{- if or .Values.node.service.annotations .Values.commonAnnotations }}
   annotations:
     {{- if .Values.node.service.annotations }}
-    {{- include "hetzner.common.tplvalues.render" ( dict "value" .Values.node.service.annotations "context" $) | nindent 4 }}
+    {{- include "hcloud-csi.tplvalues.render" ( dict "value" .Values.node.service.annotations "context" $) | nindent 4 }}
     {{- end }}
     {{- if .Values.commonAnnotations }}
-    {{- include "hetzner.common.tplvalues.render" ( dict "value" .Values.commonAnnotations "context" $ ) | nindent 4 }}
+    {{- include "hcloud-csi.tplvalues.render" ( dict "value" .Values.commonAnnotations "context" $ ) | nindent 4 }}
     {{- end }}
   {{- end }}
 spec:
   ports:
     - name: metrics
       port: {{ .Values.node.service.ports.metrics }}
-  selector: {{- include "hetzner.common.labels.matchLabels" . | nindent 4 }}
+  selector: {{- include "hcloud-csi.labels.matchLabels" . | nindent 4 }}
     app.kubernetes.io/component: node
 {{- end }}

@@ -1,20 +1,20 @@
 kind: ClusterRoleBinding
 apiVersion: rbac.authorization.k8s.io/v1
 metadata:
-  name: {{ template "hetzner.common.names.fullname" . }}-controller
-  labels: {{- include "hetzner.common.labels.standard" . | nindent 4 }}
+  name: {{ template "hcloud-csi.names.fullname" . }}-controller
+  labels: {{- include "hcloud-csi.labels.standard" . | nindent 4 }}
     app.kubernetes.io/component: controller
     {{- if .Values.commonLabels }}
-    {{- include "hetzner.common.tplvalues.render" ( dict "value" .Values.commonLabels "context" $ ) | nindent 4 }}
+    {{- include "hcloud-csi.tplvalues.render" ( dict "value" .Values.commonLabels "context" $ ) | nindent 4 }}
     {{- end }}
   {{- if .Values.commonAnnotations }}
-  annotations: {{- include "hetzner.common.tplvalues.render" ( dict "value" .Values.commonAnnotations "context" $ ) | nindent 4 }}
+  annotations: {{- include "hcloud-csi.tplvalues.render" ( dict "value" .Values.commonAnnotations "context" $ ) | nindent 4 }}
   {{- end }}
 roleRef:
   apiGroup: rbac.authorization.k8s.io
   kind: ClusterRole
-  name: {{ template "hetzner.common.names.fullname" . }}-controller
+  name: {{ template "hcloud-csi.names.fullname" . }}-controller
 subjects:
   - kind: ServiceAccount
-    name: {{ template "hetzner.common.names.serviceAccountName" . }}-controller
-    namespace: {{ include "hetzner.common.names.namespace" . | quote }}
+    name: {{ template "hcloud-csi.names.serviceAccountName" . }}-controller
+    namespace: {{ include "hcloud-csi.names.namespace" . | quote }}
