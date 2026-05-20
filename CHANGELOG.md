@@ -1,5 +1,11 @@
 # Changelog
 
+## [v2.21.1](https://github.com/hetznercloud/csi-driver/releases/tag/v2.21.1)
+
+### Bug Fixes
+
+- **chart**: prefix local templates to avoid bitnami common collision (#1360)
+
 ## [v2.21.0](https://github.com/hetznercloud/csi-driver/releases/tag/v2.21.0)
 
 ### Features
