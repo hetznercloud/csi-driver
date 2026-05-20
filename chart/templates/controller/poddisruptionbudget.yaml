@@ -3,15 +3,15 @@
 apiVersion: policy/v1
 kind: PodDisruptionBudget
 metadata:
-  name: {{ include "common.names.fullname" . }}-controller
-  namespace: {{ include "common.names.namespace" . | quote }}
-  labels: {{- include "common.labels.standard" . | nindent 4 }}
+  name: {{ include "hcloud-csi.names.fullname" . }}-controller
+  namespace: {{ include "hcloud-csi.names.namespace" . | quote }}
+  labels: {{- include "hcloud-csi.labels.standard" . | nindent 4 }}
     app.kubernetes.io/component: controller
     {{- if .Values.commonLabels }}
-    {{- include "common.tplvalues.render" ( dict "value" .Values.commonLabels "context" $ ) | nindent 4 }}
+    {{- include "hcloud-csi.tplvalues.render" ( dict "value" .Values.commonLabels "context" $ ) | nindent 4 }}
     {{- end }}
   {{- if .Values.commonAnnotations }}
-  annotations: {{- include "common.tplvalues.render" ( dict "value" .Values.commonAnnotations "context" $ ) | nindent 4 }}
+  annotations: {{- include "hcloud-csi.tplvalues.render" ( dict "value" .Values.commonAnnotations "context" $ ) | nindent 4 }}
   {{- end }}
 spec:
   {{- if .Values.controller.podDisruptionBudget.minAvailable }}
@@ -21,6 +21,6 @@ spec:
   maxUnavailable: {{ .Values.controller.podDisruptionBudget.maxUnavailable }}
   {{- end  }}
   selector:
-    matchLabels: {{- include "common.labels.matchLabels" . | nindent 6 }}
+    matchLabels: {{- include "hcloud-csi.labels.matchLabels" . | nindent 6 }}
       app.kubernetes.io/component: controller
 {{- end }}

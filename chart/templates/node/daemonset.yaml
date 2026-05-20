@@ -1,16 +1,16 @@
 apiVersion: apps/v1
 kind: DaemonSet
 metadata:
-  name: {{ template "common.names.fullname" . }}-node
-  namespace: {{ include "common.names.namespace" . | quote }}
-  labels: {{- include "common.labels.standard" . | nindent 4 }}
+  name: {{ template "hcloud-csi.names.fullname" . }}-node
+  namespace: {{ include "hcloud-csi.names.namespace" . | quote }}
+  labels: {{- include "hcloud-csi.labels.standard" . | nindent 4 }}
     app.kubernetes.io/component: node
     app: hcloud-csi {{- /* Compatibility with old manifests */}}
     {{- if .Values.commonLabels }}
-    {{- include "common.tplvalues.render" ( dict "value" .Values.commonLabels "context" $ ) | nindent 4 }}
+    {{- include "hcloud-csi.tplvalues.render" ( dict "value" .Values.commonLabels "context" $ ) | nindent 4 }}
     {{- end }}
   {{- if .Values.commonAnnotations }}
-  annotations: {{- include "common.tplvalues.render" ( dict "value" .Values.commonAnnotations "context" $ ) | nindent 4 }}
+  annotations: {{- include "hcloud-csi.tplvalues.render" ( dict "value" .Values.commonAnnotations "context" $ ) | nindent 4 }}
   {{- end }}
 spec:
   {{- if .Values.node.updateStrategy }}
@@ -21,35 +21,35 @@ spec:
       {{- if .Values.node.matchLabelsOverride }}
       {{- toYaml .Values.node.matchLabelsOverride | nindent 6 }}
       {{- else }}
-      {{- include "common.labels.matchLabels" . | nindent 6 }}
+      {{- include "hcloud-csi.labels.matchLabels" . | nindent 6 }}
       app.kubernetes.io/component: node
       {{- end }}
   template:
     metadata:
       {{- if .Values.node.podAnnotations }}
-      annotations: {{- include "common.tplvalues.render" (dict "value" .Values.node.podAnnotations "context" $) | nindent 8 }}
+      annotations: {{- include "hcloud-csi.tplvalues.render" (dict "value" .Values.node.podAnnotations "context" $) | nindent 8 }}
       {{- end }}
-      labels: {{- include "common.labels.standard" . | nindent 8 }}
+      labels: {{- include "hcloud-csi.labels.standard" . | nindent 8 }}
         app.kubernetes.io/component: node
         {{- if .Values.node.podLabels }}
-        {{- include "common.tplvalues.render" (dict "value" .Values.node.podLabels "context" $) | nindent 8 }}
+        {{- include "hcloud-csi.tplvalues.render" (dict "value" .Values.node.podLabels "context" $) | nindent 8 }}
         {{- end }}
         {{- if .Values.commonLabels }}
-        {{- include "common.tplvalues.render" ( dict "value" .Values.commonLabels "context" $ ) | nindent 8 }}
+        {{- include "hcloud-csi.tplvalues.render" ( dict "value" .Values.commonLabels "context" $ ) | nindent 8 }}
         {{- end }}
     spec:
-      {{- include "common.images.pullSecrets" (dict "images" .Values.node.image "context" .) | nindent 6 }}
+      {{- include "hcloud-csi.images.pullSecrets" (dict "images" .Values.node.image "context" .) | nindent 6 }}
       {{- if .Values.node.hostNetwork }}
       hostNetwork: true
       {{- end }}
       {{- if .Values.node.affinity }}
-      affinity: {{- include "common.tplvalues.render" ( dict "value" .Values.node.affinity "context" $) | nindent 8 }}
+      affinity: {{- include "hcloud-csi.tplvalues.render" ( dict "value" .Values.node.affinity "context" $) | nindent 8 }}
       {{- end }}
       {{- if .Values.node.nodeSelector }}
-      nodeSelector: {{- include "common.tplvalues.render" ( dict "value" .Values.node.nodeSelector "context" $) | nindent 8 }}
+      nodeSelector: {{- include "hcloud-csi.tplvalues.render" ( dict "value" .Values.node.nodeSelector "context" $) | nindent 8 }}
       {{- end }}
       {{- if .Values.node.tolerations }}
-      tolerations: {{- include "common.tplvalues.render" (dict "value" .Values.node.tolerations "context" .) | nindent 8 }}
+      tolerations: {{- include "hcloud-csi.tplvalues.render" (dict "value" .Values.node.tolerations "context" .) | nindent 8 }}
       {{- else }}
       tolerations:
         - effect: NoExecute
@@ -70,11 +70,11 @@ spec:
       {{- end }}
       initContainers:
         {{- if .Values.node.initContainers }}
-          {{- include "common.tplvalues.render" (dict "value" .Values.node.initContainers "context" $) | nindent 8 }}
+          {{- include "hcloud-csi.tplvalues.render" (dict "value" .Values.node.initContainers "context" $) | nindent 8 }}
         {{- end }}
       containers:
         - name: csi-node-driver-registrar
-          image: {{ include "common.images.image" (dict "value" .Values.node.image.csiNodeDriverRegistrar "context" .) }}
+          image: {{ include "hcloud-csi.images.image" (dict "value" .Values.node.image.csiNodeDriverRegistrar "context" .) }}
           imagePullPolicy: {{ .Values.node.image.csiNodeDriverRegistrar.pullPolicy }}
           args:
             - --kubelet-registration-path={{ .Values.node.kubeletDir }}/plugins/csi.hetzner.cloud/socket
@@ -87,7 +87,7 @@ spec:
           resources: {{- toYaml .Values.node.resources.csiNodeDriverRegistrar | nindent 12 }}
           {{- end }}
         - name: liveness-probe
-          image: {{ include "common.images.image" (dict "value" .Values.node.image.livenessProbe "context" .) }}
+          image: {{ include "hcloud-csi.images.image" (dict "value" .Values.node.image.livenessProbe "context" .) }}
           imagePullPolicy: {{ .Values.node.image.livenessProbe.pullPolicy }}
           volumeMounts:
           - mountPath: /run/csi
@@ -96,7 +96,7 @@ spec:
           resources: {{- toYaml .Values.node.resources.livenessProbe | nindent 12 }}
           {{- end }}
         - name: hcloud-csi-driver
-          image: {{ include "common.images.image" (dict "value" .Values.node.image.hcloudCSIDriver "context" .) }} # x-releaser-pleaser-version
+          image: {{ include "hcloud-csi.images.image" (dict "value" .Values.node.image.hcloudCSIDriver "context" .) }} # x-releaser-pleaser-version
           imagePullPolicy: {{ .Values.node.image.hcloudCSIDriver.pullPolicy }}
           args:
             - -node
@@ -109,7 +109,7 @@ spec:
             - name: device-dir
               mountPath: /dev
             {{- if .Values.node.extraVolumeMounts }}
-            {{- include "common.tplvalues.render" (dict "value" .Values.node.extraVolumeMounts "context" $) | nindent 12 }}
+            {{- include "hcloud-csi.tplvalues.render" (dict "value" .Values.node.extraVolumeMounts "context" $) | nindent 12 }}
             {{- end }}
           securityContext:
             privileged: true
@@ -127,7 +127,7 @@ spec:
               value: "t"
             {{ end }}
             {{- if .Values.node.extraEnvVars }}
-            {{- include "common.tplvalues.render" (dict "value" .Values.node.extraEnvVars "context" $) | nindent 12 }}
+            {{- include "hcloud-csi.tplvalues.render" (dict "value" .Values.node.extraEnvVars "context" $) | nindent 12 }}
             {{- end }}
           ports:
             {{- if .Values.metrics.enabled }}
@@ -141,24 +141,24 @@ spec:
           resources: {{- toYaml .Values.node.resources.hcloudCSIDriver | nindent 12 }}
           {{- end }}
           {{- if .Values.node.customLivenessProbe }}
-          livenessProbe: {{- include "common.tplvalues.render" (dict "value" .Values.node.customLivenessProbe "context" $) | nindent 12 }}
+          livenessProbe: {{- include "hcloud-csi.tplvalues.render" (dict "value" .Values.node.customLivenessProbe "context" $) | nindent 12 }}
           {{- else if .Values.node.livenessProbe.enabled }}
-          livenessProbe: {{- include "common.tplvalues.render" (dict "value" (omit .Values.node.livenessProbe "enabled") "context" $) | nindent 12 }}
+          livenessProbe: {{- include "hcloud-csi.tplvalues.render" (dict "value" (omit .Values.node.livenessProbe "enabled") "context" $) | nindent 12 }}
             httpGet:
               path: /healthz
               port: healthz
           {{- end }}
           {{- if .Values.node.customReadinessProbe }}
-          readinessProbe: {{- include "common.tplvalues.render" (dict "value" .Values.node.customReadinessProbe "context" $) | nindent 12 }}
+          readinessProbe: {{- include "hcloud-csi.tplvalues.render" (dict "value" .Values.node.customReadinessProbe "context" $) | nindent 12 }}
           {{- end }}
           {{- if .Values.node.customStartupProbe }}
-          startupProbe: {{- include "common.tplvalues.render" (dict "value" .Values.node.customStartupProbe "context" $) | nindent 12 }}
+          startupProbe: {{- include "hcloud-csi.tplvalues.render" (dict "value" .Values.node.customStartupProbe "context" $) | nindent 12 }}
           {{- end }}
           {{- if .Values.node.lifecycleHooks }}
-          lifecycle: {{- include "common.tplvalues.render" (dict "value" .Values.node.lifecycleHooks "context" $) | nindent 12 }}
+          lifecycle: {{- include "hcloud-csi.tplvalues.render" (dict "value" .Values.node.lifecycleHooks "context" $) | nindent 12 }}
           {{- end }}
         {{- if .Values.node.sidecars }}
-        {{- include "common.tplvalues.render" ( dict "value" .Values.node.sidecars "context" $) | nindent 8 }}
+        {{- include "hcloud-csi.tplvalues.render" ( dict "value" .Values.node.sidecars "context" $) | nindent 8 }}
         {{- end }}
       volumes:
         - name: kubelet-dir
@@ -178,5 +178,5 @@ spec:
             path: /dev
             type: Directory
         {{- if .Values.node.extraVolumes }}
-        {{- include "common.tplvalues.render" (dict "value" .Values.node.extraVolumes "context" $) | nindent 8 }}
+        {{- include "hcloud-csi.tplvalues.render" (dict "value" .Values.node.extraVolumes "context" $) | nindent 8 }}
         {{- end }}
