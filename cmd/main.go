@@ -1,6 +1,7 @@
 package main
 
 import (
+	"context"
 	"flag"
 	"fmt"
 	"log/slog"
@@ -82,19 +83,20 @@ func setup(
 	m *metrics.Metrics,
 	metadataClient *metadata.Client,
 ) error {
+	ctx := context.Background()
 	enableProvidedByTopology := app.GetEnableProvidedByTopology()
 
-	if !metadataClient.IsHcloudServer() {
+	if !metadataClient.IsHcloudServerWithContext(ctx) {
 		logger.Warn("unable to connect to the metadata service")
 	}
 
 	if node {
-		location, err := app.GetServerLocation(logger, metadataClient, nil, false)
+		location, err := app.GetServerLocation(ctx, logger, metadataClient, nil, false)
 		if err != nil {
 			return fmt.Errorf("could not determine default volume location: %w", err)
 		}
 
-		serverID, err := metadataClient.InstanceID()
+		serverID, err := metadataClient.InstanceIDWithContext(ctx)
 		if err != nil {
 			return fmt.Errorf("failed to fetch server ID from metadata service: %w", err)
 		}
@@ -122,7 +124,7 @@ func setup(
 			return fmt.Errorf("failed to initialize hcloud client: %w", err)
 		}
 
-		location, err := app.GetServerLocation(logger, metadataClient, hcloudClient, true)
+		location, err := app.GetServerLocation(ctx, logger, metadataClient, hcloudClient, true)
 		if err != nil {
 			return fmt.Errorf("could not determine default volume location: %w", err)
 		}
