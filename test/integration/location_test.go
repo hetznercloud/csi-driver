@@ -55,27 +55,27 @@ func TestGetServerLocation(t *testing.T) {
 
 	t.Run("location env", func(t *testing.T) {
 		t.Setenv("HCLOUD_VOLUME_DEFAULT_LOCATION", "hel1")
-		loc, err := app.GetServerLocation(slog.New(slog.DiscardHandler), metadataClient, client, false)
+		loc, err := app.GetServerLocation(t.Context(), slog.New(slog.DiscardHandler), metadataClient, client, false)
 		require.NoError(t, err)
 		assert.Equal(t, "hel1", loc)
 	})
 
 	t.Run("server ID env", func(t *testing.T) {
 		t.Setenv("HCLOUD_SERVER_ID", strconv.FormatInt(result.Server.ID, 10))
-		loc, err := app.GetServerLocation(slog.New(slog.DiscardHandler), metadataClient, client, true)
+		loc, err := app.GetServerLocation(t.Context(), slog.New(slog.DiscardHandler), metadataClient, client, true)
 		require.NoError(t, err)
 		assert.Equal(t, "hel1", loc)
 	})
 
 	t.Run("node name env", func(t *testing.T) {
 		t.Setenv("KUBE_NODE_NAME", serverName)
-		loc, err := app.GetServerLocation(slog.New(slog.DiscardHandler), metadataClient, client, true)
+		loc, err := app.GetServerLocation(t.Context(), slog.New(slog.DiscardHandler), metadataClient, client, true)
 		require.NoError(t, err)
 		assert.Equal(t, "hel1", loc)
 	})
 
 	t.Run("metadata service", func(t *testing.T) {
-		loc, err := app.GetServerLocation(slog.New(slog.DiscardHandler), metadataClient, client, false)
+		loc, err := app.GetServerLocation(t.Context(), slog.New(slog.DiscardHandler), metadataClient, client, false)
 		require.NoError(t, err)
 		assert.Equal(t, "hel1", loc)
 	})
