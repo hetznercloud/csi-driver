@@ -201,6 +201,7 @@ func CreateHcloudClient(metricsRegistry *prometheus.Registry, logger *slog.Logge
 
 // GetServerLocation retrieves the hcloud server the application is running on.
 func GetServerLocation(
+	ctx context.Context,
 	logger *slog.Logger,
 	metadataClient *metadata.Client,
 	hcloudClient *hcloud.Client,
@@ -215,7 +216,7 @@ func GetServerLocation(
 		// Get from HCLOUD_SERVER_ID env
 		// This env would be set explicitly by the user
 		// If this is set and location can not be found we do not want a fallback
-		isSet, location, err := getLocationByEnvID(logger, hcloudClient)
+		isSet, location, err := getLocationByEnvID(ctx, logger, hcloudClient)
 		if isSet {
 			return location, err
 		}
@@ -223,7 +224,7 @@ func GetServerLocation(
 		// Get from node name and search server list
 		// This env is set by default via a fieldRef on spec.nodeName
 		// If this is set and server can not be found we fallback to the metadata fallback
-		location, err = getLocationByEnvNodeName(logger, hcloudClient)
+		location, err = getLocationByEnvNodeName(ctx, logger, hcloudClient)
 		if err != nil {
 			return "", err
 		}
@@ -233,10 +234,10 @@ func GetServerLocation(
 	}
 
 	// Metadata service as fallback
-	return GetLocationFromMetadata(logger, metadataClient)
+	return GetLocationFromMetadata(ctx, logger, metadataClient)
 }
 
-func getLocationByEnvID(logger *slog.Logger, hcloudClient *hcloud.Client) (bool, string, error) {
+func getLocationByEnvID(ctx context.Context, logger *slog.Logger, hcloudClient *hcloud.Client) (bool, string, error) {
 	envID := os.Getenv("HCLOUD_SERVER_ID")
 	if envID == "" {
 		return false, "", nil
@@ -252,7 +253,7 @@ func getLocationByEnvID(logger *slog.Logger, hcloudClient *hcloud.Client) (bool,
 		"server-id", id,
 	)
 
-	server, _, err := hcloudClient.Server.GetByID(context.Background(), id)
+	server, _, err := hcloudClient.Server.GetByID(ctx, id)
 	if err != nil {
 		return true, "", err
 	}
@@ -263,13 +264,13 @@ func getLocationByEnvID(logger *slog.Logger, hcloudClient *hcloud.Client) (bool,
 	return true, server.Location.Name, nil
 }
 
-func getLocationByEnvNodeName(logger *slog.Logger, hcloudClient *hcloud.Client) (string, error) {
+func getLocationByEnvNodeName(ctx context.Context, logger *slog.Logger, hcloudClient *hcloud.Client) (string, error) {
 	nodeName := os.Getenv("KUBE_NODE_NAME")
 	if nodeName == "" {
 		return "", nil
 	}
 
-	server, _, err := hcloudClient.Server.GetByName(context.Background(), nodeName)
+	server, _, err := hcloudClient.Server.GetByName(ctx, nodeName)
 	if err != nil {
 		return "", fmt.Errorf("error while getting server through node name: %w", err)
 	}
@@ -289,9 +290,9 @@ func getLocationByEnvNodeName(logger *slog.Logger, hcloudClient *hcloud.Client) 
 	return "", nil
 }
 
-func GetLocationFromMetadata(logger *slog.Logger, metadataClient *metadata.Client) (string, error) {
+func GetLocationFromMetadata(ctx context.Context, logger *slog.Logger, metadataClient *metadata.Client) (string, error) {
 	logger.Debug("getting location from metadata service")
-	availabilityZone, err := metadataClient.AvailabilityZone()
+	availabilityZone, err := metadataClient.AvailabilityZoneWithContext(ctx)
 	if err != nil {
 		return "", fmt.Errorf("failed to get location from metadata service: %w", err)
 	}
