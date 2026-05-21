@@ -54,7 +54,7 @@ func (s *NodeService) NodeUnstageVolume(_ context.Context, _ *proto.NodeUnstageV
 	return nil, status.Error(codes.Unimplemented, "not supported")
 }
 
-func (s *NodeService) NodePublishVolume(_ context.Context, req *proto.NodePublishVolumeRequest) (*proto.NodePublishVolumeResponse, error) {
+func (s *NodeService) NodePublishVolume(ctx context.Context, req *proto.NodePublishVolumeRequest) (*proto.NodePublishVolumeResponse, error) {
 	if req.GetVolumeId() == "" {
 		return nil, status.Error(codes.InvalidArgument, "missing volume id")
 	}
@@ -87,13 +87,13 @@ func (s *NodeService) NodePublishVolume(_ context.Context, req *proto.NodePublis
 		return nil, status.Error(codes.InvalidArgument, "publish volume: unsupported volume capability")
 	}
 
-	if err := s.volumeMountService.Publish(req.GetTargetPath(), devicePath, opts); err != nil {
+	if err := s.volumeMountService.Publish(ctx, req.GetTargetPath(), devicePath, opts); err != nil {
 		return nil, status.Error(codes.Internal, fmt.Sprintf("failed to publish volume: %s", err))
 	}
 	return &proto.NodePublishVolumeResponse{}, nil
 }
 
-func (s *NodeService) NodeUnpublishVolume(_ context.Context, req *proto.NodeUnpublishVolumeRequest) (*proto.NodeUnpublishVolumeResponse, error) {
+func (s *NodeService) NodeUnpublishVolume(ctx context.Context, req *proto.NodeUnpublishVolumeRequest) (*proto.NodeUnpublishVolumeResponse, error) {
 	if req.GetVolumeId() == "" {
 		return nil, status.Error(codes.InvalidArgument, "missing volume id")
 	}
@@ -101,7 +101,7 @@ func (s *NodeService) NodeUnpublishVolume(_ context.Context, req *proto.NodeUnpu
 		return nil, status.Error(codes.InvalidArgument, "missing target path")
 	}
 
-	if err := s.volumeMountService.Unpublish(req.GetTargetPath()); err != nil {
+	if err := s.volumeMountService.Unpublish(ctx, req.GetTargetPath()); err != nil {
 		return nil, status.Error(codes.Internal, fmt.Sprintf("failed to unpublish volume: %s", err))
 	}
 
@@ -192,7 +192,7 @@ func (s *NodeService) NodeGetInfo(_ context.Context, _ *proto.NodeGetInfoRequest
 	return resp, nil
 }
 
-func (s *NodeService) NodeExpandVolume(_ context.Context, req *proto.NodeExpandVolumeRequest) (*proto.NodeExpandVolumeResponse, error) {
+func (s *NodeService) NodeExpandVolume(ctx context.Context, req *proto.NodeExpandVolumeRequest) (*proto.NodeExpandVolumeResponse, error) {
 	if req.GetVolumeId() == "" {
 		return nil, status.Error(codes.InvalidArgument, "missing volume id")
 	}
@@ -209,7 +209,7 @@ func (s *NodeService) NodeExpandVolume(_ context.Context, req *proto.NodeExpandV
 	}
 
 	if req.GetVolumeCapability().GetBlock() == nil {
-		if err := s.volumeResizeService.Resize(req.GetVolumePath()); err != nil {
+		if err := s.volumeResizeService.Resize(ctx, req.GetVolumePath()); err != nil {
 			return nil, status.Error(codes.Internal, fmt.Sprintf("failed to resize volume: %s", err))
 		}
 	}
