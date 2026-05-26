@@ -109,6 +109,8 @@ github.com/hetznercloud/hcloud-go/v2 v2.40.0 h1:fuP7khfiDQAIXdKyQq7f3LnnOjyZg0PX
 github.com/hetznercloud/hcloud-go/v2 v2.40.0/go.mod h1:ANz38eerXjPv00dm9dckKhttOGtYeeGmjjvwL5e6c5E=
 github.com/hetznercloud/hcloud-go/v2 v2.41.1 h1:nsNE9rFFVtIlpRW3nNXk3RjZ2XoAIcdofTVevukZ1dg=
 github.com/hetznercloud/hcloud-go/v2 v2.41.1/go.mod h1:tnkEeFxIh+dT7/2cvRT4dEAszS2osJ1ZLIFVpN+xqZ8=
+github.com/hetznercloud/hcloud-go/v2 v2.41.2 h1:fO5zsMgp5oejrtnFj8mYuqlp+iMuirpaKv4b5FYNRdQ=
+github.com/hetznercloud/hcloud-go/v2 v2.41.2/go.mod h1:9OGvC//jbHE4sv2Oyo0bQ2vEWuUMKYoNMyj9Qxz2qcc=
 github.com/klauspost/compress v1.18.1 h1:bcSGx7UbpBqMChDtsF28Lw6v/G94LPrrbMbdC3JH2co=
 github.com/klauspost/compress v1.18.1/go.mod h1:ZQFFVG+MdnR0P+l6wpXgIL4NTtwiKIdBnrBd8Nrxr+0=
 github.com/kr/pretty v0.3.1 h1:flRD4NNwYAUpkphVc1HcthR4KEIFJ65n8Mw5qdRn3LE=
