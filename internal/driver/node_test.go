@@ -109,7 +109,6 @@ func TestNodeServiceNodePublishBlockVolume(t *testing.T) {
 		},
 		PublishContext: map[string]string{"devicePath": "devpath"},
 	})
-
 	if err != nil {
 		t.Fatal(err)
 	}
