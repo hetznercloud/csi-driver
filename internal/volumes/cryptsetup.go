@@ -9,7 +9,7 @@ import (
 	"strings"
 )
 
-const cryptsetupExecuable = "cryptsetup"
+const cryptsetupExecutable = "cryptsetup"
 
 type LUKSDeviceStatus struct {
 	Device string
@@ -33,16 +33,22 @@ func NewCryptSetup(logger *slog.Logger) *CryptSetup {
 }
 
 func (cs *CryptSetup) Status(ctx context.Context, device string) (LUKSDeviceStatus, error) {
-	status := LUKSDeviceStatus{Active: false}
 	output, code, err := cryptsetup(ctx, "status", device)
 	if err != nil {
 		if code == 4 {
-			return status, nil
+			return LUKSDeviceStatus{Active: false}, nil
 		}
-		return status, fmt.Errorf("unable to check LUKS device %s activity: %w", device, err)
+		return LUKSDeviceStatus{Active: false}, fmt.Errorf("unable to check LUKS device %s status: %w", device, err)
 	}
 
-	status.Active = true
+	return parseLUKSStatus(output), nil
+}
+
+// parseLUKSStatus extracts the relevant fields from the output of
+// `cryptsetup status`. It assumes the device is active; a non-active device is
+// reported through the exit code, not the output.
+func parseLUKSStatus(output string) LUKSDeviceStatus {
+	status := LUKSDeviceStatus{Active: true}
 	for line := range strings.SplitSeq(output, "\n") {
 		key, value, ok := strings.Cut(strings.TrimSpace(line), ":")
 		if !ok {
@@ -57,7 +63,7 @@ func (cs *CryptSetup) Status(ctx context.Context, device string) (LUKSDeviceStat
 		}
 	}
 
-	return status, nil
+	return status
 }
 
 func (cs *CryptSetup) Format(ctx context.Context, devicePath string, passphrase string) error {
@@ -159,7 +165,7 @@ func cryptsetup(ctx context.Context, args ...string) (string, int, error) {
 }
 
 func cryptsetupWithStdin(ctx context.Context, stdin string, args ...string) (string, int, error) {
-	cmd := exec.CommandContext(ctx, cryptsetupExecuable, args...)
+	cmd := exec.CommandContext(ctx, cryptsetupExecutable, args...)
 	if stdin != "" {
 		cmd.Stdin = strings.NewReader(stdin)
 	}
