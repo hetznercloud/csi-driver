@@ -23,13 +23,14 @@ func TestCryptSetup(t *testing.T) {
 		t.Fatal(err)
 	}
 	passphrase := "passphrase"
+	ctx := t.Context()
 
-	if err := cryptSetup.Format(device, passphrase); err != nil {
+	if err := cryptSetup.Format(ctx, device, passphrase); err != nil {
 		t.Fatal(err)
 	}
 	decryptedName := name + "-decrypted"
 
-	if err := cryptSetup.Open(device, decryptedName, passphrase); err != nil {
+	if err := cryptSetup.Open(ctx, device, decryptedName, passphrase); err != nil {
 		t.Fatal(err)
 	}
 	decryptedDevice := "/dev/mapper/" + decryptedName
@@ -50,7 +51,7 @@ func TestCryptSetup(t *testing.T) {
 	if _, err := runCmd("umount", decryptedMount); err != nil {
 		t.Fatal(err)
 	}
-	if err := cryptSetup.Close(decryptedName); err != nil {
+	if err := cryptSetup.Close(ctx, decryptedName); err != nil {
 		t.Fatal(err)
 	}
 }

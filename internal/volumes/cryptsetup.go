@@ -19,8 +19,8 @@ func NewCryptSetup(logger *slog.Logger) *CryptSetup {
 	return &CryptSetup{logger: logger}
 }
 
-func (cs *CryptSetup) IsActive(luksDeviceName string) (bool, error) {
-	output, code, err := command(context.Background(), cryptsetupExecuable, "status", luksDeviceName)
+func (cs *CryptSetup) IsActive(ctx context.Context, luksDeviceName string) (bool, error) {
+	output, code, err := command(ctx, cryptsetupExecuable, "status", luksDeviceName)
 	if err != nil {
 		if code == 4 {
 			return false, nil
@@ -30,20 +30,20 @@ func (cs *CryptSetup) IsActive(luksDeviceName string) (bool, error) {
 	return true, nil
 }
 
-func (cs *CryptSetup) Format(devicePath string, passphrase string) error {
+func (cs *CryptSetup) Format(ctx context.Context, devicePath string, passphrase string) error {
 	cs.logger.Info(
 		"formatting LUKS device",
 		"devicePath", devicePath,
 	)
-	output, _, err := commandWithStdin(context.Background(), passphrase, cryptsetupExecuable, "luksFormat", "--type", "luks1", devicePath)
+	output, _, err := commandWithStdin(ctx, passphrase, cryptsetupExecuable, "luksFormat", "--type", "luks1", devicePath)
 	if err != nil {
 		return fmt.Errorf("unable to format device %s with LUKS: %s", devicePath, output)
 	}
 	return nil
 }
 
-func (cs *CryptSetup) Open(devicePath string, luksDeviceName string, passphrase string) error {
-	active, err := cs.IsActive(luksDeviceName)
+func (cs *CryptSetup) Open(ctx context.Context, devicePath string, luksDeviceName string, passphrase string) error {
+	active, err := cs.IsActive(ctx, luksDeviceName)
 	if err != nil {
 		return err
 	}
@@ -55,15 +55,15 @@ func (cs *CryptSetup) Open(devicePath string, luksDeviceName string, passphrase 
 		"devicePath", devicePath,
 		"luksDeviceName", luksDeviceName,
 	)
-	output, _, err := commandWithStdin(context.Background(), passphrase, cryptsetupExecuable, "luksOpen", "--allow-discards", devicePath, luksDeviceName)
+	output, _, err := commandWithStdin(ctx, passphrase, cryptsetupExecuable, "luksOpen", "--allow-discards", devicePath, luksDeviceName)
 	if err != nil {
 		return fmt.Errorf("unable to open LUKS device %s: %s", devicePath, output)
 	}
 	return nil
 }
 
-func (cs *CryptSetup) Close(luksDeviceName string) error {
-	active, err := cs.IsActive(luksDeviceName)
+func (cs *CryptSetup) Close(ctx context.Context, luksDeviceName string) error {
+	active, err := cs.IsActive(ctx, luksDeviceName)
 	if err != nil {
 		return err
 	}
@@ -74,19 +74,19 @@ func (cs *CryptSetup) Close(luksDeviceName string) error {
 		"closing LUKS device",
 		"luksDeviceName", luksDeviceName,
 	)
-	output, _, err := command(context.Background(), cryptsetupExecuable, "luksClose", luksDeviceName)
+	output, _, err := command(ctx, cryptsetupExecuable, "luksClose", luksDeviceName)
 	if err != nil {
 		return fmt.Errorf("unable to close LUKS device %s: %s", luksDeviceName, output)
 	}
 	return nil
 }
 
-func (cs *CryptSetup) Resize(luksDeviceName string) error {
+func (cs *CryptSetup) Resize(ctx context.Context, luksDeviceName string) error {
 	cs.logger.Info(
 		"resizing LUKS device",
 		"luksDeviceName", luksDeviceName,
 	)
-	output, _, err := command(context.Background(), cryptsetupExecuable, "resize", luksDeviceName)
+	output, _, err := command(ctx, cryptsetupExecuable, "resize", luksDeviceName)
 	if err != nil {
 		return fmt.Errorf("unable to resize LUKS device %s: %s", luksDeviceName, output)
 	}
