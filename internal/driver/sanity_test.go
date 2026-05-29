@@ -227,6 +227,7 @@ type sanityStatsService struct{}
 func (s *sanityStatsService) ByteFilesystemStats(_ string) (totalBytes int64, availableBytes int64, usedBytes int64, err error) {
 	return 1, 1, 1, nil
 }
+
 func (s *sanityStatsService) INodeFilesystemStats(_ string) (total int64, used int64, free int64, err error) {
 	return 1, 1, 1, nil
 }

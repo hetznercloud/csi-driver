@@ -2,15 +2,20 @@ package volumes
 
 import (
 	"context"
+	"errors"
 	"fmt"
 	"log/slog"
 	"os"
 	"path/filepath"
 	"strings"
+	"time"
 
 	"github.com/moby/buildkit/frontend/dockerfile/shell"
+	"golang.org/x/sys/unix"
 	"k8s.io/mount-utils"
 	"k8s.io/utils/exec"
+
+	"github.com/hetznercloud/hcloud-go/v2/hcloud"
 )
 
 const (
@@ -55,6 +60,12 @@ func NewLinuxMountService(logger *slog.Logger) *LinuxMountService {
 }
 
 func (s *LinuxMountService) Publish(ctx context.Context, targetPath string, devicePath string, opts MountOpts) error {
+	// Ensure device is ready via stat syscall. Otherwise, `blkid` might return
+	// exit code 2, which is the same exit code as for an unformatted device.
+	if err := s.waitDeviceReady(ctx, devicePath); err != nil {
+		return fmt.Errorf("device %q not ready: %w", devicePath, err)
+	}
+
 	isMountPoint, err := s.mounter.IsMountPoint(targetPath)
 	if err != nil {
 		if os.IsNotExist(err) {
@@ -63,21 +74,20 @@ func (s *LinuxMountService) Publish(ctx context.Context, targetPath string, devi
 			return err
 		}
 	}
-
 	if isMountPoint {
 		return nil
 	}
 
 	var mountOptions []string
 
-	targetPathPermissions := os.FileMode(0750)
+	targetPathPermissions := os.FileMode(0o750)
 	if opts.BlockVolume {
 		mountOptions = append(mountOptions, "bind")
 		if err := os.MkdirAll(filepath.Dir(targetPath), targetPathPermissions); err != nil {
 			return err
 		}
 
-		mountFilePermissions := os.FileMode(0660)
+		mountFilePermissions := os.FileMode(0o660)
 		mountFile, err := os.OpenFile(targetPath, os.O_CREATE, mountFilePermissions)
 		if err != nil {
 			return err
@@ -151,6 +161,43 @@ func (s *LinuxMountService) Publish(ctx context.Context, targetPath string, devi
 	}
 
 	return s.mounter.FormatAndMountSensitiveWithFormatOptions(devicePath, targetPath, opts.FSType, mountOptions, opts.Additional, formatOptions)
+}
+
+// waitDeviceReady ensures the device at devicePath exists. This is done by ensuring a stat
+// syscall returns no error.
+func (s *LinuxMountService) waitDeviceReady(ctx context.Context, devicePath string) error {
+	const maxRetries = 7
+	backoffFunc := hcloud.ExponentialBackoffWithOpts(hcloud.ExponentialBackoffOpts{
+		Base:       time.Millisecond * 50,
+		Multiplier: 2.0,
+		Cap:        500 * time.Millisecond,
+	})
+
+	var err error
+	for i := range maxRetries {
+		var stat unix.Stat_t
+		err = unix.Stat(devicePath, &stat)
+		if err == nil {
+			return nil
+		}
+		if !errors.Is(err, unix.ENOENT) {
+			return err
+		}
+
+		s.logger.Debug("device not ready yet: stat syscall returned ENOENT", "devicePath", devicePath)
+
+		if i == maxRetries-1 {
+			break
+		}
+
+		select {
+		case <-ctx.Done():
+			return fmt.Errorf("waiting for device %s: %w", devicePath, ctx.Err())
+		case <-time.After(backoffFunc(i)):
+		}
+	}
+
+	return err
 }
 
 func (s *LinuxMountService) Unpublish(ctx context.Context, targetPath string) error {
