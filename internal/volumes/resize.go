@@ -1,6 +1,7 @@
 package volumes
 
 import (
+	"context"
 	"fmt"
 	"log/slog"
 
@@ -10,7 +11,7 @@ import (
 
 // ResizeService resizes volumes.
 type ResizeService interface {
-	Resize(volumePath string) error
+	Resize(ctx context.Context, volumePath string) error
 }
 
 // LinuxResizeService resizes volumes on a Linux system.
@@ -31,7 +32,7 @@ func NewLinuxResizeService(logger *slog.Logger) *LinuxResizeService {
 	}
 }
 
-func (l *LinuxResizeService) Resize(volumePath string) error {
+func (l *LinuxResizeService) Resize(ctx context.Context, volumePath string) error {
 	devicePath, _, err := mount.GetDeviceNameFromMount(mount.New(""), volumePath)
 	if err != nil {
 		return fmt.Errorf("failed to determine mount path for %s: %w", volumePath, err)
@@ -44,13 +45,13 @@ func (l *LinuxResizeService) Resize(volumePath string) error {
 	)
 
 	luksDeviceName := GenerateLUKSDeviceName(devicePath)
-	active, err := l.cryptSetup.IsActive(luksDeviceName)
+	active, err := l.cryptSetup.IsActive(ctx, luksDeviceName)
 	if err != nil {
 		return err
 	}
 	if active {
 		luksDevicePath := GenerateLUKSDevicePath(luksDeviceName)
-		if err := l.cryptSetup.Resize(luksDeviceName); err != nil {
+		if err := l.cryptSetup.Resize(ctx, luksDeviceName); err != nil {
 			return err
 		}
 		devicePath = luksDevicePath
