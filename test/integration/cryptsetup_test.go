@@ -24,7 +24,6 @@ func TestCryptSetup(t *testing.T) {
 		t.Fatal(err)
 	}
 	passphrase := "passphrase"
-	ctx := t.Context()
 
 	if err := cryptSetup.Format(ctx, device, passphrase); err != nil {
 		t.Fatal(err)
