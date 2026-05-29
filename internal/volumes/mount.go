@@ -63,7 +63,7 @@ func (s *LinuxMountService) Publish(ctx context.Context, targetPath string, devi
 	// Ensure device is ready via stat syscall. Otherwise, `blkid` might return
 	// exit code 2, which is the same exit code as for an unformatted device.
 	if err := s.waitDeviceReady(ctx, devicePath); err != nil {
-		return fmt.Errorf("device not ready: %w", err)
+		return fmt.Errorf("device %q not ready: %w", devicePath, err)
 	}
 
 	isMountPoint, err := s.mounter.IsMountPoint(targetPath)
