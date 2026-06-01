@@ -1,5 +1,11 @@
 # Changelog
 
+## [v2.21.2](https://github.com/hetznercloud/csi-driver/releases/tag/v2.21.2)
+
+### Bug Fixes
+
+- device needs to be ready on node publish (#1381)
+
 ## [v2.21.1](https://github.com/hetznercloud/csi-driver/releases/tag/v2.21.1)
 
 ### Bug Fixes
