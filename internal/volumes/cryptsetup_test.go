@@ -99,7 +99,7 @@ func TestParseLUKSStatus(t *testing.T) {
 
 	for _, testCase := range testCases {
 		t.Run(testCase.Name, func(t *testing.T) {
-			got := parseLUKSStatus(testCase.Output)
+			got := NewLUKSDeviceStatus(testCase.Output)
 			if got != testCase.Want {
 				t.Errorf("parseLUKSStatus() = %+v, want %+v", got, testCase.Want)
 			}

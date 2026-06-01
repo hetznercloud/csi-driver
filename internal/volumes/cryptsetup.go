@@ -11,19 +11,6 @@ import (
 
 const cryptsetupExecutable = "cryptsetup"
 
-type LUKSDeviceStatus struct {
-	Device string
-	Type   string
-	Active bool
-}
-
-func (s LUKSDeviceStatus) IsZombie() bool {
-	if !s.Active {
-		return false
-	}
-	return s.Device == "" || s.Type == "" || s.Device == "(null)" || s.Type == "n/a"
-}
-
 type CryptSetup struct {
 	logger *slog.Logger
 }
@@ -41,29 +28,7 @@ func (cs *CryptSetup) Status(ctx context.Context, device string) (LUKSDeviceStat
 		return LUKSDeviceStatus{Active: false}, fmt.Errorf("unable to check LUKS device %s status: %w", device, err)
 	}
 
-	return parseLUKSStatus(output), nil
-}
-
-// parseLUKSStatus extracts the relevant fields from the output of
-// `cryptsetup status`. It assumes the device is active; a non-active device is
-// reported through the exit code, not the output.
-func parseLUKSStatus(output string) LUKSDeviceStatus {
-	status := LUKSDeviceStatus{Active: true}
-	for line := range strings.SplitSeq(output, "\n") {
-		key, value, ok := strings.Cut(strings.TrimSpace(line), ":")
-		if !ok {
-			continue
-		}
-		value = strings.TrimSpace(value)
-		switch key {
-		case "type":
-			status.Type = value
-		case "device":
-			status.Device = value
-		}
-	}
-
-	return status
+	return NewLUKSDeviceStatus(output), nil
 }
 
 func (cs *CryptSetup) Format(ctx context.Context, devicePath string, passphrase string) error {
@@ -179,4 +144,38 @@ func cryptsetupWithStdin(ctx context.Context, stdin string, args ...string) (str
 		return output, exitError.ExitCode(), fmt.Errorf("%w\n%s", exitError, output)
 	}
 	return output, 0, nil
+}
+
+type LUKSDeviceStatus struct {
+	Device string
+	Type   string
+	Active bool
+}
+
+func NewLUKSDeviceStatus(output string) LUKSDeviceStatus {
+	// Assumes the device is active; a non-active device is
+	// reported through the exit code, not the output.
+	status := LUKSDeviceStatus{Active: true}
+	for line := range strings.SplitSeq(output, "\n") {
+		key, value, ok := strings.Cut(strings.TrimSpace(line), ":")
+		if !ok {
+			continue
+		}
+		value = strings.TrimSpace(value)
+		switch key {
+		case "type":
+			status.Type = value
+		case "device":
+			status.Device = value
+		}
+	}
+
+	return status
+}
+
+func (s LUKSDeviceStatus) IsZombie() bool {
+	if !s.Active {
+		return false
+	}
+	return s.Device == "" || s.Type == "" || s.Device == "(null)" || s.Type == "n/a"
 }
