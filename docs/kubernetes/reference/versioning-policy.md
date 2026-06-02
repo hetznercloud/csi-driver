@@ -1,10 +1,6 @@
 # Versioning policy
 
-We aim to support the latest three versions of Kubernetes. When a Kubernetes
-version is marked as _End Of Life_, we will stop support for it and remove the
-version from our CI tests. This does not necessarily mean that the
-csi-driver does not still work with this version. We will
-not fix bugs related only to an unsupported version.
+We aim to support the latest three versions of Kubernetes. When a Kubernetes version is marked as _End Of Life_, we will stop support for it and remove the version from our CI tests. This does not necessarily mean that the csi-driver does not still work with this version. We will not fix bugs related only to an unsupported version.
 
 Current Kubernetes Releases: https://kubernetes.io/releases/
 
