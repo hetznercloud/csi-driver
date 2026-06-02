@@ -43,6 +43,42 @@ To watch a specific node's logs, find the pod scheduled on that node first:
 kubectl get pods -n kube-system -l app.kubernetes.io/component=node -o wide
 ```
 
+### Enable debug logs
+
+By default the driver only logs at `info` level. When the standard logs are not
+enough, raise the verbosity through two environment variables:
+
+- `LOG_LEVEL=debug` increases the driver's log verbosity.
+- `HCLOUD_DEBUG=true` logs the raw Hetzner Cloud API requests and responses. API tokens are redacted.
+
+Set them on **both** components via the Helm values `controller.extraEnvVars`
+and `node.extraEnvVars`:
+
+```yaml
+# values.yaml
+controller:
+  extraEnvVars:
+    - name: LOG_LEVEL
+      value: debug
+    - name: HCLOUD_DEBUG
+      value: "true"
+node:
+  extraEnvVars:
+    - name: LOG_LEVEL
+      value: debug
+    - name: HCLOUD_DEBUG
+      value: "true"
+```
+
+Apply the values and let the pods roll out:
+
+```bash
+helm upgrade hcloud-csi hcloud/hcloud-csi -n kube-system -f values.yaml
+```
+
+Once the new pods have started, you should see debug messages and raw API
+requests in the logs.
+
 ### Inspect the affected object
 
 Kubernetes records most provisioning and mounting problems as Events on the PersistentVolumeClaim or the Pod:
