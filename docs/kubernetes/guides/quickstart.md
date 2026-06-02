@@ -20,9 +20,3 @@ helm repo update hcloud
 ```bash
 helm install hcloud-csi hcloud/hcloud-csi -n kube-system
 ```
-
-5. You should now see a new StorageClass `hcloud-volumes`, which you can reference in your PersistentVolumeClaims to dynamically provision Hetzner Cloud Volumes:
-
-```bash
-kubectl get storageclasses.storage.k8s.io
-```
