@@ -8,7 +8,6 @@ import (
 	"github.com/hetznercloud/csi-driver/internal/csi"
 	"github.com/hetznercloud/csi-driver/internal/volumes"
 	"github.com/hetznercloud/hcloud-go/v2/hcloud"
-	"github.com/hetznercloud/hcloud-go/v2/hcloud/exp/errutil"
 )
 
 type VolumeService struct {
@@ -28,7 +27,7 @@ func (s *VolumeService) All(ctx context.Context) ([]*csi.Volume, error) {
 	if err != nil {
 		s.logger.Info(
 			"failed to get volumes",
-			"err", errutil.LogValue(err),
+			"err", err,
 		)
 		return nil, err
 	}
@@ -59,7 +58,7 @@ func (s *VolumeService) Create(ctx context.Context, opts volumes.CreateOpts) (*c
 		s.logger.Info(
 			"failed to create volume",
 			"volume-name", opts.Name,
-			"err", errutil.LogValue(err),
+			"err", err,
 		)
 		if hcloud.IsError(err, hcloud.ErrorCode("uniqueness_error")) {
 			return nil, volumes.ErrVolumeAlreadyExists
@@ -71,7 +70,7 @@ func (s *VolumeService) Create(ctx context.Context, opts volumes.CreateOpts) (*c
 		s.logger.Info(
 			"failed to create volume",
 			"volume-name", opts.Name,
-			"err", errutil.LogValue(err),
+			"err", err,
 		)
 		_, _ = s.client.Volume.Delete(ctx, result.Volume) // fire and forget
 		return nil, err
@@ -86,7 +85,7 @@ func (s *VolumeService) GetByID(ctx context.Context, id int64) (*csi.Volume, err
 		s.logger.Info(
 			"failed to get volume",
 			"volume-id", id,
-			"err", errutil.LogValue(err),
+			"err", err,
 		)
 		return nil, err
 	}
@@ -106,7 +105,7 @@ func (s *VolumeService) GetByName(ctx context.Context, name string) (*csi.Volume
 		s.logger.Info(
 			"failed to get volume",
 			"volume-name", name,
-			"err", errutil.LogValue(err),
+			"err", err,
 		)
 		return nil, err
 	}
@@ -131,7 +130,7 @@ func (s *VolumeService) Delete(ctx context.Context, volume *csi.Volume) error {
 		s.logger.Info(
 			"failed to get volume",
 			"volume-id", volume.ID,
-			"err", errutil.LogValue(err),
+			"err", err,
 		)
 		return err
 	}
@@ -155,7 +154,7 @@ func (s *VolumeService) Delete(ctx context.Context, volume *csi.Volume) error {
 		s.logger.Info(
 			"failed to delete volume",
 			"volume-id", volume.ID,
-			"err", errutil.LogValue(err),
+			"err", err,
 		)
 		if hcloud.IsError(err, hcloud.ErrorCodeNotFound) {
 			return volumes.ErrVolumeNotFound
@@ -182,7 +181,7 @@ func (s *VolumeService) Attach(ctx context.Context, volume *csi.Volume, server *
 		s.logger.Info(
 			"failed to get volume",
 			"volume-id", volume.ID,
-			"err", errutil.LogValue(err),
+			"err", err,
 		)
 		return err
 	}
@@ -200,7 +199,7 @@ func (s *VolumeService) Attach(ctx context.Context, volume *csi.Volume, server *
 			"failed to get server",
 			"volume-id", volume.ID,
 			"server-id", server.ID,
-			"err", errutil.LogValue(err),
+			"err", err,
 		)
 		return err
 	}
@@ -236,7 +235,7 @@ func (s *VolumeService) Attach(ctx context.Context, volume *csi.Volume, server *
 			"failed to attach volume",
 			"volume-id", volume.ID,
 			"server-id", server.ID,
-			"err", errutil.LogValue(err),
+			"err", err,
 		)
 		if hcloud.IsError(err, hcloud.ErrorCode("limit_exceeded_error")) {
 			return volumes.ErrAttachLimitReached
@@ -255,7 +254,7 @@ func (s *VolumeService) Attach(ctx context.Context, volume *csi.Volume, server *
 			"failed to attach volume",
 			"volume-id", volume.ID,
 			"server-id", server.ID,
-			"err", errutil.LogValue(err),
+			"err", err,
 		)
 		return err
 	}
@@ -282,14 +281,14 @@ func (s *VolumeService) Detach(ctx context.Context, volume *csi.Volume, server *
 			s.logger.Info(
 				"volume to detach not found",
 				"volume-id", volume.ID,
-				"err", errutil.LogValue(err),
+				"err", err,
 			)
 			return volumes.ErrVolumeNotFound
 		}
 		s.logger.Info(
 			"failed to get volume to detach",
 			"volume-id", volume.ID,
-			"err", errutil.LogValue(err),
+			"err", err,
 		)
 		return err
 	}
@@ -297,7 +296,7 @@ func (s *VolumeService) Detach(ctx context.Context, volume *csi.Volume, server *
 		s.logger.Info(
 			"volume to detach not found",
 			"volume-id", volume.ID,
-			"err", errutil.LogValue(err),
+			"err", err,
 		)
 		return volumes.ErrVolumeNotFound
 	}
@@ -326,7 +325,7 @@ func (s *VolumeService) Detach(ctx context.Context, volume *csi.Volume, server *
 		s.logger.Info(
 			"failed to detach volume",
 			"volume-id", volume.ID,
-			"err", errutil.LogValue(err),
+			"err", err,
 		)
 		if hcloud.IsError(err, hcloud.ErrorCodeLocked) {
 			return volumes.ErrLockedServer
@@ -338,7 +337,7 @@ func (s *VolumeService) Detach(ctx context.Context, volume *csi.Volume, server *
 		s.logger.Info(
 			"failed to detach volume",
 			"volume-id", volume.ID,
-			"err", errutil.LogValue(err),
+			"err", err,
 		)
 		return err
 	}
@@ -354,7 +353,7 @@ func (s *VolumeService) Resize(ctx context.Context, volume *csi.Volume, size int
 
 	hcloudVolume, _, err := s.client.Volume.GetByID(ctx, volume.ID)
 	if err != nil {
-		logger.Info("failed to get volume", "err", errutil.LogValue(err))
+		logger.Info("failed to get volume", "err", err)
 		return err
 	}
 	if hcloudVolume == nil {
@@ -371,12 +370,12 @@ func (s *VolumeService) Resize(ctx context.Context, volume *csi.Volume, size int
 
 	action, _, err := s.client.Volume.Resize(ctx, hcloudVolume, size)
 	if err != nil {
-		logger.Info("failed to resize volume", "err", errutil.LogValue(err))
+		logger.Info("failed to resize volume", "err", err)
 		return err
 	}
 
 	if err = s.client.Action.WaitFor(ctx, action); err != nil {
-		logger.Info("failed to resize volume", "err", errutil.LogValue(err))
+		logger.Info("failed to resize volume", "err", err)
 		return err
 	}
 	return nil
