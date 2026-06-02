@@ -2,7 +2,7 @@
 
 ⚠️ Docker Swarm is not officially supported.
 
-Only [Kubernetes](./docs/kubernetes/README.md) is officially supported.
+Only [Kubernetes](../kubernetes/README.md) is officially supported.
 
 ---
 
