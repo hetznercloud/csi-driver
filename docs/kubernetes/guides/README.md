@@ -4,9 +4,10 @@ In this folder, you should find guides for you to accomplish specific tasks with
 
 - [Quickstart](quickstart.md)
 - [Volumes Encrypted with LUKS](volumes-encrypted-with-luks.md)
-- [How to Import Volumes](how-to-import-volumes.md) — Importing existing volumes
-- [Alternative Kubelet Directory](alternative-kubelet-directory.md)
+- [Troubleshooting](troubleshooting.md)
+- [How to Import Volumes](how-to-import-volumes.md)
+- [Monitoring](monitoring.md)
 - [Filesystem Formatting Options](filesystem-formatting-options.md)
-- [Upgrading from v1 to v2](upgrading-from-v1-to-v2.md)
-- [Monitoring](monitoring.md) — Scraping metrics and the Grafana dashboard
-- [Troubleshooting](troubleshooting.md) — Diagnosing common problems
+- [Alternative Kubelet Directory](alternative-kubelet-directory.md)
+- [Upgrading from v1 to v2](upgrading-from-v1-to-v2)
+- [v2.0.0 Fix Volume Topology](v2.0.0-fix-volume-topology)
