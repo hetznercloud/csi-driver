@@ -1,4 +1,4 @@
-# Getting Started
+# Quick start
 
 1. Create a read+write API token in the [Hetzner Cloud Console](https://console.hetzner.cloud/).
 
