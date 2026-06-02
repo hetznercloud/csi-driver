@@ -26,8 +26,8 @@ metrics:
 
 > 💡 Learn more:
 >
-> - https://prometheus-operator.dev/docs/prologue/quick-start/
-> - https://prometheus-operator.dev/docs/operator/design/#servicemonitor
+> - https://prometheus-operator.dev/docs/getting-started/introduction/
+> - https://prometheus-operator.dev/docs/getting-started/design/#servicemonitor
 
 ## Grafana Dashboard
 
@@ -38,5 +38,5 @@ You can find the dashboard at [`deploy/monitoring/grafana-dashboard.json`](../..
 
 > 💡 Learn more:
 >
-> - https://grafana.com/docs/grafana/latest/dashboards/
-> - https://grafana.com/docs/grafana/latest/dashboards/manage-dashboards/#import-a-dashboard
+> - https://grafana.com/docs/grafana/latest/visualizations/dashboards
+> - https://grafana.com/docs/grafana/latest/visualizations/dashboards/build-dashboards/import-dashboards/

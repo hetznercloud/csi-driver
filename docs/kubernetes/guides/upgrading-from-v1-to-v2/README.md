@@ -4,7 +4,7 @@ There are three breaking changes between v1.6 and v2.0 that require user interve
 
 **Before the rollout**:
 
-1. The secret containing the API token was renamed from `hcloud-csi` to `hcloud`. This change was made so both the cloud-controller-manager and the csi-driver can use the same secret. Check that you have a secret `hcloud` in the namespace `kube-system`, and that the secret contains the API token, as described in the section [Quick start](quickstart.md):
+1. The secret containing the API token was renamed from `hcloud-csi` to `hcloud`. This change was made so both the cloud-controller-manager and the csi-driver can use the same secret. Check that you have a secret `hcloud` in the namespace `kube-system`, and that the secret contains the API token, as described in the section [Quick start](../quickstart.md):
 
    ```shell
    $ kubectl get secret -n kube-system hcloud
