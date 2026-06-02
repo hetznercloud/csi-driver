@@ -60,7 +60,7 @@ A PVC that never leaves `Pending` means the **controller** could not provision a
 
 ### Missing or invalid API token
 
-The controller needs a Hetzner Cloud API token to create volumes. By default it reads a secret named `hcloud` with a key `token` (see the [Quickstart](quickstart.md)). The token must have **read & write** permissions.
+The controller needs a Hetzner Cloud API token to create volumes. By default it reads a secret named `hcloud` with a key `token` (see the [Quickstart](quickstart.md)). The token must have **read+write** permissions.
 
 ### Wrong or missing StorageClass
 
