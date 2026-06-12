@@ -1,4 +1,4 @@
-# Upgrading From v1 to v2
+# Upgrading from v1 to v2
 
 There are three breaking changes between v1.6 and v2.0 that require user intervention. Please take care to follow these steps, as otherwise the update might fail.
 

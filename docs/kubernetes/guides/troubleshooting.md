@@ -147,7 +147,7 @@ To grow a volume:
 1. The StorageClass must have `allowVolumeExpansion: true`.
 2. Increase `spec.resources.requests.storage` on the **PVC** (not the PV).
 
-The controller resizes the underlying Hetzner Cloud volume, and the filesystem is expanded the next time it is mounted. Watch the controller and node logs if the new size does not appear. Note that volumes can only be **grown**, never shrunk.
+The controller resizes the underlying Hetzner Cloud volume, and the filesystem is expanded the next time it is mounted. Watch the controller and node logs if the new size does not appear. Note that volumes can only **grow**, never shrink.
 
 ## Volumes do not work on Robot / dedicated servers
 
