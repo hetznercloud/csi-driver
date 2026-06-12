@@ -5,7 +5,7 @@ In this folder, you should find guides for you to accomplish specific tasks with
 - [Quickstart](quickstart.md)
 - [Volumes Encrypted with LUKS](volumes-encrypted-with-luks.md)
 - [Troubleshooting](troubleshooting.md)
-- [How to Import Volumes](how-to-import-volumes.md)
+- [Importing Volumes](importing-volumes.md)
 - [Monitoring](monitoring.md)
 - [Filesystem Formatting Options](filesystem-formatting-options.md)
 - [Alternative Kubelet Directory](alternative-kubelet-directory.md)
