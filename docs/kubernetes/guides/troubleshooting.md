@@ -128,7 +128,11 @@ See [Volume location](../reference/volume-location.md) for more details.
 
 Some Kubernetes distributions (k0s, MicroK8s, …) use a non-standard kubelet directory. If the driver is not configured for it, mounts silently fail with errors about missing paths.
 
-Set the Helm value `node.kubeletDir` to match your distribution. See [Alternative kubelet directory](alternative-kubelet-directory.md) for the known paths.
+Set the Helm value `node.kubeletDir` to match your distribution:
+
+- Standard: `/var/lib/kubelet`
+- **k0s**: `/var/lib/k0s/kubelet`
+- **microk8s**: `/var/snap/microk8s/common/var/lib/kubelet`
 
 ### No `node` pod on the target node
 
