@@ -1,4 +1,4 @@
-# How to import volumes
+# Importing Volumes
 
 This guide explains how to import an existing Hetzner Volume into your Kubernetes cluster with the csi-driver installed.
 

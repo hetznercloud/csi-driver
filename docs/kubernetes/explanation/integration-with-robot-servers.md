@@ -1,6 +1,6 @@
 # Integration with Root Servers
 
-Root servers can be part of the cluster, but the CSI plugin doesn't work there. To ensure proper topology evaluation, labels are needed to indicate whether a node is a cloud VM or a dedicated server from Robot. If you are using the `hcloud-cloud-controller-manager` version 1.21.0 or later, these labels are added automatically. Otherwise, you will need to label the nodes manually.
+Robot servers can be part of the cluster, but the CSI plugin doesn't work there. To ensure proper topology evaluation, labels are needed to indicate whether a node is a cloud VM or a dedicated server from Robot. If you are using the `hcloud-cloud-controller-manager` version 1.21.0 or later, these labels are added automatically. Otherwise, you will need to label the nodes manually.
 
 ## Adding labels manually
 
@@ -18,7 +18,7 @@ kubectl label nodes <node name> instance.hetzner.cloud/provided-by=robot
 
 ## DEPRECATED: Old Label
 
-We prefer that you use our [new label](#new-label). The label `instance.hetzner.cloud/is-robot-server` will be deprecated in future releases.
+We prefer that you use our new label `instance.hetzner.cloud/provided-by`. The label `instance.hetzner.cloud/is-robot-server` will be deprecated in future releases.
 
 **Cloud Servers**
 

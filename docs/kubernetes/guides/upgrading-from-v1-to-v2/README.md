@@ -1,16 +1,10 @@
-# Upgrading
-
-To upgrade the csi-driver version, you just need to apply the new manifests to your cluster.
-
-In case of a new major version, there might be manual steps that you need to follow to upgrade the csi-driver. See the following section for a list of major updates and their required steps.
-
-## From v1 to v2
+# Upgrading from v1 to v2
 
 There are three breaking changes between v1.6 and v2.0 that require user intervention. Please take care to follow these steps, as otherwise the update might fail.
 
 **Before the rollout**:
 
-1. The secret containing the API token was renamed from `hcloud-csi` to `hcloud`. This change was made so both the cloud-controller-manager and the csi-driver can use the same secret. Check that you have a secret `hcloud` in the namespace `kube-system`, and that the secret contains the API token, as described in the section [Getting Started](getting-started.md):
+1. The secret containing the API token was renamed from `hcloud-csi` to `hcloud`. This change was made so both the cloud-controller-manager and the csi-driver can use the same secret. Check that you have a secret `hcloud` in the namespace `kube-system`, and that the secret contains the API token, as described in the section [Quick start](../quickstart.md):
 
    ```shell
    $ kubectl get secret -n kube-system hcloud
@@ -35,7 +29,7 @@ There are three breaking changes between v1.6 and v2.0 that require user interve
 
    ```shell
    $ kubectl version
-   $ curl -O https://raw.githubusercontent.com/hetznercloud/csi-driver/main/docs/v2-fix-volumeattachments/fix-volumeattachments.sh
+   $ curl -O https://raw.githubusercontent.com/hetznercloud/csi-driver/main/docs/kubernetes/guides/upgrading-from-v1-to-v2/fix-volumeattachments.sh
    $ chmod +x ./fix-volumeattachments.sh
    $ ./fix-volumeattachments.sh
    ```
