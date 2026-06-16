@@ -143,7 +143,7 @@ These labels are informational only and not used by the CSI driver itself. Volum
 > [!CAUTION]
 > Please do not install the version v2.14.0 of the `csi-driver`, install the version v2.15.0 or later instead.
 
-With this release, you can now assign Hetzner Cloud labels to all newly created volumes. For a brief guide, visit [this page](https://github.com/hetznercloud/csi-driver/blob/15c27b7359180151a91228d5d32a2976fb7a3e99/docs/kubernetes/explanation/volume-labels.md).
+With this release, you can now assign Hetzner Cloud labels to all newly created volumes. For a brief guide, visit [this page](https://github.com/hetznercloud/csi-driver/tree/v2.14.0/docs/kubernetes#volume-labels).
 
 By default, all volumes are labeled as follows:
 
@@ -472,7 +472,7 @@ Learn more: https://www.hetzner.com/news/arm64-cloud/
 
 ### Breaking Changes
 
-:warning: This release contains breaking changes from `1.6.0`. Please see the [Upgrading](https://github.com/hetznercloud/csi-driver/blob/15c27b7359180151a91228d5d32a2976fb7a3e99/docs/kubernetes/guides/upgrading-from-v1-to-v2/README.md) section in the README for details on the required steps.
+:warning: This release contains breaking changes from `1.6.0`. Please see the [Upgrading](https://github.com/hetznercloud/csi-driver/blob/v2.0.0/README.md#from-v1-to-v2) section in the README for details on the required steps.
 
 ### What's Changed
 
