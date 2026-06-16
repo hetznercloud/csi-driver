@@ -4,4 +4,5 @@ In this folder, you should find technical references material of the hcloud-csi-
 
 - [Volume Location](volume-location.md)
 - [Volume Labels](volume-labels.md)
+- [Version Policy](version-policy.md)
 - [XFS Filesystem](xfs-filesystem.md)
