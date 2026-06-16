@@ -318,7 +318,7 @@ Learn more about this in [#400](https://github.com/hetznercloud/csi-driver/issue
 Affordable, sustainable & powerful! 🚀You can now get one of our Arm64 CAX servers to optimize your operations while minimizing your costs!
 Discover Ampere’s efficient and robust Arm64 architecture and be ready to get blown away with its performance. 😎
 
-Learn more: https://www.hetzner.com/de/news/arm64-cloud/
+Learn more: https://www.hetzner.com/news/arm64-cloud/
 
 ### What's Changed
 
@@ -331,7 +331,7 @@ Learn more: https://www.hetzner.com/de/news/arm64-cloud/
 Affordable, sustainable & powerful! 🚀You can now get one of our Arm64 CAX servers to optimize your operations while minimizing your costs!
 Discover Ampere’s efficient and robust Arm64 architecture and be ready to get blown away with its performance. 😎
 
-Learn more: https://www.hetzner.com/de/news/arm64-cloud/
+Learn more: https://www.hetzner.com/news/arm64-cloud/
 
 ### What's Changed
 
@@ -345,7 +345,7 @@ Learn more: https://www.hetzner.com/de/news/arm64-cloud/
 Affordable, sustainable & powerful! 🚀You can now get one of our Arm64 CAX servers to optimize your operations while minimizing your costs!
 Discover Ampere’s efficient and robust Arm64 architecture and be ready to get blown away with its performance. 😎
 
-Learn more: https://www.hetzner.com/de/news/arm64-cloud/
+Learn more: https://www.hetzner.com/news/arm64-cloud/
 
 ### What's Changed
 
