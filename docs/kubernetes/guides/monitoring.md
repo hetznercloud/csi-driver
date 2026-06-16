@@ -24,11 +24,40 @@ metrics:
     enabled: true
 ```
 
+Prometheus only scrapes `ServiceMonitors` whose labels match the `serviceMonitorSelector` of your `Prometheus` resource. If your Prometheus selects on a `release` label (the default for the kube-prometheus-stack), set it via `metrics.serviceMonitor.labels` so the target is actually scraped:
+
+```yaml
+metrics:
+  enabled: true
+  serviceMonitor:
+    enabled: true
+    labels:
+      release: YOUR_RELEASE
+```
+
 > [!TIP]
 > To learn more about how the Prometheus operator works:
 >
 > - https://prometheus-operator.dev/docs/getting-started/introduction/
 > - https://prometheus-operator.dev/docs/getting-started/design/#servicemonitor
+
+### Using `kubernetes_sd_configs`
+
+If you're running Prometheus without the operator, you can configure scraping with `kubernetes_sd_configs` by adding annotations to the csi-driver workloads. Add these annotations to the `hcloud-csi-controller` Deployment and the `hcloud-csi-node` DaemonSet:
+
+```yaml
+annotations:
+  prometheus.io/scrape: "true"
+  prometheus.io/port: "9189"
+```
+
+With these annotations in place, Prometheus can discover and scrape metrics from the csi-driver components.
+
+> [!TIP]
+> To learn more about `kubernetes_sd_configs`:
+>
+> - https://prometheus.io/docs/prometheus/latest/getting_started/
+> - https://prometheus.io/docs/prometheus/latest/configuration/configuration/#kubernetes_sd_config
 
 ## Grafana Dashboard
 

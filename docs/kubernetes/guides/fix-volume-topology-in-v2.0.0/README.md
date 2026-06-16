@@ -46,7 +46,7 @@ For the following step we provide a migration script, that will make a backup, a
 Download the script:
 
 ```shell
-$ curl https://raw.githubusercontent.com/hetznercloud/csi-driver/main/docs/v2.0.0-fix-volume-topology/fix-persistentvolume-topology.sh ./fix-persistentvolume-topology.sh
+$ curl -O https://raw.githubusercontent.com/hetznercloud/csi-driver/main/docs/kubernetes/guides/fix-volume-topology-in-v2.0.0/fix-persistentvolume-topology.sh
 $ chmod +x ./fix-persistentvolume-topology.sh
 ```
 

@@ -79,6 +79,38 @@ helm upgrade hcloud-csi hcloud/hcloud-csi -n kube-system -f values.yaml
 Once the new pods have started, you should see debug messages and raw API
 requests in the logs.
 
+If you deploy via raw manifests instead of Helm, add the same two environment
+variables to the `hcloud-csi-driver` container of both workloads. Apply this
+patch to `deploy/kubernetes/hcloud-csi.yml` with `git apply` and re-apply the
+manifest:
+
+```diff
+--- a/deploy/kubernetes/hcloud-csi.yml
++++ b/deploy/kubernetes/hcloud-csi.yml
+@@ -230,6 +230,10 @@
+           securityContext:
+             privileged: true
+           env:
++            - name: LOG_LEVEL
++              value: debug
++            - name: HCLOUD_DEBUG
++              value: "true"
+             - name: CSI_ENDPOINT
+               value: unix:///run/csi/socket
+             - name: METRICS_ENDPOINT
+@@ -320,6 +324,10 @@
+           args:
+             - -controller
+           env:
++            - name: LOG_LEVEL
++              value: debug
++            - name: HCLOUD_DEBUG
++              value: "true"
+             - name: CSI_ENDPOINT
+               value: unix:///run/csi/socket
+             - name: METRICS_ENDPOINT
+```
+
 ### Inspect the affected object
 
 Kubernetes records most provisioning and mounting problems as Events on the PersistentVolumeClaim or the Pod:
@@ -122,7 +154,7 @@ Hetzner Cloud volumes are bound to a single location (e.g. `fsn1`, `nbg1`, `hel1
 
 The driver sets topology constraints to prevent this, but it can still happen when importing volumes or pinning Pods to specific nodes. Make sure `volumeBindingMode: WaitForFirstConsumer` is set on your StorageClass so the volume is created in the location where the Pod is scheduled.
 
-See [Volume location](../reference/volume-location.md) for more details.
+See [Volume location](../explanation/volume-location.md) for more details.
 
 ### Non-standard kubelet directory
 
