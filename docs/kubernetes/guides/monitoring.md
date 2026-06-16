@@ -38,7 +38,7 @@ This dashboard has been confirmed to work with kube-prometheus-stack, but it may
 You can find the dashboard at [`deploy/monitoring/grafana-dashboard.json`](../../../deploy/monitoring/grafana-dashboard.json).
 
 > [!TIP]
-> To learn more about Grafana dashboards works:
+> To learn more about Grafana dashboards:
 >
 > - https://grafana.com/docs/grafana/latest/visualizations/dashboards
 > - https://grafana.com/docs/grafana/latest/visualizations/dashboards/build-dashboards/import-dashboards/
