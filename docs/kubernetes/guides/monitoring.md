@@ -24,7 +24,8 @@ metrics:
     enabled: true
 ```
 
-> 💡 Learn more:
+> [!TIP]
+> To learn more about how the Prometheus operator works:
 >
 > - https://prometheus-operator.dev/docs/getting-started/introduction/
 > - https://prometheus-operator.dev/docs/getting-started/design/#servicemonitor
@@ -36,7 +37,8 @@ To help with this, we provide a default Grafana dashboard that can be used to di
 This dashboard has been confirmed to work with kube-prometheus-stack, but it may require some tweaking to work correctly in your specific environment.
 You can find the dashboard at [`deploy/monitoring/grafana-dashboard.json`](../../../deploy/monitoring/grafana-dashboard.json).
 
-> 💡 Learn more:
+> [!TIP]
+> To learn more about Grafana dashboards works:
 >
 > - https://grafana.com/docs/grafana/latest/visualizations/dashboards
 > - https://grafana.com/docs/grafana/latest/visualizations/dashboards/build-dashboards/import-dashboards/
