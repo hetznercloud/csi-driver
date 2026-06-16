@@ -40,7 +40,7 @@ Then you can follow the Quickstart installation steps above.
 ## Configuration
 
 This chart aims to be highly flexible. Please review the [values.yaml](./values.yaml) for a full list of configuration options.
-There are additional recommendations for production deployments in [`example-prod.values.yaml`](./example-prod-values.yaml).
+There are additional recommendations for production deployments in [`example-prod-values.yaml`](./example-prod-values.yaml).
 
 If you've already deployed csi-driver using the `helm install` command above, you can easily change configuration values:
 
