@@ -27,6 +27,7 @@ jobs:
             --verbose
             --no-progress
             --cache
+            --accept 200,302
             --max-cache-age 2d
             --include-fragments
             --exclude 'api.hetzner.cloud'
