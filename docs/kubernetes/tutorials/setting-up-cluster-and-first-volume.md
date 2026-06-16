@@ -1,4 +1,4 @@
-# Setting up a Cluster and Creating your first Volume
+# Setting up a cluster and creating your first Volume
 
 In this tutorial, you will learn how to set up a lightweight Kubernetes cluster on **Hetzner Cloud** using **k3s**, install the **Hetzner Cloud csi-driver**, and create a Deployment with a PersistentVolumeClaim.
 

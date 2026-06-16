@@ -2,7 +2,7 @@
 
 Monitoring is an important part of managing any system, and the csi-driver components are no exception. To help you keep an eye on how the components are performing, we've exposed Prometheus-compatible metrics on port 9189. You can configure the endpoint for these metrics by setting the `METRICS_ENDPOINT` environment variable to the appropriate value for your system.
 
-The metrics exposed include the following:
+The metrics expose details about the following components:
 
 - Go Runtime
 - gRPC Server for CSI calls
