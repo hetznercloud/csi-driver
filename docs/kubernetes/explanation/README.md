@@ -7,4 +7,3 @@ In this folder, you should find explanations for you to understand concepts of t
 - [Volume Location](volume-location.md)
 - [Volume Labels](volume-labels.md)
 - [Integration with Robot Servers](integration-with-robot-servers.md)
-- [XFS Filesystem](xfs-filesystem.md)
