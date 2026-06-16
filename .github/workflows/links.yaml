@@ -23,11 +23,10 @@ jobs:
         with:
           fail: true
           args: >
+            -v
             --root-dir ${{ github.workspace }}
-            --verbose
             --no-progress
             --cache
-            --accept 200,302
             --max-cache-age 2d
             --include-fragments
             --exclude 'api.hetzner.cloud'
@@ -36,4 +35,5 @@ jobs:
             --exclude 'https://docs.hetzner.cloud/reference/hetzner#'
             --exclude 'codecov.io'
             --exclude '169.254.169.254'
+            --exclude 'https://www.hetzner.com/news/arm64-cloud/'
             '**/*.md'
