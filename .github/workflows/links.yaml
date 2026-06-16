@@ -1,0 +1,39 @@
+name: Links
+
+on:
+  pull_request:
+  workflow_dispatch:
+  schedule:
+    - cron: "43 12 * * *"
+
+jobs:
+  check:
+    runs-on: ubuntu-latest
+
+    steps:
+      - uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6
+
+      - uses: actions/cache@27d5ce7f107fe9357f9df03efb73ab90386fccae # v5
+        with:
+          path: .lycheecache
+          key: cache-lychee-${{ github.sha }}
+          restore-keys: cache-lychee-
+
+      - uses: lycheeverse/lychee-action@8646ba30535128ac92d33dfc9133794bfdd9b411 # v2
+        with:
+          fail: true
+          args: >
+            -v
+            --root-dir ${{ github.workspace }}
+            --no-progress
+            --cache
+            --max-cache-age 2d
+            --include-fragments
+            --exclude 'api.hetzner.cloud'
+            --exclude 'api.hetzner.com'
+            --exclude 'https://docs.hetzner.cloud/reference/cloud#'
+            --exclude 'https://docs.hetzner.cloud/reference/hetzner#'
+            --exclude 'codecov.io'
+            --exclude '169.254.169.254'
+            --exclude 'https://www.hetzner.com/news/arm64-cloud/'
+            '**/*.md'

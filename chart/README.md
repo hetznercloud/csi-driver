@@ -17,7 +17,7 @@ helm repo update hcloud
 helm install hcloud-csi hcloud/hcloud-csi -n kube-system
 ```
 
-Please note that a secret containing the Hetzner Cloud token is necessary. See the main [Kubernetes Deployment](../docs/kubernetes/getting-started.md) guide.
+Please note that a secret containing the Hetzner Cloud token is necessary. See the main [Kubernetes Deployment](../docs/kubernetes/guides/quickstart.md) guide.
 
 If you're unfamiliar with Helm it would behoove you to peep around the documentation. Perhaps start with the [Quickstart Guide](https://helm.sh/docs/intro/quickstart/)?
 
@@ -40,7 +40,7 @@ Then you can follow the Quickstart installation steps above.
 ## Configuration
 
 This chart aims to be highly flexible. Please review the [values.yaml](./values.yaml) for a full list of configuration options.
-There are additional recommendations for production deployments in [`example-prod.values.yaml`](./example-prod.values.yaml).
+There are additional recommendations for production deployments in [`example-prod-values.yaml`](./example-prod-values.yaml).
 
 If you've already deployed csi-driver using the `helm install` command above, you can easily change configuration values:
 

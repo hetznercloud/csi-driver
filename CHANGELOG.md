@@ -143,7 +143,7 @@ These labels are informational only and not used by the CSI driver itself. Volum
 > [!CAUTION]
 > Please do not install the version v2.14.0 of the `csi-driver`, install the version v2.15.0 or later instead.
 
-With this release, you can now assign Hetzner Cloud labels to all newly created volumes. For a brief guide, visit [this page](https://github.com/hetznercloud/csi-driver/tree/main/docs/kubernetes#volume-labels).
+With this release, you can now assign Hetzner Cloud labels to all newly created volumes. For a brief guide, visit [this page](https://github.com/hetznercloud/csi-driver/tree/v2.14.0/docs/kubernetes#volume-labels).
 
 By default, all volumes are labeled as follows:
 
@@ -318,7 +318,7 @@ Learn more about this in [#400](https://github.com/hetznercloud/csi-driver/issue
 Affordable, sustainable & powerful! 🚀You can now get one of our Arm64 CAX servers to optimize your operations while minimizing your costs!
 Discover Ampere’s efficient and robust Arm64 architecture and be ready to get blown away with its performance. 😎
 
-Learn more: https://www.hetzner.com/news/arm64-cloud
+Learn more: https://www.hetzner.com/news/arm64-cloud/
 
 ### What's Changed
 
@@ -331,7 +331,7 @@ Learn more: https://www.hetzner.com/news/arm64-cloud
 Affordable, sustainable & powerful! 🚀You can now get one of our Arm64 CAX servers to optimize your operations while minimizing your costs!
 Discover Ampere’s efficient and robust Arm64 architecture and be ready to get blown away with its performance. 😎
 
-Learn more: https://www.hetzner.com/news/arm64-cloud
+Learn more: https://www.hetzner.com/news/arm64-cloud/
 
 ### What's Changed
 
@@ -345,7 +345,7 @@ Learn more: https://www.hetzner.com/news/arm64-cloud
 Affordable, sustainable & powerful! 🚀You can now get one of our Arm64 CAX servers to optimize your operations while minimizing your costs!
 Discover Ampere’s efficient and robust Arm64 architecture and be ready to get blown away with its performance. 😎
 
-Learn more: https://www.hetzner.com/news/arm64-cloud
+Learn more: https://www.hetzner.com/news/arm64-cloud/
 
 ### What's Changed
 
@@ -472,7 +472,7 @@ Learn more: https://www.hetzner.com/news/arm64-cloud
 
 ### Breaking Changes
 
-:warning: This release contains breaking changes from `1.6.0`. Please see the [Upgrading](https://github.com/hetznercloud/csi-driver#from-v1-to-v2) section in the README for details on the required steps.
+:warning: This release contains breaking changes from `1.6.0`. Please see the [Upgrading](https://github.com/hetznercloud/csi-driver/blob/v2.0.0/README.md#from-v1-to-v2) section in the README for details on the required steps.
 
 ### What's Changed
 
