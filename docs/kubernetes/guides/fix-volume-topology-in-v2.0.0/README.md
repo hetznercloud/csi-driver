@@ -1,4 +1,4 @@
-# Updating the Topology selection for `PersistentVolumes` created with csi-driver v2.0.0
+# How to fix volume topology in v2.0.0
 
 This guide is intended for Kubernetes Cluster operators that installed the hcloud-csi-driver v2.0.0 and created Volumes. Unfortunately this version included a change that we had to revert, for details you can read the [issue #333](https://github.com/hetznercloud/csi-driver/issues/333).
 
