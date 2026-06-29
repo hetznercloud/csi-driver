@@ -56,7 +56,7 @@ jobs:
           # helm is needed to generate chart snapshots
           setup-tools: |
             helm
-          helm: v4.2.0 # renovate: datasource=github-releases depName=helm/helm
+          helm: v4.2.2 # renovate: datasource=github-releases depName=helm/helm
 
       - uses: actions/cache@2c8a9bd7457de244a408f35966fab2fb45fda9c8 # v6
         with:
