@@ -89,9 +89,6 @@ rules:
     verbs: [patch]
   # provisioner
   - apiGroups: [""]
-    resources: [secrets]
-    verbs: [get, list]
-  - apiGroups: [""]
     resources: [persistentvolumes]
     verbs: [get, list, watch, create, delete, patch]
   - apiGroups: [""]
