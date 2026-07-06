@@ -305,6 +305,8 @@ node:
 
   schedulerName: foobar
 
+  serviceAccountName: hcloud-csi-node
+
   terminationGracePeriodSeconds: 35
 
   lifecycleHooks:
