@@ -1,5 +1,15 @@
 # Changelog
 
+## [v2.22.0](https://github.com/hetznercloud/csi-driver/releases/tag/v2.22.0)
+
+### Features
+
+- **helm**: option to specify service account name for node driver (#1420)
+
+### Bug Fixes
+
+- **helm**: drop unused secrets get/list permission from controller
+
 ## [v2.21.2](https://github.com/hetznercloud/csi-driver/releases/tag/v2.21.2)
 
 ### Bug Fixes
