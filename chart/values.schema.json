@@ -687,6 +687,9 @@
           },
           "type": "object"
         },
+        "serviceAccountName": {
+          "type": "string"
+        },
         "sidecars": {
           "type": "array"
         },

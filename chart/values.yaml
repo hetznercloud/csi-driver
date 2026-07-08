@@ -617,6 +617,11 @@ node:
   ##
   schedulerName: ""
 
+  ## @param node.serviceAccountName Name of an existing ServiceAccount to use for the node pods. If not set, the "default" ServiceAccount of the namespace is used.
+  ## ref: https://kubernetes.io/docs/tasks/configure-pod-container/configure-service-account/
+  ##
+  serviceAccountName: ""
+
   ## @param node.terminationGracePeriodSeconds Seconds pod needs to terminate gracefully
   ## ref: https://kubernetes.io/docs/concepts/workloads/pods/pod/#termination-of-pods
   ##
@@ -676,7 +681,11 @@ node:
 ## @section Other Parameters
 ##
 
-## ServiceAccount configuration
+## ServiceAccount configuration for the hcloud-csi-controller.
+##
+## These settings apply only to the controller. The hcloud-csi-node DaemonSet
+## is configured separately via `node.serviceAccountName`, and falls back to
+## the namespace's "default" ServiceAccount when that is left unset.
 ##
 serviceAccount:
   ## @param serviceAccount.create Specifies whether a ServiceAccount should be created

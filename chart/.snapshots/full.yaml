@@ -233,6 +233,7 @@ spec:
         pod-label: pod-label
         common-label: common-label
     spec:
+      serviceAccountName: hcloud-csi-node
       
       imagePullSecrets:
         - name: global-image-pull-secret
