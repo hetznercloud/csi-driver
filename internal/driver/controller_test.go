@@ -404,6 +404,36 @@ func TestControllerServiceCreateVolumeInputErrors(t *testing.T) {
 			},
 			Code: codes.InvalidArgument,
 		},
+		{
+			Name: "topology requirement without location segment",
+			Req: &proto.CreateVolumeRequest{
+				Name: "test",
+				CapacityRange: &proto.CapacityRange{
+					RequiredBytes: 5 * GB,
+					LimitBytes:    10 * GB,
+				},
+				VolumeCapabilities: []*proto.VolumeCapability{
+					{
+						AccessType: &proto.VolumeCapability_Mount{
+							Mount: &proto.VolumeCapability_MountVolume{},
+						},
+						AccessMode: &proto.VolumeCapability_AccessMode{
+							Mode: proto.VolumeCapability_AccessMode_SINGLE_NODE_WRITER,
+						},
+					},
+				},
+				AccessibilityRequirements: &proto.TopologyRequirement{
+					Preferred: []*proto.Topology{
+						{
+							Segments: map[string]string{
+								ProvidedByLabel: "cloud",
+							},
+						},
+					},
+				},
+			},
+			Code: codes.InvalidArgument,
+		},
 	}
 
 	for _, testCase := range testCases {

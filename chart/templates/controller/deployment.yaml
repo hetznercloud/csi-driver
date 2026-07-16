@@ -200,6 +200,7 @@ spec:
             - --feature-gates=Topology=true
             - --default-fstype=ext4
             - --extra-create-metadata
+            - --strict-topology
             {{- if $enableLeaderElection }}
             - --leader-election
             - --leader-election-namespace={{ include "hcloud-csi.names.namespace" . }}
