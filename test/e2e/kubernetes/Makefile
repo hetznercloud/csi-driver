@@ -4,7 +4,7 @@ K8S_TEST_VERSION ?= v1.36.2
 
 GINKGO = bin/ginkgo
 GINKGO_ARGS = -v --flake-attempts=2
-GINKGO_EXTRA_ARGS ?= ""
+GINKGO_EXTRA_ARGS ?=
 
 E2E = bin/e2e.test
 E2E_ARGS = -storage.testdriver=$(CURDIR)/testdriver.yaml
