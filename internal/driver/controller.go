@@ -79,10 +79,10 @@ func (s *ControllerService) CreateVolume(ctx context.Context, req *proto.CreateV
 		}
 	}
 
-	// If the CO did send topology requirements but none of them carry a
-	// location segment, we must not silently fall back to the controller's
-	// location: that can provision the volume in a location the selected node
-	// can not reach, leaving the pod unschedulable (see #1428).
+	// If the container orchestration system did send topology requirements but
+	// none of them carry a location segment, we must not silently fall back to
+	// the controller's location: that can provision the volume in a location the
+	// selected node can not reach, leaving the pod unschedulable (see #1428).
 	location := s.location
 	if reqs := req.GetAccessibilityRequirements(); len(reqs.GetPreferred()) > 0 || len(reqs.GetRequisite()) > 0 {
 		loc := locationFromTopologyRequirement(reqs)
