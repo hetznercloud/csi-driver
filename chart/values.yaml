@@ -590,8 +590,7 @@ node:
   ## @param node.tolerations Tolerations for node pods assignment
   ## ref: https://kubernetes.io/docs/concepts/configuration/taint-and-toleration/
   ##
-  tolerations:
-    []
+  tolerations: []
     # - effect: NoExecute
     #   operator: Exists
     # - effect: NoSchedule
