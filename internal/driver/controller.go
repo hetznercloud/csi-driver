@@ -79,11 +79,19 @@ func (s *ControllerService) CreateVolume(ctx context.Context, req *proto.CreateV
 		}
 	}
 
-	// Take the location where to create the volume from the request's
-	// accessibility requirements, falling back to the location where the
-	// controller pod has been scheduled if no requirements have been provided.
+	// If the container orchestration system did send topology requirements but
+	// none of them carry a location segment, we must not silently fall back to
+	// the controller's location: that can provision the volume in a location the
+	// selected node can not reach, leaving the pod unschedulable (see #1428).
 	location := s.location
-	if loc := locationFromTopologyRequirement(req.GetAccessibilityRequirements()); loc != nil {
+	if reqs := req.GetAccessibilityRequirements(); len(reqs.GetPreferred()) > 0 || len(reqs.GetRequisite()) > 0 {
+		loc := locationFromTopologyRequirement(reqs)
+		if loc == nil {
+			return nil, status.Errorf(codes.InvalidArgument,
+				"accessibility requirements were provided but none contained a %q topology segment; "+
+					"can not determine the location to create the volume in",
+				TopologySegmentLocation)
+		}
 		location = *loc
 	}
 

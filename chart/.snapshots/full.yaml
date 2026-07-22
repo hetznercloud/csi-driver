@@ -615,6 +615,7 @@ spec:
             - --feature-gates=Topology=true
             - --default-fstype=ext4
             - --extra-create-metadata
+            - --strict-topology
             - --leader-election
             - --leader-election-namespace=namespace-override
           volumeMounts:
