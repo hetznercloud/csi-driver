@@ -52,7 +52,10 @@ func main() {
 
 	m := app.CreateMetrics(logger)
 
-	metadataClient := metadata.NewClient(metadata.WithInstrumentation(m.Registry()))
+	metadataClient := metadata.NewClient(
+		metadata.WithApplication("csi-driver", driver.PluginVersion),
+		metadata.WithInstrumentation(m.Registry()),
+	)
 
 	listener, err := app.CreateListener()
 	if err != nil {
