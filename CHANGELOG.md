@@ -1,5 +1,13 @@
 # Changelog
 
+## [v2.22.1](https://github.com/hetznercloud/csi-driver/releases/tag/v2.22.1)
+
+[Compare to previous version](https://github.com/hetznercloud/csi-driver/compare/v2.22.0...v2.22.1)
+
+### Bug Fixes
+
+- provision volumes in the correct location with enableProvidedByTopology (#1434) ([7fa011f](https://github.com/hetznercloud/csi-driver/commit/7fa011f328b7bde470c1ee05635d3adf4a2eefb2))
+
 ## [v2.22.0](https://github.com/hetznercloud/csi-driver/releases/tag/v2.22.0)
 
 ### Features
