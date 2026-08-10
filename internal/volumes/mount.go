@@ -1,6 +1,7 @@
 package volumes
 
 import (
+	"bytes"
 	"context"
 	"errors"
 	"fmt"
@@ -163,8 +164,51 @@ func (s *LinuxMountService) Publish(ctx context.Context, targetPath string, devi
 	return s.mounter.FormatAndMountSensitiveWithFormatOptions(devicePath, targetPath, opts.FSType, mountOptions, opts.Additional, formatOptions)
 }
 
-// waitDeviceReady ensures the device at devicePath exists. This is done by ensuring a stat
-// syscall returns no error.
+// HCloudVolumeDevicePrefix is the prefix of the by-id path reported as Volume.LinuxDevice.
+const HCloudVolumeDevicePrefix = "/dev/disk/by-id/scsi-0HC_Volume_"
+
+// sysBlockPath is a variable so tests can point it at a fixture directory.
+var sysBlockPath = "/sys/block"
+
+var ErrDeviceMismatch = errors.New("device path resolves to a different volume")
+
+// verifyDeviceIdentity checks that devicePath resolves to the device of the volume named
+// in the path. The by-id symlinks are maintained asynchronously by udev, so a stale one
+// can resolve to another volume's device. Returns nil when the identity is confirmed and
+// when it cannot be determined, so an unverifiable mount is never blocked.
+func (s *LinuxMountService) verifyDeviceIdentity(devicePath string) error {
+	volumeID, isHCloudVolume := strings.CutPrefix(devicePath, HCloudVolumeDevicePrefix)
+	if !isHCloudVolume {
+		return nil
+	}
+
+	resolved, err := filepath.EvalSymlinks(devicePath)
+	if err != nil {
+		return nil
+	}
+
+	return verifyDeviceSerial(devicePath, resolved, volumeID)
+}
+
+// verifyDeviceSerial compares the SCSI serial of the resolved device against the volume ID.
+func verifyDeviceSerial(devicePath, resolved, volumeID string) error {
+	// VPD page 0x80: a 4 byte header, then the serial, which is the volume ID.
+	raw, err := os.ReadFile(filepath.Join(sysBlockPath, filepath.Base(resolved), "device", "vpd_pg80"))
+	if err != nil || len(raw) <= 4 {
+		return nil
+	}
+
+	serial := string(bytes.Trim(raw[4:], "\x00 "))
+	if serial != volumeID {
+		return fmt.Errorf("%w: %s resolved to %s with serial %q, expected volume %s",
+			ErrDeviceMismatch, devicePath, resolved, serial, volumeID)
+	}
+	return nil
+}
+
+// waitDeviceReady ensures the device at devicePath exists and belongs to the volume named
+// in the path. Existence is checked via stat, otherwise `blkid` might return exit code 2,
+// which is the same exit code as for an unformatted device.
 func (s *LinuxMountService) waitDeviceReady(ctx context.Context, devicePath string) error {
 	const maxRetries = 7
 	backoffFunc := hcloud.ExponentialBackoffWithOpts(hcloud.ExponentialBackoffOpts{
@@ -176,15 +220,19 @@ func (s *LinuxMountService) waitDeviceReady(ctx context.Context, devicePath stri
 	var err error
 	for i := range maxRetries {
 		var stat unix.Stat_t
-		err = unix.Stat(devicePath, &stat)
-		if err == nil {
-			return nil
-		}
-		if !errors.Is(err, unix.ENOENT) {
+		switch err = unix.Stat(devicePath, &stat); {
+		case err == nil:
+			if err = s.verifyDeviceIdentity(devicePath); err == nil {
+				return nil
+			}
+			// udev has not finished updating the symlink yet. Retrying is safe,
+			// mounting the wrong device is not.
+			s.logger.Warn("device not ready yet: path resolves to another volume", "devicePath", devicePath, "error", err)
+		case errors.Is(err, unix.ENOENT):
+			s.logger.Debug("device not ready yet: stat syscall returned ENOENT", "devicePath", devicePath)
+		default:
 			return err
 		}
-
-		s.logger.Debug("device not ready yet: stat syscall returned ENOENT", "devicePath", devicePath)
 
 		if i == maxRetries-1 {
 			break
