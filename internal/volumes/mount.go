@@ -184,7 +184,7 @@ func (s *LinuxMountService) verifyDeviceIdentity(devicePath string) error {
 
 	resolved, err := filepath.EvalSymlinks(devicePath)
 	if err != nil {
-		return nil
+		return nil //nolint:nilerr // identity cannot be determined, so the mount is allowed to proceed
 	}
 
 	return verifyDeviceSerial(devicePath, resolved, volumeID)
@@ -195,7 +195,7 @@ func verifyDeviceSerial(devicePath, resolved, volumeID string) error {
 	// VPD page 0x80: a 4 byte header, then the serial, which is the volume ID.
 	raw, err := os.ReadFile(filepath.Join(sysBlockPath, filepath.Base(resolved), "device", "vpd_pg80"))
 	if err != nil || len(raw) <= 4 {
-		return nil
+		return nil //nolint:nilerr // identity cannot be determined, so the mount is allowed to proceed
 	}
 
 	serial := string(bytes.Trim(raw[4:], "\x00 "))

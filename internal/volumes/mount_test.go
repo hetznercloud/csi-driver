@@ -18,12 +18,15 @@ func writeVPD(t *testing.T, root, device, serial string) {
 	t.Helper()
 
 	dir := filepath.Join(root, device, "device")
-	if err := os.MkdirAll(dir, 0o755); err != nil {
+	if err := os.MkdirAll(dir, 0o750); err != nil {
 		t.Fatal(err)
 	}
 
-	page := append([]byte{0x00, 0x80, 0x00, byte(len(serial))}, []byte(serial)...)
-	if err := os.WriteFile(filepath.Join(dir, "vpd_pg80"), page, 0o644); err != nil {
+	if len(serial) > 255 {
+		t.Fatalf("test serial %q longer than a byte can encode", serial)
+	}
+	page := append([]byte{0x00, 0x80, 0x00, byte(len(serial))}, []byte(serial)...) //nolint:gosec // bounds-checked above
+	if err := os.WriteFile(filepath.Join(dir, "vpd_pg80"), page, 0o600); err != nil {
 		t.Fatal(err)
 	}
 }
@@ -105,14 +108,14 @@ func TestVerifyDeviceIdentitySkipsForeignPaths(t *testing.T) {
 // blkid finds no filesystem, destroying its data (#1346).
 func TestPublishRejectsAliasedDevice(t *testing.T) {
 	byID := filepath.Dir(HCloudVolumeDevicePrefix)
-	if err := os.MkdirAll(byID, 0o755); err != nil {
+	if err := os.MkdirAll(byID, 0o750); err != nil {
 		t.Skipf("needs a writable %s: %v", byID, err)
 	}
 
 	// The device of volume 106478890, holding data blkid does not recognise.
 	deviceOfOtherVolume := "/dev/sdc-aliased"
 	payload := bytes.Repeat([]byte("data-of-volume-106478890."), 40)
-	if err := os.WriteFile(deviceOfOtherVolume, payload, 0o644); err != nil {
+	if err := os.WriteFile(deviceOfOtherVolume, payload, 0o600); err != nil {
 		t.Skipf("needs a writable /dev: %v", err)
 	}
 	t.Cleanup(func() { _ = os.Remove(deviceOfOtherVolume) })
