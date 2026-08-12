@@ -24,10 +24,12 @@ func TestVolumePublishUnpublish(t *testing.T) {
 	}
 
 	tests := []struct {
-		name          string
-		mountOpts     volumes.MountOpts
-		prepare       func(ctx context.Context, mounter *mount.SafeFormatAndMount, cs *volumes.CryptSetup, device string) error
-		expectedError error
+		name      string
+		mountOpts volumes.MountOpts
+		prepare   func(ctx context.Context, mounter *mount.SafeFormatAndMount, cs *volumes.CryptSetup, device string) error
+		// expectedError is passed the device path, which carries the ID of the volume the
+		// test got and is therefore only known once the fake device exists.
+		expectedError func(device string) error
 	}{
 		// Block volume not formatted
 		{
@@ -50,7 +52,9 @@ func TestVolumePublishUnpublish(t *testing.T) {
 			prepare: func(ctx context.Context, mounter *mount.SafeFormatAndMount, cs *volumes.CryptSetup, device string) error {
 				return formatDisk(mounter, device, "xfs")
 			},
-			expectedError: mount.NewMountError(mount.FilesystemMismatch, ""),
+			expectedError: func(string) error {
+				return mount.NewMountError(mount.FilesystemMismatch, "")
+			},
 		},
 		{
 			name:          "block-volume",
@@ -98,7 +102,9 @@ func TestVolumePublishUnpublish(t *testing.T) {
 			prepare: func(ctx context.Context, mounter *mount.SafeFormatAndMount, cs *volumes.CryptSetup, device string) error {
 				return formatDisk(mounter, device, "ext4")
 			},
-			expectedError: fmt.Errorf("requested encrypted volume, but disk /dev-fake-encrypted-wrong-formatted-1 already is formatted with ext4"),
+			expectedError: func(device string) error {
+				return fmt.Errorf("requested encrypted volume, but disk %s already is formatted with ext4", device)
+			},
 		},
 	}
 
@@ -141,13 +147,18 @@ func TestVolumePublishUnpublish(t *testing.T) {
 				}
 			}()
 
+			var expectedError error
 			if test.expectedError != nil {
+				expectedError = test.expectedError(device)
+			}
+
+			if expectedError != nil {
 				if publishErr == nil {
-					t.Fatalf("expected error %q but got no error", test.expectedError.Error())
+					t.Fatalf("expected error %q but got no error", expectedError.Error())
 				}
 
 				if got, ok := publishErr.(mount.MountError); ok {
-					if expected, ok := test.expectedError.(mount.MountError); ok {
+					if expected, ok := expectedError.(mount.MountError); ok {
 						if got.Type != expected.Type {
 							t.Fatalf("Expected Mount Error %s, but got %s", expected.Type, got.Type)
 						}
@@ -155,8 +166,8 @@ func TestVolumePublishUnpublish(t *testing.T) {
 					} else {
 						t.Fatalf("Test returned MountError %s, but expected error is not of MountError", got.Type)
 					}
-				} else if test.expectedError.Error() != publishErr.Error() {
-					t.Fatal(fmt.Errorf("expected error %q but got %q", test.expectedError.Error(), publishErr.Error()))
+				} else if expectedError.Error() != publishErr.Error() {
+					t.Fatal(fmt.Errorf("expected error %q but got %q", expectedError.Error(), publishErr.Error()))
 				}
 			}
 

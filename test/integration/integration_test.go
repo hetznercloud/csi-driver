@@ -3,24 +3,33 @@
 package integration
 
 import (
+	"encoding/binary"
 	"fmt"
 	"log"
 	"os"
+	"path/filepath"
 	"regexp"
 	"strconv"
+	"sync/atomic"
 	"testing"
 
 	"k8s.io/mount-utils"
+
+	"github.com/hetznercloud/csi-driver/internal/volumes"
 )
 
-const testImageName = "hcloud-csi-driver-integrationtests"
-const testImageEnvironmentVariable = "HCLOUD_CSI_DRIVER_INTEGRATIONTESTS"
+const (
+	testImageName                = "hcloud-csi-driver-integrationtests"
+	testImageEnvironmentVariable = "HCLOUD_CSI_DRIVER_INTEGRATIONTESTS"
+)
 
 func TestMain(t *testing.M) {
 	if os.Getenv(testImageEnvironmentVariable) != "true" {
 		if err := prepareDockerImage(); err != nil {
 			log.Fatal(err)
 		}
+	} else if err := setupDeviceFixtures(); err != nil {
+		log.Fatal(err)
 	}
 
 	os.Exit(t.Run())
@@ -59,6 +68,35 @@ func runTestInDockerImage(t *testing.T, privileged bool) bool { //nolint:unparam
 	return false
 }
 
+const deviceFixtureVolumeIDBase = 100000000
+
+var (
+	deviceFixtureByIDPrefix    string
+	deviceFixtureSysClassBlock string
+	deviceFixtureVolumeIDs     atomic.Int64
+)
+
+func setupDeviceFixtures() error {
+	root, err := os.MkdirTemp(os.TempDir(), "csi-driver-devices")
+	if err != nil {
+		return err
+	}
+
+	deviceFixtureByIDPrefix = filepath.Join(root, "by-id", "scsi-0HC_Volume_")
+	deviceFixtureSysClassBlock = filepath.Join(root, "sys", "class", "block")
+
+	if err := os.MkdirAll(filepath.Dir(deviceFixtureByIDPrefix), 0o750); err != nil {
+		return err
+	}
+	if err := os.MkdirAll(deviceFixtureSysClassBlock, 0o750); err != nil {
+		return err
+	}
+
+	volumes.SetDeviceIdentityPaths(deviceFixtureByIDPrefix, deviceFixtureSysClassBlock)
+
+	return nil
+}
+
 func createFakeDevice(name string, megabytes int) (string, error) {
 	path := "/dev-" + name
 	if _, err := os.Create(path); err != nil {
@@ -67,7 +105,34 @@ func createFakeDevice(name string, megabytes int) (string, error) {
 	if _, err := runCmd("dd", "if=/dev/zero", "of="+path, "bs=1M", "count="+strconv.Itoa(megabytes)); err != nil {
 		return "", err
 	}
-	return path, nil
+	return linkFakeDeviceByID(path)
+}
+
+func linkFakeDeviceByID(devicePath string) (string, error) {
+	volumeID := strconv.FormatInt(deviceFixtureVolumeIDBase+deviceFixtureVolumeIDs.Add(1), 10)
+
+	vpdDir := filepath.Join(deviceFixtureSysClassBlock, filepath.Base(devicePath), "device")
+	if err := os.MkdirAll(vpdDir, 0o750); err != nil {
+		return "", err
+	}
+	if err := os.WriteFile(filepath.Join(vpdDir, "vpd_pg80"), vpdPage(volumeID), 0o600); err != nil {
+		return "", err
+	}
+
+	byIDPath := deviceFixtureByIDPrefix + volumeID
+	if err := os.Symlink(devicePath, byIDPath); err != nil {
+		return "", err
+	}
+
+	return byIDPath, nil
+}
+
+func vpdPage(serial string) []byte {
+	page := make([]byte, 4, 4+len(serial))
+	page[1] = 0x80
+	binary.BigEndian.PutUint16(page[2:4], uint16(len(serial))) //nolint:gosec // a volume ID is 9 digits
+
+	return append(page, serial...)
 }
 
 func increaseFakeDeviceSize(name string, megabytesToAdd int) error {
