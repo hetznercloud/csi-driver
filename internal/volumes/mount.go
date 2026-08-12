@@ -163,8 +163,9 @@ func (s *LinuxMountService) Publish(ctx context.Context, targetPath string, devi
 	return s.mounter.FormatAndMountSensitiveWithFormatOptions(devicePath, targetPath, opts.FSType, mountOptions, opts.Additional, formatOptions)
 }
 
-// waitDeviceReady ensures the device at devicePath exists. This is done by ensuring a stat
-// syscall returns no error.
+// waitDeviceReady ensures the device at devicePath exists and belongs to the volume named
+// in the path. Existence is checked via stat, otherwise `blkid` might return exit code 2,
+// which is the same exit code as for an unformatted device.
 func (s *LinuxMountService) waitDeviceReady(ctx context.Context, devicePath string) error {
 	const maxRetries = 7
 	backoffFunc := hcloud.ExponentialBackoffWithOpts(hcloud.ExponentialBackoffOpts{
@@ -174,26 +175,38 @@ func (s *LinuxMountService) waitDeviceReady(ctx context.Context, devicePath stri
 	})
 
 	var err error
-	for i := range maxRetries {
+	for attempt := range maxRetries {
+		logger := s.logger.With(
+			"device-path", devicePath,
+			"attempt", attempt+1,
+			"max-attempts", maxRetries,
+		)
+
 		var stat unix.Stat_t
-		err = unix.Stat(devicePath, &stat)
-		if err == nil {
-			return nil
-		}
-		if !errors.Is(err, unix.ENOENT) {
+		switch err = unix.Stat(devicePath, &stat); {
+		case err == nil:
+			if err = VerifyDeviceIdentity(devicePath); err == nil {
+				return nil
+			}
+			if errors.Is(err, errDeviceMismatch) {
+				logger.Warn("device path still resolves to another volume, waiting for udev", "error", err)
+			} else {
+				logger.Warn("device identity could not be verified, refusing to mount", "error", err)
+			}
+		case errors.Is(err, unix.ENOENT):
+			logger.Debug("device path does not exist yet, waiting for the volume to attach")
+		default:
 			return err
 		}
 
-		s.logger.Debug("device not ready yet: stat syscall returned ENOENT", "devicePath", devicePath)
-
-		if i == maxRetries-1 {
+		if attempt == maxRetries-1 {
 			break
 		}
 
 		select {
 		case <-ctx.Done():
 			return fmt.Errorf("waiting for device %s: %w", devicePath, ctx.Err())
-		case <-time.After(backoffFunc(i)):
+		case <-time.After(backoffFunc(attempt)):
 		}
 	}
 
