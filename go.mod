@@ -12,7 +12,7 @@ require (
 	github.com/kubernetes-csi/csi-test/v5 v5.5.0
 	github.com/moby/buildkit v0.32.2
 	github.com/prometheus/client_golang v1.24.1
-	github.com/stretchr/testify v1.11.1
+	github.com/stretchr/testify v1.12.0
 	golang.org/x/sys v0.47.0
 	google.golang.org/grpc v1.83.0
 	google.golang.org/protobuf v1.36.12
