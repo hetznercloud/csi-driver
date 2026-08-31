@@ -12,37 +12,42 @@ import (
 
 var _ MountService = (*LinuxMountService)(nil)
 
-// TestPublishRejectsAliasedDevice covers a stale by-id symlink resolving to another
-// volume's device. Without the identity check, Publish mounts it, or formats it when
-// blkid finds no filesystem, destroying its data (#1346).
-func TestPublishRejectsAliasedDevice(t *testing.T) {
-	sysRoot := fakeSysClassBlock(t)
-	link, byIDPrefix := fakeByID(t)
+func TestWaitDeviceReadyPicksTheDeviceOfTheVolume(t *testing.T) {
+	attach, devRoot := fakeNode(t)
+
+	attach("sdc", vpdPage(t, "106478890"))
+	attach("sdd", vpdPage(t, "106486781"))
+
+	s := NewLinuxMountService(slog.New(slog.DiscardHandler))
+
+	devicePath, err := s.waitDeviceReady(context.Background(), "106486781")
+	if err != nil {
+		t.Fatalf("waitDeviceReady() = %v, want the device of volume 106486781", err)
+	}
+	if want := filepath.Join(devRoot, "sdd"); devicePath != want {
+		t.Errorf("waitDeviceReady() = %q, want %q", devicePath, want)
+	}
+}
+
+func TestPublishRefusesWithoutAnIdentifiedDevice(t *testing.T) {
+	attach, _ := fakeNode(t)
 
 	// The device of volume 106478890, holding data blkid does not recognise.
-	writeVPD(t, sysRoot, "sdc", vpdPage(t, "106478890"))
+	deviceOfOtherVolume := attach("sdc", vpdPage(t, "106478890"))
 	payload := bytes.Repeat([]byte("data-of-volume-106478890."), 40)
-
-	// udev has not caught up: the by-id link of volume 106486781 still points at it.
-	requestedPath := link("106486781", "sdc")
-	deviceOfOtherVolume, err := filepath.EvalSymlinks(requestedPath)
-	if err != nil {
-		t.Fatal(err)
-	}
 	if err := os.WriteFile(deviceOfOtherVolume, payload, 0o600); err != nil {
 		t.Fatal(err)
 	}
 
-	if requestedPath != byIDPrefix+"106486781" {
-		t.Fatalf("fixture path %q does not carry the volume ID", requestedPath)
-	}
+	// A device whose serial can not be read is not an identified device either.
+	attach("sdd", nil)
 
 	s := NewLinuxMountService(slog.New(slog.DiscardHandler))
 
-	err = s.Publish(context.Background(), filepath.Join(t.TempDir(), "mount"), requestedPath, MountOpts{})
-	if !errors.Is(err, errDeviceMismatch) {
-		t.Fatalf("Publish(%s) = %v, want %v: it mounted the device holding volume 106478890 "+
-			"after being asked for volume 106486781", requestedPath, err, errDeviceMismatch)
+	err := s.Publish(context.Background(), filepath.Join(t.TempDir(), "mount"), "106486781", MountOpts{})
+	if !errors.Is(err, errDeviceNotFound) {
+		t.Fatalf("Publish() = %v, want %v: it mounted a device after being asked for a volume "+
+			"no device reports", err, errDeviceNotFound)
 	}
 
 	after, err := os.ReadFile(deviceOfOtherVolume)
@@ -54,19 +59,46 @@ func TestPublishRejectsAliasedDevice(t *testing.T) {
 	}
 }
 
-// TestPublishRejectsUnverifiableDevice covers a device whose serial cannot be read. The
-// identity check is fail-closed, so Publish has to refuse rather than mount blind.
-func TestPublishRejectsUnverifiableDevice(t *testing.T) {
-	fakeSysClassBlock(t)
-	link, _ := fakeByID(t)
+func TestPublishRefusesAmbiguousDevice(t *testing.T) {
+	attach, _ := fakeNode(t)
 
-	// No vpd_pg80 is written for sdc, so its serial is unknown.
-	requestedPath := link("106486781", "sdc")
+	attach("sdc", vpdPage(t, "106486781"))
+	attach("sdd", vpdPage(t, "106486781"))
 
 	s := NewLinuxMountService(slog.New(slog.DiscardHandler))
 
-	err := s.Publish(context.Background(), filepath.Join(t.TempDir(), "mount"), requestedPath, MountOpts{})
+	err := s.Publish(context.Background(), filepath.Join(t.TempDir(), "mount"), "106486781", MountOpts{})
+	if !errors.Is(err, errAmbiguousDevice) {
+		t.Fatalf("Publish() = %v, want %v", err, errAmbiguousDevice)
+	}
+}
+
+func TestPublishRefusesWhenTheDeviceNodeIsMissing(t *testing.T) {
+	_, devRoot := fakeNode(t)
+
+	writeVPD(t, sysClassBlockPath, "sdc", vpdPage(t, "106486781"))
+
+	s := NewLinuxMountService(slog.New(slog.DiscardHandler))
+
+	err := s.Publish(context.Background(), filepath.Join(t.TempDir(), "mount"), "106486781", MountOpts{})
 	if !errors.Is(err, os.ErrNotExist) {
-		t.Fatalf("Publish(%s) = %v, want %v", requestedPath, err, os.ErrNotExist)
+		t.Fatalf("Publish() = %v, want %v", err, os.ErrNotExist)
+	}
+	if _, err := os.Stat(filepath.Join(devRoot, "sdc")); !errors.Is(err, os.ErrNotExist) {
+		t.Fatalf("fixture created a device node: %v", err)
+	}
+}
+
+func TestPublishStopsWhenTheContextIsCancelled(t *testing.T) {
+	fakeNode(t)
+
+	ctx, cancel := context.WithCancel(context.Background())
+	cancel()
+
+	s := NewLinuxMountService(slog.New(slog.DiscardHandler))
+
+	err := s.Publish(ctx, filepath.Join(t.TempDir(), "mount"), "106486781", MountOpts{})
+	if !errors.Is(err, context.Canceled) {
+		t.Fatalf("Publish() = %v, want %v", err, context.Canceled)
 	}
 }

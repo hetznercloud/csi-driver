@@ -24,12 +24,10 @@ func TestVolumePublishUnpublish(t *testing.T) {
 	}
 
 	tests := []struct {
-		name      string
-		mountOpts volumes.MountOpts
-		prepare   func(ctx context.Context, mounter *mount.SafeFormatAndMount, cs *volumes.CryptSetup, device string) error
-		// expectedError is passed the device path, which carries the ID of the volume the
-		// test got and is therefore only known once the fake device exists.
-		expectedError func(device string) error
+		name          string
+		mountOpts     volumes.MountOpts
+		prepare       func(ctx context.Context, mounter *mount.SafeFormatAndMount, cs *volumes.CryptSetup, device string) error
+		expectedError error
 	}{
 		// Block volume not formatted
 		{
@@ -52,9 +50,7 @@ func TestVolumePublishUnpublish(t *testing.T) {
 			prepare: func(ctx context.Context, mounter *mount.SafeFormatAndMount, cs *volumes.CryptSetup, device string) error {
 				return formatDisk(mounter, device, "xfs")
 			},
-			expectedError: func(string) error {
-				return mount.NewMountError(mount.FilesystemMismatch, "")
-			},
+			expectedError: mount.NewMountError(mount.FilesystemMismatch, ""),
 		},
 		{
 			name:          "block-volume",
@@ -102,9 +98,7 @@ func TestVolumePublishUnpublish(t *testing.T) {
 			prepare: func(ctx context.Context, mounter *mount.SafeFormatAndMount, cs *volumes.CryptSetup, device string) error {
 				return formatDisk(mounter, device, "ext4")
 			},
-			expectedError: func(device string) error {
-				return fmt.Errorf("requested encrypted volume, but disk %s already is formatted with ext4", device)
-			},
+			expectedError: fmt.Errorf("requested encrypted volume, but disk /dev-fake-encrypted-wrong-formatted-1 already is formatted with ext4"),
 		},
 	}
 
@@ -118,7 +112,7 @@ func TestVolumePublishUnpublish(t *testing.T) {
 				Exec:      exec.New(),
 			}
 			cryptSetup := volumes.NewCryptSetup(logger)
-			device, err := createFakeDevice("fake-"+test.name, 512)
+			device, volumeID, err := createFakeDevice("fake-"+test.name, 512)
 			if err != nil {
 				t.Fatal(err)
 			}
@@ -137,7 +131,7 @@ func TestVolumePublishUnpublish(t *testing.T) {
 			// Required as FS volumes require target dir, but block volumes require
 			// target file
 			targetPath = path.Join(targetPath, "target-path")
-			publishErr := mountService.Publish(ctx, targetPath, device, test.mountOpts)
+			publishErr := mountService.Publish(ctx, targetPath, volumeID, test.mountOpts)
 			defer func() {
 				err := mountService.Unpublish(ctx, targetPath)
 				if err != nil {
@@ -147,18 +141,13 @@ func TestVolumePublishUnpublish(t *testing.T) {
 				}
 			}()
 
-			var expectedError error
 			if test.expectedError != nil {
-				expectedError = test.expectedError(device)
-			}
-
-			if expectedError != nil {
 				if publishErr == nil {
-					t.Fatalf("expected error %q but got no error", expectedError.Error())
+					t.Fatalf("expected error %q but got no error", test.expectedError.Error())
 				}
 
 				if got, ok := publishErr.(mount.MountError); ok {
-					if expected, ok := expectedError.(mount.MountError); ok {
+					if expected, ok := test.expectedError.(mount.MountError); ok {
 						if got.Type != expected.Type {
 							t.Fatalf("Expected Mount Error %s, but got %s", expected.Type, got.Type)
 						}
@@ -166,8 +155,8 @@ func TestVolumePublishUnpublish(t *testing.T) {
 					} else {
 						t.Fatalf("Test returned MountError %s, but expected error is not of MountError", got.Type)
 					}
-				} else if expectedError.Error() != publishErr.Error() {
-					t.Fatal(fmt.Errorf("expected error %q but got %q", expectedError.Error(), publishErr.Error()))
+				} else if test.expectedError.Error() != publishErr.Error() {
+					t.Fatal(fmt.Errorf("expected error %q but got %q", test.expectedError.Error(), publishErr.Error()))
 				}
 			}
 
@@ -239,7 +228,7 @@ func TestVolumeResize(t *testing.T) {
 			resizeService := volumes.NewLinuxResizeService(logger)
 			cryptSetup := volumes.NewCryptSetup(logger)
 			deviceName := "fake-" + test.name
-			device, err := createFakeDevice(deviceName, 512)
+			device, volumeID, err := createFakeDevice(deviceName, 512)
 			if err != nil {
 				t.Fatal(err)
 			}
@@ -274,7 +263,7 @@ func TestVolumeResize(t *testing.T) {
 				t.Fatal()
 			}
 
-			if err := mountService.Publish(ctx, targetPath, device, volumes.MountOpts{
+			if err := mountService.Publish(ctx, targetPath, volumeID, volumes.MountOpts{
 				EncryptionPassphrase: test.passphrase,
 			}); err != nil {
 				t.Fatal(err)
@@ -354,7 +343,7 @@ func TestDetectDiskFormat(t *testing.T) {
 				Interface: mount.New(""),
 				Exec:      exec.New(),
 			}
-			disk, err := createFakeDevice(test.name, 512)
+			disk, _, err := createFakeDevice(test.name, 512)
 			if err != nil {
 				t.Fatal(err)
 			}

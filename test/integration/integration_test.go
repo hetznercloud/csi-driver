@@ -71,47 +71,60 @@ func runTestInDockerImage(t *testing.T, privileged bool) bool { //nolint:unparam
 const deviceFixtureVolumeIDBase = 100000000
 
 var (
-	deviceFixtureByIDPrefix    string
 	deviceFixtureSysClassBlock string
 	deviceFixtureVolumeIDs     atomic.Int64
 )
 
+// setupDeviceFixtures points the device lookup at directories the tests can write. A fake
+// device is a file: it has no SCSI serial for the driver to find it by, and sysfs, where
+// the serial would be, is not writable. The tests report one per fake device instead, so
+// that publishing takes the same path it takes on a node.
 func setupDeviceFixtures() error {
 	root, err := os.MkdirTemp(os.TempDir(), "csi-driver-devices")
 	if err != nil {
 		return err
 	}
 
-	deviceFixtureByIDPrefix = filepath.Join(root, "by-id", "scsi-0HC_Volume_")
 	deviceFixtureSysClassBlock = filepath.Join(root, "sys", "class", "block")
-
-	if err := os.MkdirAll(filepath.Dir(deviceFixtureByIDPrefix), 0o750); err != nil {
-		return err
-	}
 	if err := os.MkdirAll(deviceFixtureSysClassBlock, 0o750); err != nil {
 		return err
 	}
 
-	volumes.SetDeviceIdentityPaths(deviceFixtureByIDPrefix, deviceFixtureSysClassBlock)
+	// The fake devices are files at the root of the container filesystem, so that is
+	// where the driver has to look for the device the fixture sysfs reports.
+	volumes.SetDeviceIdentityPaths("/", deviceFixtureSysClassBlock)
 
 	return nil
 }
 
-func createFakeDevice(name string, megabytes int) (string, error) {
-	path := "/dev-" + name
-	if _, err := os.Create(path); err != nil {
-		return "", err
+// createFakeDevice creates a file standing in for a block device, and the sysfs entry
+// reporting the serial of the volume it holds. It returns the device path and that volume
+// ID: the driver is asked for the volume and finds the device by its serial, the same way
+// it does on a node.
+func createFakeDevice(name string, megabytes int) (devicePath string, volumeID string, err error) {
+	devicePath = "/dev-" + name
+	if _, err := os.Create(devicePath); err != nil {
+		return "", "", err
 	}
-	if _, err := runCmd("dd", "if=/dev/zero", "of="+path, "bs=1M", "count="+strconv.Itoa(megabytes)); err != nil {
-		return "", err
+	if _, err := runCmd("dd", "if=/dev/zero", "of="+devicePath, "bs=1M", "count="+strconv.Itoa(megabytes)); err != nil {
+		return "", "", err
 	}
-	return linkFakeDeviceByID(path)
+
+	volumeID, err = reportFakeDeviceSerial(filepath.Base(devicePath))
+	if err != nil {
+		return "", "", err
+	}
+
+	return devicePath, volumeID, nil
 }
 
-func linkFakeDeviceByID(devicePath string) (string, error) {
+// reportFakeDeviceSerial makes the fake device report the serial of a volume, the way the
+// kernel does for a SCSI disk. device is the name of the device file, as it appears in
+// sysfs.
+func reportFakeDeviceSerial(device string) (string, error) {
 	volumeID := strconv.FormatInt(deviceFixtureVolumeIDBase+deviceFixtureVolumeIDs.Add(1), 10)
 
-	vpdDir := filepath.Join(deviceFixtureSysClassBlock, filepath.Base(devicePath), "device")
+	vpdDir := filepath.Join(deviceFixtureSysClassBlock, device, "device")
 	if err := os.MkdirAll(vpdDir, 0o750); err != nil {
 		return "", err
 	}
@@ -119,14 +132,11 @@ func linkFakeDeviceByID(devicePath string) (string, error) {
 		return "", err
 	}
 
-	byIDPath := deviceFixtureByIDPrefix + volumeID
-	if err := os.Symlink(devicePath, byIDPath); err != nil {
-		return "", err
-	}
-
-	return byIDPath, nil
+	return volumeID, nil
 }
 
+// vpdPage lays out the bytes the kernel exposes as vpd_pg80 for a SCSI disk: a 4 byte
+// header whose last two bytes hold the length of the serial that follows.
 func vpdPage(serial string) []byte {
 	page := make([]byte, 4, 4+len(serial))
 	page[1] = 0x80

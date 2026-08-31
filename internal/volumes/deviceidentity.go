@@ -10,16 +10,14 @@ import (
 )
 
 var (
-	// volumeDevicePrefix is the prefix of the by-id path reported as Volume.LinuxDevice.
-	// It is a variable so tests can point it at a fixture directory.
 	volumeDevicePrefix = "/dev/disk/by-id/scsi-0HC_Volume_"
-	// sysClassBlockPath is a variable so tests can point it at a fixture directory.
-	sysClassBlockPath = "/sys/class/block"
+	devPath            = "/dev"
+	sysClassBlockPath  = "/sys/class/block"
 )
 
 var (
-	errDeviceMismatch     = errors.New("device path resolves to a different volume")
-	errNotVolume          = errors.New("device is not a hetzner cloud volume")
+	errDeviceNotFound     = errors.New("no block device reports the volume as its serial")
+	errAmbiguousDevice    = errors.New("multiple block devices report the volume as their serial")
 	errEmptySerial        = errors.New("vpd_pg80: empty serial")
 	errAllPadding         = errors.New("vpd_pg80: serial is all padding")
 	errShortPage          = errors.New("vpd_pg80: page is shorter than the 4 byte header")
@@ -27,38 +25,38 @@ var (
 	errPageLengthTooLarge = errors.New("vpd_pg80: page length exceeds the bytes read")
 )
 
-// VerifyDeviceIdentity checks that devicePath resolves to the device of the volume named
-// in the path, by comparing the SCSI serial of the resolved device against the volume ID.
-// The by-id symlinks are maintained asynchronously by udev, so a stale one can resolve to
-// another volume's device. An identity that cannot be determined is an error: mounting the
-// wrong device destroys data, refusing to mount does not.
-func VerifyDeviceIdentity(devicePath string) error {
-	volumeID, isHCloudVolume := strings.CutPrefix(devicePath, volumeDevicePrefix)
-	if !isHCloudVolume {
-		return fmt.Errorf("%w: %s", errNotVolume, devicePath)
-	}
+func VolumeDevicePath(volumeID string) string {
+	return volumeDevicePrefix + volumeID
+}
 
-	resolved, err := filepath.EvalSymlinks(devicePath)
+func DeviceForVolume(volumeID string) (string, error) {
+	entries, err := os.ReadDir(sysClassBlockPath)
 	if err != nil {
-		return err
+		return "", fmt.Errorf("list block devices: %w", err)
 	}
 
-	serial, err := readDiskSerial(resolved)
-	if err != nil {
-		return fmt.Errorf("can't verify serial of volume %s: %w", volumeID, err)
+	var found []string
+	for _, entry := range entries {
+		serial, err := readDiskSerial(entry.Name())
+		if err != nil {
+			continue
+		}
+
+		if serial == volumeID {
+			found = append(found, entry.Name())
+		}
 	}
 
-	if serial != volumeID {
-		return fmt.Errorf(
-			"%w: got serial %s for device %s, expected volume %s",
-			errDeviceMismatch,
-			serial,
-			devicePath,
-			volumeID,
-		)
+	switch len(found) {
+	case 1:
+		return filepath.Join(devPath, found[0]), nil
+	case 0:
+		return "", fmt.Errorf("%w: volume %s", errDeviceNotFound, volumeID)
+	default:
+		// Two devices claiming the same volume means the node can not tell them apart.
+		// Refusing is the only safe answer: mounting the wrong one destroys data.
+		return "", fmt.Errorf("%w: volume %s: %s", errAmbiguousDevice, volumeID, strings.Join(found, ", "))
 	}
-
-	return nil
 }
 
 // readDiskSerial reads the SCSI serial of a block device from sysfs. dev is either a
