@@ -75,10 +75,6 @@ var (
 	deviceFixtureVolumeIDs     atomic.Int64
 )
 
-// setupDeviceFixtures points the device lookup at directories the tests can write. A fake
-// device is a file: it has no SCSI serial for the driver to find it by, and sysfs, where
-// the serial would be, is not writable. The tests report one per fake device instead, so
-// that publishing takes the same path it takes on a node.
 func setupDeviceFixtures() error {
 	root, err := os.MkdirTemp(os.TempDir(), "csi-driver-devices")
 	if err != nil {
@@ -97,10 +93,6 @@ func setupDeviceFixtures() error {
 	return nil
 }
 
-// createFakeDevice creates a file standing in for a block device, and the sysfs entry
-// reporting the serial of the volume it holds. It returns the device path and that volume
-// ID: the driver is asked for the volume and finds the device by its serial, the same way
-// it does on a node.
 func createFakeDevice(name string, megabytes int) (devicePath string, volumeID string, err error) {
 	devicePath = "/dev-" + name
 	if _, err := os.Create(devicePath); err != nil {
@@ -118,9 +110,6 @@ func createFakeDevice(name string, megabytes int) (devicePath string, volumeID s
 	return devicePath, volumeID, nil
 }
 
-// reportFakeDeviceSerial makes the fake device report the serial of a volume, the way the
-// kernel does for a SCSI disk. device is the name of the device file, as it appears in
-// sysfs.
 func reportFakeDeviceSerial(device string) (string, error) {
 	volumeID := strconv.FormatInt(deviceFixtureVolumeIDBase+deviceFixtureVolumeIDs.Add(1), 10)
 
