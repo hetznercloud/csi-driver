@@ -1,5 +1,13 @@
 # Changelog
 
+## [v2.22.2](https://github.com/hetznercloud/csi-driver/releases/tag/v2.22.2)
+
+[Compare to previous version](https://github.com/hetznercloud/csi-driver/compare/v2.22.1...v2.22.2)
+
+### Bug Fixes
+
+- panic in ListVolumes when the project has volumes (#1478) ([acf12df](https://github.com/hetznercloud/csi-driver/commit/acf12df2c27700d65f220c2b7b0e345c8f37a485))
+
 ## [v2.22.1](https://github.com/hetznercloud/csi-driver/releases/tag/v2.22.1)
 
 [Compare to previous version](https://github.com/hetznercloud/csi-driver/compare/v2.22.0...v2.22.1)
