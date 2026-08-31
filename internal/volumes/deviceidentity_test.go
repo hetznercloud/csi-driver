@@ -26,6 +26,38 @@ func vpdPage(t *testing.T, serial string) []byte {
 	return append(page, serial...)
 }
 
+func fakeNode(t *testing.T) (attach func(device string, page []byte) string, devRoot string) {
+	t.Helper()
+
+	root := t.TempDir()
+	devRoot = filepath.Join(root, "dev")
+	sysRoot := filepath.Join(root, "sys", "class", "block")
+
+	for _, dir := range []string{devRoot, sysRoot} {
+		if err := os.MkdirAll(dir, 0o750); err != nil {
+			t.Fatal(err)
+		}
+	}
+
+	previousDev, previousSys := devPath, sysClassBlockPath
+	devPath, sysClassBlockPath = devRoot, sysRoot
+	t.Cleanup(func() { devPath, sysClassBlockPath = previousDev, previousSys })
+
+	attach = func(device string, page []byte) string {
+		t.Helper()
+
+		devicePath := filepath.Join(devRoot, device)
+		if err := os.WriteFile(devicePath, nil, 0o600); err != nil {
+			t.Fatal(err)
+		}
+		writeVPD(t, sysRoot, device, page)
+
+		return devicePath
+	}
+
+	return attach, devRoot
+}
+
 // fakeSysClassBlock points the serial lookup at a fixture directory and returns it.
 // It swaps a package level variable, so its callers must not run in parallel.
 func fakeSysClassBlock(t *testing.T) string {
@@ -39,7 +71,8 @@ func fakeSysClassBlock(t *testing.T) string {
 	return root
 }
 
-// writeVPD creates the sysfs entry reporting serial for device.
+// writeVPD creates the sysfs entry reporting serial for device. A nil page leaves the
+// entry without a vpd_pg80, as a device that is not a SCSI disk has.
 func writeVPD(t *testing.T, root, device string, page []byte) {
 	t.Helper()
 
@@ -47,46 +80,12 @@ func writeVPD(t *testing.T, root, device string, page []byte) {
 	if err := os.MkdirAll(dir, 0o750); err != nil {
 		t.Fatal(err)
 	}
+	if page == nil {
+		return
+	}
 	if err := os.WriteFile(filepath.Join(dir, "vpd_pg80"), page, 0o600); err != nil {
 		t.Fatal(err)
 	}
-}
-
-// fakeByID points the by-id prefix at a fixture directory, so the tests need neither a
-// writable /dev nor a writable /sys. It returns a function creating a by-id symlink to a
-// device file, mirroring what udev maintains on a node. It swaps a package level variable,
-// so its callers must not run in parallel.
-func fakeByID(t *testing.T) (link func(volumeID, device string) string, byIDPrefix string) {
-	t.Helper()
-
-	root := t.TempDir()
-	previous := volumeDevicePrefix
-	volumeDevicePrefix = filepath.Join(root, "by-id", "scsi-0HC_Volume_")
-	t.Cleanup(func() { volumeDevicePrefix = previous })
-
-	if err := os.MkdirAll(filepath.Join(root, "by-id"), 0o750); err != nil {
-		t.Fatal(err)
-	}
-	if err := os.MkdirAll(filepath.Join(root, "dev"), 0o750); err != nil {
-		t.Fatal(err)
-	}
-
-	link = func(volumeID, device string) string {
-		t.Helper()
-
-		devicePath := filepath.Join(root, "dev", device)
-		if err := os.WriteFile(devicePath, nil, 0o600); err != nil {
-			t.Fatal(err)
-		}
-
-		byIDPath := volumeDevicePrefix + volumeID
-		if err := os.Symlink(devicePath, byIDPath); err != nil {
-			t.Fatal(err)
-		}
-		return byIDPath
-	}
-
-	return link, volumeDevicePrefix
 }
 
 func TestParseVPDPG80(t *testing.T) {
@@ -192,7 +191,7 @@ func TestReadDiskSerial(t *testing.T) {
 		}
 	})
 
-	// VerifyDeviceIdentity passes the path EvalSymlinks resolved to, not a bare name.
+	// Callers pass a device path as well as a bare kernel device name.
 	t.Run("resolved device path", func(t *testing.T) {
 		serial, err := readDiskSerial("/dev/sdc")
 		if err != nil {
@@ -217,97 +216,99 @@ func TestReadDiskSerial(t *testing.T) {
 	})
 }
 
-func TestVerifyDeviceIdentity(t *testing.T) {
-	sysRoot := fakeSysClassBlock(t)
-	link, byIDPrefix := fakeByID(t)
+func TestDeviceForVolume(t *testing.T) {
+	attach, devRoot := fakeNode(t)
 
-	writeVPD(t, sysRoot, "sdc", vpdPage(t, "106478890"))
-	writeVPD(t, sysRoot, "sdd", vpdPage(t, "106486781  "))
-	writeVPD(t, sysRoot, "sdf", vpdPage(t, ""))
-
-	// udev pointed the by-id link of volume 106486782 at the device of volume 106478890.
-	staleLink := link("106486782", "sdc")
-	matching := link("106486781", "sdd")
-	noSerial := link("106486783", "sdf")
-	noVPD := link("106486784", "sde")
-
-	dangling := byIDPrefix + "106486785"
-	if err := os.Symlink(filepath.Join(t.TempDir(), "gone"), dangling); err != nil {
+	attach("sdc", vpdPage(t, "106478890"))
+	attach("sdd", vpdPage(t, "106486781  "))
+	// A device without a readable serial is never a match, even if it is the only one.
+	attach("sde", nil)
+	attach("sdf", vpdPage(t, ""))
+	// Two devices reporting the same volume: the node can not tell them apart.
+	attach("sdg", vpdPage(t, "106486799"))
+	attach("sdh", vpdPage(t, "106486799"))
+	// A partition has no device directory at all.
+	if err := os.MkdirAll(filepath.Join(sysClassBlockPath, "sdc1"), 0o750); err != nil {
 		t.Fatal(err)
 	}
 
 	tests := []struct {
-		name       string
-		devicePath string
-		wantErr    error
+		name     string
+		volumeID string
+		wantPath string
+		wantErr  error
 	}{
 		{
-			name:       "serial matches the requested volume",
-			devicePath: matching,
+			name:     "device reporting the volume",
+			volumeID: "106478890",
+			wantPath: filepath.Join(devRoot, "sdc"),
 		},
 		{
-			name:       "by-id link resolves to another volume's device",
-			devicePath: staleLink,
-			wantErr:    errDeviceMismatch,
+			name:     "serial is padded",
+			volumeID: "106486781",
+			wantPath: filepath.Join(devRoot, "sdd"),
 		},
 		{
-			name:       "device is not an hcloud volume",
-			devicePath: "/dev/mapper/scsi-0HC_Volume_106478890",
-			wantErr:    errNotVolume,
+			name:     "no device reports the volume",
+			volumeID: "106486782",
+			wantErr:  errDeviceNotFound,
 		},
 		{
-			name:       "device path carries no volume id",
-			devicePath: "devpath",
-			wantErr:    errNotVolume,
-		},
-		{
-			name:       "by-id link does not exist",
-			devicePath: byIDPrefix + "106486786",
-			wantErr:    os.ErrNotExist,
-		},
-		{
-			name:       "by-id link resolves to a missing device",
-			devicePath: dangling,
-			wantErr:    os.ErrNotExist,
-		},
-		{
-			name:       "device reports no serial",
-			devicePath: noSerial,
-			wantErr:    errEmptySerial,
-		},
-		{
-			name:       "device exposes no vpd_pg80",
-			devicePath: noVPD,
-			wantErr:    os.ErrNotExist,
+			name:     "two devices report the volume",
+			volumeID: "106486799",
+			wantErr:  errAmbiguousDevice,
 		},
 	}
 
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
-			err := VerifyDeviceIdentity(tt.devicePath)
+			devicePath, err := DeviceForVolume(tt.volumeID)
+
 			if !errors.Is(err, tt.wantErr) {
-				t.Fatalf("VerifyDeviceIdentity(%s) = %v, want %v", tt.devicePath, err, tt.wantErr)
+				t.Fatalf("DeviceForVolume(%s) error = %v, want %v", tt.volumeID, err, tt.wantErr)
+			}
+			if devicePath != tt.wantPath {
+				t.Errorf("DeviceForVolume(%s) = %q, want %q", tt.volumeID, devicePath, tt.wantPath)
 			}
 		})
 	}
 }
 
-// TestVerifyDeviceIdentityNamesTheVolume covers the message an operator sees when a mount
-// is refused: it has to name both volumes to be actionable.
-func TestVerifyDeviceIdentityNamesTheVolume(t *testing.T) {
-	sysRoot := fakeSysClassBlock(t)
-	link, _ := fakeByID(t)
+func TestDeviceForVolumeIgnoresByIDLinks(t *testing.T) {
+	attach, devRoot := fakeNode(t)
 
-	writeVPD(t, sysRoot, "sdc", vpdPage(t, "106478890"))
-	staleLink := link("106486781", "sdc")
+	attach("sdc", vpdPage(t, "106478890"))
+	attach("sdd", vpdPage(t, "106486781"))
 
-	err := VerifyDeviceIdentity(staleLink)
-	if err == nil {
-		t.Fatal("VerifyDeviceIdentity() = nil, want an error")
+	// udev points the by-id link of volume 106486781 at the device of volume 106478890,
+	// and has not created one for volume 106478890 at all.
+	byID := filepath.Join(t.TempDir(), "by-id")
+	if err := os.MkdirAll(byID, 0o750); err != nil {
+		t.Fatal(err)
 	}
-	for _, want := range []string{"106478890", "106486781"} {
-		if !strings.Contains(err.Error(), want) {
-			t.Errorf("error %q does not mention volume %s", err, want)
+	if err := os.Symlink(filepath.Join(devRoot, "sdc"), filepath.Join(byID, "scsi-0HC_Volume_106486781")); err != nil {
+		t.Fatal(err)
+	}
+
+	for volumeID, want := range map[string]string{"106478890": "sdc", "106486781": "sdd"} {
+		devicePath, err := DeviceForVolume(volumeID)
+		if err != nil {
+			t.Fatalf("DeviceForVolume(%s) = %v", volumeID, err)
 		}
+		if devicePath != filepath.Join(devRoot, want) {
+			t.Errorf("DeviceForVolume(%s) = %q, want the device %q", volumeID, devicePath, want)
+		}
+	}
+}
+
+func TestDeviceForVolumeNamesTheVolume(t *testing.T) {
+	fakeNode(t)
+
+	_, err := DeviceForVolume("106486781")
+	if err == nil {
+		t.Fatal("DeviceForVolume() = nil, want an error")
+	}
+	if !strings.Contains(err.Error(), "106486781") {
+		t.Errorf("error %q does not mention volume 106486781", err)
 	}
 }
