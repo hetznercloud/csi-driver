@@ -38,6 +38,18 @@
           "properties": {},
           "type": "object"
         },
+        "extraArgs": {
+          "additionalProperties": false,
+          "properties": {
+            "csiProvisioner": {
+              "items": {
+                "type": "string"
+              },
+              "type": "array"
+            }
+          },
+          "type": "object"
+        },
         "extraEnvVars": {
           "type": "array"
         },

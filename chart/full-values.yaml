@@ -116,6 +116,10 @@ controller:
         memory: 45Mi
         cpu: 15m
 
+  extraArgs:
+    csiProvisioner:
+      - --volume-name-prefix=pvc-mycluster
+
   podLabels:
     pod-label: pod-label
 

@@ -205,6 +205,9 @@ spec:
             - --leader-election
             - --leader-election-namespace={{ include "hcloud-csi.names.namespace" . }}
             {{- end}}
+            {{- if .Values.controller.extraArgs.csiProvisioner }}
+            {{- include "hcloud-csi.tplvalues.render" (dict "value" .Values.controller.extraArgs.csiProvisioner "context" $) | nindent 12 }}
+            {{- end }}
           volumeMounts:
           - name: socket-dir
             mountPath: /run/csi
