@@ -18,7 +18,7 @@ func TestCryptSetup(t *testing.T) {
 	logger := slog.New(slog.NewTextHandler(os.Stdout, nil))
 	cryptSetup := volumes.NewCryptSetup(logger)
 	name := "fake"
-	device, err := createFakeDevice(name, 32)
+	device, _, err := createFakeDevice(name, 32)
 	if err != nil {
 		t.Fatal(err)
 	}

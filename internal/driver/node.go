@@ -62,8 +62,12 @@ func (s *NodeService) NodePublishVolume(ctx context.Context, req *proto.NodePubl
 		return nil, status.Error(codes.InvalidArgument, "missing target path")
 	}
 
-	devicePath := req.GetPublishContext()["devicePath"]
-	if devicePath == "" {
+	// The device path the controller published is not used to find the device: it names
+	// a by-id symlink, which udev maintains asynchronously, so it can still point at the
+	// device of another volume. The device is looked up by the serial the kernel reports
+	// for it instead. The publish context entry is still required, as its presence is how
+	// the CO signals that the volume was attached to this node.
+	if req.GetPublishContext()["devicePath"] == "" {
 		return nil, status.Error(codes.InvalidArgument, "missing device path")
 	}
 
@@ -87,7 +91,7 @@ func (s *NodeService) NodePublishVolume(ctx context.Context, req *proto.NodePubl
 		return nil, status.Error(codes.InvalidArgument, "publish volume: unsupported volume capability")
 	}
 
-	if err := s.volumeMountService.Publish(ctx, req.GetTargetPath(), devicePath, opts); err != nil {
+	if err := s.volumeMountService.Publish(ctx, req.GetTargetPath(), req.GetVolumeId(), opts); err != nil {
 		return nil, status.Error(codes.Internal, fmt.Sprintf("failed to publish volume: %s", err))
 	}
 	return &proto.NodePublishVolumeResponse{}, nil
