@@ -15,6 +15,11 @@ var (
 	sysClassBlockPath  = "/sys/class/block"
 )
 
+func SetDeviceIdentityPaths(dev, sysClassBlock string) {
+	devPath = dev
+	sysClassBlockPath = sysClassBlock
+}
+
 var (
 	errDeviceNotFound     = errors.New("no block device reports the volume as its serial")
 	errAmbiguousDevice    = errors.New("multiple block devices report the volume as their serial")
