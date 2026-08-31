@@ -51,6 +51,8 @@ github.com/hashicorp/go-rootcerts v1.0.2 h1:jzhAVGtqPKbwpyCPELlgNWhE1znq+qwJtW5O
 github.com/hashicorp/go-rootcerts v1.0.2/go.mod h1:pqUvnprVnM5bf7AOirdbb01K4ccR319Vf4pU3K5EGc8=
 github.com/hashicorp/nomad/api v0.0.0-20260515191012-25c2050ecd32 h1:Vzdqg+5iIsc/EAEQHWoNukRktvVJwCHEFNmbRHyjIYk=
 github.com/hashicorp/nomad/api v0.0.0-20260515191012-25c2050ecd32/go.mod h1:Kr8imJwigbQ/50BqVae2+JL+AyX+FnzbnuCoIFb6iYg=
+github.com/hashicorp/nomad/api v0.0.0-20260828175948-872d430669c5 h1:A0KaA88JT9xBLjA3l4peLwMpvfOLKYmN7Wr62BPp1Zs=
+github.com/hashicorp/nomad/api v0.0.0-20260828175948-872d430669c5/go.mod h1:VFUTWokvU72oJNoQpFB2Z2IppNJm/GRZps4zkDBK/ak=
 github.com/hetznercloud/hcloud-go/v2 v2.42.0 h1:srRqdDCsMaxQvqiYhXP0nzf5yz16TEfGqfHkiWrkMso=
 github.com/hetznercloud/hcloud-go/v2 v2.42.0/go.mod h1:9OGvC//jbHE4sv2Oyo0bQ2vEWuUMKYoNMyj9Qxz2qcc=
 github.com/hetznercloud/hcloud-go/v2 v2.43.0 h1:soqEUxJJqbf8UICQmDXfUwY/khfROAk0fi1s0bnBtd8=
