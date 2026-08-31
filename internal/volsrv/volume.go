@@ -33,8 +33,8 @@ func (s *VolumeService) All(ctx context.Context) ([]*csi.Volume, error) {
 	}
 
 	volumes := make([]*csi.Volume, 0, len(hcloudVolumes))
-	for i, hcloudVolume := range hcloudVolumes {
-		volumes[i] = toDomainVolume(hcloudVolume)
+	for _, hcloudVolume := range hcloudVolumes {
+		volumes = append(volumes, toDomainVolume(hcloudVolume))
 	}
 	return volumes, nil
 }
