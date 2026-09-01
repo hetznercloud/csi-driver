@@ -1,5 +1,13 @@
 # Changelog
 
+## [v2.23.0](https://github.com/hetznercloud/csi-driver/releases/tag/v2.23.0)
+
+[Compare to previous version](https://github.com/hetznercloud/csi-driver/compare/v2.22.2...v2.23.0)
+
+### Features
+
+- **chart**: allow extra args on the csi-provisioner container (#1480) ([95fe0dc](https://github.com/hetznercloud/csi-driver/commit/95fe0dc1248b5fc0f800e0a17293f4f102f7151d))
+
 ## [v2.22.2](https://github.com/hetznercloud/csi-driver/releases/tag/v2.22.2)
 
 [Compare to previous version](https://github.com/hetznercloud/csi-driver/compare/v2.22.1...v2.22.2)
