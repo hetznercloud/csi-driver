@@ -618,6 +618,7 @@ spec:
             - --strict-topology
             - --leader-election
             - --leader-election-namespace=namespace-override
+            - --volume-name-prefix=pvc-mycluster
           volumeMounts:
           - name: socket-dir
             mountPath: /run/csi
