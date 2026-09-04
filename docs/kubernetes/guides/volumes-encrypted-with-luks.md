@@ -1,3 +1,19 @@
+<!--
+---
+date: "2026-09-07"
+date_changed: "2026-09-07"
+title: "Encrypted with LUKS"
+tags: []
+language: "en"
+description: ""
+docs_type: ["how_to"]
+product_category: ["Integrations"]
+translation: ["Integrations", "CSI driver", "How-To: Volumes", "Encrypted with LUKS"]
+scrape_type: "whole"
+priority: 90
+---
+-->
+
 # Volumes Encrypted with LUKS
 
 To add encryption with LUKS you have to create a dedicate secret containing an encryption passphrase and duplicate the default `hcloud-volumes` storage class with added parameters referencing this secret:
@@ -25,4 +41,4 @@ parameters:
   csi.storage.k8s.io/node-publish-secret-namespace: kube-system
 ```
 
-Your nodes might need to have `cryptsetup` installed to mount the volumes with LUKS.
+Your nodes might need to have `cryptsetup` installed to mount the Volumes with LUKS.

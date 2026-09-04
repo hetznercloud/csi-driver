@@ -1,3 +1,19 @@
+<!--
+---
+date: "2026-09-07"
+date_changed: "2026-09-07"
+title: "Setting up a cluster with a Volume"
+tags: []
+language: "en"
+description: ""
+docs_type: ["getting_started"]
+product_category: ["Integrations"]
+translation: ["Integrations", "CSI driver", "Getting Started", "Setting up a cluster with a Volume"]
+scrape_type: "whole"
+priority: 90
+---
+-->
+
 # Setting up a cluster and creating your first Volume
 
 In this tutorial, you will learn how to set up a lightweight Kubernetes cluster on **Hetzner Cloud** using **k3s**, install the **Hetzner Cloud csi-driver**, and create a Deployment with a PersistentVolumeClaim.
@@ -217,9 +233,9 @@ kubectl apply -f pvc-app.yaml
 
 ---
 
-## 6. Verify the volume
+## 6. Verify the Volume
 
-Watch the PVC move from `Pending` to `Bound`. This happens as soon as the Deployment's Pod is scheduled and the csi-driver has provisioned the volume:
+Watch the PVC move from `Pending` to `Bound`. This happens as soon as the Deployment's Pod is scheduled and the csi-driver has provisioned the Volume:
 
 ```bash
 kubectl get pvc csi-pvc -w
@@ -237,7 +253,7 @@ Confirm that the Pod is running:
 kubectl get pods -l app=my-csi-app
 ```
 
-You can also see the newly created volume in Hetzner Cloud. Its name starts with `pvc-` and matches the volume bound above:
+You can also see the newly created Volume in Hetzner Cloud. Its name starts with `pvc-` and matches the Volume bound above:
 
 ```bash
 hcloud volume list
@@ -247,14 +263,14 @@ hcloud volume list
 
 ## 7. Write data and confirm it persists
 
-Write a file into the mounted volume:
+Write a file into the mounted Volume:
 
 ```bash
 kubectl exec deploy/my-csi-app -- sh -c 'echo "Hello from Hetzner Cloud Volumes" > /data/hello.txt'
 kubectl exec deploy/my-csi-app -- cat /data/hello.txt
 ```
 
-To prove the data lives on the volume and not inside the Pod, delete the Pod. The Deployment recreates it, the same volume is re-attached, and the file is still there:
+To prove the data lives on the Volume and not inside the Pod, delete the Pod. The Deployment recreates it, the same Volume is re-attached, and the file is still there:
 
 ```bash
 kubectl delete pod -l app=my-csi-app
@@ -274,7 +290,7 @@ Delete the workload and the claim. Because the StorageClass uses `reclaimPolicy:
 kubectl delete -f pvc-app.yaml
 ```
 
-Verify the volume is gone:
+Verify the Volume is gone:
 
 ```bash
 hcloud volume list

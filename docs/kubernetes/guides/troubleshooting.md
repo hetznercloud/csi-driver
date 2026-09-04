@@ -1,3 +1,19 @@
+<!--
+---
+date: "2026-09-07"
+date_changed: "2026-09-07"
+title: "Common issues"
+tags: []
+language: "en"
+description: ""
+docs_type: ["faq/troubleshooting"]
+product_category: ["Integrations"]
+translation: ["Integrations", "CSI driver", "Troubleshooting", "Common issues"]
+scrape_type: "whole"
+priority: 100
+---
+-->
+
 # Troubleshooting
 
 This guide helps you diagnose and fix the most common problems with the hcloud-csi-driver. Start with [Gathering diagnostics](#gathering-diagnostics) to collect the information you need, then jump to the section that matches your symptom.
@@ -142,7 +158,7 @@ If your PVC has no `storageClassName` and there is no default StorageClass, it w
 
 ### Volume limit or quota reached
 
-If your project has reached its volume limit or quota, the Hetzner Cloud API rejects new volumes and the controller logs the API error. Check your limits in the [Hetzner Cloud Console](https://console.hetzner.cloud/) and delete unused volumes or request a limit increase via the [Support Center](https://console.hetzner.cloud/support).
+If your project has reached its volume limit or quota, the Hetzner Cloud API rejects new volumes and the controller logs the API error. Check your limits in the [Hetzner Console](https://console.hetzner.com/) and delete unused volumes or request a limit increase via the [Support Center](https://console.hetzner.com/support).
 
 ## Pod is stuck in `ContainerCreating`
 
@@ -183,10 +199,10 @@ To grow a volume:
 1. The StorageClass must have `allowVolumeExpansion: true`.
 2. Increase `spec.resources.requests.storage` on the **PVC** (not the PV).
 
-The controller resizes the underlying Hetzner Cloud volume, and the filesystem is expanded the next time it is mounted. Watch the controller and node logs if the new size does not appear. Note that volumes can only **grow**, never shrink.
+The controller resizes the underlying Hetzner Cloud Volume, and the filesystem is expanded the next time it is mounted. Watch the controller and node logs if the new size does not appear. Note that Volumes can only **grow**, never shrink.
 
 ## Volumes do not work on Robot / dedicated servers
 
-The hcloud-csi-driver provisions **Hetzner Cloud** volumes, which are only available on Hetzner Cloud servers. Dedicated Robot servers cannot attach Cloud volumes.
+The hcloud-csi-driver provisions **Hetzner Cloud** Volumes, which are only available on Hetzner Cloud servers. Dedicated Robot servers cannot attach Cloud volumes.
 
 If you run a mixed cluster, see [Integration with Robot servers](../explanation/integration-with-robot-servers.md) for what is and isn't supported.
