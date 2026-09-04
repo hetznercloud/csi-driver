@@ -1,3 +1,19 @@
+<!--
+---
+date: "2026-09-07"
+date_changed: "2026-09-07"
+title: "From v1 to v2"
+tags: []
+language: "en"
+description: ""
+docs_type: ["how_to"]
+product_category: ["Integrations"]
+translation: ["Integrations", "CSI driver", "How-To: Upgrade", "From v1 to v2"]
+scrape_type: "whole"
+priority: 90
+---
+-->
+
 # Upgrading from v1 to v2
 
 There are three breaking changes between v1.6 and v2.0 that require user intervention. Please take care to follow these steps, as otherwise the update might fail.

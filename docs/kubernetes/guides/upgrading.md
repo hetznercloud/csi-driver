@@ -1,3 +1,19 @@
+<!--
+---
+date: "2026-09-07"
+date_changed: "2026-09-07"
+title: "General"
+tags: []
+language: "en"
+description: ""
+docs_type: ["how_to"]
+product_category: ["Integrations"]
+translation: ["Integrations", "CSI driver", "How-To: Upgrade", "General"]
+scrape_type: "whole"
+priority: 100
+---
+-->
+
 # Upgrading
 
 For most upgrades — patch and minor versions within the same major version
