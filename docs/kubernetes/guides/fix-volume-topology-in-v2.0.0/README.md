@@ -1,19 +1,3 @@
-<!--
----
-date: "2026-09-07"
-date_changed: "2026-09-07"
-title: "Fix volume topology in v2.0.0"
-tags: []
-language: "en"
-description: ""
-docs_type: ["how_to"]
-product_category: ["Integrations"]
-translation: ["Integrations", "CSI driver", "How-To: Upgrade", "Fix volume topology in v2.0.0"]
-scrape_type: "whole"
-priority: 80
----
--->
-
 # How to fix volume topology in v2.0.0
 
 This guide is intended for Kubernetes Cluster operators that installed the hcloud-csi-driver v2.0.0 and created Volumes. Unfortunately this version included a change that we had to revert, for details you can read the [issue #333](https://github.com/hetznercloud/csi-driver/issues/333).
