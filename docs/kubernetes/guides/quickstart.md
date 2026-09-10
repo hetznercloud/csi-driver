@@ -1,8 +1,24 @@
+<!--
+---
+date: "2026-09-07"
+date_changed: "2026-09-07"
+title: "Installing the CSI driver"
+tags: []
+language: "en"
+description: ""
+docs_type: ["getting_started"]
+product_category: ["Integrations"]
+translation: ["Integrations", "CSI driver", "Getting Started", "Installing the CSI driver"]
+scrape_type: "whole"
+priority: 90
+---
+-->
+
 # Quick start
 
-1. Create a read+write API token in the [Hetzner Cloud Console](https://console.hetzner.cloud/) as described in [this document](https://docs.hetzner.com/cloud/api/getting-started/generating-api-token/).
+1. Create a read+write API token in the [Hetzner Console](https://console.hetzner.com/) as described in [this document](https://docs.hetzner.com/cloud/api/getting-started/generating-api-token/).
 
-2. Create a secret containing your Hetzner Cloud API token:
+2. Create a secret containing your Hetzner Console API token:
 
 ```bash
 kubectl -n kube-system create secret generic hcloud --from-literal=token=<hcloud API token>

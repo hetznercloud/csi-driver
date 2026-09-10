@@ -85,6 +85,6 @@ In case the script encountered an error and shows a message prefixed with `[ERR]
 
 You can fix these errors and then re-run the script.
 
-In case something else goes wrong, the script makes backups of all resources in the directory`./hcloud-csi-fix-topology/$PERSITENT_VOLUME_NAME`, as logged by the script. You can use these to manually re-create the `PersistentVolume`.
+In case something else goes wrong, the script makes backups of all resources in the directory `./hcloud-csi-fix-topology/$PERSITENT_VOLUME_NAME`, as logged by the script. You can use these to manually re-create the `PersistentVolume`.
 
 If you have any issues, please feel free to open an issue on the [GitHub Repository](https://github.com/hetznercloud/csi-driver) or through the [Hetzner Ticket System](https://console.hetzner.cloud/support).

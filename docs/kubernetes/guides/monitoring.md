@@ -1,3 +1,19 @@
+<!--
+---
+date: "2026-09-07"
+date_changed: "2026-09-07"
+title: "Monitoring"
+tags: []
+language: "en"
+description: ""
+docs_type: ["how_to"]
+product_category: ["Integrations"]
+translation: ["Integrations", "CSI driver", "How-To: Administration", "Monitoring"]
+scrape_type: "whole"
+priority: 100
+---
+-->
+
 # Monitoring
 
 Monitoring is an important part of managing any system, and the csi-driver components are no exception. To help you keep an eye on how the components are performing, we've exposed Prometheus-compatible metrics on port 9189. You can configure the endpoint for these metrics by setting the `METRICS_ENDPOINT` environment variable to the appropriate value for your system.
