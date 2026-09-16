@@ -52,6 +52,7 @@ func (s *VolumeService) Create(ctx context.Context, opts volumes.CreateOpts) (*c
 		Size:     opts.MinSize,
 		Location: &hcloud.Location{Name: opts.Location},
 		Labels:   opts.Labels,
+		Snapshot: toHcloudSnapshot(opts.Snapshot),
 	})
 
 	if err != nil {
@@ -77,6 +78,97 @@ func (s *VolumeService) Create(ctx context.Context, opts volumes.CreateOpts) (*c
 	}
 
 	return toDomainVolume(result.Volume), nil
+}
+
+func (s *VolumeService) CreateSnapshot(ctx context.Context, opts volumes.CreateSnapshotOpts) (*csi.Snapshot, error) {
+	result, _, err := s.client.Volume.CreateSnapshot(ctx, &hcloud.Volume{ID: opts.VolumeID}, hcloud.VolumeSnapshotCreateOpts{
+		Name:   opts.Name,
+		Labels: opts.Labels,
+	})
+	if err != nil {
+		if hcloud.IsError(err, hcloud.ErrorCode("uniqueness_error")) {
+			return nil, volumes.ErrSnapshotAlreadyExists
+		}
+		if hcloud.IsError(err, hcloud.ErrorCodeNotFound) {
+			return nil, volumes.ErrVolumeNotFound
+		}
+		return nil, err
+	}
+	if err := s.client.Action.WaitFor(ctx, result.Action); err != nil {
+		return nil, err
+	}
+	snapshot, _, err := s.client.Volume.GetSnapshotByID(ctx, result.Snapshot.ID)
+	if err != nil {
+		return nil, err
+	}
+	if snapshot == nil {
+		return nil, volumes.ErrSnapshotNotFound
+	}
+	return toDomainSnapshot(snapshot), nil
+}
+
+func (s *VolumeService) GetSnapshotByID(ctx context.Context, id int64) (*csi.Snapshot, error) {
+	snapshot, _, err := s.client.Volume.GetSnapshotByID(ctx, id)
+	if err != nil {
+		return nil, err
+	}
+	if snapshot == nil {
+		return nil, volumes.ErrSnapshotNotFound
+	}
+	return toDomainSnapshot(snapshot), nil
+}
+
+func (s *VolumeService) GetSnapshotByName(ctx context.Context, name string) (*csi.Snapshot, error) {
+	snapshot, _, err := s.client.Volume.GetSnapshotByName(ctx, name)
+	if err != nil {
+		return nil, err
+	}
+	if snapshot == nil {
+		return nil, volumes.ErrSnapshotNotFound
+	}
+	return toDomainSnapshot(snapshot), nil
+}
+
+func (s *VolumeService) DeleteSnapshot(ctx context.Context, snapshot *csi.Snapshot) error {
+	action, _, err := s.client.Volume.DeleteSnapshot(ctx, toHcloudSnapshot(snapshot))
+	if err != nil {
+		if hcloud.IsError(err, hcloud.ErrorCodeNotFound) {
+			return volumes.ErrSnapshotNotFound
+		}
+		return err
+	}
+	return s.client.Action.WaitFor(ctx, action)
+}
+
+func (s *VolumeService) AllSnapshots(ctx context.Context) ([]*csi.Snapshot, error) {
+	hcloudSnapshots, err := s.client.Volume.AllSnapshots(ctx)
+	if err != nil {
+		return nil, err
+	}
+	snapshots := make([]*csi.Snapshot, 0, len(hcloudSnapshots))
+	for _, snapshot := range hcloudSnapshots {
+		snapshots = append(snapshots, toDomainSnapshot(snapshot))
+	}
+	return snapshots, nil
+}
+
+func toDomainSnapshot(snapshot *hcloud.VolumeSnapshot) *csi.Snapshot {
+	return &csi.Snapshot{
+		ID:             snapshot.ID,
+		Name:           snapshot.Name,
+		SourceVolumeID: snapshot.Volume.ID,
+		Size:           snapshot.Size,
+		Location:       snapshot.Location.Name,
+		Created:        snapshot.Created,
+		Ready:          snapshot.Status == hcloud.VolumeSnapshotStatusAvailable,
+	}
+}
+
+func toHcloudSnapshot(snapshot *csi.Snapshot) *hcloud.VolumeSnapshot {
+	if snapshot == nil {
+		return nil
+	}
+	return &hcloud.VolumeSnapshot{ID: snapshot.ID}
 }
 
 func (s *VolumeService) GetByID(ctx context.Context, id int64) (*csi.Volume, error) {

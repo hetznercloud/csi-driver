@@ -10,6 +10,7 @@ import (
 	"os"
 	"sync"
 	"testing"
+	"time"
 
 	proto "github.com/container-storage-interface/spec/lib/go/csi"
 	"github.com/kubernetes-csi/csi-test/v5/pkg/sanity"
@@ -91,8 +92,9 @@ func TestSanity(t *testing.T) {
 }
 
 type sanityVolumeService struct {
-	mu      sync.Mutex
-	volumes list.List
+	mu        sync.Mutex
+	volumes   list.List
+	snapshots list.List
 }
 
 func (s *sanityVolumeService) All(_ context.Context) ([]*csi.Volume, error) {
@@ -124,6 +126,7 @@ func (s *sanityVolumeService) Create(_ context.Context, opts volumes.CreateOpts)
 		Size:        opts.MinSize,
 		Location:    opts.Location,
 		LinuxDevice: fmt.Sprintf("/dev/disk/by-id/scsi-0HC_Volume_%d", s.volumes.Len()+1),
+		Labels:      opts.Labels,
 	}
 
 	s.volumes.PushBack(volume)
@@ -194,6 +197,75 @@ func (s *sanityVolumeService) Attach(_ context.Context, _ *csi.Volume, _ *csi.Se
 
 func (s *sanityVolumeService) Detach(_ context.Context, _ *csi.Volume, _ *csi.Server) error {
 	return nil
+}
+
+func (s *sanityVolumeService) CreateSnapshot(_ context.Context, opts volumes.CreateSnapshotOpts) (*csi.Snapshot, error) {
+	s.mu.Lock()
+	defer s.mu.Unlock()
+	for e := s.snapshots.Front(); e != nil; e = e.Next() {
+		snapshot := e.Value.(*csi.Snapshot)
+		if snapshot.Name == opts.Name {
+			return nil, volumes.ErrSnapshotAlreadyExists
+		}
+	}
+	snapshot := &csi.Snapshot{
+		ID:             int64(s.snapshots.Len() + 1),
+		Name:           opts.Name,
+		SourceVolumeID: opts.VolumeID,
+		Size:           MinVolumeSize,
+		Location:       "testloc",
+		Created:        time.Now(),
+		Ready:          true,
+	}
+	s.snapshots.PushBack(snapshot)
+	return snapshot, nil
+}
+
+func (s *sanityVolumeService) GetSnapshotByID(_ context.Context, id int64) (*csi.Snapshot, error) {
+	s.mu.Lock()
+	defer s.mu.Unlock()
+	for e := s.snapshots.Front(); e != nil; e = e.Next() {
+		snapshot := e.Value.(*csi.Snapshot)
+		if snapshot.ID == id {
+			return snapshot, nil
+		}
+	}
+	return nil, volumes.ErrSnapshotNotFound
+}
+
+func (s *sanityVolumeService) GetSnapshotByName(_ context.Context, name string) (*csi.Snapshot, error) {
+	s.mu.Lock()
+	defer s.mu.Unlock()
+	for e := s.snapshots.Front(); e != nil; e = e.Next() {
+		snapshot := e.Value.(*csi.Snapshot)
+		if snapshot.Name == name {
+			return snapshot, nil
+		}
+	}
+	return nil, volumes.ErrSnapshotNotFound
+}
+
+func (s *sanityVolumeService) DeleteSnapshot(_ context.Context, target *csi.Snapshot) error {
+	s.mu.Lock()
+	defer s.mu.Unlock()
+	for e := s.snapshots.Front(); e != nil; e = e.Next() {
+		snapshot := e.Value.(*csi.Snapshot)
+		if snapshot.ID == target.ID {
+			s.snapshots.Remove(e)
+			return nil
+		}
+	}
+	return volumes.ErrSnapshotNotFound
+}
+
+func (s *sanityVolumeService) AllSnapshots(_ context.Context) ([]*csi.Snapshot, error) {
+	s.mu.Lock()
+	defer s.mu.Unlock()
+	snapshots := make([]*csi.Snapshot, 0, s.snapshots.Len())
+	for e := s.snapshots.Front(); e != nil; e = e.Next() {
+		snapshots = append(snapshots, e.Value.(*csi.Snapshot))
+	}
+	return snapshots, nil
 }
 
 type sanityMountService struct{}

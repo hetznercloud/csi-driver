@@ -51,6 +51,12 @@ linters:
     exhaustive:
       default-signifies-exhaustive: true
 
+    gomoddirectives:
+      # The draft CSI proposal intentionally compiles against the companion
+      # hcloud-go API proposal until that module publishes the new contract.
+      replace-allow-list:
+        - github.com/hetznercloud/hcloud-go/v2
+
     staticcheck:
       checks: ["all", "-QF1008"]
 

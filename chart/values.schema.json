@@ -46,6 +46,12 @@
                 "type": "string"
               },
               "type": "array"
+            },
+            "csiSnapshotter": {
+              "items": {
+                "type": "string"
+              },
+              "type": "array"
             }
           },
           "type": "object"
@@ -110,6 +116,23 @@
               "type": "object"
             },
             "csiProvisioner": {
+              "properties": {
+                "name": {
+                  "type": "string"
+                },
+                "pullPolicy": {
+                  "type": "string"
+                },
+                "pullSecrets": {
+                  "type": "array"
+                },
+                "tag": {
+                  "type": "string"
+                }
+              },
+              "type": "object"
+            },
+            "csiSnapshotter": {
               "properties": {
                 "name": {
                   "type": "string"
@@ -280,6 +303,19 @@
               "type": "object"
             },
             "csiProvisioner": {
+              "properties": {
+                "limits": {
+                  "properties": {},
+                  "type": "object"
+                },
+                "requests": {
+                  "properties": {},
+                  "type": "object"
+                }
+              },
+              "type": "object"
+            },
+            "csiSnapshotter": {
               "properties": {
                 "limits": {
                   "properties": {},

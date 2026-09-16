@@ -6,12 +6,14 @@ import (
 	"fmt"
 	"log/slog"
 	"maps"
+	"slices"
 	"strconv"
 	"strings"
 
 	proto "github.com/container-storage-interface/spec/lib/go/csi"
 	"google.golang.org/grpc/codes"
 	"google.golang.org/grpc/status"
+	"google.golang.org/protobuf/types/known/timestamppb"
 
 	"github.com/hetznercloud/csi-driver/internal/csi"
 	"github.com/hetznercloud/csi-driver/internal/utils"
@@ -95,11 +97,50 @@ func (s *ControllerService) CreateVolume(ctx context.Context, req *proto.CreateV
 		location = *loc
 	}
 
+	var sourceSnapshot *csi.Snapshot
+	if source := req.GetVolumeContentSource(); source != nil {
+		if source.GetVolume() != nil {
+			return nil, status.Error(codes.InvalidArgument, "volume cloning is not supported")
+		}
+		if source.GetSnapshot() == nil || source.GetSnapshot().GetSnapshotId() == "" {
+			return nil, status.Error(codes.InvalidArgument, "invalid volume content source")
+		}
+		snapshotID, err := parseVolumeID(source.GetSnapshot().GetSnapshotId())
+		if err != nil {
+			return nil, status.Error(codes.NotFound, "snapshot not found")
+		}
+		sourceSnapshot, err = s.volumeService.GetSnapshotByID(ctx, snapshotID)
+		if err != nil {
+			if errors.Is(err, volumes.ErrSnapshotNotFound) {
+				return nil, status.Error(codes.NotFound, "snapshot not found")
+			}
+			return nil, status.Errorf(codes.Internal, "failed to get snapshot: %s", err)
+		}
+		if !sourceSnapshot.Ready {
+			return nil, status.Error(codes.Aborted, "snapshot is not ready")
+		}
+		if reqs := req.GetAccessibilityRequirements(); len(reqs.GetPreferred()) > 0 || len(reqs.GetRequisite()) > 0 {
+			if location != sourceSnapshot.Location {
+				return nil, status.Errorf(codes.InvalidArgument, "snapshot is in location %q, not requested location %q", sourceSnapshot.Location, location)
+			}
+		}
+		location = sourceSnapshot.Location
+		if maxSize > 0 && sourceSnapshot.Size > maxSize {
+			return nil, status.Error(codes.OutOfRange, "snapshot is larger than the requested capacity limit")
+		}
+		if minSize < sourceSnapshot.Size {
+			minSize = sourceSnapshot.Size
+		}
+	}
+
 	volumeLabels := map[string]string{
 		labelKeyManagedBy: "csi-driver",
 	}
 
 	maps.Copy(volumeLabels, s.extraVolumeLabels)
+	if sourceSnapshot != nil {
+		volumeLabels[volumes.SnapshotIDLabel] = strconv.FormatInt(sourceSnapshot.ID, 10)
+	}
 
 	for key, value := range req.GetParameters() {
 		switch strings.ToLower(key) {
@@ -129,7 +170,7 @@ func (s *ControllerService) CreateVolume(ctx context.Context, req *proto.CreateV
 			// (e.g. a dash), which violates the label spec. Strip any
 			// leading non-alphanumeric characters.
 			truncated = strings.TrimLeftFunc(truncated, func(r rune) bool {
-				return !((r >= 'a' && r <= 'z') || (r >= 'A' && r <= 'Z') || (r >= '0' && r <= '9'))
+				return (r < 'a' || r > 'z') && (r < 'A' || r > 'Z') && (r < '0' || r > '9')
 			})
 			s.logger.Warn(
 				"volume label value truncated",
@@ -157,6 +198,7 @@ func (s *ControllerService) CreateVolume(ctx context.Context, req *proto.CreateV
 		MaxSize:  maxSize,
 		Location: location,
 		Labels:   volumeLabels,
+		Snapshot: sourceSnapshot,
 	})
 	if err != nil {
 		s.logger.Error(
@@ -196,6 +238,7 @@ func (s *ControllerService) CreateVolume(ctx context.Context, req *proto.CreateV
 			VolumeContext: map[string]string{
 				"fsFormatOptions": req.GetParameters()["fsFormatOptions"],
 			},
+			ContentSource: req.GetVolumeContentSource(),
 		},
 	}
 	return resp, nil
@@ -433,9 +476,134 @@ func (s *ControllerService) ControllerGetCapabilities(context.Context, *proto.Co
 					},
 				},
 			},
+			{
+				Type: &proto.ControllerServiceCapability_Rpc{
+					Rpc: &proto.ControllerServiceCapability_RPC{
+						Type: proto.ControllerServiceCapability_RPC_CREATE_DELETE_SNAPSHOT,
+					},
+				},
+			},
+			{
+				Type: &proto.ControllerServiceCapability_Rpc{
+					Rpc: &proto.ControllerServiceCapability_RPC{
+						Type: proto.ControllerServiceCapability_RPC_LIST_SNAPSHOTS,
+					},
+				},
+			},
 		},
 	}
 	return resp, nil
+}
+
+func (s *ControllerService) CreateSnapshot(ctx context.Context, req *proto.CreateSnapshotRequest) (*proto.CreateSnapshotResponse, error) {
+	if req.GetName() == "" {
+		return nil, status.Error(codes.InvalidArgument, "missing name")
+	}
+	if req.GetSourceVolumeId() == "" {
+		return nil, status.Error(codes.InvalidArgument, "missing source volume id")
+	}
+	volumeID, err := parseVolumeID(req.GetSourceVolumeId())
+	if err != nil {
+		return nil, status.Error(codes.NotFound, "source volume not found")
+	}
+
+	labels := map[string]string{labelKeyManagedBy: "csi-driver"}
+	maps.Copy(labels, s.extraVolumeLabels)
+	snapshot, err := s.volumeService.CreateSnapshot(ctx, volumes.CreateSnapshotOpts{
+		Name:     req.GetName(),
+		VolumeID: volumeID,
+		Labels:   labels,
+	})
+	if err != nil {
+		switch {
+		case errors.Is(err, volumes.ErrVolumeNotFound):
+			return nil, status.Error(codes.NotFound, "source volume not found")
+		case errors.Is(err, volumes.ErrSnapshotAlreadyExists):
+			return nil, status.Error(codes.AlreadyExists, "snapshot name already exists for another source volume")
+		default:
+			return nil, status.Errorf(codes.Internal, "failed to create snapshot: %s", err)
+		}
+	}
+	return &proto.CreateSnapshotResponse{Snapshot: snapshotToProto(snapshot)}, nil
+}
+
+func (s *ControllerService) DeleteSnapshot(ctx context.Context, req *proto.DeleteSnapshotRequest) (*proto.DeleteSnapshotResponse, error) {
+	if req.GetSnapshotId() == "" {
+		return nil, status.Error(codes.InvalidArgument, "missing snapshot id")
+	}
+	snapshotID := parseSnapshotIDForDelete(req.GetSnapshotId())
+	if snapshotID == 0 {
+		return &proto.DeleteSnapshotResponse{}, nil
+	}
+	if err := s.volumeService.DeleteSnapshot(ctx, &csi.Snapshot{ID: snapshotID}); err != nil {
+		return nil, status.Errorf(codes.Internal, "failed to delete snapshot: %s", err)
+	}
+	return &proto.DeleteSnapshotResponse{}, nil
+}
+
+func parseSnapshotIDForDelete(id string) int64 {
+	snapshotID, err := parseVolumeID(id)
+	if err != nil {
+		return 0
+	}
+	return snapshotID
+}
+
+func (s *ControllerService) ListSnapshots(ctx context.Context, req *proto.ListSnapshotsRequest) (*proto.ListSnapshotsResponse, error) {
+	if req.GetMaxEntries() < 0 {
+		return nil, status.Error(codes.InvalidArgument, "max entries must not be negative")
+	}
+	snapshots, err := s.volumeService.AllSnapshots(ctx)
+	if err != nil {
+		return nil, status.Errorf(codes.Internal, "failed to list snapshots: %s", err)
+	}
+
+	if req.GetSnapshotId() != "" {
+		id, parseErr := parseVolumeID(req.GetSnapshotId())
+		if parseErr != nil {
+			snapshots = nil
+		} else {
+			snapshots = slices.DeleteFunc(snapshots, func(snapshot *csi.Snapshot) bool { return snapshot.ID != id })
+		}
+	}
+	if req.GetSourceVolumeId() != "" {
+		id, parseErr := parseVolumeID(req.GetSourceVolumeId())
+		if parseErr != nil {
+			snapshots = nil
+		} else {
+			snapshots = slices.DeleteFunc(snapshots, func(snapshot *csi.Snapshot) bool { return snapshot.SourceVolumeID != id })
+		}
+	}
+
+	start := 0
+	if req.GetStartingToken() != "" {
+		start, err = strconv.Atoi(req.GetStartingToken())
+		if err != nil || start < 0 || start > len(snapshots) {
+			return nil, status.Error(codes.Aborted, "invalid starting token")
+		}
+	}
+	end := len(snapshots)
+	if req.GetMaxEntries() > 0 && start+int(req.GetMaxEntries()) < end {
+		end = start + int(req.GetMaxEntries())
+	}
+	resp := &proto.ListSnapshotsResponse{Entries: make([]*proto.ListSnapshotsResponse_Entry, 0, end-start)}
+	for _, snapshot := range snapshots[start:end] {
+		resp.Entries = append(resp.Entries, &proto.ListSnapshotsResponse_Entry{Snapshot: snapshotToProto(snapshot)})
+	}
+	if end < len(snapshots) {
+		resp.NextToken = strconv.Itoa(end)
+	}
+	return resp, nil
+}
+
+func snapshotToProto(snapshot *csi.Snapshot) *proto.Snapshot {
+	return &proto.Snapshot{
+		SnapshotId:     strconv.FormatInt(snapshot.ID, 10),
+		SourceVolumeId: strconv.FormatInt(snapshot.SourceVolumeID, 10),
+		SizeBytes:      snapshot.SizeBytes(),
+		CreationTime:   timestamppb.New(snapshot.Created),
+		ReadyToUse:     snapshot.Ready,
+	}
 }
 
 func (s *ControllerService) ControllerExpandVolume(ctx context.Context, req *proto.ControllerExpandVolumeRequest) (*proto.ControllerExpandVolumeResponse, error) {

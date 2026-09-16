@@ -8,6 +8,7 @@ type Volume struct {
 	Location    string
 	LinuxDevice string
 	Server      *Server
+	Labels      map[string]string
 }
 
 func (v Volume) SizeBytes() int64 {

@@ -212,6 +212,25 @@ spec:
           - name: socket-dir
             mountPath: /run/csi
 
+        - name: csi-snapshotter
+          image: {{ include "hcloud-csi.images.image" (dict "value" .Values.controller.image.csiSnapshotter "context" .) }}
+          imagePullPolicy: {{ .Values.controller.image.csiSnapshotter.pullPolicy }}
+          {{- if .Values.controller.resources.csiSnapshotter }}
+          resources: {{- toYaml .Values.controller.resources.csiSnapshotter | nindent 12 }}
+          {{- end }}
+          args:
+            - --csi-address=/run/csi/socket
+            {{- if $enableLeaderElection }}
+            - --leader-election
+            - --leader-election-namespace={{ include "hcloud-csi.names.namespace" . }}
+            {{- end}}
+            {{- if (.Values.controller.extraArgs).csiSnapshotter }}
+            {{- include "hcloud-csi.tplvalues.render" (dict "value" (.Values.controller.extraArgs).csiSnapshotter "context" $) | nindent 12 }}
+            {{- end }}
+          volumeMounts:
+          - name: socket-dir
+            mountPath: /run/csi
+
         - name: liveness-probe
           image: {{ include "hcloud-csi.images.image" (dict "value" .Values.controller.image.livenessProbe "context" .) }}
           imagePullPolicy: {{ .Values.controller.image.livenessProbe.pullPolicy }}

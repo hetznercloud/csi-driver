@@ -57,6 +57,10 @@ controller:
   ## @param controller.image.csiProvisioner.tag csi-provisioner image tag
   ## @param controller.image.csiProvisioner.pullPolicy csi-provisioner image pull policy
   ## @param controller.image.csiProvisioner.pullSecrets csi-provisioner image pull secrets
+  ## @param controller.image.csiSnapshotter.name csi-snapshotter image name
+  ## @param controller.image.csiSnapshotter.tag csi-snapshotter image tag
+  ## @param controller.image.csiSnapshotter.pullPolicy csi-snapshotter image pull policy
+  ## @param controller.image.csiSnapshotter.pullSecrets csi-snapshotter image pull secrets
   ## @param controller.image.livenessProbe.name liveness-probe image name
   ## @param controller.image.livenessProbe.tag liveness-probe image tag
   ## @param controller.image.livenessProbe.pullPolicy liveness-probe image pull policy
@@ -115,6 +119,20 @@ controller:
       ## e.g:
       ## pullSecrets:
       ##   - myRegistryKeySecretName
+      ##
+      pullSecrets: []
+
+    csiSnapshotter:
+      name: registry.k8s.io/sig-storage/csi-snapshotter
+      tag: v8.6.0 # renovate: datasource=docker depName=registry.k8s.io/sig-storage/csi-snapshotter
+      ## Specify a imagePullPolicy
+      ## Defaults to 'Always' if image tag is 'latest', else set to 'IfNotPresent'
+      ## ref: http://kubernetes.io/docs/user-guide/images/#pre-pulling-images
+      ##
+      pullPolicy: IfNotPresent
+      ## Optionally specify an array of imagePullSecrets.
+      ## Secrets must be manually created in the namespace.
+      ## ref: https://kubernetes.io/docs/tasks/configure-pod-container/pull-image-private-registry/
       ##
       pullSecrets: []
 
@@ -261,6 +279,9 @@ controller:
     csiProvisioner:
       limits: {}
       requests: {}
+    csiSnapshotter:
+      limits: {}
+      requests: {}
     livenessProbe:
       limits: {}
       requests: {}
@@ -269,6 +290,7 @@ controller:
       requests: {}
 
   ## @param controller.extraArgs.csiProvisioner Array with extra arguments for the csi-provisioner container
+  ## @param controller.extraArgs.csiSnapshotter Array with extra arguments for the csi-snapshotter container
   ## e.g:
   ## extraArgs:
   ##   csiProvisioner:
@@ -276,6 +298,7 @@ controller:
   ##
   extraArgs:
     csiProvisioner: []
+    csiSnapshotter: []
 
   ## Configure Pods Security Context
   ## ref: https://kubernetes.io/docs/tasks/configure-pod-container/security-context/#set-the-security-context-for-a-pod

@@ -389,3 +389,51 @@ func TestIdempotentServiceExpand(t *testing.T) {
 		}
 	})
 }
+
+func TestIdempotentServiceCreateSnapshotExisting(t *testing.T) {
+	existing := &csi.Snapshot{ID: 7, Name: "backup", SourceVolumeID: 42, Ready: true}
+	volumeService := &mock.VolumeService{
+		CreateSnapshotFunc: func(context.Context, volumes.CreateSnapshotOpts) (*csi.Snapshot, error) {
+			return nil, volumes.ErrSnapshotAlreadyExists
+		},
+		GetSnapshotByNameFunc: func(context.Context, string) (*csi.Snapshot, error) {
+			return existing, nil
+		},
+	}
+	service := volumes.NewIdempotentService(slog.New(slog.DiscardHandler), volumeService)
+
+	snapshot, err := service.CreateSnapshot(context.Background(), volumes.CreateSnapshotOpts{Name: "backup", VolumeID: 42})
+	if err != nil {
+		t.Fatal(err)
+	}
+	if snapshot != existing {
+		t.Fatal("unexpected snapshot")
+	}
+}
+
+func TestIdempotentServiceCreateExistingWithDifferentSnapshot(t *testing.T) {
+	volumeService := &mock.VolumeService{
+		CreateFunc: func(context.Context, volumes.CreateOpts) (*csi.Volume, error) {
+			return nil, volumes.ErrVolumeAlreadyExists
+		},
+		GetByNameFunc: func(context.Context, string) (*csi.Volume, error) {
+			return &csi.Volume{
+				Name:     "restored",
+				Size:     10,
+				Location: "fsn1",
+				Labels:   map[string]string{volumes.SnapshotIDLabel: "8"},
+			}, nil
+		},
+	}
+	service := volumes.NewIdempotentService(slog.New(slog.DiscardHandler), volumeService)
+
+	_, err := service.Create(context.Background(), volumes.CreateOpts{
+		Name:     "restored",
+		MinSize:  10,
+		Location: "fsn1",
+		Snapshot: &csi.Snapshot{ID: 7},
+	})
+	if !errors.Is(err, volumes.ErrVolumeAlreadyExists) {
+		t.Fatalf("unexpected error: %v", err)
+	}
+}

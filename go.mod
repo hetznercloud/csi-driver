@@ -55,3 +55,5 @@ require (
 	gopkg.in/yaml.v2 v2.4.0 // indirect
 	k8s.io/klog/v2 v2.140.0 // indirect
 )
+
+replace github.com/hetznercloud/hcloud-go/v2 => github.com/eugene-harold-krabs/hcloud-go/v2 v2.48.1-0.20260916054509-08a5d1fa2990

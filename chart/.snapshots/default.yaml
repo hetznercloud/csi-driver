@@ -11,6 +11,7 @@ metadata:
     app.kubernetes.io/managed-by: Helm
     app.kubernetes.io/component: controller
 automountServiceAccountToken: true
+
 ---
 # Source: hcloud-csi/templates/core/storageclass.yaml
 kind: StorageClass
@@ -69,9 +70,22 @@ rules:
     verbs: [list, watch, create, update, patch]
   - apiGroups: [snapshot.storage.k8s.io]
     resources: [volumesnapshots]
-    verbs: [get, list]
+    verbs: [get, list, watch, update, patch]
   - apiGroups: [snapshot.storage.k8s.io]
     resources: [volumesnapshotcontents]
+    verbs: [get, list, watch, update, patch]
+  # snapshotter
+  - apiGroups: [snapshot.storage.k8s.io]
+    resources: [volumesnapshotclasses]
+    verbs: [get, list, watch]
+  - apiGroups: [snapshot.storage.k8s.io]
+    resources: [volumesnapshots/status]
+    verbs: [update, patch]
+  - apiGroups: [snapshot.storage.k8s.io]
+    resources: [volumesnapshotcontents/status]
+    verbs: [update, patch]
+  - apiGroups: [""]
+    resources: [secrets]
     verbs: [get, list]
   # resizer
   - apiGroups: [""]
@@ -84,6 +98,7 @@ rules:
   - apiGroups: [""]
     resources: [events]
     verbs: [get, list, watch, create, update, patch]
+
 ---
 # Source: hcloud-csi/templates/controller/clusterrolebinding.yaml
 kind: ClusterRoleBinding
@@ -103,6 +118,7 @@ subjects:
   - kind: ServiceAccount
     name: hcloud-csi-controller
     namespace: "kube-system"
+
 ---
 # Source: hcloud-csi/templates/node/daemonset.yaml
 apiVersion: apps/v1
@@ -232,6 +248,7 @@ spec:
           hostPath:
             path: /dev
             type: Directory
+
 ---
 # Source: hcloud-csi/templates/controller/deployment.yaml
 apiVersion: apps/v1
@@ -354,6 +371,18 @@ spec:
           - name: socket-dir
             mountPath: /run/csi
 
+        - name: csi-snapshotter
+          image: registry.k8s.io/sig-storage/csi-snapshotter:v8.6.0
+          imagePullPolicy: IfNotPresent
+          resources:
+            limits: {}
+            requests: {}
+          args:
+            - --csi-address=/run/csi/socket
+          volumeMounts:
+          - name: socket-dir
+            mountPath: /run/csi
+
         - name: liveness-probe
           image: registry.k8s.io/sig-storage/livenessprobe:v2.18.0
           imagePullPolicy: IfNotPresent
@@ -367,6 +396,7 @@ spec:
       volumes:
         - name: socket-dir
           emptyDir: {}
+
 ---
 # Source: hcloud-csi/templates/core/csidriver.yaml
 apiVersion: storage.k8s.io/v1

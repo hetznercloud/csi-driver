@@ -4,6 +4,7 @@ import (
 	"context"
 	"errors"
 	"log/slog"
+	"strconv"
 
 	"github.com/hetznercloud/csi-driver/internal/csi"
 )
@@ -88,10 +89,62 @@ func (s *IdempotentService) Create(ctx context.Context, opts CreateOpts) (*csi.V
 			)
 			return nil, ErrVolumeAlreadyExists
 		}
+		expectedSnapshotID := ""
+		if opts.Snapshot != nil {
+			expectedSnapshotID = strconv.FormatInt(opts.Snapshot.ID, 10)
+		}
+		if existingVolume.Labels[SnapshotIDLabel] != expectedSnapshotID {
+			s.logger.Info(
+				"existing volume has a different content source",
+				"name", opts.Name,
+				"snapshot-id", expectedSnapshotID,
+				"actual-snapshot-id", existingVolume.Labels[SnapshotIDLabel],
+			)
+			return nil, ErrVolumeAlreadyExists
+		}
 		return existingVolume, nil
 	}
 
 	return nil, err
+}
+
+func (s *IdempotentService) CreateSnapshot(ctx context.Context, opts CreateSnapshotOpts) (*csi.Snapshot, error) {
+	snapshot, err := s.volumeService.CreateSnapshot(ctx, opts)
+	if err == nil {
+		return snapshot, nil
+	}
+	if !errors.Is(err, ErrSnapshotAlreadyExists) {
+		return nil, err
+	}
+
+	existing, getErr := s.volumeService.GetSnapshotByName(ctx, opts.Name)
+	if getErr != nil {
+		return nil, getErr
+	}
+	if existing == nil || existing.SourceVolumeID != opts.VolumeID {
+		return nil, ErrSnapshotAlreadyExists
+	}
+	return existing, nil
+}
+
+func (s *IdempotentService) GetSnapshotByID(ctx context.Context, id int64) (*csi.Snapshot, error) {
+	return s.volumeService.GetSnapshotByID(ctx, id)
+}
+
+func (s *IdempotentService) GetSnapshotByName(ctx context.Context, name string) (*csi.Snapshot, error) {
+	return s.volumeService.GetSnapshotByName(ctx, name)
+}
+
+func (s *IdempotentService) DeleteSnapshot(ctx context.Context, snapshot *csi.Snapshot) error {
+	err := s.volumeService.DeleteSnapshot(ctx, snapshot)
+	if errors.Is(err, ErrSnapshotNotFound) {
+		return nil
+	}
+	return err
+}
+
+func (s *IdempotentService) AllSnapshots(ctx context.Context) ([]*csi.Snapshot, error) {
+	return s.volumeService.AllSnapshots(ctx)
 }
 
 func (s *IdempotentService) All(ctx context.Context) ([]*csi.Volume, error) {

@@ -13,6 +13,7 @@ func toDomainVolume(hcloudVolume *hcloud.Volume) *csi.Volume {
 		Location:    hcloudVolume.Location.Name,
 		LinuxDevice: hcloudVolume.LinuxDevice,
 		Server:      toDomainServer(hcloudVolume.Server),
+		Labels:      hcloudVolume.Labels,
 	}
 }
 

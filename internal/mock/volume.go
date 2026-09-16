@@ -9,15 +9,20 @@ import (
 )
 
 type VolumeService struct {
-	CreateFunc        func(ctx context.Context, opts volumes.CreateOpts) (*csi.Volume, error)
-	GetServerByIDFunc func(ctx context.Context, id int) (*hcloud.Server, error)
-	AllFunc           func(ctx context.Context) ([]*csi.Volume, error)
-	GetByIDFunc       func(ctx context.Context, id int64) (*csi.Volume, error)
-	GetByNameFunc     func(ctx context.Context, name string) (*csi.Volume, error)
-	DeleteFunc        func(ctx context.Context, volume *csi.Volume) error
-	AttachFunc        func(ctx context.Context, volume *csi.Volume, server *csi.Server) error
-	DetachFunc        func(ctx context.Context, volume *csi.Volume, server *csi.Server) error
-	ResizeFunc        func(ctx context.Context, volume *csi.Volume, size int) error
+	CreateFunc            func(ctx context.Context, opts volumes.CreateOpts) (*csi.Volume, error)
+	GetServerByIDFunc     func(ctx context.Context, id int) (*hcloud.Server, error)
+	AllFunc               func(ctx context.Context) ([]*csi.Volume, error)
+	GetByIDFunc           func(ctx context.Context, id int64) (*csi.Volume, error)
+	GetByNameFunc         func(ctx context.Context, name string) (*csi.Volume, error)
+	DeleteFunc            func(ctx context.Context, volume *csi.Volume) error
+	AttachFunc            func(ctx context.Context, volume *csi.Volume, server *csi.Server) error
+	DetachFunc            func(ctx context.Context, volume *csi.Volume, server *csi.Server) error
+	ResizeFunc            func(ctx context.Context, volume *csi.Volume, size int) error
+	CreateSnapshotFunc    func(ctx context.Context, opts volumes.CreateSnapshotOpts) (*csi.Snapshot, error)
+	GetSnapshotByIDFunc   func(ctx context.Context, id int64) (*csi.Snapshot, error)
+	GetSnapshotByNameFunc func(ctx context.Context, name string) (*csi.Snapshot, error)
+	DeleteSnapshotFunc    func(ctx context.Context, snapshot *csi.Snapshot) error
+	AllSnapshotsFunc      func(ctx context.Context) ([]*csi.Snapshot, error)
 }
 
 func (s *VolumeService) All(ctx context.Context) ([]*csi.Volume, error) {
@@ -74,6 +79,41 @@ func (s *VolumeService) Resize(ctx context.Context, volume *csi.Volume, size int
 		panic("not implemented")
 	}
 	return s.ResizeFunc(ctx, volume, size)
+}
+
+func (s *VolumeService) CreateSnapshot(ctx context.Context, opts volumes.CreateSnapshotOpts) (*csi.Snapshot, error) {
+	if s.CreateSnapshotFunc == nil {
+		panic("not implemented")
+	}
+	return s.CreateSnapshotFunc(ctx, opts)
+}
+
+func (s *VolumeService) GetSnapshotByID(ctx context.Context, id int64) (*csi.Snapshot, error) {
+	if s.GetSnapshotByIDFunc == nil {
+		panic("not implemented")
+	}
+	return s.GetSnapshotByIDFunc(ctx, id)
+}
+
+func (s *VolumeService) GetSnapshotByName(ctx context.Context, name string) (*csi.Snapshot, error) {
+	if s.GetSnapshotByNameFunc == nil {
+		panic("not implemented")
+	}
+	return s.GetSnapshotByNameFunc(ctx, name)
+}
+
+func (s *VolumeService) DeleteSnapshot(ctx context.Context, snapshot *csi.Snapshot) error {
+	if s.DeleteSnapshotFunc == nil {
+		panic("not implemented")
+	}
+	return s.DeleteSnapshotFunc(ctx, snapshot)
+}
+
+func (s *VolumeService) AllSnapshots(ctx context.Context) ([]*csi.Snapshot, error) {
+	if s.AllSnapshotsFunc == nil {
+		panic("not implemented")
+	}
+	return s.AllSnapshotsFunc(ctx)
 }
 
 type VolumeMountService struct {

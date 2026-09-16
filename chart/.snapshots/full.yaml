@@ -20,6 +20,7 @@ spec:
       app.kubernetes.io/name: hcloud-csi
       app.kubernetes.io/instance: hcloud-csi
       app.kubernetes.io/component: controller
+
 ---
 # Source: hcloud-csi/templates/controller/serviceaccount.yaml
 apiVersion: v1
@@ -37,6 +38,7 @@ metadata:
     common-annotation: common-annotation
     service-account-annotation: service-account-annotation
 automountServiceAccountToken: false
+
 ---
 # Source: hcloud-csi/templates/core/storageclass.yaml
 kind: StorageClass
@@ -102,9 +104,22 @@ rules:
     verbs: [list, watch, create, update, patch]
   - apiGroups: [snapshot.storage.k8s.io]
     resources: [volumesnapshots]
-    verbs: [get, list]
+    verbs: [get, list, watch, update, patch]
   - apiGroups: [snapshot.storage.k8s.io]
     resources: [volumesnapshotcontents]
+    verbs: [get, list, watch, update, patch]
+  # snapshotter
+  - apiGroups: [snapshot.storage.k8s.io]
+    resources: [volumesnapshotclasses]
+    verbs: [get, list, watch]
+  - apiGroups: [snapshot.storage.k8s.io]
+    resources: [volumesnapshots/status]
+    verbs: [update, patch]
+  - apiGroups: [snapshot.storage.k8s.io]
+    resources: [volumesnapshotcontents/status]
+    verbs: [update, patch]
+  - apiGroups: [""]
+    resources: [secrets]
     verbs: [get, list]
   # resizer
   - apiGroups: [""]
@@ -124,6 +139,7 @@ rules:
     verbs:
     - get
     - list
+
 ---
 # Source: hcloud-csi/templates/controller/clusterrolebinding.yaml
 kind: ClusterRoleBinding
@@ -146,6 +162,7 @@ subjects:
   - kind: ServiceAccount
     name: fullname-override-controller
     namespace: "namespace-override"
+
 ---
 # Source: hcloud-csi/templates/controller/service.yaml
 apiVersion: v1
@@ -170,6 +187,7 @@ spec:
     app.kubernetes.io/name: hcloud-csi
     app.kubernetes.io/instance: hcloud-csi
     app.kubernetes.io/component: controller
+
 ---
 # Source: hcloud-csi/templates/node/service.yaml
 apiVersion: v1
@@ -194,6 +212,7 @@ spec:
     app.kubernetes.io/name: hcloud-csi
     app.kubernetes.io/instance: hcloud-csi
     app.kubernetes.io/component: node
+
 ---
 # Source: hcloud-csi/templates/node/daemonset.yaml
 apiVersion: apps/v1
@@ -397,6 +416,7 @@ spec:
             type: Directory
         - emptyDir: {}
           name: extra-volume
+
 ---
 # Source: hcloud-csi/templates/controller/deployment.yaml
 apiVersion: apps/v1
@@ -623,6 +643,20 @@ spec:
           - name: socket-dir
             mountPath: /run/csi
 
+        - name: csi-snapshotter
+          image: registry.k8s.io/sig-storage/csi-snapshotter:v8.6.0
+          imagePullPolicy: IfNotPresent
+          resources:
+            limits: {}
+            requests: {}
+          args:
+            - --csi-address=/run/csi/socket
+            - --leader-election
+            - --leader-election-namespace=namespace-override
+          volumeMounts:
+          - name: socket-dir
+            mountPath: /run/csi
+
         - name: liveness-probe
           image: registry.k8s.io/sig-storage/livenessprobe:v2.18.0
           imagePullPolicy: Always
@@ -648,6 +682,7 @@ spec:
           emptyDir: {}
         - emptyDir: {}
           name: extra-volume
+
 ---
 # Source: hcloud-csi/templates/core/csidriver.yaml
 apiVersion: storage.k8s.io/v1
@@ -661,6 +696,7 @@ spec:
   seLinuxMount: true
   volumeLifecycleModes:
   - Persistent
+
 ---
 # Source: hcloud-csi/templates/controller/servicemonitor.yaml
 apiVersion: monitoring.coreos.com/v1
@@ -702,6 +738,7 @@ spec:
   namespaceSelector:
     matchNames:
     - "namespace-override"
+
 ---
 # Source: hcloud-csi/templates/node/servicemonitor.yaml
 apiVersion: monitoring.coreos.com/v1

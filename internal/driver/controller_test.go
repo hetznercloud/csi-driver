@@ -5,6 +5,7 @@ import (
 	"io"
 	"log/slog"
 	"testing"
+	"time"
 
 	proto "github.com/container-storage-interface/spec/lib/go/csi"
 	"google.golang.org/grpc/codes"
@@ -928,8 +929,107 @@ func TestControllerServiceControllerGetCapabilities(t *testing.T) {
 		t.Fatal(err)
 	}
 
-	if len(resp.GetCapabilities()) != 5 {
+	if len(resp.GetCapabilities()) != 7 {
 		t.Fatalf("unexpected number of capabilities: %d", len(resp.GetCapabilities()))
+	}
+}
+
+func TestControllerServiceCreateSnapshot(t *testing.T) {
+	env := newControllerServiceTestEnv()
+	created := time.Date(2026, 9, 16, 5, 0, 0, 0, time.UTC)
+	env.volumeService.CreateSnapshotFunc = func(_ context.Context, opts volumes.CreateSnapshotOpts) (*csi.Snapshot, error) {
+		if opts.Name != "backup" || opts.VolumeID != 42 {
+			t.Fatalf("unexpected create options: %+v", opts)
+		}
+		if opts.Labels[labelKeyManagedBy] != "csi-driver" || opts.Labels["clusterName"] != "myCluster" {
+			t.Fatalf("unexpected labels: %v", opts.Labels)
+		}
+		return &csi.Snapshot{ID: 7, Name: opts.Name, SourceVolumeID: opts.VolumeID, Size: 10, Created: created, Ready: true}, nil
+	}
+
+	resp, err := env.service.CreateSnapshot(env.ctx, &proto.CreateSnapshotRequest{Name: "backup", SourceVolumeId: "42"})
+	if err != nil {
+		t.Fatal(err)
+	}
+	if resp.GetSnapshot().GetSnapshotId() != "7" || resp.GetSnapshot().GetSourceVolumeId() != "42" {
+		t.Fatalf("unexpected snapshot response: %+v", resp.GetSnapshot())
+	}
+	if resp.GetSnapshot().GetSizeBytes() != 10*GB || !resp.GetSnapshot().GetReadyToUse() {
+		t.Fatalf("unexpected snapshot state: %+v", resp.GetSnapshot())
+	}
+	if !resp.GetSnapshot().GetCreationTime().AsTime().Equal(created) {
+		t.Fatalf("unexpected creation time: %v", resp.GetSnapshot().GetCreationTime())
+	}
+}
+
+func TestControllerServiceDeleteSnapshot(t *testing.T) {
+	env := newControllerServiceTestEnv()
+	env.volumeService.DeleteSnapshotFunc = func(_ context.Context, snapshot *csi.Snapshot) error {
+		if snapshot.ID != 7 {
+			t.Fatalf("unexpected snapshot ID: %d", snapshot.ID)
+		}
+		return nil
+	}
+	if _, err := env.service.DeleteSnapshot(env.ctx, &proto.DeleteSnapshotRequest{SnapshotId: "7"}); err != nil {
+		t.Fatal(err)
+	}
+}
+
+func TestControllerServiceListSnapshots(t *testing.T) {
+	env := newControllerServiceTestEnv()
+	env.volumeService.AllSnapshotsFunc = func(context.Context) ([]*csi.Snapshot, error) {
+		return []*csi.Snapshot{
+			{ID: 1, SourceVolumeID: 42, Size: 10, Ready: true},
+			{ID: 2, SourceVolumeID: 42, Size: 20, Ready: true},
+			{ID: 3, SourceVolumeID: 99, Size: 30, Ready: true},
+		}, nil
+	}
+
+	first, err := env.service.ListSnapshots(env.ctx, &proto.ListSnapshotsRequest{SourceVolumeId: "42", MaxEntries: 1})
+	if err != nil {
+		t.Fatal(err)
+	}
+	if len(first.GetEntries()) != 1 || first.GetEntries()[0].GetSnapshot().GetSnapshotId() != "1" || first.GetNextToken() != "1" {
+		t.Fatalf("unexpected first page: %+v", first)
+	}
+	second, err := env.service.ListSnapshots(env.ctx, &proto.ListSnapshotsRequest{SourceVolumeId: "42", StartingToken: first.GetNextToken(), MaxEntries: 1})
+	if err != nil {
+		t.Fatal(err)
+	}
+	if len(second.GetEntries()) != 1 || second.GetEntries()[0].GetSnapshot().GetSnapshotId() != "2" || second.GetNextToken() != "" {
+		t.Fatalf("unexpected second page: %+v", second)
+	}
+}
+
+func TestControllerServiceCreateVolumeFromSnapshot(t *testing.T) {
+	env := newControllerServiceTestEnv()
+	env.volumeService.GetSnapshotByIDFunc = func(_ context.Context, id int64) (*csi.Snapshot, error) {
+		return &csi.Snapshot{ID: id, SourceVolumeID: 11, Size: 20, Location: "fsn1", Ready: true}, nil
+	}
+	env.volumeService.CreateFunc = func(_ context.Context, opts volumes.CreateOpts) (*csi.Volume, error) {
+		if opts.Snapshot == nil || opts.Snapshot.ID != 7 || opts.MinSize != 20 || opts.Location != "fsn1" {
+			t.Fatalf("unexpected restore options: %+v", opts)
+		}
+		return &csi.Volume{ID: 43, Name: opts.Name, Size: opts.MinSize, Location: opts.Location}, nil
+	}
+
+	req := &proto.CreateVolumeRequest{
+		Name:          "restored",
+		CapacityRange: &proto.CapacityRange{LimitBytes: 25 * GB},
+		VolumeCapabilities: []*proto.VolumeCapability{{
+			AccessType: &proto.VolumeCapability_Mount{Mount: &proto.VolumeCapability_MountVolume{}},
+			AccessMode: &proto.VolumeCapability_AccessMode{Mode: proto.VolumeCapability_AccessMode_SINGLE_NODE_WRITER},
+		}},
+		VolumeContentSource: &proto.VolumeContentSource{Type: &proto.VolumeContentSource_Snapshot{
+			Snapshot: &proto.VolumeContentSource_SnapshotSource{SnapshotId: "7"},
+		}},
+	}
+	resp, err := env.service.CreateVolume(env.ctx, req)
+	if err != nil {
+		t.Fatal(err)
+	}
+	if resp.GetVolume().GetContentSource().GetSnapshot().GetSnapshotId() != "7" {
+		t.Fatalf("snapshot source not preserved: %+v", resp.GetVolume())
 	}
 }
 
