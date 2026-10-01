@@ -62,15 +62,6 @@ func (s *NodeService) NodePublishVolume(ctx context.Context, req *proto.NodePubl
 		return nil, status.Error(codes.InvalidArgument, "missing target path")
 	}
 
-	// The device path the controller published is not used to find the device: it names
-	// a by-id symlink, which udev maintains asynchronously, so it can still point at the
-	// device of another volume. The device is looked up by the serial the kernel reports
-	// for it instead. The publish context entry is still required, as its presence is how
-	// the CO signals that the volume was attached to this node.
-	if req.GetPublishContext()["devicePath"] == "" {
-		return nil, status.Error(codes.InvalidArgument, "missing device path")
-	}
-
 	var opts volumes.MountOpts
 	switch {
 	case req.GetVolumeCapability().GetBlock() != nil:
@@ -105,7 +96,7 @@ func (s *NodeService) NodeUnpublishVolume(ctx context.Context, req *proto.NodeUn
 		return nil, status.Error(codes.InvalidArgument, "missing target path")
 	}
 
-	if err := s.volumeMountService.Unpublish(ctx, req.GetTargetPath()); err != nil {
+	if err := s.volumeMountService.Unpublish(ctx, req.GetTargetPath(), req.GetVolumeId()); err != nil {
 		return nil, status.Error(codes.Internal, fmt.Sprintf("failed to unpublish volume: %s", err))
 	}
 
@@ -213,7 +204,7 @@ func (s *NodeService) NodeExpandVolume(ctx context.Context, req *proto.NodeExpan
 	}
 
 	if req.GetVolumeCapability().GetBlock() == nil {
-		if err := s.volumeResizeService.Resize(ctx, req.GetVolumePath()); err != nil {
+		if err := s.volumeResizeService.Resize(ctx, req.GetVolumePath(), req.GetVolumeId()); err != nil {
 			return nil, status.Error(codes.Internal, fmt.Sprintf("failed to resize volume: %s", err))
 		}
 	}

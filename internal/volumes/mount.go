@@ -36,10 +36,8 @@ type MountOpts struct {
 
 // MountService mounts volumes.
 type MountService interface {
-	// Publish mounts the volume with the passed ID at targetPath. The device holding the
-	// volume is looked up on the node, see DeviceForVolume.
 	Publish(ctx context.Context, targetPath string, volumeID string, opts MountOpts) error
-	Unpublish(ctx context.Context, targetPath string) error
+	Unpublish(ctx context.Context, targetPath string, volumeID string) error
 	PathExists(path string) (bool, error)
 }
 
@@ -62,8 +60,8 @@ func NewLinuxMountService(logger *slog.Logger) *LinuxMountService {
 }
 
 func (s *LinuxMountService) Publish(ctx context.Context, targetPath string, volumeID string, opts MountOpts) error {
-	// Find the device holding the volume, and wait for it in case the attachment has not
-	// reached the node yet.
+	// Ensure device is ready via stat syscall. Otherwise, `blkid` might return
+	// exit code 2, which is the same exit code as for an unformatted device.
 	devicePath, err := s.waitDeviceReady(ctx, volumeID)
 	if err != nil {
 		return fmt.Errorf("device of volume %s not ready: %w", volumeID, err)
@@ -118,7 +116,7 @@ func (s *LinuxMountService) Publish(ctx context.Context, targetPath string, volu
 		if err != nil {
 			return fmt.Errorf("unable to detect existing disk format of %s: %w", devicePath, err)
 		}
-		luksDeviceName := GenerateLUKSDeviceName(VolumeDevicePath(volumeID))
+		luksDeviceName := "scsi-0HC_Volume_" + volumeID
 		if existingFSType == "" {
 			if opts.Readonly {
 				return fmt.Errorf("cannot publish unformatted disk %s in read-only mode", devicePath)
@@ -176,50 +174,37 @@ func (s *LinuxMountService) waitDeviceReady(ctx context.Context, volumeID string
 	})
 
 	var err error
-	for attempt := range maxRetries {
-		logger := s.logger.With(
-			"volume-id", volumeID,
-			"attempt", attempt+1,
-			"max-attempts", maxRetries,
-		)
-
+	for i := range maxRetries {
 		var devicePath string
-		switch devicePath, err = DeviceForVolume(volumeID); {
-		case err == nil:
+		devicePath, err = deviceForVolume(volumeID)
+		if err == nil {
 			var stat unix.Stat_t
 			err = unix.Stat(devicePath, &stat)
 			if err == nil {
-				logger.Debug("found device of volume", "device-path", devicePath)
 				return devicePath, nil
 			}
-			if !errors.Is(err, unix.ENOENT) {
-				return "", err
-			}
-
-			logger.Debug("device node does not exist yet, waiting for devtmpfs", "device-path", devicePath)
-		case errors.Is(err, errDeviceNotFound):
-			logger.Debug("no device reports the volume yet, waiting for the volume to attach")
-		default:
-			// Anything else, an unreadable sysfs or two devices claiming the volume, is
-			// not going to resolve itself.
+		}
+		if !errors.Is(err, errDeviceNotFound) && !errors.Is(err, unix.ENOENT) {
 			return "", err
 		}
 
-		if attempt == maxRetries-1 {
+		s.logger.Debug("device not ready yet", "volume-id", volumeID, "err", err)
+
+		if i == maxRetries-1 {
 			break
 		}
 
 		select {
 		case <-ctx.Done():
-			return "", fmt.Errorf("waiting for the device of volume %s: %w", volumeID, ctx.Err())
-		case <-time.After(backoffFunc(attempt)):
+			return "", fmt.Errorf("%w: %w", ctx.Err(), err)
+		case <-time.After(backoffFunc(i)):
 		}
 	}
 
 	return "", err
 }
 
-func (s *LinuxMountService) Unpublish(ctx context.Context, targetPath string) error {
+func (s *LinuxMountService) Unpublish(ctx context.Context, targetPath string, volumeID string) error {
 	devicePath, _, err := mount.GetDeviceNameFromMount(mount.New(""), targetPath)
 	if err != nil {
 		return fmt.Errorf("failed to determine mount path for %s: %w", targetPath, err)
@@ -227,6 +212,7 @@ func (s *LinuxMountService) Unpublish(ctx context.Context, targetPath string) er
 
 	s.logger.Info(
 		"unpublishing volume",
+		"volume-id", volumeID,
 		"target-path", targetPath,
 		"device-path", devicePath,
 	)

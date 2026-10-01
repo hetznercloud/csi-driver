@@ -133,7 +133,7 @@ func TestVolumePublishUnpublish(t *testing.T) {
 			targetPath = path.Join(targetPath, "target-path")
 			publishErr := mountService.Publish(ctx, targetPath, volumeID, test.mountOpts)
 			defer func() {
-				err := mountService.Unpublish(ctx, targetPath)
+				err := mountService.Unpublish(ctx, targetPath, volumeID)
 				if err != nil {
 					t.Fatal(err)
 				} else {
@@ -195,7 +195,7 @@ func TestVolumePublishUnpublish(t *testing.T) {
 					t.Fatalf("expected device to have fs type '%s', but device is formatted with '%s'", expectedFSType, fsType)
 				}
 
-				if err := mountService.Unpublish(ctx, targetPath); err != nil {
+				if err := mountService.Unpublish(ctx, targetPath, volumeID); err != nil {
 					t.Fatal(err)
 				}
 			}
@@ -268,14 +268,14 @@ func TestVolumeResize(t *testing.T) {
 			}); err != nil {
 				t.Fatal(err)
 			}
-			defer mountService.Unpublish(ctx, targetPath)
+			defer mountService.Unpublish(ctx, targetPath, volumeID)
 
 			initialSize, err := getFakeDeviceSizeKilobytes(targetPath)
 			if err != nil {
 				t.Fatal(err)
 			}
 
-			if err := resizeService.Resize(ctx, targetPath); err != nil {
+			if err := resizeService.Resize(ctx, targetPath, volumeID); err != nil {
 				t.Fatal(err)
 			}
 
@@ -288,7 +288,7 @@ func TestVolumeResize(t *testing.T) {
 				t.Fatal(fmt.Errorf("expected final size to be roughly double of initial size (final size %d KB, initial size %d KB)", finalSize, initialSize))
 			}
 
-			if err := mountService.Unpublish(ctx, targetPath); err != nil {
+			if err := mountService.Unpublish(ctx, targetPath, volumeID); err != nil {
 				t.Fatal(err)
 			}
 		})

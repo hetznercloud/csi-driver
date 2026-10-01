@@ -216,9 +216,12 @@ func TestNodeServiceNodePublishVolumeInputErrors(t *testing.T) {
 func TestNodeServiceNodeUnpublishVolume(t *testing.T) {
 	env := newNodeServerTestEnv()
 
-	env.volumeMountService.UnpublishFunc = func(ctx context.Context, targetPath string) error {
+	env.volumeMountService.UnpublishFunc = func(ctx context.Context, targetPath string, volumeID string) error {
 		if targetPath != "target" {
 			t.Errorf("unexpected target path passed to volume service: %s", targetPath)
+		}
+		if volumeID != "1" {
+			t.Errorf("unexpected volume id passed to volume service: %s", volumeID)
 		}
 		return nil
 	}
@@ -235,7 +238,7 @@ func TestNodeServiceNodeUnpublishVolume(t *testing.T) {
 func TestNodeServiceNodeUnpublishUnpublishError(t *testing.T) {
 	env := newNodeServerTestEnv()
 
-	env.volumeMountService.UnpublishFunc = func(ctx context.Context, targetPath string) error {
+	env.volumeMountService.UnpublishFunc = func(ctx context.Context, targetPath string, volumeID string) error {
 		return io.EOF
 	}
 
@@ -336,9 +339,12 @@ func TestNodeServiceNodeExpandVolume(t *testing.T) {
 		}
 		return true, nil
 	}
-	env.volumeResizeService.ResizeFunc = func(ctx context.Context, volumePath string) error {
+	env.volumeResizeService.ResizeFunc = func(ctx context.Context, volumePath string, volumeID string) error {
 		if volumePath != "volumePath" {
 			t.Errorf("unexpected volume path passed to volume service: %s", volumePath)
+		}
+		if volumeID != "1" {
+			t.Errorf("unexpected volume id passed to volume service: %s", volumeID)
 		}
 		return nil
 	}
@@ -361,7 +367,7 @@ func TestNodeServiceNodeExpandBlockVolume(t *testing.T) {
 		}
 		return true, nil
 	}
-	env.volumeResizeService.ResizeFunc = func(ctx context.Context, volumePath string) error {
+	env.volumeResizeService.ResizeFunc = func(ctx context.Context, volumePath string, volumeID string) error {
 		t.Errorf("This function should never be called.")
 		return nil
 	}
