@@ -14,6 +14,7 @@ var (
 	sysClassBlockPath = "/sys/class/block"
 )
 
+// Integrations test helper
 func SetDeviceIdentityPaths(dev, sysClassBlock string) {
 	devPath = dev
 	sysClassBlockPath = sysClassBlock
