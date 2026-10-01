@@ -16,6 +16,7 @@ import (
 	"syscall"
 	"time"
 
+	"github.com/kubernetes-csi/csi-lib-utils/protosanitizer"
 	"github.com/prometheus/client_golang/prometheus"
 	"google.golang.org/grpc"
 
@@ -306,20 +307,30 @@ func GetLocationFromMetadata(ctx context.Context, logger *slog.Logger, metadataC
 }
 
 func CreateGRPCServer(logger *slog.Logger, metricsInterceptor grpc.UnaryServerInterceptor) *grpc.Server {
-	requestLogger := func(ctx context.Context, req any, info *grpc.UnaryServerInfo, handler grpc.UnaryHandler) (any, error) {
+	return grpc.NewServer(
+		grpc.ChainUnaryInterceptor(
+			requestLogger(logger),
+			metricsInterceptor,
+		),
+	)
+}
+
+func requestLogger(logger *slog.Logger) grpc.UnaryServerInterceptor {
+	return func(ctx context.Context, req any, info *grpc.UnaryServerInfo, handler grpc.UnaryHandler) (any, error) {
 		isProbe := info.FullMethod == "/csi.v1.Identity/Probe"
 
 		if !isProbe {
 			logger.Debug(
 				"handling request",
 				"method", info.FullMethod,
-				"req", req,
+				"req", protosanitizer.StripSecrets(req),
 			)
 		}
 		resp, err := handler(ctx, req)
 		if err != nil {
 			logger.Error(
 				"handler failed",
+				"method", info.FullMethod,
 				"err", err,
 			)
 		} else if !isProbe {
@@ -327,11 +338,4 @@ func CreateGRPCServer(logger *slog.Logger, metricsInterceptor grpc.UnaryServerIn
 		}
 		return resp, err
 	}
-
-	return grpc.NewServer(
-		grpc.ChainUnaryInterceptor(
-			requestLogger,
-			metricsInterceptor,
-		),
-	)
 }
