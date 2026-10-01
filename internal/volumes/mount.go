@@ -36,8 +36,8 @@ type MountOpts struct {
 
 // MountService mounts volumes.
 type MountService interface {
-	Publish(ctx context.Context, targetPath string, devicePath string, opts MountOpts) error
-	Unpublish(ctx context.Context, targetPath string) error
+	Publish(ctx context.Context, targetPath string, volumeID string, opts MountOpts) error
+	Unpublish(ctx context.Context, targetPath string, volumeID string) error
 	PathExists(path string) (bool, error)
 }
 
@@ -59,11 +59,12 @@ func NewLinuxMountService(logger *slog.Logger) *LinuxMountService {
 	}
 }
 
-func (s *LinuxMountService) Publish(ctx context.Context, targetPath string, devicePath string, opts MountOpts) error {
+func (s *LinuxMountService) Publish(ctx context.Context, targetPath string, volumeID string, opts MountOpts) error {
 	// Ensure device is ready via stat syscall. Otherwise, `blkid` might return
 	// exit code 2, which is the same exit code as for an unformatted device.
-	if err := s.waitDeviceReady(ctx, devicePath); err != nil {
-		return fmt.Errorf("device %q not ready: %w", devicePath, err)
+	devicePath, err := s.waitDeviceReady(ctx, volumeID)
+	if err != nil {
+		return fmt.Errorf("device of volume %s not ready: %w", volumeID, err)
 	}
 
 	isMountPoint, err := s.mounter.IsMountPoint(targetPath)
@@ -115,7 +116,7 @@ func (s *LinuxMountService) Publish(ctx context.Context, targetPath string, devi
 		if err != nil {
 			return fmt.Errorf("unable to detect existing disk format of %s: %w", devicePath, err)
 		}
-		luksDeviceName := GenerateLUKSDeviceName(devicePath)
+		luksDeviceName := "scsi-0HC_Volume_" + volumeID
 		if existingFSType == "" {
 			if opts.Readonly {
 				return fmt.Errorf("cannot publish unformatted disk %s in read-only mode", devicePath)
@@ -135,6 +136,7 @@ func (s *LinuxMountService) Publish(ctx context.Context, targetPath string, devi
 
 	s.logger.Info(
 		"publishing volume",
+		"volume-id", volumeID,
 		"target-path", targetPath,
 		"device-path", devicePath,
 		"fs-type", opts.FSType,
@@ -163,9 +165,7 @@ func (s *LinuxMountService) Publish(ctx context.Context, targetPath string, devi
 	return s.mounter.FormatAndMountSensitiveWithFormatOptions(devicePath, targetPath, opts.FSType, mountOptions, opts.Additional, formatOptions)
 }
 
-// waitDeviceReady ensures the device at devicePath exists. This is done by ensuring a stat
-// syscall returns no error.
-func (s *LinuxMountService) waitDeviceReady(ctx context.Context, devicePath string) error {
+func (s *LinuxMountService) waitDeviceReady(ctx context.Context, volumeID string) (string, error) {
 	const maxRetries = 7
 	backoffFunc := hcloud.ExponentialBackoffWithOpts(hcloud.ExponentialBackoffOpts{
 		Base:       time.Millisecond * 50,
@@ -175,16 +175,20 @@ func (s *LinuxMountService) waitDeviceReady(ctx context.Context, devicePath stri
 
 	var err error
 	for i := range maxRetries {
-		var stat unix.Stat_t
-		err = unix.Stat(devicePath, &stat)
+		var devicePath string
+		devicePath, err = deviceForVolume(volumeID)
 		if err == nil {
-			return nil
+			var stat unix.Stat_t
+			err = unix.Stat(devicePath, &stat)
+			if err == nil {
+				return devicePath, nil
+			}
 		}
-		if !errors.Is(err, unix.ENOENT) {
-			return err
+		if !errors.Is(err, errDeviceNotFound) && !errors.Is(err, unix.ENOENT) {
+			return "", err
 		}
 
-		s.logger.Debug("device not ready yet: stat syscall returned ENOENT", "devicePath", devicePath)
+		s.logger.Debug("device not ready yet", "volume-id", volumeID, "err", err)
 
 		if i == maxRetries-1 {
 			break
@@ -192,15 +196,15 @@ func (s *LinuxMountService) waitDeviceReady(ctx context.Context, devicePath stri
 
 		select {
 		case <-ctx.Done():
-			return fmt.Errorf("waiting for device %s: %w", devicePath, ctx.Err())
+			return "", fmt.Errorf("%w: %w", ctx.Err(), err)
 		case <-time.After(backoffFunc(i)):
 		}
 	}
 
-	return err
+	return "", err
 }
 
-func (s *LinuxMountService) Unpublish(ctx context.Context, targetPath string) error {
+func (s *LinuxMountService) Unpublish(ctx context.Context, targetPath string, volumeID string) error {
 	devicePath, _, err := mount.GetDeviceNameFromMount(mount.New(""), targetPath)
 	if err != nil {
 		return fmt.Errorf("failed to determine mount path for %s: %w", targetPath, err)
@@ -208,6 +212,7 @@ func (s *LinuxMountService) Unpublish(ctx context.Context, targetPath string) er
 
 	s.logger.Info(
 		"unpublishing volume",
+		"volume-id", volumeID,
 		"target-path", targetPath,
 		"device-path", devicePath,
 	)

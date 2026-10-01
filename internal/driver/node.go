@@ -62,11 +62,6 @@ func (s *NodeService) NodePublishVolume(ctx context.Context, req *proto.NodePubl
 		return nil, status.Error(codes.InvalidArgument, "missing target path")
 	}
 
-	devicePath := req.GetPublishContext()["devicePath"]
-	if devicePath == "" {
-		return nil, status.Error(codes.InvalidArgument, "missing device path")
-	}
-
 	var opts volumes.MountOpts
 	switch {
 	case req.GetVolumeCapability().GetBlock() != nil:
@@ -87,7 +82,7 @@ func (s *NodeService) NodePublishVolume(ctx context.Context, req *proto.NodePubl
 		return nil, status.Error(codes.InvalidArgument, "publish volume: unsupported volume capability")
 	}
 
-	if err := s.volumeMountService.Publish(ctx, req.GetTargetPath(), devicePath, opts); err != nil {
+	if err := s.volumeMountService.Publish(ctx, req.GetTargetPath(), req.GetVolumeId(), opts); err != nil {
 		return nil, status.Error(codes.Internal, fmt.Sprintf("failed to publish volume: %s", err))
 	}
 	return &proto.NodePublishVolumeResponse{}, nil
@@ -101,7 +96,7 @@ func (s *NodeService) NodeUnpublishVolume(ctx context.Context, req *proto.NodeUn
 		return nil, status.Error(codes.InvalidArgument, "missing target path")
 	}
 
-	if err := s.volumeMountService.Unpublish(ctx, req.GetTargetPath()); err != nil {
+	if err := s.volumeMountService.Unpublish(ctx, req.GetTargetPath(), req.GetVolumeId()); err != nil {
 		return nil, status.Error(codes.Internal, fmt.Sprintf("failed to unpublish volume: %s", err))
 	}
 
@@ -209,7 +204,7 @@ func (s *NodeService) NodeExpandVolume(ctx context.Context, req *proto.NodeExpan
 	}
 
 	if req.GetVolumeCapability().GetBlock() == nil {
-		if err := s.volumeResizeService.Resize(ctx, req.GetVolumePath()); err != nil {
+		if err := s.volumeResizeService.Resize(ctx, req.GetVolumePath(), req.GetVolumeId()); err != nil {
 			return nil, status.Error(codes.Internal, fmt.Sprintf("failed to resize volume: %s", err))
 		}
 	}

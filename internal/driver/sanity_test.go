@@ -202,7 +202,7 @@ func (s *sanityMountService) Publish(_ context.Context, _ string, _ string, _ vo
 	return nil
 }
 
-func (s *sanityMountService) Unpublish(_ context.Context, _ string) error {
+func (s *sanityMountService) Unpublish(_ context.Context, _ string, _ string) error {
 	return nil
 }
 
@@ -215,7 +215,7 @@ func (s *sanityMountService) PathExists(path string) (bool, error) {
 
 type sanityResizeService struct{}
 
-func (s *sanityResizeService) Resize(_ context.Context, volumePath string) error {
+func (s *sanityResizeService) Resize(_ context.Context, volumePath string, _ string) error {
 	if volumePath == "some/path" {
 		return errors.New("path not found")
 	}
