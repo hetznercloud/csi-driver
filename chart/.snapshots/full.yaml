@@ -567,7 +567,7 @@ spec:
             - mountPath: /tmp/extra-volume
               name: extra-volume
         - name: csi-attacher
-          image: registry.k8s.io/sig-storage/csi-attacher:v4.11.0
+          image: registry.k8s.io/sig-storage/csi-attacher:v4.13.0
           imagePullPolicy: Always
           resources:
             limits:
