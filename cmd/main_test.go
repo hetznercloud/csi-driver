@@ -50,6 +50,7 @@ func TestSetup(t *testing.T) {
 		metaClient := metadata.NewClient(metadata.WithEndpoint(metaServer.URL))
 
 		t.Setenv("CSI_ENDPOINT", fmt.Sprintf("unix:///%s/csi.sock", t.TempDir()))
+		t.Setenv("HCLOUD_TOKEN", "")
 
 		err := setup(logger, true, false, grpcServer, m, metaClient)
 		require.EqualError(t, err, "failed to initialize hcloud client: you need to provide an API token via the HCLOUD_TOKEN or HCLOUD_TOKEN_FILE env var")
