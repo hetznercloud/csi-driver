@@ -7,7 +7,7 @@ toolchain go1.26.8
 require (
 	github.com/container-storage-interface/spec v1.13.0
 	github.com/grpc-ecosystem/go-grpc-middleware/providers/prometheus v1.1.0
-	github.com/hashicorp/nomad/api v0.0.0-20260828175948-872d430669c5
+	github.com/hashicorp/nomad/api v0.0.0-20261005062230-f09f6df326b4
 	github.com/hetznercloud/hcloud-go/v2 v2.50.0
 	github.com/kubernetes-csi/csi-lib-utils v0.25.0
 	github.com/kubernetes-csi/csi-test/v5 v5.6.0
