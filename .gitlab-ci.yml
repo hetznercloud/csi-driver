@@ -2,7 +2,11 @@ include:
   - project: cloud/integrations/ci
     file:
       - default.yml
-      - workflows/feature-branches.yml
+  - project: cloud/integrations/ci
+    file: docs-sync.yml
+    inputs:
+      target-base-branch: "docs-integrations"
+      docs-source-dir: "${CI_PROJECT_DIR}/docs/kubernetes"
 
 variables:
   GOMODCACHE: $CI_PROJECT_DIR/.cache/go-mod
