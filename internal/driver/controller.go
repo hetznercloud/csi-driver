@@ -129,7 +129,7 @@ func (s *ControllerService) CreateVolume(ctx context.Context, req *proto.CreateV
 			// (e.g. a dash), which violates the label spec. Strip any
 			// leading non-alphanumeric characters.
 			truncated = strings.TrimLeftFunc(truncated, func(r rune) bool {
-				return !((r >= 'a' && r <= 'z') || (r >= 'A' && r <= 'Z') || (r >= '0' && r <= '9'))
+				return (r < 'a' || r > 'z') && (r < 'A' || r > 'Z') && (r < '0' || r > '9')
 			})
 			s.logger.Warn(
 				"volume label value truncated",
