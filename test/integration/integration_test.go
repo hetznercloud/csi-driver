@@ -71,6 +71,7 @@ func runTestInDockerImage(t *testing.T, privileged bool) bool { //nolint:unparam
 const deviceFixtureVolumeIDBase = 100000000
 
 var (
+	deviceFixtureByID          string
 	deviceFixtureSysClassBlock string
 	deviceFixtureVolumeIDs     atomic.Int64
 )
@@ -81,20 +82,22 @@ func setupDeviceFixtures() error {
 		return err
 	}
 
+	deviceFixtureByID = filepath.Join(root, "dev", "disk", "by-id")
 	deviceFixtureSysClassBlock = filepath.Join(root, "sys", "class", "block")
-	if err := os.MkdirAll(deviceFixtureSysClassBlock, 0o750); err != nil {
-		return err
+
+	for _, dir := range []string{deviceFixtureByID, deviceFixtureSysClassBlock} {
+		if err := os.MkdirAll(dir, 0o750); err != nil {
+			return err
+		}
 	}
 
-	// The fake devices are files at the root of the container filesystem, so that is
-	// where the driver has to look for the device the fixture sysfs reports.
-	volumes.SetDeviceIdentityPaths("/", deviceFixtureSysClassBlock)
+	volumes.SetSysClassBlockPath(deviceFixtureSysClassBlock)
 
 	return nil
 }
 
-func createFakeDevice(name string, megabytes int) (devicePath string, volumeID string, err error) {
-	devicePath = "/dev-" + name
+func createFakeDevice(name string, megabytes int) (byIDPath string, volumeID string, err error) {
+	devicePath := "/dev-" + name
 	if _, err := os.Create(devicePath); err != nil {
 		return "", "", err
 	}
@@ -107,7 +110,12 @@ func createFakeDevice(name string, megabytes int) (devicePath string, volumeID s
 		return "", "", err
 	}
 
-	return devicePath, volumeID, nil
+	byIDPath = filepath.Join(deviceFixtureByID, "scsi-0HC_Volume_"+volumeID)
+	if err := os.Symlink(devicePath, byIDPath); err != nil {
+		return "", "", err
+	}
+
+	return byIDPath, volumeID, nil
 }
 
 func reportFakeDeviceSerial(device string) (string, error) {

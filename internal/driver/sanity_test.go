@@ -198,11 +198,11 @@ func (s *sanityVolumeService) Detach(_ context.Context, _ *csi.Volume, _ *csi.Se
 
 type sanityMountService struct{}
 
-func (s *sanityMountService) Publish(_ context.Context, _ string, _ string, _ volumes.MountOpts) error {
+func (s *sanityMountService) Publish(_ context.Context, _ string, _ string, _ string, _ volumes.MountOpts) error {
 	return nil
 }
 
-func (s *sanityMountService) Unpublish(_ context.Context, _ string, _ string) error {
+func (s *sanityMountService) Unpublish(_ context.Context, _ string) error {
 	return nil
 }
 

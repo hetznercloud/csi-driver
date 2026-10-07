@@ -131,9 +131,9 @@ func TestVolumePublishUnpublish(t *testing.T) {
 			// Required as FS volumes require target dir, but block volumes require
 			// target file
 			targetPath = path.Join(targetPath, "target-path")
-			publishErr := mountService.Publish(ctx, targetPath, volumeID, test.mountOpts)
+			publishErr := mountService.Publish(ctx, targetPath, device, volumeID, test.mountOpts)
 			defer func() {
-				err := mountService.Unpublish(ctx, targetPath, volumeID)
+				err := mountService.Unpublish(ctx, targetPath)
 				if err != nil {
 					t.Fatal(err)
 				} else {
@@ -195,7 +195,7 @@ func TestVolumePublishUnpublish(t *testing.T) {
 					t.Fatalf("expected device to have fs type '%s', but device is formatted with '%s'", expectedFSType, fsType)
 				}
 
-				if err := mountService.Unpublish(ctx, targetPath, volumeID); err != nil {
+				if err := mountService.Unpublish(ctx, targetPath); err != nil {
 					t.Fatal(err)
 				}
 			}
@@ -263,12 +263,12 @@ func TestVolumeResize(t *testing.T) {
 				t.Fatal()
 			}
 
-			if err := mountService.Publish(ctx, targetPath, volumeID, volumes.MountOpts{
+			if err := mountService.Publish(ctx, targetPath, device, volumeID, volumes.MountOpts{
 				EncryptionPassphrase: test.passphrase,
 			}); err != nil {
 				t.Fatal(err)
 			}
-			defer mountService.Unpublish(ctx, targetPath, volumeID)
+			defer mountService.Unpublish(ctx, targetPath)
 
 			initialSize, err := getFakeDeviceSizeKilobytes(targetPath)
 			if err != nil {
@@ -288,7 +288,7 @@ func TestVolumeResize(t *testing.T) {
 				t.Fatal(fmt.Errorf("expected final size to be roughly double of initial size (final size %d KB, initial size %d KB)", finalSize, initialSize))
 			}
 
-			if err := mountService.Unpublish(ctx, targetPath, volumeID); err != nil {
+			if err := mountService.Unpublish(ctx, targetPath); err != nil {
 				t.Fatal(err)
 			}
 		})
