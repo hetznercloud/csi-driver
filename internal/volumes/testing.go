@@ -7,18 +7,18 @@ import (
 	"testing"
 )
 
-type fakeNode struct {
-	t        *testing.T
-	devRoot  string
-	byIDRoot string
-}
-
-func vpdPage(serial string) []byte {
+func VPDPage(serial string) []byte {
 	page := make([]byte, 4, 4+len(serial))
 	page[1] = 0x80
 	binary.BigEndian.PutUint16(page[2:4], uint16(len(serial))) //nolint:gosec // test serials fit the length field
 
 	return append(page, serial...)
+}
+
+type fakeNode struct {
+	t        *testing.T
+	devRoot  string
+	byIDRoot string
 }
 
 func newFakeNode(t *testing.T) *fakeNode {

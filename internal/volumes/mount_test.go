@@ -20,7 +20,7 @@ func TestPublishRefusesUnverifiedDevice(t *testing.T) {
 		{
 			name: "symlink resolves to another volume",
 			setup: func(n *fakeNode) string {
-				return n.link("106486781", n.attach("sdc", vpdPage("106478890")))
+				return n.link("106486781", n.attach("sdc", VPDPage("106478890")))
 			},
 			wantErr: errDeviceMismatch,
 		},

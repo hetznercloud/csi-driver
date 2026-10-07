@@ -3,7 +3,6 @@
 package integration
 
 import (
-	"encoding/binary"
 	"fmt"
 	"log"
 	"os"
@@ -125,21 +124,11 @@ func reportFakeDeviceSerial(device string) (string, error) {
 	if err := os.MkdirAll(vpdDir, 0o750); err != nil {
 		return "", err
 	}
-	if err := os.WriteFile(filepath.Join(vpdDir, "vpd_pg80"), vpdPage(volumeID), 0o600); err != nil {
+	if err := os.WriteFile(filepath.Join(vpdDir, "vpd_pg80"), volumes.VPDPage(volumeID), 0o600); err != nil {
 		return "", err
 	}
 
 	return volumeID, nil
-}
-
-// vpdPage lays out the bytes the kernel exposes as vpd_pg80 for a SCSI disk: a 4 byte
-// header whose last two bytes hold the length of the serial that follows.
-func vpdPage(serial string) []byte {
-	page := make([]byte, 4, 4+len(serial))
-	page[1] = 0x80
-	binary.BigEndian.PutUint16(page[2:4], uint16(len(serial))) //nolint:gosec // a volume ID is 9 digits
-
-	return append(page, serial...)
 }
 
 func increaseFakeDeviceSize(name string, megabytesToAdd int) error {

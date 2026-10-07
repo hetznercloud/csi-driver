@@ -17,22 +17,22 @@ func TestReadVPDPG80(t *testing.T) {
 	}{
 		{
 			name: "serial of an hcloud volume",
-			page: vpdPage("106478890"),
+			page: VPDPage("106478890"),
 			want: "106478890",
 		},
 		{
 			name: "padding is trimmed",
-			page: vpdPage(" 106478890 \x00\x00"),
+			page: VPDPage(" 106478890 \x00\x00"),
 			want: "106478890",
 		},
 		{
 			name: "page length needs both length bytes",
-			page: vpdPage(strings.Repeat("\x00", 300) + "106478890"),
+			page: VPDPage(strings.Repeat("\x00", 300) + "106478890"),
 			want: "106478890",
 		},
 		{
 			name: "bytes past the page length are ignored",
-			page: append(vpdPage("106478890"), "trailing junk"...),
+			page: append(VPDPage("106478890"), "trailing junk"...),
 			want: "106478890",
 		},
 		{
@@ -74,8 +74,8 @@ func TestReadVPDPG80(t *testing.T) {
 func TestResolveVolumeDevice(t *testing.T) {
 	n := newFakeNode(t)
 
-	sdc := n.attach("sdc", vpdPage("106478890"))
-	sdd := n.attach("sdd", vpdPage("106486781  "))
+	sdc := n.attach("sdc", VPDPage("106478890"))
+	sdd := n.attach("sdd", VPDPage("106486781  "))
 	sde := n.attach("sde", nil)
 
 	tests := []struct {
