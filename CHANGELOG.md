@@ -1,5 +1,18 @@
 # Changelog
 
+## [v2.24.0](https://github.com/hetznercloud/csi-driver/releases/tag/v2.24.0)
+
+[Compare to previous version](https://github.com/hetznercloud/csi-driver/compare/v2.23.0...v2.24.0)
+
+### Features
+
+- support Kubernetes v1.37 ([aee00ad](https://github.com/hetznercloud/csi-driver/commit/aee00ad89e769caee936a2157945f877b478d82a))
+
+### Bug Fixes
+
+- drop Kubernetes v1.33 support ([aee00ad](https://github.com/hetznercloud/csi-driver/commit/aee00ad89e769caee936a2157945f877b478d82a))
+- strip secrets from debug logs (#1506) ([0d09a5d](https://github.com/hetznercloud/csi-driver/commit/0d09a5de62b94e3888da60355edfd05005aaf162))
+
 ## [v2.23.0](https://github.com/hetznercloud/csi-driver/releases/tag/v2.23.0)
 
 [Compare to previous version](https://github.com/hetznercloud/csi-driver/compare/v2.22.2...v2.23.0)
