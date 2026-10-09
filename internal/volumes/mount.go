@@ -4,6 +4,7 @@ import (
 	"context"
 	"errors"
 	"fmt"
+	"io/fs"
 	"log/slog"
 	"os"
 	"path/filepath"
@@ -11,7 +12,6 @@ import (
 	"time"
 
 	"github.com/moby/buildkit/frontend/dockerfile/shell"
-	"golang.org/x/sys/unix"
 	"k8s.io/mount-utils"
 	"k8s.io/utils/exec"
 
@@ -36,7 +36,7 @@ type MountOpts struct {
 
 // MountService mounts volumes.
 type MountService interface {
-	Publish(ctx context.Context, targetPath string, devicePath string, opts MountOpts) error
+	Publish(ctx context.Context, targetPath string, devicePath string, volumeID string, opts MountOpts) error
 	Unpublish(ctx context.Context, targetPath string) error
 	PathExists(path string) (bool, error)
 }
@@ -59,11 +59,14 @@ func NewLinuxMountService(logger *slog.Logger) *LinuxMountService {
 	}
 }
 
-func (s *LinuxMountService) Publish(ctx context.Context, targetPath string, devicePath string, opts MountOpts) error {
-	// Ensure device is ready via stat syscall. Otherwise, `blkid` might return
-	// exit code 2, which is the same exit code as for an unformatted device.
-	if err := s.waitDeviceReady(ctx, devicePath); err != nil {
-		return fmt.Errorf("device %q not ready: %w", devicePath, err)
+func (s *LinuxMountService) Publish(ctx context.Context, targetPath string, devicePath string, volumeID string, opts MountOpts) error {
+	luksDeviceName := GenerateLUKSDeviceName(devicePath)
+
+	// Ensure device is ready. Otherwise, `blkid` might return exit code 2,
+	// which is the same exit code as for an unformatted device.
+	devicePath, err := s.waitDeviceReady(ctx, devicePath, volumeID)
+	if err != nil {
+		return fmt.Errorf("device not ready: %w", err)
 	}
 
 	isMountPoint, err := s.mounter.IsMountPoint(targetPath)
@@ -115,7 +118,6 @@ func (s *LinuxMountService) Publish(ctx context.Context, targetPath string, devi
 		if err != nil {
 			return fmt.Errorf("unable to detect existing disk format of %s: %w", devicePath, err)
 		}
-		luksDeviceName := GenerateLUKSDeviceName(devicePath)
 		if existingFSType == "" {
 			if opts.Readonly {
 				return fmt.Errorf("cannot publish unformatted disk %s in read-only mode", devicePath)
@@ -135,6 +137,7 @@ func (s *LinuxMountService) Publish(ctx context.Context, targetPath string, devi
 
 	s.logger.Info(
 		"publishing volume",
+		"volume-id", volumeID,
 		"target-path", targetPath,
 		"device-path", devicePath,
 		"fs-type", opts.FSType,
@@ -163,9 +166,7 @@ func (s *LinuxMountService) Publish(ctx context.Context, targetPath string, devi
 	return s.mounter.FormatAndMountSensitiveWithFormatOptions(devicePath, targetPath, opts.FSType, mountOptions, opts.Additional, formatOptions)
 }
 
-// waitDeviceReady ensures the device at devicePath exists. This is done by ensuring a stat
-// syscall returns no error.
-func (s *LinuxMountService) waitDeviceReady(ctx context.Context, devicePath string) error {
+func (s *LinuxMountService) waitDeviceReady(ctx context.Context, devicePath string, volumeID string) (string, error) {
 	const maxRetries = 7
 	backoffFunc := hcloud.ExponentialBackoffWithOpts(hcloud.ExponentialBackoffOpts{
 		Base:       time.Millisecond * 50,
@@ -175,16 +176,18 @@ func (s *LinuxMountService) waitDeviceReady(ctx context.Context, devicePath stri
 
 	var err error
 	for i := range maxRetries {
-		var stat unix.Stat_t
-		err = unix.Stat(devicePath, &stat)
-		if err == nil {
-			return nil
+		var resolved string
+		resolved, err = resolveVolumeDevice(devicePath, volumeID)
+		switch {
+		case err == nil:
+			return resolved, nil
+		case errors.Is(err, errDeviceMismatch):
+			s.logger.Warn("device path resolves to another volume, waiting for udev", "volume-id", volumeID, "err", err)
+		case errors.Is(err, fs.ErrNotExist):
+			s.logger.Debug("device not ready yet", "volume-id", volumeID, "err", err)
+		default:
+			return "", err
 		}
-		if !errors.Is(err, unix.ENOENT) {
-			return err
-		}
-
-		s.logger.Debug("device not ready yet: stat syscall returned ENOENT", "devicePath", devicePath)
 
 		if i == maxRetries-1 {
 			break
@@ -192,12 +195,12 @@ func (s *LinuxMountService) waitDeviceReady(ctx context.Context, devicePath stri
 
 		select {
 		case <-ctx.Done():
-			return fmt.Errorf("waiting for device %s: %w", devicePath, ctx.Err())
+			return "", fmt.Errorf("wait for device: %w: %w", err, ctx.Err())
 		case <-time.After(backoffFunc(i)):
 		}
 	}
 
-	return err
+	return "", err
 }
 
 func (s *LinuxMountService) Unpublish(ctx context.Context, targetPath string) error {

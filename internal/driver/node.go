@@ -87,7 +87,7 @@ func (s *NodeService) NodePublishVolume(ctx context.Context, req *proto.NodePubl
 		return nil, status.Error(codes.InvalidArgument, "publish volume: unsupported volume capability")
 	}
 
-	if err := s.volumeMountService.Publish(ctx, req.GetTargetPath(), devicePath, opts); err != nil {
+	if err := s.volumeMountService.Publish(ctx, req.GetTargetPath(), devicePath, req.GetVolumeId(), opts); err != nil {
 		return nil, status.Error(codes.Internal, fmt.Sprintf("failed to publish volume: %s", err))
 	}
 	return &proto.NodePublishVolumeResponse{}, nil
@@ -209,7 +209,7 @@ func (s *NodeService) NodeExpandVolume(ctx context.Context, req *proto.NodeExpan
 	}
 
 	if req.GetVolumeCapability().GetBlock() == nil {
-		if err := s.volumeResizeService.Resize(ctx, req.GetVolumePath()); err != nil {
+		if err := s.volumeResizeService.Resize(ctx, req.GetVolumePath(), req.GetVolumeId()); err != nil {
 			return nil, status.Error(codes.Internal, fmt.Sprintf("failed to resize volume: %s", err))
 		}
 	}
