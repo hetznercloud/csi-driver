@@ -15,4 +15,4 @@ This documentation is written and organized following the [Diátaxis guidelines]
 
 - :mag: Check out the [troubleshooting document](./guides/troubleshooting.md)
 - :bug: Report bugs using [our ticket tracker](https://github.com/hetznercloud/csi-driver/issues).
-- :raising_hand: If you need help, reach us using the [Support Center](https://console.hetzner.cloud/support).
+- :raising_hand: If you need help, reach us using the [Support Center](https://console.hetzner.com/support).
