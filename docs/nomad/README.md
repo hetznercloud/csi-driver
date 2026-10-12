@@ -14,7 +14,7 @@ Only [Kubernetes](../kubernetes/README.md) is officially supported.
 
 ### CSI Setup
 
-1. Create a read+write API token in the [Hetzner Cloud Console](https://console.hetzner.cloud/).
+1. Create a read+write API token in the [Hetzner Cloud Console](https://console.hetzner.com/).
 
 2. Create a Nomad Variable for the HCLOUD token:
 

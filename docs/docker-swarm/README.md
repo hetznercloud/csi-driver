@@ -16,7 +16,7 @@ The community is tracking the state of support for CSI in Docker Swarm over at h
 Run the following steps on all nodes (especially master nodes).
 The simplest way to achieve this
 
-1. Create a read+write API token in the [Hetzner Cloud Console](https://console.hetzner.cloud/).
+1. Create a read+write API token in the [Hetzner Cloud Console](https://console.hetzner.com/).
 
 2. Install the plugin
 
