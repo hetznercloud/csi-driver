@@ -11,7 +11,7 @@ import (
 
 // ResizeService resizes volumes.
 type ResizeService interface {
-	Resize(ctx context.Context, volumePath string) error
+	Resize(ctx context.Context, volumePath string, volumeID string) error
 }
 
 // LinuxResizeService resizes volumes on a Linux system.
@@ -32,7 +32,7 @@ func NewLinuxResizeService(logger *slog.Logger) *LinuxResizeService {
 	}
 }
 
-func (l *LinuxResizeService) Resize(ctx context.Context, volumePath string) error {
+func (l *LinuxResizeService) Resize(ctx context.Context, volumePath string, volumeID string) error {
 	devicePath, _, err := mount.GetDeviceNameFromMount(mount.New(""), volumePath)
 	if err != nil {
 		return fmt.Errorf("failed to determine mount path for %s: %w", volumePath, err)
@@ -40,6 +40,7 @@ func (l *LinuxResizeService) Resize(ctx context.Context, volumePath string) erro
 
 	l.logger.Info(
 		"resizing volume",
+		"volume-id", volumeID,
 		"volume-path", volumePath,
 		"device-path", devicePath,
 	)
