@@ -23,14 +23,14 @@ type nodeServiceTestEnv struct {
 	volumeResizeService *mock.VolumeResizeService
 }
 
-func newNodeServerTestEnv() nodeServiceTestEnv {
+func newNodeServerTestEnv(t *testing.T) nodeServiceTestEnv {
 	var (
 		volumeMountService  = &mock.VolumeMountService{}
 		volumeResizeService = &mock.VolumeResizeService{}
 		volumeStatsService  = &mock.VolumeStatsService{}
 	)
 	return nodeServiceTestEnv{
-		ctx: context.Background(),
+		ctx: t.Context(),
 		service: NewNodeService(
 			slog.New(slog.DiscardHandler),
 			"1",
@@ -46,9 +46,9 @@ func newNodeServerTestEnv() nodeServiceTestEnv {
 }
 
 func TestNodeServiceNodePublishVolume(t *testing.T) {
-	env := newNodeServerTestEnv()
+	env := newNodeServerTestEnv(t)
 
-	env.volumeMountService.PublishFunc = func(ctx context.Context, targetPath string, devicePath string, volumeID string, opts volumes.MountOpts) error {
+	env.volumeMountService.PublishFunc = func(_ context.Context, targetPath string, devicePath string, volumeID string, opts volumes.MountOpts) error {
 		if targetPath != "target" {
 			t.Errorf("unexpected target path passed to volume service: %s", targetPath)
 		}
@@ -85,10 +85,10 @@ func TestNodeServiceNodePublishVolume(t *testing.T) {
 }
 
 func TestNodeServiceNodePublishBlockVolume(t *testing.T) {
-	env := newNodeServerTestEnv()
+	env := newNodeServerTestEnv(t)
 
 	env.volumeMountService.PublishFunc = func(
-		ctx context.Context, targetPath, devicePath, volumeID string, opts volumes.MountOpts,
+		_ context.Context, targetPath, devicePath, volumeID string, opts volumes.MountOpts,
 	) error {
 		if targetPath != "target" {
 			t.Errorf("unexpected target path: %s", targetPath)
@@ -121,9 +121,9 @@ func TestNodeServiceNodePublishBlockVolume(t *testing.T) {
 }
 
 func TestNodeServiceNodePublishPublishError(t *testing.T) {
-	env := newNodeServerTestEnv()
+	env := newNodeServerTestEnv(t)
 
-	env.volumeMountService.PublishFunc = func(ctx context.Context, targetPath string, devicePath string, volumeID string, opts volumes.MountOpts) error {
+	env.volumeMountService.PublishFunc = func(_ context.Context, targetPath string, devicePath string, volumeID string, opts volumes.MountOpts) error {
 		return io.EOF
 	}
 
@@ -151,7 +151,7 @@ func TestNodeServiceNodePublishPublishError(t *testing.T) {
 }
 
 func TestNodeServiceNodePublishVolumeInputErrors(t *testing.T) {
-	env := newNodeServerTestEnv()
+	env := newNodeServerTestEnv(t)
 
 	testCases := []struct {
 		Name string
@@ -220,9 +220,9 @@ func TestNodeServiceNodePublishVolumeInputErrors(t *testing.T) {
 }
 
 func TestNodeServiceNodeUnpublishVolume(t *testing.T) {
-	env := newNodeServerTestEnv()
+	env := newNodeServerTestEnv(t)
 
-	env.volumeMountService.UnpublishFunc = func(ctx context.Context, targetPath string) error {
+	env.volumeMountService.UnpublishFunc = func(_ context.Context, targetPath string) error {
 		if targetPath != "target" {
 			t.Errorf("unexpected target path passed to volume service: %s", targetPath)
 		}
@@ -239,9 +239,9 @@ func TestNodeServiceNodeUnpublishVolume(t *testing.T) {
 }
 
 func TestNodeServiceNodeUnpublishUnpublishError(t *testing.T) {
-	env := newNodeServerTestEnv()
+	env := newNodeServerTestEnv(t)
 
-	env.volumeMountService.UnpublishFunc = func(ctx context.Context, targetPath string) error {
+	env.volumeMountService.UnpublishFunc = func(_ context.Context, targetPath string) error {
 		return io.EOF
 	}
 
@@ -255,7 +255,7 @@ func TestNodeServiceNodeUnpublishUnpublishError(t *testing.T) {
 }
 
 func TestNodeServiceNodeUnpublishVolumeInputErrors(t *testing.T) {
-	env := newNodeServerTestEnv()
+	env := newNodeServerTestEnv(t)
 
 	testCases := []struct {
 		Name string
@@ -289,7 +289,7 @@ func TestNodeServiceNodeUnpublishVolumeInputErrors(t *testing.T) {
 }
 
 func TestNodeServiceNodeGetCapabilities(t *testing.T) {
-	env := newNodeServerTestEnv()
+	env := newNodeServerTestEnv(t)
 
 	req := &proto.NodeGetCapabilitiesRequest{}
 	resp, err := env.service.NodeGetCapabilities(env.ctx, req)
@@ -318,7 +318,7 @@ func TestNodeServiceNodeGetCapabilities(t *testing.T) {
 }
 
 func TestNodeServiceNodeGetInfo(t *testing.T) {
-	env := newNodeServerTestEnv()
+	env := newNodeServerTestEnv(t)
 
 	req := &proto.NodeGetInfoRequest{}
 	resp, err := env.service.NodeGetInfo(env.ctx, req)
@@ -334,7 +334,7 @@ func TestNodeServiceNodeGetInfo(t *testing.T) {
 }
 
 func TestNodeServiceNodeExpandVolume(t *testing.T) {
-	env := newNodeServerTestEnv()
+	env := newNodeServerTestEnv(t)
 
 	env.volumeMountService.PathExistsFunc = func(path string) (bool, error) {
 		if path != "volumePath" {
@@ -342,7 +342,7 @@ func TestNodeServiceNodeExpandVolume(t *testing.T) {
 		}
 		return true, nil
 	}
-	env.volumeResizeService.ResizeFunc = func(ctx context.Context, volumePath string, volumeID string) error {
+	env.volumeResizeService.ResizeFunc = func(_ context.Context, volumePath string, volumeID string) error {
 		if volumePath != "volumePath" {
 			t.Errorf("unexpected volume path passed to volume service: %s", volumePath)
 		}
@@ -362,7 +362,7 @@ func TestNodeServiceNodeExpandVolume(t *testing.T) {
 }
 
 func TestNodeServiceNodeExpandBlockVolume(t *testing.T) {
-	env := newNodeServerTestEnv()
+	env := newNodeServerTestEnv(t)
 
 	env.volumeMountService.PathExistsFunc = func(path string) (bool, error) {
 		if path != "volumePath" {
@@ -370,7 +370,7 @@ func TestNodeServiceNodeExpandBlockVolume(t *testing.T) {
 		}
 		return true, nil
 	}
-	env.volumeResizeService.ResizeFunc = func(ctx context.Context, volumePath string, volumeID string) error {
+	env.volumeResizeService.ResizeFunc = func(_ context.Context, volumePath string, volumeID string) error {
 		t.Errorf("This function should never be called.")
 		return nil
 	}
@@ -391,7 +391,7 @@ func TestNodeServiceNodeExpandBlockVolume(t *testing.T) {
 }
 
 func TestNodeServiceNodeExpandVolumeInputErrors(t *testing.T) {
-	env := newNodeServerTestEnv()
+	env := newNodeServerTestEnv(t)
 
 	testCases := []struct {
 		Name string
