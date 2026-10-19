@@ -1,60 +1,12 @@
 package volumes
 
-import "testing"
+import (
+	"os"
+	"path/filepath"
+	"testing"
+)
 
-func TestLUKSDeviceStatusIsZombie(t *testing.T) {
-	testCases := []struct {
-		Name   string
-		Status LUKSDeviceStatus
-		Want   bool
-	}{
-		{
-			Name:   "inactive is never a zombie",
-			Status: LUKSDeviceStatus{Active: false},
-			Want:   false,
-		},
-		{
-			Name:   "inactive with missing fields is never a zombie",
-			Status: LUKSDeviceStatus{Active: false, Type: "", Device: ""},
-			Want:   false,
-		},
-		{
-			Name:   "healthy active device",
-			Status: LUKSDeviceStatus{Active: true, Type: "LUKS1", Device: "/dev/sdb"},
-			Want:   false,
-		},
-		{
-			Name:   "active with empty device",
-			Status: LUKSDeviceStatus{Active: true, Type: "LUKS1", Device: ""},
-			Want:   true,
-		},
-		{
-			Name:   "active with empty type",
-			Status: LUKSDeviceStatus{Active: true, Type: "", Device: "/dev/sdb"},
-			Want:   true,
-		},
-		{
-			Name:   "active with (null) device",
-			Status: LUKSDeviceStatus{Active: true, Type: "LUKS1", Device: "(null)"},
-			Want:   true,
-		},
-		{
-			Name:   "active with n/a type",
-			Status: LUKSDeviceStatus{Active: true, Type: "n/a", Device: "/dev/sdb"},
-			Want:   true,
-		},
-	}
-
-	for _, testCase := range testCases {
-		t.Run(testCase.Name, func(t *testing.T) {
-			if got := testCase.Status.IsZombie(); got != testCase.Want {
-				t.Errorf("IsZombie() = %v, want %v", got, testCase.Want)
-			}
-		})
-	}
-}
-
-func TestParseLUKSStatus(t *testing.T) {
+func TestNewLUKSDeviceStatus(t *testing.T) {
 	testCases := []struct {
 		Name   string
 		Output string
@@ -71,24 +23,24 @@ func TestParseLUKSStatus(t *testing.T) {
   offset:  4096 sectors
   size:    2093056 sectors
   mode:    read/write`,
-			Want: LUKSDeviceStatus{Active: true, Type: "LUKS1", Device: "/dev/sdb"},
+			Want: LUKSDeviceStatus{Active: true, Device: "/dev/sdb"},
 		},
 		{
-			Name: "stale device with (null) backing",
+			Name: "backing device disappeared",
 			Output: `/dev/mapper/pv-1 is active.
   type:    n/a
   cipher:  aes-xts-plain64
   keysize: 512 bits
   device:  (null)
   mode:    read/write`,
-			Want: LUKSDeviceStatus{Active: true, Type: "n/a", Device: "(null)"},
+			Want: LUKSDeviceStatus{Active: true, Device: "(null)"},
 		},
 		{
-			Name: "device line missing entirely",
+			Name: "device line missing",
 			Output: `/dev/mapper/pv-1 is active.
   type:    LUKS1
   cipher:  aes-xts-plain64`,
-			Want: LUKSDeviceStatus{Active: true, Type: "LUKS1", Device: ""},
+			Want: LUKSDeviceStatus{Active: true},
 		},
 		{
 			Name:   "empty output",
@@ -99,9 +51,61 @@ func TestParseLUKSStatus(t *testing.T) {
 
 	for _, testCase := range testCases {
 		t.Run(testCase.Name, func(t *testing.T) {
-			got := NewLUKSDeviceStatus(testCase.Output)
-			if got != testCase.Want {
-				t.Errorf("parseLUKSStatus() = %+v, want %+v", got, testCase.Want)
+			if got := NewLUKSDeviceStatus(testCase.Output); got != testCase.Want {
+				t.Errorf("NewLUKSDeviceStatus() = %+v, want %+v", got, testCase.Want)
+			}
+		})
+	}
+}
+
+func TestSameDevice(t *testing.T) {
+	regularFile := filepath.Join(t.TempDir(), "file")
+	if err := os.WriteFile(regularFile, nil, 0o600); err != nil {
+		t.Fatal(err)
+	}
+
+	testCases := []struct {
+		Name string
+		A    string
+		B    string
+		Want bool
+	}{
+		{
+			Name: "same device",
+			A:    "/dev/null",
+			B:    "/dev/null",
+			Want: true,
+		},
+		{
+			Name: "different devices",
+			A:    "/dev/null",
+			B:    "/dev/zero",
+			Want: false,
+		},
+		{
+			Name: "backing device disappeared",
+			A:    "(null)",
+			B:    "/dev/null",
+			Want: false,
+		},
+		{
+			Name: "backing device missing",
+			A:    "",
+			B:    "/dev/null",
+			Want: false,
+		},
+		{
+			Name: "regular files",
+			A:    regularFile,
+			B:    regularFile,
+			Want: false,
+		},
+	}
+
+	for _, testCase := range testCases {
+		t.Run(testCase.Name, func(t *testing.T) {
+			if got := sameDevice(testCase.A, testCase.B); got != testCase.Want {
+				t.Errorf("sameDevice(%q, %q) = %v, want %v", testCase.A, testCase.B, got, testCase.Want)
 			}
 		})
 	}
