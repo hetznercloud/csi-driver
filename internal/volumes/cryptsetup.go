@@ -5,8 +5,10 @@ import (
 	"errors"
 	"fmt"
 	"log/slog"
+	"os"
 	"os/exec"
 	"strings"
+	"syscall"
 )
 
 const cryptsetupExecutable = "cryptsetup"
@@ -19,13 +21,13 @@ func NewCryptSetup(logger *slog.Logger) *CryptSetup {
 	return &CryptSetup{logger: logger}
 }
 
-func (cs *CryptSetup) Status(ctx context.Context, device string) (LUKSDeviceStatus, error) {
-	output, code, err := cryptsetup(ctx, "status", device)
+func (cs *CryptSetup) Status(ctx context.Context, luksDeviceName string) (LUKSDeviceStatus, error) {
+	output, code, err := cryptsetup(ctx, "status", luksDeviceName)
 	if err != nil {
 		if code == 4 {
 			return LUKSDeviceStatus{Active: false}, nil
 		}
-		return LUKSDeviceStatus{Active: false}, fmt.Errorf("unable to check LUKS device %s status: %w", device, err)
+		return LUKSDeviceStatus{Active: false}, fmt.Errorf("unable to check LUKS device %s status: %w", luksDeviceName, err)
 	}
 
 	return NewLUKSDeviceStatus(output), nil
@@ -49,27 +51,25 @@ func (cs *CryptSetup) Open(ctx context.Context, devicePath string, luksDeviceNam
 		return err
 	}
 	if status.Active {
-		if !status.IsZombie() {
+		if sameDevice(status.Device, devicePath) {
 			cs.logger.Debug(
-				"luks device already active",
+				"LUKS device already active",
 				"devicePath", devicePath,
 				"luksDeviceName", luksDeviceName,
 			)
 			return nil
 		}
 
-		// If the volume is not correctly unpublished, a prior attach might leave a dm-crypt
-		// target whose backing block device disappeared. Reusing this mapper would mount
-		// on a dead device so we have to close it first.
+		// A volume detached without being unpublished leaves behind a mapper whose backing
+		// device is gone. Reusing it would format and mount a dead device.
 		cs.logger.Warn(
-			"detected zombie luks device; cleaning up",
+			"LUKS device is not backed by the expected device, closing it",
 			"devicePath", devicePath,
 			"luksDeviceName", luksDeviceName,
-			"type", status.Type,
-			"device", status.Device,
+			"backingDevice", status.Device,
 		)
 		if err := cs.Close(ctx, luksDeviceName); err != nil {
-			return fmt.Errorf("failed to close zombie LUKS device %s: %w", luksDeviceName, err)
+			return fmt.Errorf("unable to close stale LUKS device %s: %w", luksDeviceName, err)
 		}
 	}
 
@@ -147,35 +147,30 @@ func cryptsetupWithStdin(ctx context.Context, stdin string, args ...string) (str
 }
 
 type LUKSDeviceStatus struct {
-	Device string
-	Type   string
 	Active bool
+	Device string
 }
 
 func NewLUKSDeviceStatus(output string) LUKSDeviceStatus {
-	// Assumes the device is active; a non-active device is
-	// reported through the exit code, not the output.
+	// An inactive device is reported through the exit code, not the output.
 	status := LUKSDeviceStatus{Active: true}
 	for line := range strings.SplitSeq(output, "\n") {
 		key, value, ok := strings.Cut(strings.TrimSpace(line), ":")
-		if !ok {
-			continue
-		}
-		value = strings.TrimSpace(value)
-		switch key {
-		case "type":
-			status.Type = value
-		case "device":
-			status.Device = value
+		if ok && key == "device" {
+			status.Device = strings.TrimSpace(value)
 		}
 	}
-
 	return status
 }
 
-func (s LUKSDeviceStatus) IsZombie() bool {
-	if !s.Active {
+func sameDevice(a string, b string) bool {
+	infoA, err := os.Stat(a)
+	if err != nil || infoA.Mode()&os.ModeDevice == 0 {
 		return false
 	}
-	return s.Device == "" || s.Type == "" || s.Device == "(null)" || s.Type == "n/a"
+	infoB, err := os.Stat(b)
+	if err != nil || infoB.Mode()&os.ModeDevice == 0 {
+		return false
+	}
+	return infoA.Sys().(*syscall.Stat_t).Rdev == infoB.Sys().(*syscall.Stat_t).Rdev
 }
