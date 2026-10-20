@@ -163,6 +163,12 @@ func NewLUKSDeviceStatus(output string) LUKSDeviceStatus {
 	return status
 }
 
+// sameDevice reports whether a and b refer to the same device node.
+//
+// os.ModeDevice is set for block and character device files only. Both paths
+// must be device nodes because Rdev (the major:minor device number) is only
+// meaningful for them: for regular files and directories it is 0, so two
+// unrelated non-device paths would otherwise compare as equal.
 func sameDevice(a string, b string) bool {
 	infoA, err := os.Stat(a)
 	if err != nil || infoA.Mode()&os.ModeDevice == 0 {
