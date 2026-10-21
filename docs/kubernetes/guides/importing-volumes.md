@@ -2,15 +2,15 @@
 ---
 date: "2026-09-07"
 date_changed: "2026-09-07"
-title: "Import"
+title: "Importing existing Volumes"
 tags: []
 language: "en"
 description: ""
 docs_type: ["how_to"]
 product_category: ["Integrations"]
-translation: ["Integrations", "CSI driver", "How-To: Volumes", "Import"]
+translation: ["Integrations", "CSI driver", "Guides", "Importing existing Volumes"]
 scrape_type: "whole"
-priority: 100
+priority: 90
 ---
 -->
 

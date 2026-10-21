@@ -2,15 +2,15 @@
 ---
 date: "2026-09-07"
 date_changed: "2026-09-07"
-title: "Encrypted with LUKS"
+title: "Encrypting Volumes with LUKS"
 tags: []
 language: "en"
 description: ""
 docs_type: ["how_to"]
 product_category: ["Integrations"]
-translation: ["Integrations", "CSI driver", "How-To: Volumes", "Encrypted with LUKS"]
+translation: ["Integrations", "CSI driver", "Guides", "Encrypting Volumes with LUKS"]
 scrape_type: "whole"
-priority: 90
+priority: 80
 ---
 -->
 

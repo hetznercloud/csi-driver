@@ -8,9 +8,9 @@ language: "en"
 description: ""
 docs_type: ["faq/troubleshooting"]
 product_category: ["Integrations"]
-translation: ["Integrations", "CSI driver", "Troubleshooting", "Common issues"]
+translation: ["Integrations", "CSI driver", "Guides", "Common issues"]
 scrape_type: "whole"
-priority: 100
+priority: 10
 ---
 -->
 
