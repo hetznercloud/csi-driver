@@ -8,9 +8,9 @@ language: "en"
 description: ""
 docs_type: ["how_to"]
 product_category: ["Integrations"]
-translation: ["Integrations", "CSI driver", "How-To: Administration", "Monitoring"]
+translation: ["Integrations", "CSI driver", "Guides", "Monitoring"]
 scrape_type: "whole"
-priority: 100
+priority: 70
 ---
 -->
 

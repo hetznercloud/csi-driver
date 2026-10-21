@@ -8,9 +8,9 @@ language: "en"
 description: ""
 docs_type: ["getting_started"]
 product_category: ["Integrations"]
-translation: ["Integrations", "CSI driver", "Getting Started", "Installing the CSI driver"]
+translation: ["Integrations", "CSI driver", "Guides", "Installing the CSI driver"]
 scrape_type: "whole"
-priority: 90
+priority: 100
 ---
 -->
 

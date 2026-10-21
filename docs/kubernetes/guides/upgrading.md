@@ -2,15 +2,15 @@
 ---
 date: "2026-09-07"
 date_changed: "2026-09-07"
-title: "General"
+title: "Upgrading the CSI driver"
 tags: []
 language: "en"
 description: ""
 docs_type: ["how_to"]
 product_category: ["Integrations"]
-translation: ["Integrations", "CSI driver", "How-To: Upgrade", "General"]
+translation: ["Integrations", "CSI driver", "Guides", "Upgrading the CSI driver"]
 scrape_type: "whole"
-priority: 100
+priority: 60
 ---
 -->
 
