@@ -96,6 +96,55 @@ func TestStaleLUKSMapperIsReplaced(t *testing.T) {
 	}
 }
 
+func TestStaleLUKSMapperInUseIsKept(t *testing.T) {
+	if !runTestInDockerImage(t, true) {
+		return
+	}
+
+	ctx := t.Context()
+	logger := slog.New(slog.NewTextHandler(os.Stdout, nil))
+	cryptSetup := volumes.NewCryptSetup(logger)
+	passphrase := "passphrase"
+	luksDeviceName := "stale-in-use"
+
+	staleDevice := createLoopDevice(t, "stale-in-use-previous")
+	currentDevice := createLoopDevice(t, "stale-in-use-current")
+	for _, device := range []string{staleDevice, currentDevice} {
+		if err := cryptSetup.Format(ctx, device, passphrase); err != nil {
+			t.Fatal(err)
+		}
+	}
+
+	if err := cryptSetup.Open(ctx, staleDevice, luksDeviceName, passphrase); err != nil {
+		t.Fatal(err)
+	}
+	defer runCmd("cryptsetup", "luksClose", luksDeviceName)
+
+	luksDevicePath := volumes.GenerateLUKSDevicePath(luksDeviceName)
+	if _, err := runCmd("mkfs.ext4", luksDevicePath); err != nil {
+		t.Fatal(err)
+	}
+	mountPath := t.TempDir()
+	if _, err := runCmd("mount", "-t", "ext4", luksDevicePath, mountPath); err != nil {
+		t.Fatal(err)
+	}
+	defer runCmd("umount", mountPath)
+
+	err := cryptSetup.Open(ctx, currentDevice, luksDeviceName, passphrase)
+	if err == nil {
+		t.Fatalf("expected opening %s on %s to fail while it is mounted", luksDeviceName, currentDevice)
+	}
+	t.Log(err)
+
+	status, err := cryptSetup.Status(ctx, luksDeviceName)
+	if err != nil {
+		t.Fatal(err)
+	}
+	if !status.Active || status.Device != staleDevice {
+		t.Fatalf("expected %s to still be backed by %s, got %+v", luksDeviceName, staleDevice, status)
+	}
+}
+
 func createLoopDevice(t *testing.T, name string) string {
 	t.Helper()
 
