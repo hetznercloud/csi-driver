@@ -69,7 +69,13 @@ func (cs *CryptSetup) Open(ctx context.Context, devicePath string, luksDeviceNam
 			"backingDevice", status.Device,
 		)
 		if err := cs.Close(ctx, luksDeviceName); err != nil {
-			return fmt.Errorf("unable to close stale LUKS device %s: %w", luksDeviceName, err)
+			return fmt.Errorf(
+				"LUKS device %s is backed by %s instead of %s: %w",
+				luksDeviceName,
+				status.Device,
+				devicePath,
+				err,
+			)
 		}
 	}
 
