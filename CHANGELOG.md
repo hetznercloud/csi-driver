@@ -1,5 +1,13 @@
 # Changelog
 
+## [v2.24.1](https://github.com/hetznercloud/csi-driver/releases/tag/v2.24.1)
+
+[Compare to previous version](https://github.com/hetznercloud/csi-driver/compare/v2.24.0...v2.24.1)
+
+### Bug Fixes
+
+- update Go to mitigate CVE-2026-111943 (#1536) ([d0fa6d2](https://github.com/hetznercloud/csi-driver/commit/d0fa6d2c82a65d8b030d67559f1f4c86c3a4bac7))
+
 ## [v2.24.0](https://github.com/hetznercloud/csi-driver/releases/tag/v2.24.0)
 
 [Compare to previous version](https://github.com/hetznercloud/csi-driver/compare/v2.23.0...v2.24.0)
