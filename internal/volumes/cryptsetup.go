@@ -5,11 +5,13 @@ import (
 	"errors"
 	"fmt"
 	"log/slog"
+	"os"
 	"os/exec"
 	"strings"
+	"syscall"
 )
 
-const cryptsetupExecuable = "cryptsetup"
+const cryptsetupExecutable = "cryptsetup"
 
 type CryptSetup struct {
 	logger *slog.Logger
@@ -19,15 +21,16 @@ func NewCryptSetup(logger *slog.Logger) *CryptSetup {
 	return &CryptSetup{logger: logger}
 }
 
-func (cs *CryptSetup) IsActive(ctx context.Context, luksDeviceName string) (bool, error) {
-	output, code, err := command(ctx, cryptsetupExecuable, "status", luksDeviceName)
+func (cs *CryptSetup) Status(ctx context.Context, luksDeviceName string) (LUKSDeviceStatus, error) {
+	output, code, err := cryptsetup(ctx, "status", luksDeviceName)
 	if err != nil {
 		if code == 4 {
-			return false, nil
+			return LUKSDeviceStatus{Active: false}, nil
 		}
-		return false, fmt.Errorf("unable to check LUKS device %s activity: %s", luksDeviceName, output)
+		return LUKSDeviceStatus{Active: false}, fmt.Errorf("unable to check LUKS device %s status: %w", luksDeviceName, err)
 	}
-	return true, nil
+
+	return NewLUKSDeviceStatus(output), nil
 }
 
 func (cs *CryptSetup) Format(ctx context.Context, devicePath string, passphrase string) error {
@@ -35,7 +38,7 @@ func (cs *CryptSetup) Format(ctx context.Context, devicePath string, passphrase 
 		"formatting LUKS device",
 		"devicePath", devicePath,
 	)
-	output, _, err := commandWithStdin(ctx, passphrase, cryptsetupExecuable, "luksFormat", "--type", "luks1", devicePath)
+	output, _, err := cryptsetupWithStdin(ctx, passphrase, "luksFormat", "--type", "luks1", devicePath)
 	if err != nil {
 		return fmt.Errorf("unable to format device %s with LUKS: %s", devicePath, output)
 	}
@@ -43,19 +46,45 @@ func (cs *CryptSetup) Format(ctx context.Context, devicePath string, passphrase 
 }
 
 func (cs *CryptSetup) Open(ctx context.Context, devicePath string, luksDeviceName string, passphrase string) error {
-	active, err := cs.IsActive(ctx, luksDeviceName)
+	status, err := cs.Status(ctx, luksDeviceName)
 	if err != nil {
 		return err
 	}
-	if active {
-		return nil
+	if status.Active {
+		if sameDevice(status.Device, devicePath) {
+			cs.logger.Debug(
+				"LUKS device already active",
+				"devicePath", devicePath,
+				"luksDeviceName", luksDeviceName,
+			)
+			return nil
+		}
+
+		// A volume detached without being unpublished leaves behind a mapper whose backing
+		// device is gone. Reusing it would format and mount a dead device.
+		cs.logger.Warn(
+			"LUKS device is not backed by the expected device, closing it",
+			"devicePath", devicePath,
+			"luksDeviceName", luksDeviceName,
+			"backingDevice", status.Device,
+		)
+		if err := cs.Close(ctx, luksDeviceName); err != nil {
+			return fmt.Errorf(
+				"LUKS device %s is backed by %s instead of %s: %w",
+				luksDeviceName,
+				status.Device,
+				devicePath,
+				err,
+			)
+		}
 	}
+
 	cs.logger.Info(
 		"opening LUKS device",
 		"devicePath", devicePath,
 		"luksDeviceName", luksDeviceName,
 	)
-	output, _, err := commandWithStdin(ctx, passphrase, cryptsetupExecuable, "luksOpen", "--allow-discards", devicePath, luksDeviceName)
+	output, _, err := cryptsetupWithStdin(ctx, passphrase, "luksOpen", "--allow-discards", devicePath, luksDeviceName)
 	if err != nil {
 		return fmt.Errorf("unable to open LUKS device %s: %s", devicePath, output)
 	}
@@ -63,18 +92,18 @@ func (cs *CryptSetup) Open(ctx context.Context, devicePath string, luksDeviceNam
 }
 
 func (cs *CryptSetup) Close(ctx context.Context, luksDeviceName string) error {
-	active, err := cs.IsActive(ctx, luksDeviceName)
+	status, err := cs.Status(ctx, luksDeviceName)
 	if err != nil {
 		return err
 	}
-	if !active {
+	if !status.Active {
 		return nil
 	}
 	cs.logger.Info(
 		"closing LUKS device",
 		"luksDeviceName", luksDeviceName,
 	)
-	output, _, err := command(ctx, cryptsetupExecuable, "luksClose", luksDeviceName)
+	output, _, err := cryptsetup(ctx, "luksClose", luksDeviceName)
 	if err != nil {
 		return fmt.Errorf("unable to close LUKS device %s: %s", luksDeviceName, output)
 	}
@@ -86,7 +115,7 @@ func (cs *CryptSetup) Resize(ctx context.Context, luksDeviceName string) error {
 		"resizing LUKS device",
 		"luksDeviceName", luksDeviceName,
 	)
-	output, _, err := command(ctx, cryptsetupExecuable, "resize", luksDeviceName)
+	output, _, err := cryptsetup(ctx, "resize", luksDeviceName)
 	if err != nil {
 		return fmt.Errorf("unable to resize LUKS device %s: %s", luksDeviceName, output)
 	}
@@ -102,12 +131,12 @@ func GenerateLUKSDevicePath(luksDeviceName string) string {
 	return "/dev/mapper/" + luksDeviceName
 }
 
-func command(ctx context.Context, name string, args ...string) (string, int, error) {
-	return commandWithStdin(ctx, "", name, args...)
+func cryptsetup(ctx context.Context, args ...string) (string, int, error) {
+	return cryptsetupWithStdin(ctx, "", args...)
 }
 
-func commandWithStdin(ctx context.Context, stdin string, name string, args ...string) (string, int, error) {
-	cmd := exec.CommandContext(ctx, name, args...)
+func cryptsetupWithStdin(ctx context.Context, stdin string, args ...string) (string, int, error) {
+	cmd := exec.CommandContext(ctx, cryptsetupExecutable, args...)
 	if stdin != "" {
 		cmd.Stdin = strings.NewReader(stdin)
 	}
@@ -121,4 +150,39 @@ func commandWithStdin(ctx context.Context, stdin string, name string, args ...st
 		return output, exitError.ExitCode(), fmt.Errorf("%w\n%s", exitError, output)
 	}
 	return output, 0, nil
+}
+
+type LUKSDeviceStatus struct {
+	Active bool
+	Device string
+}
+
+func NewLUKSDeviceStatus(output string) LUKSDeviceStatus {
+	// An inactive device is reported through the exit code, not the output.
+	status := LUKSDeviceStatus{Active: true}
+	for line := range strings.SplitSeq(output, "\n") {
+		key, value, ok := strings.Cut(strings.TrimSpace(line), ":")
+		if ok && key == "device" {
+			status.Device = strings.TrimSpace(value)
+		}
+	}
+	return status
+}
+
+// sameDevice reports whether a and b refer to the same device node.
+//
+// os.ModeDevice is set for block and character device files only. Both paths
+// must be device nodes because Rdev (the major:minor device number) is only
+// meaningful for them: for regular files and directories it is 0, so two
+// unrelated non-device paths would otherwise compare as equal.
+func sameDevice(a string, b string) bool {
+	infoA, err := os.Stat(a)
+	if err != nil || infoA.Mode()&os.ModeDevice == 0 {
+		return false
+	}
+	infoB, err := os.Stat(b)
+	if err != nil || infoB.Mode()&os.ModeDevice == 0 {
+		return false
+	}
+	return infoA.Sys().(*syscall.Stat_t).Rdev == infoB.Sys().(*syscall.Stat_t).Rdev
 }
