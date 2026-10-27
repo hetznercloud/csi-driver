@@ -8,7 +8,7 @@ language: "en"
 description: ""
 docs_type: ["how_to"]
 product_category: ["Integrations"]
-translation: ["Integrations", "CSI driver", "Guides", "Encrypting Volumes with LUKS"]
+translation: ["Integrations", "Kubernetes CSI driver", "Guides", "Encrypting Volumes with LUKS"]
 scrape_type: "whole"
 priority: 80
 ---

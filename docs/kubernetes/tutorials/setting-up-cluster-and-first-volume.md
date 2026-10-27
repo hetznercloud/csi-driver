@@ -8,7 +8,7 @@ language: "en"
 description: ""
 docs_type: ["getting_started"]
 product_category: ["Integrations"]
-translation: ["Integrations", "CSI driver", "Tutorials", "Setting up a cluster with a Volume"]
+translation: ["Integrations", "Kubernetes CSI driver", "Tutorials", "Setting up a cluster with a Volume"]
 scrape_type: "whole"
 priority: 90
 ---

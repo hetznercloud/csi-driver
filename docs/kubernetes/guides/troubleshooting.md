@@ -8,7 +8,7 @@ language: "en"
 description: ""
 docs_type: ["faq/troubleshooting"]
 product_category: ["Integrations"]
-translation: ["Integrations", "CSI driver", "Guides", "Common issues"]
+translation: ["Integrations", "Kubernetes CSI driver", "Guides", "Common issues"]
 scrape_type: "whole"
 priority: 10
 ---
