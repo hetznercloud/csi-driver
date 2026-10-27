@@ -8,7 +8,7 @@ language: "en"
 description: ""
 docs_type: ["how_to"]
 product_category: ["Integrations"]
-translation: ["Integrations", "CSI driver", "Guides", "Importing existing Volumes"]
+translation: ["Integrations", "Kubernetes CSI driver", "Guides", "Importing existing Volumes"]
 scrape_type: "whole"
 priority: 90
 ---

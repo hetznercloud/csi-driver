@@ -8,7 +8,7 @@ language: "en"
 description: ""
 docs_type: ["how_to"]
 product_category: ["Integrations"]
-translation: ["Integrations", "CSI driver", "Guides", "Upgrading the CSI driver"]
+translation: ["Integrations", "Kubernetes CSI driver", "Guides", "Upgrading the CSI driver"]
 scrape_type: "whole"
 priority: 60
 ---
