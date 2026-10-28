@@ -15,8 +15,8 @@ import (
 	"github.com/kubernetes-csi/csi-test/v5/pkg/sanity"
 	"google.golang.org/grpc"
 
-	"github.com/hetznercloud/csi-driver/internal/csi"
 	"github.com/hetznercloud/csi-driver/internal/volumes"
+	"github.com/hetznercloud/hcloud-go/v2/hcloud"
 )
 
 func TestSanity(t *testing.T) {
@@ -95,34 +95,34 @@ type sanityVolumeService struct {
 	volumes list.List
 }
 
-func (s *sanityVolumeService) All(_ context.Context) ([]*csi.Volume, error) {
+func (s *sanityVolumeService) All(_ context.Context) ([]*hcloud.Volume, error) {
 	s.mu.Lock()
 	defer s.mu.Unlock()
 
-	vols := []*csi.Volume{}
+	vols := []*hcloud.Volume{}
 	for e := s.volumes.Front(); e != nil; e = e.Next() {
-		v := e.Value.(*csi.Volume)
+		v := e.Value.(*hcloud.Volume)
 		vols = append(vols, v)
 	}
 	return vols, nil
 }
 
-func (s *sanityVolumeService) Create(_ context.Context, opts volumes.CreateOpts) (*csi.Volume, error) {
+func (s *sanityVolumeService) Create(_ context.Context, opts volumes.CreateOpts) (*hcloud.Volume, error) {
 	s.mu.Lock()
 	defer s.mu.Unlock()
 
 	for e := s.volumes.Front(); e != nil; e = e.Next() {
-		v := e.Value.(*csi.Volume)
+		v := e.Value.(*hcloud.Volume)
 		if v.Name == opts.Name {
 			return nil, volumes.ErrVolumeAlreadyExists
 		}
 	}
 
-	volume := &csi.Volume{
+	volume := &hcloud.Volume{
 		ID:          int64(s.volumes.Len() + 1),
 		Name:        opts.Name,
 		Size:        opts.MinSize,
-		Location:    opts.Location,
+		Location:    &hcloud.Location{Name: opts.Location},
 		LinuxDevice: fmt.Sprintf("/dev/disk/by-id/scsi-0HC_Volume_%d", s.volumes.Len()+1),
 	}
 
@@ -130,12 +130,12 @@ func (s *sanityVolumeService) Create(_ context.Context, opts volumes.CreateOpts)
 	return volume, nil
 }
 
-func (s *sanityVolumeService) GetByID(_ context.Context, id int64) (*csi.Volume, error) {
+func (s *sanityVolumeService) GetByID(_ context.Context, id int64) (*hcloud.Volume, error) {
 	s.mu.Lock()
 	defer s.mu.Unlock()
 
 	for e := s.volumes.Front(); e != nil; e = e.Next() {
-		v := e.Value.(*csi.Volume)
+		v := e.Value.(*hcloud.Volume)
 		if v.ID == id {
 			return v, nil
 		}
@@ -144,12 +144,12 @@ func (s *sanityVolumeService) GetByID(_ context.Context, id int64) (*csi.Volume,
 	return nil, volumes.ErrVolumeNotFound
 }
 
-func (s *sanityVolumeService) GetByName(_ context.Context, name string) (*csi.Volume, error) {
+func (s *sanityVolumeService) GetByName(_ context.Context, name string) (*hcloud.Volume, error) {
 	s.mu.Lock()
 	defer s.mu.Unlock()
 
 	for e := s.volumes.Front(); e != nil; e = e.Next() {
-		v := e.Value.(*csi.Volume)
+		v := e.Value.(*hcloud.Volume)
 		if v.Name == name {
 			return v, nil
 		}
@@ -158,12 +158,12 @@ func (s *sanityVolumeService) GetByName(_ context.Context, name string) (*csi.Vo
 	return nil, volumes.ErrVolumeNotFound
 }
 
-func (s *sanityVolumeService) Delete(_ context.Context, volume *csi.Volume) error {
+func (s *sanityVolumeService) Delete(_ context.Context, volume *hcloud.Volume) error {
 	s.mu.Lock()
 	defer s.mu.Unlock()
 
 	for e := s.volumes.Front(); e != nil; e = e.Next() {
-		v := e.Value.(*csi.Volume)
+		v := e.Value.(*hcloud.Volume)
 		if v.ID == volume.ID {
 			s.volumes.Remove(e)
 			return nil
@@ -173,12 +173,12 @@ func (s *sanityVolumeService) Delete(_ context.Context, volume *csi.Volume) erro
 	return volumes.ErrVolumeNotFound
 }
 
-func (s *sanityVolumeService) Resize(_ context.Context, volume *csi.Volume, size int) error {
+func (s *sanityVolumeService) Resize(_ context.Context, volume *hcloud.Volume, size int) error {
 	s.mu.Lock()
 	defer s.mu.Unlock()
 
 	for e := s.volumes.Front(); e != nil; e = e.Next() {
-		v := e.Value.(*csi.Volume)
+		v := e.Value.(*hcloud.Volume)
 		if v.ID == volume.ID {
 			v.Size = size
 			return nil
@@ -188,11 +188,11 @@ func (s *sanityVolumeService) Resize(_ context.Context, volume *csi.Volume, size
 	return volumes.ErrVolumeNotFound
 }
 
-func (s *sanityVolumeService) Attach(_ context.Context, _ *csi.Volume, _ *csi.Server) error {
+func (s *sanityVolumeService) Attach(_ context.Context, _ *hcloud.Volume, _ *hcloud.Server) error {
 	return nil
 }
 
-func (s *sanityVolumeService) Detach(_ context.Context, _ *csi.Volume, _ *csi.Server) error {
+func (s *sanityVolumeService) Detach(_ context.Context, _ *hcloud.Volume, _ *hcloud.Server) error {
 	return nil
 }
 

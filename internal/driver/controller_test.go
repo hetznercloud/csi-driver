@@ -10,9 +10,9 @@ import (
 	"google.golang.org/grpc/codes"
 	"google.golang.org/grpc/status"
 
-	"github.com/hetznercloud/csi-driver/internal/csi"
 	"github.com/hetznercloud/csi-driver/internal/mock"
 	"github.com/hetznercloud/csi-driver/internal/volumes"
+	"github.com/hetznercloud/hcloud-go/v2/hcloud"
 )
 
 var _ proto.ControllerServer = (*ControllerService)(nil)
@@ -45,7 +45,7 @@ func TestControllerServiceCreateVolume(t *testing.T) {
 
 	env.service.enableProvidedByTopology = true
 
-	env.volumeService.CreateFunc = func(ctx context.Context, opts volumes.CreateOpts) (*csi.Volume, error) {
+	env.volumeService.CreateFunc = func(ctx context.Context, opts volumes.CreateOpts) (*hcloud.Volume, error) {
 		if opts.Name != "testvol" {
 			t.Errorf("unexpected name passed to volume service: %s", opts.Name)
 		}
@@ -70,11 +70,11 @@ func TestControllerServiceCreateVolume(t *testing.T) {
 		if v, ok := opts.Labels[labelKeyPVName]; !ok || v != "pv-name" {
 			t.Errorf("unexpected labels passed to volume service: %s", opts.Labels)
 		}
-		return &csi.Volume{
+		return &hcloud.Volume{
 			ID:       1,
 			Name:     opts.Name,
 			Size:     opts.MinSize,
-			Location: opts.Location,
+			Location: &hcloud.Location{Name: opts.Location},
 		}, nil
 	}
 
@@ -130,7 +130,7 @@ func TestControllerServiceCreateVolumeWithParameterLabels(t *testing.T) {
 
 	env.service.enableProvidedByTopology = true
 
-	env.volumeService.CreateFunc = func(ctx context.Context, opts volumes.CreateOpts) (*csi.Volume, error) {
+	env.volumeService.CreateFunc = func(ctx context.Context, opts volumes.CreateOpts) (*hcloud.Volume, error) {
 		if opts.Name != "testvol" {
 			t.Errorf("unexpected name passed to volume service: %s", opts.Name)
 		}
@@ -149,11 +149,11 @@ func TestControllerServiceCreateVolumeWithParameterLabels(t *testing.T) {
 		if v, ok := opts.Labels["clusterName"]; !ok || v != "myCluster" {
 			t.Errorf("unexpected labels passed to volume service: %s", opts.Labels)
 		}
-		return &csi.Volume{
+		return &hcloud.Volume{
 			ID:       1,
 			Name:     opts.Name,
 			Size:     opts.MinSize,
-			Location: opts.Location,
+			Location: &hcloud.Location{Name: opts.Location},
 		}, nil
 	}
 
@@ -205,17 +205,17 @@ func TestControllerServiceCreateVolumeWithTruncatedLabelStartingWithDash(t *test
 
 	env.service.enableProvidedByTopology = true
 
-	env.volumeService.CreateFunc = func(ctx context.Context, opts volumes.CreateOpts) (*csi.Volume, error) {
+	env.volumeService.CreateFunc = func(ctx context.Context, opts volumes.CreateOpts) (*hcloud.Volume, error) {
 		// Input: "a" + 63x"-" + "b" (65 chars). After truncating to last 63: 62x"-" + "b".
 		// After stripping leading non-alphanumeric chars: "b".
 		if v, ok := opts.Labels["test"]; !ok || v != "b" {
 			t.Errorf("unexpected label value after truncation: %q", v)
 		}
-		return &csi.Volume{
+		return &hcloud.Volume{
 			ID:       1,
 			Name:     opts.Name,
 			Size:     opts.MinSize,
-			Location: opts.Location,
+			Location: &hcloud.Location{Name: opts.Location},
 		}, nil
 	}
 
@@ -249,15 +249,15 @@ func TestControllerServiceCreateVolumeWithTruncatedLabelStartingWithDash(t *test
 func TestControllerServiceCreateVolumeWithLocation(t *testing.T) {
 	env := newControllerServiceTestEnv()
 
-	env.volumeService.CreateFunc = func(ctx context.Context, opts volumes.CreateOpts) (*csi.Volume, error) {
+	env.volumeService.CreateFunc = func(ctx context.Context, opts volumes.CreateOpts) (*hcloud.Volume, error) {
 		if opts.Location != "explicit" {
 			t.Errorf("unexpected location passed to volume service: %s", opts.Location)
 		}
-		return &csi.Volume{
+		return &hcloud.Volume{
 			ID:       1,
 			Name:     opts.Name,
 			Size:     opts.MinSize,
-			Location: opts.Location,
+			Location: &hcloud.Location{Name: opts.Location},
 		}, nil
 	}
 
@@ -468,7 +468,7 @@ func TestControllerServiceCreateVolumeCreateErrors(t *testing.T) {
 
 	for _, testCase := range testCases {
 		t.Run(testCase.Name, func(t *testing.T) {
-			env.volumeService.CreateFunc = func(ctx context.Context, opts volumes.CreateOpts) (*csi.Volume, error) {
+			env.volumeService.CreateFunc = func(ctx context.Context, opts volumes.CreateOpts) (*hcloud.Volume, error) {
 				return nil, testCase.CreateError
 			}
 
@@ -499,7 +499,7 @@ func TestControllerServiceCreateVolumeCreateErrors(t *testing.T) {
 func TestControllerServiceDeleteVolume(t *testing.T) {
 	env := newControllerServiceTestEnv()
 
-	env.volumeService.DeleteFunc = func(ctx context.Context, volume *csi.Volume) error {
+	env.volumeService.DeleteFunc = func(ctx context.Context, volume *hcloud.Volume) error {
 		if volume.ID != 1 {
 			t.Errorf("unexpected volume id passed to volume service: %d", volume.ID)
 		}
@@ -545,7 +545,7 @@ func TestControllerServiceDeleteVolumeInputErrors(t *testing.T) {
 func TestControllerServiceDeleteVolumeAttached(t *testing.T) {
 	env := newControllerServiceTestEnv()
 
-	env.volumeService.DeleteFunc = func(ctx context.Context, volume *csi.Volume) error {
+	env.volumeService.DeleteFunc = func(ctx context.Context, volume *hcloud.Volume) error {
 		return volumes.ErrAttached
 	}
 
@@ -560,7 +560,7 @@ func TestControllerServiceDeleteVolumeAttached(t *testing.T) {
 func TestControllerServiceDeleteVolumeInvalidID(t *testing.T) {
 	env := newControllerServiceTestEnv()
 
-	env.volumeService.DeleteFunc = func(ctx context.Context, volume *csi.Volume) error {
+	env.volumeService.DeleteFunc = func(ctx context.Context, volume *hcloud.Volume) error {
 		return nil
 	}
 
@@ -575,7 +575,7 @@ func TestControllerServiceDeleteVolumeInvalidID(t *testing.T) {
 func TestControllerServiceDeleteVolumeInternalError(t *testing.T) {
 	env := newControllerServiceTestEnv()
 
-	env.volumeService.DeleteFunc = func(ctx context.Context, volume *csi.Volume) error {
+	env.volumeService.DeleteFunc = func(ctx context.Context, volume *hcloud.Volume) error {
 		return io.EOF
 	}
 
@@ -590,14 +590,14 @@ func TestControllerServiceDeleteVolumeInternalError(t *testing.T) {
 func TestControllerServicePublishVolume(t *testing.T) {
 	env := newControllerServiceTestEnv()
 
-	env.volumeService.GetByIDFunc = func(ctx context.Context, id int64) (*csi.Volume, error) {
+	env.volumeService.GetByIDFunc = func(ctx context.Context, id int64) (*hcloud.Volume, error) {
 		if id != 1 {
 			t.Errorf("unexpected volume id passed to volume service: %d", id)
 		}
-		return &csi.Volume{ID: id, LinuxDevice: "foopath"}, nil
+		return &hcloud.Volume{ID: id, LinuxDevice: "foopath"}, nil
 	}
 
-	env.volumeService.AttachFunc = func(ctx context.Context, volume *csi.Volume, server *csi.Server) error {
+	env.volumeService.AttachFunc = func(ctx context.Context, volume *hcloud.Volume, server *hcloud.Server) error {
 		if volume.ID != 1 {
 			t.Errorf("unexpected volume id passed to volume service: %d", volume.ID)
 		}
@@ -629,7 +629,7 @@ func TestControllerServicePublishVolume(t *testing.T) {
 func TestControllerServicePublishVolumeInputErrors(t *testing.T) {
 	env := newControllerServiceTestEnv()
 
-	env.volumeService.AttachFunc = func(ctx context.Context, volume *csi.Volume, server *csi.Server) error {
+	env.volumeService.AttachFunc = func(ctx context.Context, volume *hcloud.Volume, server *hcloud.Server) error {
 		return nil
 	}
 
@@ -774,7 +774,7 @@ func TestControllerServicePublishVolumeAttachErrors(t *testing.T) {
 
 	for _, testCase := range testCases {
 		t.Run(testCase.Name, func(t *testing.T) {
-			env.volumeService.AttachFunc = func(ctx context.Context, volume *csi.Volume, server *csi.Server) error {
+			env.volumeService.AttachFunc = func(ctx context.Context, volume *hcloud.Volume, server *hcloud.Server) error {
 				return testCase.AttachError
 			}
 			_, err := env.service.ControllerPublishVolume(env.ctx, &proto.ControllerPublishVolumeRequest{
@@ -796,7 +796,7 @@ func TestControllerServicePublishVolumeAttachErrors(t *testing.T) {
 func TestControllerServiceUnpublishVolume(t *testing.T) {
 	env := newControllerServiceTestEnv()
 
-	env.volumeService.DetachFunc = func(ctx context.Context, volume *csi.Volume, server *csi.Server) error {
+	env.volumeService.DetachFunc = func(ctx context.Context, volume *hcloud.Volume, server *hcloud.Server) error {
 		if volume.ID != 1 {
 			t.Errorf("unexpected volume id passed to volume service: %d", volume.ID)
 		}
@@ -819,7 +819,7 @@ func TestControllerServiceUnpublishVolume(t *testing.T) {
 func TestControllerServiceUnpublishVolumeNoNode(t *testing.T) {
 	env := newControllerServiceTestEnv()
 
-	env.volumeService.DetachFunc = func(ctx context.Context, volume *csi.Volume, server *csi.Server) error {
+	env.volumeService.DetachFunc = func(ctx context.Context, volume *hcloud.Volume, server *hcloud.Server) error {
 		if server != nil {
 			t.Errorf("unexpected server id passed to volume service: %d", server.ID)
 		}
@@ -839,7 +839,7 @@ func TestControllerServiceUnpublishVolumeNoNode(t *testing.T) {
 func TestControllerServiceUnpublishVolumeInputErrors(t *testing.T) {
 	env := newControllerServiceTestEnv()
 
-	env.volumeService.DetachFunc = func(ctx context.Context, volume *csi.Volume, server *csi.Server) error {
+	env.volumeService.DetachFunc = func(ctx context.Context, volume *hcloud.Volume, server *hcloud.Server) error {
 		return nil
 	}
 
@@ -906,7 +906,7 @@ func TestControllerServiceUnpublishVolumeDetachErrors(t *testing.T) {
 
 	for _, testCase := range testCases {
 		t.Run(testCase.Name, func(t *testing.T) {
-			env.volumeService.DetachFunc = func(ctx context.Context, volume *csi.Volume, server *csi.Server) error {
+			env.volumeService.DetachFunc = func(ctx context.Context, volume *hcloud.Volume, server *hcloud.Server) error {
 				return testCase.DetachError
 			}
 			_, err := env.service.ControllerUnpublishVolume(env.ctx, &proto.ControllerUnpublishVolumeRequest{
@@ -936,8 +936,8 @@ func TestControllerServiceControllerGetCapabilities(t *testing.T) {
 func TestControllerServiceValidateVolumeCapabilities(t *testing.T) {
 	env := newControllerServiceTestEnv()
 
-	env.volumeService.GetByIDFunc = func(ctx context.Context, id int64) (*csi.Volume, error) {
-		return &csi.Volume{ID: id}, nil
+	env.volumeService.GetByIDFunc = func(ctx context.Context, id int64) (*hcloud.Volume, error) {
+		return &hcloud.Volume{ID: id}, nil
 	}
 
 	testCases := []struct {
@@ -1043,7 +1043,7 @@ func TestControllerServiceValidateVolumeCapabilitiesInputErrors(t *testing.T) {
 func TestControllerServiceValidateVolumeCapabilitiesVolumeNotFound(t *testing.T) {
 	env := newControllerServiceTestEnv()
 
-	env.volumeService.GetByIDFunc = func(ctx context.Context, id int64) (*csi.Volume, error) {
+	env.volumeService.GetByIDFunc = func(ctx context.Context, id int64) (*hcloud.Volume, error) {
 		return nil, nil
 	}
 
@@ -1066,7 +1066,7 @@ func TestControllerServiceValidateVolumeCapabilitiesVolumeNotFound(t *testing.T)
 func TestControllerServiceValidateVolumeCapabilitiesInternalError(t *testing.T) {
 	env := newControllerServiceTestEnv()
 
-	env.volumeService.GetByIDFunc = func(ctx context.Context, id int64) (*csi.Volume, error) {
+	env.volumeService.GetByIDFunc = func(ctx context.Context, id int64) (*hcloud.Volume, error) {
 		return nil, io.EOF
 	}
 
@@ -1089,8 +1089,8 @@ func TestControllerServiceValidateVolumeCapabilitiesInternalError(t *testing.T) 
 func TestControllerServiceValidateVolumeCapabilitiesUnsupportedCapability(t *testing.T) {
 	env := newControllerServiceTestEnv()
 
-	env.volumeService.GetByIDFunc = func(ctx context.Context, id int64) (*csi.Volume, error) {
-		return &csi.Volume{ID: id}, nil
+	env.volumeService.GetByIDFunc = func(ctx context.Context, id int64) (*hcloud.Volume, error) {
+		return &hcloud.Volume{ID: id}, nil
 	}
 
 	req := &proto.ValidateVolumeCapabilitiesRequest{

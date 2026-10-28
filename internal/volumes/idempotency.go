@@ -5,7 +5,7 @@ import (
 	"errors"
 	"log/slog"
 
-	"github.com/hetznercloud/csi-driver/internal/csi"
+	"github.com/hetznercloud/hcloud-go/v2/hcloud"
 )
 
 // IdempotentService wraps a volume service and provides idempotency as required by the CSI spec.
@@ -21,7 +21,7 @@ func NewIdempotentService(logger *slog.Logger, volumeService Service) *Idempoten
 	}
 }
 
-func (s *IdempotentService) Create(ctx context.Context, opts CreateOpts) (*csi.Volume, error) {
+func (s *IdempotentService) Create(ctx context.Context, opts CreateOpts) (*hcloud.Volume, error) {
 	s.logger.Info(
 		"creating volume",
 		"name", opts.Name,
@@ -79,12 +79,12 @@ func (s *IdempotentService) Create(ctx context.Context, opts CreateOpts) (*csi.V
 			)
 			return nil, ErrVolumeAlreadyExists
 		}
-		if existingVolume.Location != opts.Location {
+		if existingVolume.Location.Name != opts.Location {
 			s.logger.Info(
 				"existing volume is in different location",
 				"name", opts.Name,
 				"location", opts.Location,
-				"actual-location", existingVolume.Location,
+				"actual-location", existingVolume.Location.Name,
 			)
 			return nil, ErrVolumeAlreadyExists
 		}
@@ -94,19 +94,19 @@ func (s *IdempotentService) Create(ctx context.Context, opts CreateOpts) (*csi.V
 	return nil, err
 }
 
-func (s *IdempotentService) All(ctx context.Context) ([]*csi.Volume, error) {
+func (s *IdempotentService) All(ctx context.Context) ([]*hcloud.Volume, error) {
 	return s.volumeService.All(ctx)
 }
 
-func (s *IdempotentService) GetByID(ctx context.Context, id int64) (*csi.Volume, error) {
+func (s *IdempotentService) GetByID(ctx context.Context, id int64) (*hcloud.Volume, error) {
 	return s.volumeService.GetByID(ctx, id)
 }
 
-func (s *IdempotentService) GetByName(ctx context.Context, name string) (*csi.Volume, error) {
+func (s *IdempotentService) GetByName(ctx context.Context, name string) (*hcloud.Volume, error) {
 	return s.volumeService.GetByName(ctx, name)
 }
 
-func (s *IdempotentService) Delete(ctx context.Context, volume *csi.Volume) error {
+func (s *IdempotentService) Delete(ctx context.Context, volume *hcloud.Volume) error {
 	switch err := s.volumeService.Detach(ctx, volume, nil); {
 	case errors.Is(err, ErrVolumeNotFound), errors.Is(err, ErrNotAttached), err == nil:
 		break
@@ -124,7 +124,7 @@ func (s *IdempotentService) Delete(ctx context.Context, volume *csi.Volume) erro
 	}
 }
 
-func (s *IdempotentService) Attach(ctx context.Context, volume *csi.Volume, server *csi.Server) error {
+func (s *IdempotentService) Attach(ctx context.Context, volume *hcloud.Volume, server *hcloud.Server) error {
 	attachErr := s.volumeService.Attach(ctx, volume, server)
 	if attachErr == nil {
 		return nil
@@ -140,7 +140,7 @@ func (s *IdempotentService) Attach(ctx context.Context, volume *csi.Volume, serv
 	return attachErr
 }
 
-func (s *IdempotentService) Detach(ctx context.Context, volume *csi.Volume, server *csi.Server) error {
+func (s *IdempotentService) Detach(ctx context.Context, volume *hcloud.Volume, server *hcloud.Server) error {
 	switch err := s.volumeService.Detach(ctx, volume, server); {
 	case errors.Is(err, ErrNotAttached):
 		return nil
@@ -154,7 +154,7 @@ func (s *IdempotentService) Detach(ctx context.Context, volume *csi.Volume, serv
 	}
 }
 
-func (s *IdempotentService) Resize(ctx context.Context, volume *csi.Volume, size int) error {
+func (s *IdempotentService) Resize(ctx context.Context, volume *hcloud.Volume, size int) error {
 	switch err := s.volumeService.Resize(ctx, volume, size); {
 	case errors.Is(err, ErrVolumeSizeAlreadyReached):
 		// If a previous rescale attempt failed (rate limit, network connectivity, ...), the volume might already have the target size.

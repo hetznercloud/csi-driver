@@ -8,19 +8,19 @@ import (
 	"reflect"
 	"testing"
 
-	"github.com/hetznercloud/csi-driver/internal/csi"
 	"github.com/hetznercloud/csi-driver/internal/mock"
 	"github.com/hetznercloud/csi-driver/internal/volumes"
+	"github.com/hetznercloud/hcloud-go/v2/hcloud"
 )
 
 var _ volumes.Service = (*volumes.IdempotentService)(nil)
 
 func TestIdempotentServiceCreateNew(t *testing.T) {
-	creatingVolume := &csi.Volume{
+	creatingVolume := &hcloud.Volume{
 		ID:       1,
 		Name:     "vol",
 		Size:     10,
-		Location: "loc",
+		Location: &hcloud.Location{Name: "loc"},
 	}
 	creatingOpts := volumes.CreateOpts{
 		Name:     "test",
@@ -30,7 +30,7 @@ func TestIdempotentServiceCreateNew(t *testing.T) {
 	}
 
 	volumeService := &mock.VolumeService{
-		CreateFunc: func(ctx context.Context, opts volumes.CreateOpts) (*csi.Volume, error) {
+		CreateFunc: func(ctx context.Context, opts volumes.CreateOpts) (*hcloud.Volume, error) {
 			if !reflect.DeepEqual(opts, creatingOpts) {
 				t.Errorf("unexpected options: %v", opts)
 			}
@@ -50,18 +50,18 @@ func TestIdempotentServiceCreateNew(t *testing.T) {
 }
 
 func TestIdempotentServiceCreateExisting(t *testing.T) {
-	existingVolume := &csi.Volume{
+	existingVolume := &hcloud.Volume{
 		ID:       1,
 		Name:     "vol",
 		Size:     10,
-		Location: "loc",
+		Location: &hcloud.Location{Name: "loc"},
 	}
 
 	volumeService := &mock.VolumeService{
-		CreateFunc: func(ctx context.Context, opts volumes.CreateOpts) (*csi.Volume, error) {
+		CreateFunc: func(ctx context.Context, opts volumes.CreateOpts) (*hcloud.Volume, error) {
 			return nil, volumes.ErrVolumeAlreadyExists
 		},
-		GetByNameFunc: func(ctx context.Context, name string) (*csi.Volume, error) {
+		GetByNameFunc: func(ctx context.Context, name string) (*hcloud.Volume, error) {
 			return existingVolume, nil
 		},
 	}
@@ -84,10 +84,10 @@ func TestIdempotentServiceCreateExisting(t *testing.T) {
 
 func TestIdempotentServiceCreateExistingError(t *testing.T) {
 	volumeService := &mock.VolumeService{
-		CreateFunc: func(ctx context.Context, opts volumes.CreateOpts) (*csi.Volume, error) {
+		CreateFunc: func(ctx context.Context, opts volumes.CreateOpts) (*hcloud.Volume, error) {
 			return nil, volumes.ErrVolumeAlreadyExists
 		},
-		GetByNameFunc: func(ctx context.Context, name string) (*csi.Volume, error) {
+		GetByNameFunc: func(ctx context.Context, name string) (*hcloud.Volume, error) {
 			return nil, io.EOF
 		},
 	}
@@ -108,39 +108,39 @@ func TestIdempotentServiceCreateExistingError(t *testing.T) {
 func TestIdempotentServiceCreateExistingNotFitting(t *testing.T) {
 	testCases := []struct {
 		Name           string
-		ExistingVolume *csi.Volume
+		ExistingVolume *hcloud.Volume
 	}{
 		{
 			Name: "too small",
-			ExistingVolume: &csi.Volume{
+			ExistingVolume: &hcloud.Volume{
 				ID:       1,
 				Name:     "vol",
 				Size:     1,
-				Location: "loc",
+				Location: &hcloud.Location{Name: "loc"},
 			},
 		},
 		{
 			Name: "too large",
-			ExistingVolume: &csi.Volume{
+			ExistingVolume: &hcloud.Volume{
 				ID:       1,
 				Name:     "vol",
 				Size:     1000,
-				Location: "loc",
+				Location: &hcloud.Location{Name: "loc"},
 			},
 		},
 		{
 			Name: "wrong location",
-			ExistingVolume: &csi.Volume{
+			ExistingVolume: &hcloud.Volume{
 				ID:       1,
 				Name:     "vol",
 				Size:     10,
-				Location: "wrong",
+				Location: &hcloud.Location{Name: "wrong"},
 			},
 		},
 	}
 
 	volumeService := &mock.VolumeService{
-		CreateFunc: func(ctx context.Context, opts volumes.CreateOpts) (*csi.Volume, error) {
+		CreateFunc: func(ctx context.Context, opts volumes.CreateOpts) (*hcloud.Volume, error) {
 			return nil, volumes.ErrVolumeAlreadyExists
 		},
 	}
@@ -149,7 +149,7 @@ func TestIdempotentServiceCreateExistingNotFitting(t *testing.T) {
 
 	for _, testCase := range testCases {
 		t.Run(testCase.Name, func(t *testing.T) {
-			volumeService.GetByNameFunc = func(ctx context.Context, name string) (*csi.Volume, error) {
+			volumeService.GetByNameFunc = func(ctx context.Context, name string) (*hcloud.Volume, error) {
 				return testCase.ExistingVolume, nil
 			}
 
@@ -216,14 +216,14 @@ func TestIdempotentServiceDelete(t *testing.T) {
 
 	for _, testCase := range testCases {
 		t.Run(testCase.Name, func(t *testing.T) {
-			volumeService.DeleteFunc = func(ctx context.Context, volume *csi.Volume) error {
+			volumeService.DeleteFunc = func(ctx context.Context, volume *hcloud.Volume) error {
 				return testCase.DeleteErr
 			}
-			volumeService.DetachFunc = func(ctx context.Context, volume *csi.Volume, server *csi.Server) error {
+			volumeService.DetachFunc = func(ctx context.Context, volume *hcloud.Volume, server *hcloud.Server) error {
 				return testCase.DetachErr
 			}
 
-			err := service.Delete(context.Background(), &csi.Volume{})
+			err := service.Delete(context.Background(), &hcloud.Volume{})
 			if !errors.Is(err, testCase.ServiceErr) {
 				t.Fatalf("unexpected error: %v", err)
 			}
@@ -233,17 +233,17 @@ func TestIdempotentServiceDelete(t *testing.T) {
 
 func TestIdempotentServiceDeleteVolumeNotFound(t *testing.T) {
 	volumeService := &mock.VolumeService{
-		DeleteFunc: func(ctx context.Context, volume *csi.Volume) error {
+		DeleteFunc: func(ctx context.Context, volume *hcloud.Volume) error {
 			return volumes.ErrVolumeNotFound
 		},
-		DetachFunc: func(ctx context.Context, volume *csi.Volume, server *csi.Server) error {
+		DetachFunc: func(ctx context.Context, volume *hcloud.Volume, server *hcloud.Server) error {
 			return nil
 		},
 	}
 
 	service := volumes.NewIdempotentService(slog.New(slog.DiscardHandler), volumeService)
 
-	err := service.Delete(context.Background(), &csi.Volume{})
+	err := service.Delete(context.Background(), &hcloud.Volume{})
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -251,17 +251,17 @@ func TestIdempotentServiceDeleteVolumeNotFound(t *testing.T) {
 
 func TestIdempotentServiceDeleteError(t *testing.T) {
 	volumeService := &mock.VolumeService{
-		DeleteFunc: func(ctx context.Context, volume *csi.Volume) error {
+		DeleteFunc: func(ctx context.Context, volume *hcloud.Volume) error {
 			return io.EOF
 		},
-		DetachFunc: func(ctx context.Context, volume *csi.Volume, server *csi.Server) error {
+		DetachFunc: func(ctx context.Context, volume *hcloud.Volume, server *hcloud.Server) error {
 			return nil
 		},
 	}
 
 	service := volumes.NewIdempotentService(slog.New(slog.DiscardHandler), volumeService)
 
-	err := service.Delete(context.Background(), &csi.Volume{})
+	err := service.Delete(context.Background(), &hcloud.Volume{})
 	if !errors.Is(err, io.EOF) {
 		t.Fatal(err)
 	}
@@ -269,14 +269,14 @@ func TestIdempotentServiceDeleteError(t *testing.T) {
 
 func TestIdempotentServiceAttach(t *testing.T) {
 	volumeService := &mock.VolumeService{
-		AttachFunc: func(ctx context.Context, volume *csi.Volume, server *csi.Server) error {
+		AttachFunc: func(ctx context.Context, volume *hcloud.Volume, server *hcloud.Server) error {
 			return nil
 		},
 	}
 
 	service := volumes.NewIdempotentService(slog.New(slog.DiscardHandler), volumeService)
 
-	err := service.Attach(context.Background(), &csi.Volume{}, &csi.Server{})
+	err := service.Attach(context.Background(), &hcloud.Volume{}, &hcloud.Server{})
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -284,13 +284,13 @@ func TestIdempotentServiceAttach(t *testing.T) {
 
 func TestIdempotentServiceAttachAlreadyAttachedSameServer(t *testing.T) {
 	volumeService := &mock.VolumeService{
-		AttachFunc: func(ctx context.Context, volume *csi.Volume, server *csi.Server) error {
+		AttachFunc: func(ctx context.Context, volume *hcloud.Volume, server *hcloud.Server) error {
 			return volumes.ErrAttached
 		},
-		GetByIDFunc: func(ctx context.Context, id int64) (*csi.Volume, error) {
-			return &csi.Volume{
+		GetByIDFunc: func(ctx context.Context, id int64) (*hcloud.Volume, error) {
+			return &hcloud.Volume{
 				ID: id,
-				Server: &csi.Server{
+				Server: &hcloud.Server{
 					ID: 1,
 				},
 			}, nil
@@ -299,7 +299,7 @@ func TestIdempotentServiceAttachAlreadyAttachedSameServer(t *testing.T) {
 
 	service := volumes.NewIdempotentService(slog.New(slog.DiscardHandler), volumeService)
 
-	err := service.Attach(context.Background(), &csi.Volume{}, &csi.Server{ID: 1})
+	err := service.Attach(context.Background(), &hcloud.Volume{}, &hcloud.Server{ID: 1})
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -307,13 +307,13 @@ func TestIdempotentServiceAttachAlreadyAttachedSameServer(t *testing.T) {
 
 func TestIdempotentServiceAttachAlreadyAttachedDifferentServer(t *testing.T) {
 	volumeService := &mock.VolumeService{
-		AttachFunc: func(ctx context.Context, volume *csi.Volume, server *csi.Server) error {
+		AttachFunc: func(ctx context.Context, volume *hcloud.Volume, server *hcloud.Server) error {
 			return volumes.ErrAttached
 		},
-		GetByIDFunc: func(ctx context.Context, id int64) (*csi.Volume, error) {
-			return &csi.Volume{
+		GetByIDFunc: func(ctx context.Context, id int64) (*hcloud.Volume, error) {
+			return &hcloud.Volume{
 				ID: id,
-				Server: &csi.Server{
+				Server: &hcloud.Server{
 					ID: 2,
 				},
 			}, nil
@@ -322,7 +322,7 @@ func TestIdempotentServiceAttachAlreadyAttachedDifferentServer(t *testing.T) {
 
 	service := volumes.NewIdempotentService(slog.New(slog.DiscardHandler), volumeService)
 
-	err := service.Attach(context.Background(), &csi.Volume{}, &csi.Server{ID: 1})
+	err := service.Attach(context.Background(), &hcloud.Volume{}, &hcloud.Server{ID: 1})
 	if !errors.Is(err, volumes.ErrAttached) {
 		t.Fatal(err)
 	}
@@ -330,14 +330,14 @@ func TestIdempotentServiceAttachAlreadyAttachedDifferentServer(t *testing.T) {
 
 func TestIdempotentServiceDetach(t *testing.T) {
 	volumeService := &mock.VolumeService{
-		DetachFunc: func(ctx context.Context, volume *csi.Volume, server *csi.Server) error {
+		DetachFunc: func(ctx context.Context, volume *hcloud.Volume, server *hcloud.Server) error {
 			return nil
 		},
 	}
 
 	service := volumes.NewIdempotentService(slog.New(slog.DiscardHandler), volumeService)
 
-	err := service.Detach(context.Background(), &csi.Volume{}, &csi.Server{})
+	err := service.Detach(context.Background(), &hcloud.Volume{}, &hcloud.Server{})
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -345,14 +345,14 @@ func TestIdempotentServiceDetach(t *testing.T) {
 
 func TestIdempotentServiceDetachNotAttached(t *testing.T) {
 	volumeService := &mock.VolumeService{
-		DetachFunc: func(ctx context.Context, volume *csi.Volume, server *csi.Server) error {
+		DetachFunc: func(ctx context.Context, volume *hcloud.Volume, server *hcloud.Server) error {
 			return volumes.ErrNotAttached
 		},
 	}
 
 	service := volumes.NewIdempotentService(slog.New(slog.DiscardHandler), volumeService)
 
-	err := service.Detach(context.Background(), &csi.Volume{}, &csi.Server{})
+	err := service.Detach(context.Background(), &hcloud.Volume{}, &hcloud.Server{})
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -360,14 +360,14 @@ func TestIdempotentServiceDetachNotAttached(t *testing.T) {
 
 func TestIdempotentServiceDetachAttachedToDifferentServer(t *testing.T) {
 	volumeService := &mock.VolumeService{
-		DetachFunc: func(ctx context.Context, volume *csi.Volume, server *csi.Server) error {
+		DetachFunc: func(ctx context.Context, volume *hcloud.Volume, server *hcloud.Server) error {
 			return volumes.ErrAttached
 		},
 	}
 
 	service := volumes.NewIdempotentService(slog.New(slog.DiscardHandler), volumeService)
 
-	err := service.Detach(context.Background(), &csi.Volume{}, &csi.Server{})
+	err := service.Detach(context.Background(), &hcloud.Volume{}, &hcloud.Server{})
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -376,14 +376,14 @@ func TestIdempotentServiceDetachAttachedToDifferentServer(t *testing.T) {
 func TestIdempotentServiceExpand(t *testing.T) {
 	t.Run("ErrVolumeSizeAlreadyReached", func(t *testing.T) {
 		volumeService := &mock.VolumeService{
-			ResizeFunc: func(ctx context.Context, volume *csi.Volume, size int) error {
+			ResizeFunc: func(ctx context.Context, volume *hcloud.Volume, size int) error {
 				return volumes.ErrVolumeSizeAlreadyReached
 			},
 		}
 
 		service := volumes.NewIdempotentService(slog.New(slog.DiscardHandler), volumeService)
 
-		err := service.Resize(context.Background(), &csi.Volume{}, 10)
+		err := service.Resize(context.Background(), &hcloud.Volume{}, 10)
 		if err != nil {
 			t.Fatal(err)
 		}
