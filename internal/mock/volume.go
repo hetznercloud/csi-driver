@@ -3,73 +3,72 @@ package mock
 import (
 	"context"
 
-	"github.com/hetznercloud/csi-driver/internal/csi"
 	"github.com/hetznercloud/csi-driver/internal/volumes"
 	"github.com/hetznercloud/hcloud-go/v2/hcloud"
 )
 
 type VolumeService struct {
-	CreateFunc        func(ctx context.Context, opts volumes.CreateOpts) (*csi.Volume, error)
+	CreateFunc        func(ctx context.Context, opts volumes.CreateOpts) (*hcloud.Volume, error)
 	GetServerByIDFunc func(ctx context.Context, id int) (*hcloud.Server, error)
-	AllFunc           func(ctx context.Context) ([]*csi.Volume, error)
-	GetByIDFunc       func(ctx context.Context, id int64) (*csi.Volume, error)
-	GetByNameFunc     func(ctx context.Context, name string) (*csi.Volume, error)
-	DeleteFunc        func(ctx context.Context, volume *csi.Volume) error
-	AttachFunc        func(ctx context.Context, volume *csi.Volume, server *csi.Server) error
-	DetachFunc        func(ctx context.Context, volume *csi.Volume, server *csi.Server) error
-	ResizeFunc        func(ctx context.Context, volume *csi.Volume, size int) error
+	AllFunc           func(ctx context.Context) ([]*hcloud.Volume, error)
+	GetByIDFunc       func(ctx context.Context, id int64) (*hcloud.Volume, error)
+	GetByNameFunc     func(ctx context.Context, name string) (*hcloud.Volume, error)
+	DeleteFunc        func(ctx context.Context, volume *hcloud.Volume) error
+	AttachFunc        func(ctx context.Context, volume *hcloud.Volume, server *hcloud.Server) error
+	DetachFunc        func(ctx context.Context, volume *hcloud.Volume, server *hcloud.Server) error
+	ResizeFunc        func(ctx context.Context, volume *hcloud.Volume, size int) error
 }
 
-func (s *VolumeService) All(ctx context.Context) ([]*csi.Volume, error) {
+func (s *VolumeService) All(ctx context.Context) ([]*hcloud.Volume, error) {
 	if s.AllFunc == nil {
 		panic("not implemented")
 	}
 	return s.AllFunc(ctx)
 }
 
-func (s *VolumeService) Create(ctx context.Context, opts volumes.CreateOpts) (*csi.Volume, error) {
+func (s *VolumeService) Create(ctx context.Context, opts volumes.CreateOpts) (*hcloud.Volume, error) {
 	if s.CreateFunc == nil {
 		panic("not implemented")
 	}
 	return s.CreateFunc(ctx, opts)
 }
 
-func (s *VolumeService) GetByID(ctx context.Context, id int64) (*csi.Volume, error) {
+func (s *VolumeService) GetByID(ctx context.Context, id int64) (*hcloud.Volume, error) {
 	if s.GetByIDFunc == nil {
 		panic("not implemented")
 	}
 	return s.GetByIDFunc(ctx, id)
 }
 
-func (s *VolumeService) GetByName(ctx context.Context, name string) (*csi.Volume, error) {
+func (s *VolumeService) GetByName(ctx context.Context, name string) (*hcloud.Volume, error) {
 	if s.GetByNameFunc == nil {
 		panic("not implemented")
 	}
 	return s.GetByNameFunc(ctx, name)
 }
 
-func (s *VolumeService) Delete(ctx context.Context, volume *csi.Volume) error {
+func (s *VolumeService) Delete(ctx context.Context, volume *hcloud.Volume) error {
 	if s.DeleteFunc == nil {
 		panic("not implemented")
 	}
 	return s.DeleteFunc(ctx, volume)
 }
 
-func (s *VolumeService) Attach(ctx context.Context, volume *csi.Volume, server *csi.Server) error {
+func (s *VolumeService) Attach(ctx context.Context, volume *hcloud.Volume, server *hcloud.Server) error {
 	if s.AttachFunc == nil {
 		panic("not implemented")
 	}
 	return s.AttachFunc(ctx, volume, server)
 }
 
-func (s *VolumeService) Detach(ctx context.Context, volume *csi.Volume, server *csi.Server) error {
+func (s *VolumeService) Detach(ctx context.Context, volume *hcloud.Volume, server *hcloud.Server) error {
 	if s.DetachFunc == nil {
 		panic("not implemented")
 	}
 	return s.DetachFunc(ctx, volume, server)
 }
 
-func (s *VolumeService) Resize(ctx context.Context, volume *csi.Volume, size int) error {
+func (s *VolumeService) Resize(ctx context.Context, volume *hcloud.Volume, size int) error {
 	if s.ResizeFunc == nil {
 		panic("not implemented")
 	}

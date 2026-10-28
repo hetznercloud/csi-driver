@@ -13,7 +13,6 @@ import (
 	"google.golang.org/grpc/codes"
 	"google.golang.org/grpc/status"
 
-	"github.com/hetznercloud/csi-driver/internal/csi"
 	"github.com/hetznercloud/csi-driver/internal/utils"
 	"github.com/hetznercloud/csi-driver/internal/volumes"
 	"github.com/hetznercloud/hcloud-go/v2/hcloud"
@@ -178,7 +177,7 @@ func (s *ControllerService) CreateVolume(ctx context.Context, req *proto.CreateV
 
 	topology := &proto.Topology{
 		Segments: map[string]string{
-			TopologySegmentLocation: volume.Location,
+			TopologySegmentLocation: volume.Location.Name,
 		},
 	}
 
@@ -189,7 +188,7 @@ func (s *ControllerService) CreateVolume(ctx context.Context, req *proto.CreateV
 	resp := &proto.CreateVolumeResponse{
 		Volume: &proto.Volume{
 			VolumeId:      strconv.FormatInt(volume.ID, 10),
-			CapacityBytes: volume.SizeBytes(),
+			CapacityBytes: volumeSizeBytes(volume),
 			AccessibleTopology: []*proto.Topology{
 				topology,
 			},
@@ -207,7 +206,7 @@ func (s *ControllerService) DeleteVolume(ctx context.Context, req *proto.DeleteV
 	}
 
 	if volumeID, err := parseVolumeID(req.GetVolumeId()); err == nil {
-		volume := &csi.Volume{ID: volumeID}
+		volume := &hcloud.Volume{ID: volumeID}
 		if err := s.volumeService.Delete(ctx, volume); err != nil {
 			if errors.Is(err, volumes.ErrVolumeNotFound) {
 				return &proto.DeleteVolumeResponse{}, nil
@@ -251,8 +250,8 @@ func (s *ControllerService) ControllerPublishVolume(ctx context.Context, req *pr
 		return nil, status.Error(codes.InvalidArgument, "readonly volumes are not supported")
 	}
 
-	volume := &csi.Volume{ID: volumeID}
-	server := &csi.Server{ID: serverID}
+	volume := &hcloud.Volume{ID: volumeID}
+	server := &hcloud.Server{ID: serverID}
 
 	if err := s.volumeService.Attach(ctx, volume, server); err != nil {
 		code := codes.Internal
@@ -298,15 +297,15 @@ func (s *ControllerService) ControllerUnpublishVolume(ctx context.Context, req *
 	if err != nil {
 		return nil, status.Error(codes.NotFound, "volume not found")
 	}
-	volume := &csi.Volume{ID: volumeID}
+	volume := &hcloud.Volume{ID: volumeID}
 
-	var server *csi.Server
+	var server *hcloud.Server
 	if req.GetNodeId() != "" {
 		serverID, err := parseNodeID(req.GetNodeId())
 		if err != nil {
 			return nil, status.Error(codes.NotFound, "node not found")
 		}
-		server = &csi.Server{ID: serverID}
+		server = &hcloud.Server{ID: serverID}
 	}
 
 	if err := s.volumeService.Detach(ctx, volume, server); err != nil {
@@ -380,11 +379,11 @@ func (s *ControllerService) ListVolumes(ctx context.Context, req *proto.ListVolu
 		resp.Entries[i] = &proto.ListVolumesResponse_Entry{
 			Volume: &proto.Volume{
 				VolumeId:      strconv.FormatInt(volume.ID, 10),
-				CapacityBytes: volume.SizeBytes(),
+				CapacityBytes: volumeSizeBytes(volume),
 				AccessibleTopology: []*proto.Topology{
 					{
 						Segments: map[string]string{
-							TopologySegmentLocation: volume.Location,
+							TopologySegmentLocation: volume.Location.Name,
 						},
 					},
 				},
@@ -447,7 +446,7 @@ func (s *ControllerService) ControllerExpandVolume(ctx context.Context, req *pro
 	if err != nil {
 		return nil, status.Error(codes.NotFound, "volume not found")
 	}
-	volume := &csi.Volume{ID: volumeID}
+	volume := &hcloud.Volume{ID: volumeID}
 
 	minSize, _, ok := volumeSizeFromCapacityRange(req.GetCapacityRange())
 	if !ok {
@@ -473,7 +472,7 @@ func (s *ControllerService) ControllerExpandVolume(ctx context.Context, req *pro
 	}
 
 	resp := &proto.ControllerExpandVolumeResponse{
-		CapacityBytes:         volume.SizeBytes(),
+		CapacityBytes:         volumeSizeBytes(volume),
 		NodeExpansionRequired: true,
 	}
 	return resp, nil

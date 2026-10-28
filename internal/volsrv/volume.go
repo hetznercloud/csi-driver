@@ -5,7 +5,6 @@ import (
 	"log/slog"
 	"time"
 
-	"github.com/hetznercloud/csi-driver/internal/csi"
 	"github.com/hetznercloud/csi-driver/internal/volumes"
 	"github.com/hetznercloud/hcloud-go/v2/hcloud"
 )
@@ -22,7 +21,7 @@ func NewVolumeService(logger *slog.Logger, client *hcloud.Client) *VolumeService
 	}
 }
 
-func (s *VolumeService) All(ctx context.Context) ([]*csi.Volume, error) {
+func (s *VolumeService) All(ctx context.Context) ([]*hcloud.Volume, error) {
 	hcloudVolumes, err := s.client.Volume.All(ctx)
 	if err != nil {
 		s.logger.Info(
@@ -31,15 +30,10 @@ func (s *VolumeService) All(ctx context.Context) ([]*csi.Volume, error) {
 		)
 		return nil, err
 	}
-
-	volumes := make([]*csi.Volume, 0, len(hcloudVolumes))
-	for _, hcloudVolume := range hcloudVolumes {
-		volumes = append(volumes, toDomainVolume(hcloudVolume))
-	}
-	return volumes, nil
+	return hcloudVolumes, nil
 }
 
-func (s *VolumeService) Create(ctx context.Context, opts volumes.CreateOpts) (*csi.Volume, error) {
+func (s *VolumeService) Create(ctx context.Context, opts volumes.CreateOpts) (*hcloud.Volume, error) {
 	s.logger.Info(
 		"creating volume",
 		"volume-name", opts.Name,
@@ -53,7 +47,6 @@ func (s *VolumeService) Create(ctx context.Context, opts volumes.CreateOpts) (*c
 		Location: &hcloud.Location{Name: opts.Location},
 		Labels:   opts.Labels,
 	})
-
 	if err != nil {
 		s.logger.Info(
 			"failed to create volume",
@@ -76,10 +69,10 @@ func (s *VolumeService) Create(ctx context.Context, opts volumes.CreateOpts) (*c
 		return nil, err
 	}
 
-	return toDomainVolume(result.Volume), nil
+	return result.Volume, nil
 }
 
-func (s *VolumeService) GetByID(ctx context.Context, id int64) (*csi.Volume, error) {
+func (s *VolumeService) GetByID(ctx context.Context, id int64) (*hcloud.Volume, error) {
 	hcloudVolume, _, err := s.client.Volume.GetByID(ctx, id)
 	if err != nil {
 		s.logger.Info(
@@ -96,10 +89,10 @@ func (s *VolumeService) GetByID(ctx context.Context, id int64) (*csi.Volume, err
 		)
 		return nil, volumes.ErrVolumeNotFound
 	}
-	return toDomainVolume(hcloudVolume), nil
+	return hcloudVolume, nil
 }
 
-func (s *VolumeService) GetByName(ctx context.Context, name string) (*csi.Volume, error) {
+func (s *VolumeService) GetByName(ctx context.Context, name string) (*hcloud.Volume, error) {
 	hcloudVolume, _, err := s.client.Volume.GetByName(ctx, name)
 	if err != nil {
 		s.logger.Info(
@@ -116,10 +109,10 @@ func (s *VolumeService) GetByName(ctx context.Context, name string) (*csi.Volume
 		)
 		return nil, volumes.ErrVolumeNotFound
 	}
-	return toDomainVolume(hcloudVolume), nil
+	return hcloudVolume, nil
 }
 
-func (s *VolumeService) Delete(ctx context.Context, volume *csi.Volume) error {
+func (s *VolumeService) Delete(ctx context.Context, volume *hcloud.Volume) error {
 	s.logger.Info(
 		"deleting volume",
 		"volume-id", volume.ID,
@@ -169,7 +162,7 @@ func (s *VolumeService) Delete(ctx context.Context, volume *csi.Volume) error {
 	return nil
 }
 
-func (s *VolumeService) Attach(ctx context.Context, volume *csi.Volume, server *csi.Server) error {
+func (s *VolumeService) Attach(ctx context.Context, volume *hcloud.Volume, server *hcloud.Server) error {
 	s.logger.Info(
 		"attaching volume",
 		"volume-id", volume.ID,
@@ -261,7 +254,7 @@ func (s *VolumeService) Attach(ctx context.Context, volume *csi.Volume, server *
 	return nil
 }
 
-func (s *VolumeService) Detach(ctx context.Context, volume *csi.Volume, server *csi.Server) error {
+func (s *VolumeService) Detach(ctx context.Context, volume *hcloud.Volume, server *hcloud.Server) error {
 	if server != nil {
 		s.logger.Info(
 			"detaching volume from server",
@@ -344,7 +337,7 @@ func (s *VolumeService) Detach(ctx context.Context, volume *csi.Volume, server *
 	return nil
 }
 
-func (s *VolumeService) Resize(ctx context.Context, volume *csi.Volume, size int) error {
+func (s *VolumeService) Resize(ctx context.Context, volume *hcloud.Volume, size int) error {
 	logger := s.logger.With("volume-id", volume.ID, "requested-size", size)
 
 	logger.Info(

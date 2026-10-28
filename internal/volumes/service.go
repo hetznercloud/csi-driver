@@ -4,7 +4,7 @@ import (
 	"context"
 	"errors"
 
-	"github.com/hetznercloud/csi-driver/internal/csi"
+	"github.com/hetznercloud/hcloud-go/v2/hcloud"
 )
 
 var (
@@ -19,14 +19,14 @@ var (
 )
 
 type Service interface {
-	Create(ctx context.Context, opts CreateOpts) (*csi.Volume, error)
-	GetByID(ctx context.Context, id int64) (*csi.Volume, error)
-	GetByName(ctx context.Context, name string) (*csi.Volume, error)
-	Delete(ctx context.Context, volume *csi.Volume) error
-	Attach(ctx context.Context, volume *csi.Volume, server *csi.Server) error
-	Detach(ctx context.Context, volume *csi.Volume, server *csi.Server) error
-	Resize(ctx context.Context, volume *csi.Volume, size int) error
-	All(ctx context.Context) ([]*csi.Volume, error)
+	Create(ctx context.Context, opts CreateOpts) (*hcloud.Volume, error)
+	GetByID(ctx context.Context, id int64) (*hcloud.Volume, error)
+	GetByName(ctx context.Context, name string) (*hcloud.Volume, error)
+	Delete(ctx context.Context, volume *hcloud.Volume) error
+	Attach(ctx context.Context, volume *hcloud.Volume, server *hcloud.Server) error
+	Detach(ctx context.Context, volume *hcloud.Volume, server *hcloud.Server) error
+	Resize(ctx context.Context, volume *hcloud.Volume, size int) error
+	All(ctx context.Context) ([]*hcloud.Volume, error)
 }
 
 // CreateOpts specifies the options for creating a volume.

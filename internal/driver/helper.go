@@ -5,10 +5,14 @@ import (
 	"strconv"
 
 	proto "github.com/container-storage-interface/spec/lib/go/csi"
+
+	"github.com/hetznercloud/hcloud-go/v2/hcloud"
 )
 
 func parseVolumeID(id string) (int64, error) { return strconv.ParseInt(id, 10, 64) }
 func parseNodeID(id string) (int64, error)   { return strconv.ParseInt(id, 10, 64) }
+
+func volumeSizeBytes(volume *hcloud.Volume) int64 { return int64(volume.Size) * 1024 * 1024 * 1024 }
 
 func volumeSizeFromCapacityRange(cr *proto.CapacityRange) (int, int, bool) {
 	if cr == nil {

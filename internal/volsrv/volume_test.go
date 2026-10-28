@@ -9,7 +9,6 @@ import (
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
 
-	"github.com/hetznercloud/csi-driver/internal/csi"
 	"github.com/hetznercloud/csi-driver/internal/volumes"
 	"github.com/hetznercloud/hcloud-go/v2/hcloud"
 	"github.com/hetznercloud/hcloud-go/v2/hcloud/exp/mockutil"
@@ -55,7 +54,7 @@ func TestResize(t *testing.T) {
 			})
 			defer cleanup()
 
-			err := volumeService.Resize(context.Background(), &csi.Volume{ID: 1}, 15)
+			err := volumeService.Resize(context.Background(), &hcloud.Volume{ID: 1}, 15)
 			assert.NoError(t, err)
 		})
 
@@ -71,7 +70,7 @@ func TestResize(t *testing.T) {
 			})
 			defer cleanup()
 
-			err := volumeService.Resize(context.Background(), &csi.Volume{ID: 1}, 15)
+			err := volumeService.Resize(context.Background(), &hcloud.Volume{ID: 1}, 15)
 			assert.Equal(t, volumes.ErrVolumeSizeAlreadyReached, err)
 		})
 
@@ -87,7 +86,7 @@ func TestResize(t *testing.T) {
 			})
 			defer cleanup()
 
-			err := volumeService.Resize(context.Background(), &csi.Volume{ID: 1}, 10)
+			err := volumeService.Resize(context.Background(), &hcloud.Volume{ID: 1}, 10)
 			assert.Equal(t, volumes.ErrVolumeSizeAlreadyReached, err)
 		})
 	})
@@ -119,16 +118,16 @@ func TestAll(t *testing.T) {
 
 		vols, err := volumeService.All(context.Background())
 		require.NoError(t, err)
-		assert.Equal(t, []*csi.Volume{
+		assert.Equal(t, []*hcloud.Volume{
 			{
 				ID: 1, Name: "pvc-123", Size: 10,
-				Location:    "hel1",
+				Location:    &hcloud.Location{Name: "hel1"},
 				LinuxDevice: "/dev/disk/by-id/scsi-0HC_Volume_1",
-				Server:      &csi.Server{ID: 42},
+				Server:      &hcloud.Server{ID: 42},
 			},
 			{
 				ID: 2, Name: "pvc-456", Size: 20,
-				Location: "fsn1",
+				Location: &hcloud.Location{Name: "fsn1"},
 			},
 		}, vols)
 	})
