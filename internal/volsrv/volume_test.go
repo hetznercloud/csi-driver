@@ -34,61 +34,59 @@ func makeTestVolumeService(t *testing.T, requests []mockutil.Request) (*VolumeSe
 }
 
 func TestResize(t *testing.T) {
-	t.Run("ErrVolumeSizeAlreadyReached", func(t *testing.T) {
-		t.Run("happy with larger volume size", func(t *testing.T) {
-			volumeService, cleanup := makeTestVolumeService(t, []mockutil.Request{
-				{
-					Method: "GET", Path: "/volumes/1",
-					Status: 200,
-					JSON: schema.VolumeGetResponse{
-						Volume: schema.Volume{ID: 1, Name: "pvc-123", Size: 10},
-					},
+	t.Run("larger volume size", func(t *testing.T) {
+		volumeService, cleanup := makeTestVolumeService(t, []mockutil.Request{
+			{
+				Method: "GET", Path: "/volumes/1",
+				Status: 200,
+				JSON: schema.VolumeGetResponse{
+					Volume: schema.Volume{ID: 1, Name: "pvc-123", Size: 10},
 				},
-				{
-					Method: "POST", Path: "/volumes/1/actions/resize",
-					Status: 201,
-					JSON: schema.VolumeActionResizeVolumeResponse{
-						Action: schema.Action{ID: 3, Status: "success"},
-					},
+			},
+			{
+				Method: "POST", Path: "/volumes/1/actions/resize",
+				Status: 201,
+				JSON: schema.VolumeActionResizeVolumeResponse{
+					Action: schema.Action{ID: 3, Status: "success"},
 				},
-			})
-			defer cleanup()
-
-			err := volumeService.Resize(context.Background(), &hcloud.Volume{ID: 1}, 15)
-			assert.NoError(t, err)
+			},
 		})
+		defer cleanup()
 
-		t.Run("with equal volume size", func(t *testing.T) {
-			volumeService, cleanup := makeTestVolumeService(t, []mockutil.Request{
-				{
-					Method: "GET", Path: "/volumes/1",
-					Status: 200,
-					JSON: schema.VolumeGetResponse{
-						Volume: schema.Volume{ID: 1, Name: "pvc-123", Size: 15},
-					},
+		err := volumeService.Resize(context.Background(), &hcloud.Volume{ID: 1}, 15)
+		assert.NoError(t, err)
+	})
+
+	t.Run("equal volume size", func(t *testing.T) {
+		volumeService, cleanup := makeTestVolumeService(t, []mockutil.Request{
+			{
+				Method: "GET", Path: "/volumes/1",
+				Status: 200,
+				JSON: schema.VolumeGetResponse{
+					Volume: schema.Volume{ID: 1, Name: "pvc-123", Size: 15},
 				},
-			})
-			defer cleanup()
-
-			err := volumeService.Resize(context.Background(), &hcloud.Volume{ID: 1}, 15)
-			assert.Equal(t, volumes.ErrVolumeSizeAlreadyReached, err)
+			},
 		})
+		defer cleanup()
 
-		t.Run("with smaller volume size", func(t *testing.T) {
-			volumeService, cleanup := makeTestVolumeService(t, []mockutil.Request{
-				{
-					Method: "GET", Path: "/volumes/1",
-					Status: 200,
-					JSON: schema.VolumeGetResponse{
-						Volume: schema.Volume{ID: 1, Name: "pvc-123", Size: 15},
-					},
+		err := volumeService.Resize(context.Background(), &hcloud.Volume{ID: 1}, 15)
+		assert.NoError(t, err)
+	})
+
+	t.Run("smaller volume size", func(t *testing.T) {
+		volumeService, cleanup := makeTestVolumeService(t, []mockutil.Request{
+			{
+				Method: "GET", Path: "/volumes/1",
+				Status: 200,
+				JSON: schema.VolumeGetResponse{
+					Volume: schema.Volume{ID: 1, Name: "pvc-123", Size: 15},
 				},
-			})
-			defer cleanup()
-
-			err := volumeService.Resize(context.Background(), &hcloud.Volume{ID: 1}, 10)
-			assert.Equal(t, volumes.ErrVolumeSizeAlreadyReached, err)
+			},
 		})
+		defer cleanup()
+
+		err := volumeService.Resize(context.Background(), &hcloud.Volume{ID: 1}, 10)
+		assert.NoError(t, err)
 	})
 }
 
@@ -148,37 +146,378 @@ func TestAll(t *testing.T) {
 	})
 }
 
-func TestAttach(t *testing.T) {
-	t.Run("attach limit reached", func(t *testing.T) {
+func errorResponse(code hcloud.ErrorCode) schema.ErrorResponse {
+	return schema.ErrorResponse{
+		Error: schema.Error{Code: string(code), Message: string(code)},
+	}
+}
+
+func TestCreate(t *testing.T) {
+	opts := volumes.CreateOpts{
+		Name:     "pvc-123",
+		MinSize:  10,
+		MaxSize:  20,
+		Location: "fsn1",
+	}
+
+	t.Run("new volume", func(t *testing.T) {
 		volumeService, cleanup := makeTestVolumeService(t, []mockutil.Request{
 			{
-				Method: "GET", Path: "/volumes/1",
-				Status: 200,
-				JSON: schema.VolumeGetResponse{
-					Volume: schema.Volume{ID: 1, Name: "pvc-123", Size: 10},
-				},
-			},
-			{
-				Method: "GET", Path: "/servers/42",
-				Status: 200,
-				JSON: schema.ServerGetResponse{
-					Server: schema.Server{ID: 42},
-				},
-			},
-			{
-				Method: "POST", Path: "/volumes/1/actions/attach",
-				Status: 403,
-				JSON: schema.ErrorResponse{
-					Error: schema.Error{
-						Code:    string(hcloud.ErrorCodeResourceLimitExceeded),
-						Message: "server has reached the maximum number of attached volumes",
-					},
+				Method: "POST", Path: "/volumes",
+				Status: 201,
+				JSON: schema.VolumeCreateResponse{
+					Volume: schema.Volume{ID: 1, Name: "pvc-123", Size: 10, Location: schema.Location{Name: "fsn1"}},
+					Action: &schema.Action{ID: 2, Status: "success"},
 				},
 			},
 		})
 		defer cleanup()
 
-		err := volumeService.Attach(context.Background(), &hcloud.Volume{ID: 1}, &hcloud.Server{ID: 42})
-		assert.ErrorIs(t, err, volumes.ErrAttachLimitReached)
+		volume, err := volumeService.Create(context.Background(), opts)
+		require.NoError(t, err)
+		assert.Equal(t, int64(1), volume.ID)
 	})
+
+	testCases := []struct {
+		name     string
+		existing []schema.Volume
+		wantErr  error
+	}{
+		{
+			name:     "existing volume",
+			existing: []schema.Volume{{ID: 1, Name: "pvc-123", Size: 10, Location: schema.Location{Name: "fsn1"}}},
+		},
+		{
+			name:     "existing volume too small",
+			existing: []schema.Volume{{ID: 1, Name: "pvc-123", Size: 5, Location: schema.Location{Name: "fsn1"}}},
+			wantErr:  volumes.ErrVolumeAlreadyExists,
+		},
+		{
+			name:     "existing volume too large",
+			existing: []schema.Volume{{ID: 1, Name: "pvc-123", Size: 30, Location: schema.Location{Name: "fsn1"}}},
+			wantErr:  volumes.ErrVolumeAlreadyExists,
+		},
+		{
+			name:     "existing volume in different location",
+			existing: []schema.Volume{{ID: 1, Name: "pvc-123", Size: 10, Location: schema.Location{Name: "nbg1"}}},
+			wantErr:  volumes.ErrVolumeAlreadyExists,
+		},
+		{
+			name:    "existing volume deleted concurrently",
+			wantErr: volumes.ErrVolumeNotFound,
+		},
+	}
+
+	for _, tt := range testCases {
+		t.Run(tt.name, func(t *testing.T) {
+			volumeService, cleanup := makeTestVolumeService(t, []mockutil.Request{
+				{
+					Method: "POST", Path: "/volumes",
+					Status: 409,
+					JSON:   errorResponse(hcloud.ErrorCodeUniquenessError),
+				},
+				{
+					Method: "GET", Path: "/volumes?name=pvc-123",
+					Status: 200,
+					JSON:   schema.VolumeListResponse{Volumes: tt.existing},
+				},
+			})
+			defer cleanup()
+
+			volume, err := volumeService.Create(context.Background(), opts)
+			if tt.wantErr != nil {
+				assert.ErrorIs(t, err, tt.wantErr)
+				return
+			}
+			require.NoError(t, err)
+			assert.Equal(t, int64(1), volume.ID)
+		})
+	}
+}
+
+func TestDelete(t *testing.T) {
+	testCases := []struct {
+		name     string
+		requests []mockutil.Request
+		wantErr  error
+	}{
+		{
+			name: "detached volume",
+			requests: []mockutil.Request{
+				{
+					Method: "GET", Path: "/volumes/1",
+					Status: 200,
+					JSON:   schema.VolumeGetResponse{Volume: schema.Volume{ID: 1}},
+				},
+				{
+					Method: "DELETE", Path: "/volumes/1",
+					Status: 204,
+				},
+			},
+		},
+		{
+			name: "attached volume",
+			requests: []mockutil.Request{
+				{
+					Method: "GET", Path: "/volumes/1",
+					Status: 200,
+					JSON:   schema.VolumeGetResponse{Volume: schema.Volume{ID: 1, Server: new(int64(42))}},
+				},
+				{
+					Method: "POST", Path: "/volumes/1/actions/detach",
+					Status: 201,
+					JSON:   schema.VolumeActionDetachVolumeResponse{Action: schema.Action{ID: 2, Status: "success"}},
+				},
+				{
+					Method: "DELETE", Path: "/volumes/1",
+					Status: 204,
+				},
+			},
+		},
+		{
+			name: "volume not found",
+			requests: []mockutil.Request{
+				{
+					Method: "GET", Path: "/volumes/1",
+					Status: 404,
+					JSON:   errorResponse(hcloud.ErrorCodeNotFound),
+				},
+			},
+		},
+		{
+			name: "volume deleted concurrently",
+			requests: []mockutil.Request{
+				{
+					Method: "GET", Path: "/volumes/1",
+					Status: 200,
+					JSON:   schema.VolumeGetResponse{Volume: schema.Volume{ID: 1}},
+				},
+				{
+					Method: "DELETE", Path: "/volumes/1",
+					Status: 404,
+					JSON:   errorResponse(hcloud.ErrorCodeNotFound),
+				},
+			},
+		},
+		{
+			name: "detach fails",
+			requests: []mockutil.Request{
+				{
+					Method: "GET", Path: "/volumes/1",
+					Status: 200,
+					JSON:   schema.VolumeGetResponse{Volume: schema.Volume{ID: 1, Server: new(int64(42))}},
+				},
+				{
+					Method: "POST", Path: "/volumes/1/actions/detach",
+					Status: 423,
+					JSON:   errorResponse(hcloud.ErrorCodeLocked),
+				},
+			},
+			wantErr: volumes.ErrLockedServer,
+		},
+	}
+
+	for _, tt := range testCases {
+		t.Run(tt.name, func(t *testing.T) {
+			volumeService, cleanup := makeTestVolumeService(t, tt.requests)
+			defer cleanup()
+
+			err := volumeService.Delete(context.Background(), &hcloud.Volume{ID: 1})
+			assert.ErrorIs(t, err, tt.wantErr)
+		})
+	}
+}
+
+func TestAttach(t *testing.T) {
+	getServer := mockutil.Request{
+		Method: "GET", Path: "/servers/42",
+		Status: 200,
+		JSON:   schema.ServerGetResponse{Server: schema.Server{ID: 42}},
+	}
+
+	testCases := []struct {
+		name     string
+		requests []mockutil.Request
+		wantErr  error
+	}{
+		{
+			name: "detached volume",
+			requests: []mockutil.Request{
+				{
+					Method: "GET", Path: "/volumes/1",
+					Status: 200,
+					JSON:   schema.VolumeGetResponse{Volume: schema.Volume{ID: 1}},
+				},
+				getServer,
+				{
+					Method: "POST", Path: "/volumes/1/actions/attach",
+					Status: 201,
+					JSON:   schema.VolumeActionAttachVolumeResponse{Action: schema.Action{ID: 2, Status: "success"}},
+				},
+			},
+		},
+		{
+			name: "already attached to server",
+			requests: []mockutil.Request{
+				{
+					Method: "GET", Path: "/volumes/1",
+					Status: 200,
+					JSON:   schema.VolumeGetResponse{Volume: schema.Volume{ID: 1, Server: new(int64(42))}},
+				},
+				getServer,
+			},
+		},
+		{
+			name: "attached to another server",
+			requests: []mockutil.Request{
+				{
+					Method: "GET", Path: "/volumes/1",
+					Status: 200,
+					JSON:   schema.VolumeGetResponse{Volume: schema.Volume{ID: 1, Server: new(int64(43))}},
+				},
+				getServer,
+			},
+			wantErr: volumes.ErrAttached,
+		},
+		{
+			name: "attached to server concurrently",
+			requests: []mockutil.Request{
+				{
+					Method: "GET", Path: "/volumes/1",
+					Status: 200,
+					JSON:   schema.VolumeGetResponse{Volume: schema.Volume{ID: 1}},
+				},
+				getServer,
+				{
+					Method: "POST", Path: "/volumes/1/actions/attach",
+					Status: 422,
+					JSON:   errorResponse(hcloud.ErrorCodeVolumeAlreadyAttached),
+				},
+				{
+					Method: "GET", Path: "/volumes/1",
+					Status: 200,
+					JSON:   schema.VolumeGetResponse{Volume: schema.Volume{ID: 1, Server: new(int64(42))}},
+				},
+			},
+		},
+		{
+			name: "attached to another server concurrently",
+			requests: []mockutil.Request{
+				{
+					Method: "GET", Path: "/volumes/1",
+					Status: 200,
+					JSON:   schema.VolumeGetResponse{Volume: schema.Volume{ID: 1}},
+				},
+				getServer,
+				{
+					Method: "POST", Path: "/volumes/1/actions/attach",
+					Status: 422,
+					JSON:   errorResponse(hcloud.ErrorCodeVolumeAlreadyAttached),
+				},
+				{
+					Method: "GET", Path: "/volumes/1",
+					Status: 200,
+					JSON:   schema.VolumeGetResponse{Volume: schema.Volume{ID: 1, Server: new(int64(43))}},
+				},
+			},
+			wantErr: volumes.ErrAttached,
+		},
+		{
+			name: "attach limit reached",
+			requests: []mockutil.Request{
+				{
+					Method: "GET", Path: "/volumes/1",
+					Status: 200,
+					JSON:   schema.VolumeGetResponse{Volume: schema.Volume{ID: 1}},
+				},
+				getServer,
+				{
+					Method: "POST", Path: "/volumes/1/actions/attach",
+					Status: 422,
+					JSON:   errorResponse(hcloud.ErrorCodeResourceLimitExceeded),
+				},
+				{
+					Method: "GET", Path: "/volumes/1",
+					Status: 200,
+					JSON:   schema.VolumeGetResponse{Volume: schema.Volume{ID: 1}},
+				},
+			},
+			wantErr: volumes.ErrAttachLimitReached,
+		},
+	}
+
+	for _, tt := range testCases {
+		t.Run(tt.name, func(t *testing.T) {
+			volumeService, cleanup := makeTestVolumeService(t, tt.requests)
+			defer cleanup()
+
+			err := volumeService.Attach(context.Background(), &hcloud.Volume{ID: 1}, &hcloud.Server{ID: 42})
+			assert.ErrorIs(t, err, tt.wantErr)
+		})
+	}
+}
+
+func TestDetach(t *testing.T) {
+	testCases := []struct {
+		name     string
+		requests []mockutil.Request
+		wantErr  error
+	}{
+		{
+			name: "attached volume",
+			requests: []mockutil.Request{
+				{
+					Method: "GET", Path: "/volumes/1",
+					Status: 200,
+					JSON:   schema.VolumeGetResponse{Volume: schema.Volume{ID: 1, Server: new(int64(42))}},
+				},
+				{
+					Method: "POST", Path: "/volumes/1/actions/detach",
+					Status: 201,
+					JSON:   schema.VolumeActionDetachVolumeResponse{Action: schema.Action{ID: 2, Status: "success"}},
+				},
+			},
+		},
+		{
+			name: "detached volume",
+			requests: []mockutil.Request{
+				{
+					Method: "GET", Path: "/volumes/1",
+					Status: 200,
+					JSON:   schema.VolumeGetResponse{Volume: schema.Volume{ID: 1}},
+				},
+			},
+		},
+		{
+			name: "attached to another server",
+			requests: []mockutil.Request{
+				{
+					Method: "GET", Path: "/volumes/1",
+					Status: 200,
+					JSON:   schema.VolumeGetResponse{Volume: schema.Volume{ID: 1, Server: new(int64(43))}},
+				},
+			},
+		},
+		{
+			name: "volume not found",
+			requests: []mockutil.Request{
+				{
+					Method: "GET", Path: "/volumes/1",
+					Status: 404,
+					JSON:   errorResponse(hcloud.ErrorCodeNotFound),
+				},
+			},
+			wantErr: volumes.ErrVolumeNotFound,
+		},
+	}
+
+	for _, tt := range testCases {
+		t.Run(tt.name, func(t *testing.T) {
+			volumeService, cleanup := makeTestVolumeService(t, tt.requests)
+			defer cleanup()
+
+			err := volumeService.Detach(context.Background(), &hcloud.Volume{ID: 1}, &hcloud.Server{ID: 42})
+			assert.ErrorIs(t, err, tt.wantErr)
+		})
+	}
 }

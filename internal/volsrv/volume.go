@@ -47,14 +47,14 @@ func (s *VolumeService) Create(ctx context.Context, opts volumes.CreateOpts) (*h
 		Labels:   opts.Labels,
 	})
 	if err != nil {
+		if hcloud.IsError(err, hcloud.ErrorCodeUniquenessError) {
+			return s.verifyExistingVolume(ctx, opts)
+		}
 		s.logger.Info(
 			"failed to create volume",
 			"volume-name", opts.Name,
 			"err", err,
 		)
-		if hcloud.IsError(err, hcloud.ErrorCode("uniqueness_error")) {
-			return nil, volumes.ErrVolumeAlreadyExists
-		}
 		return nil, err
 	}
 
@@ -69,6 +69,46 @@ func (s *VolumeService) Create(ctx context.Context, opts volumes.CreateOpts) (*h
 	}
 
 	return result.Volume, nil
+}
+
+func (s *VolumeService) verifyExistingVolume(ctx context.Context, opts volumes.CreateOpts) (*hcloud.Volume, error) {
+	s.logger.Info(
+		"another volume with that name does already exist",
+		"volume-name", opts.Name,
+	)
+
+	volume, err := s.GetByName(ctx, opts.Name)
+	if err != nil {
+		return nil, err
+	}
+	if volume.Size < opts.MinSize {
+		s.logger.Info(
+			"existing volume is too small",
+			"volume-name", opts.Name,
+			"min-size", opts.MinSize,
+			"actual-size", volume.Size,
+		)
+		return nil, volumes.ErrVolumeAlreadyExists
+	}
+	if opts.MaxSize > 0 && volume.Size > opts.MaxSize {
+		s.logger.Info(
+			"existing volume is too large",
+			"volume-name", opts.Name,
+			"max-size", opts.MaxSize,
+			"actual-size", volume.Size,
+		)
+		return nil, volumes.ErrVolumeAlreadyExists
+	}
+	if volume.Location.Name != opts.Location {
+		s.logger.Info(
+			"existing volume is in different location",
+			"volume-name", opts.Name,
+			"volume-location", opts.Location,
+			"actual-location", volume.Location.Name,
+		)
+		return nil, volumes.ErrVolumeAlreadyExists
+	}
+	return volume, nil
 }
 
 func (s *VolumeService) GetByID(ctx context.Context, id int64) (*hcloud.Volume, error) {
@@ -131,26 +171,32 @@ func (s *VolumeService) Delete(ctx context.Context, volume *hcloud.Volume) error
 			"volume to delete not found",
 			"volume-id", volume.ID,
 		)
-		return volumes.ErrVolumeNotFound
+		return nil
 	}
 	if hcloudVolume.Server != nil {
 		s.logger.Info(
-			"volume is attached to a server",
+			"detaching volume before deletion",
 			"volume-id", volume.ID,
 			"server-id", hcloudVolume.Server.ID,
 		)
-		return volumes.ErrAttached
+		if err := s.detach(ctx, hcloudVolume); err != nil {
+			return err
+		}
 	}
 
 	if _, err := s.client.Volume.Delete(ctx, hcloudVolume); err != nil {
+		if hcloud.IsError(err, hcloud.ErrorCodeNotFound) {
+			s.logger.Info(
+				"volume to delete not found",
+				"volume-id", volume.ID,
+			)
+			return nil
+		}
 		s.logger.Info(
 			"failed to delete volume",
 			"volume-id", volume.ID,
 			"err", err,
 		)
-		if hcloud.IsError(err, hcloud.ErrorCodeNotFound) {
-			return volumes.ErrVolumeNotFound
-		}
 		return err
 	}
 	s.logger.Info(
@@ -221,7 +267,23 @@ func (s *VolumeService) Attach(ctx context.Context, volume *hcloud.Volume, serve
 		return volumes.ErrAttached
 	}
 
-	action, _, err := s.client.Volume.Attach(ctx, hcloudVolume, hcloudServer)
+	if err := s.attach(ctx, hcloudVolume, hcloudServer); err != nil {
+		if s.isAttachedTo(ctx, volume.ID, server.ID) {
+			s.logger.Info(
+				"volume is attached to this server despite the error",
+				"volume-id", volume.ID,
+				"server-id", server.ID,
+				"err", err,
+			)
+			return nil
+		}
+		return err
+	}
+	return nil
+}
+
+func (s *VolumeService) attach(ctx context.Context, volume *hcloud.Volume, server *hcloud.Server) error {
+	action, _, err := s.client.Volume.Attach(ctx, volume, server)
 	if err != nil {
 		s.logger.Info(
 			"failed to attach volume",
@@ -235,7 +297,7 @@ func (s *VolumeService) Attach(ctx context.Context, volume *hcloud.Volume, serve
 		if hcloud.IsError(err, hcloud.ErrorCodeLocked) {
 			return volumes.ErrLockedServer
 		}
-		if hcloud.IsError(err, hcloud.ErrorCode("volume_already_attached")) {
+		if hcloud.IsError(err, hcloud.ErrorCodeVolumeAlreadyAttached) {
 			return volumes.ErrAttached
 		}
 		return err
@@ -250,6 +312,19 @@ func (s *VolumeService) Attach(ctx context.Context, volume *hcloud.Volume, serve
 		return err
 	}
 	return nil
+}
+
+func (s *VolumeService) isAttachedTo(ctx context.Context, volumeID int64, serverID int64) bool {
+	hcloudVolume, _, err := s.client.Volume.GetByID(ctx, volumeID)
+	if err != nil {
+		s.logger.Info(
+			"failed to get volume",
+			"volume-id", volumeID,
+			"err", err,
+		)
+		return false
+	}
+	return hcloudVolume != nil && hcloudVolume.Server != nil && hcloudVolume.Server.ID == serverID
 }
 
 func (s *VolumeService) Detach(ctx context.Context, volume *hcloud.Volume, server *hcloud.Server) error {
@@ -296,7 +371,7 @@ func (s *VolumeService) Detach(ctx context.Context, volume *hcloud.Volume, serve
 			"volume not attached to a server",
 			"volume-id", volume.ID,
 		)
-		return volumes.ErrNotAttached
+		return nil
 	}
 
 	// If a server is provided, only detach if the volume is actually attached
@@ -308,10 +383,14 @@ func (s *VolumeService) Detach(ctx context.Context, volume *hcloud.Volume, serve
 			"detach-from-server-id", server.ID,
 			"attached-to-server-id", hcloudVolume.Server.ID,
 		)
-		return volumes.ErrAttached
+		return nil
 	}
 
-	action, _, err := s.client.Volume.Detach(ctx, hcloudVolume)
+	return s.detach(ctx, hcloudVolume)
+}
+
+func (s *VolumeService) detach(ctx context.Context, volume *hcloud.Volume) error {
+	action, _, err := s.client.Volume.Detach(ctx, volume)
 	if err != nil {
 		s.logger.Info(
 			"failed to detach volume",
@@ -356,7 +435,7 @@ func (s *VolumeService) Resize(ctx context.Context, volume *hcloud.Volume, size 
 
 	if hcloudVolume.Size >= size {
 		logger.Info("volume size is already larger or equal than the requested size")
-		return volumes.ErrVolumeSizeAlreadyReached
+		return nil
 	}
 
 	action, _, err := s.client.Volume.Resize(ctx, hcloudVolume, size)
