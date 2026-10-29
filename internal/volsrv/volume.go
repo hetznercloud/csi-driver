@@ -3,7 +3,6 @@ package volsrv
 import (
 	"context"
 	"log/slog"
-	"time"
 
 	"github.com/hetznercloud/csi-driver/internal/volumes"
 	"github.com/hetznercloud/hcloud-go/v2/hcloud"
@@ -241,7 +240,6 @@ func (s *VolumeService) Attach(ctx context.Context, volume *hcloud.Volume, serve
 		}
 		return err
 	}
-	time.Sleep(3 * time.Second) // We know that the Attach action will take some time, so we wait 3 seconds before starting polling the action status. Within these 3 seconds the volume attach action may be already finished.
 	if err := s.client.Action.WaitFor(ctx, action); err != nil {
 		s.logger.Info(
 			"failed to attach volume",
