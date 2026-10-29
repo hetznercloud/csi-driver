@@ -229,7 +229,7 @@ func (s *VolumeService) Attach(ctx context.Context, volume *hcloud.Volume, serve
 			"server-id", server.ID,
 			"err", err,
 		)
-		if hcloud.IsError(err, hcloud.ErrorCode("limit_exceeded_error")) {
+		if hcloud.IsError(err, hcloud.ErrorCodeResourceLimitExceeded) {
 			return volumes.ErrAttachLimitReached
 		}
 		if hcloud.IsError(err, hcloud.ErrorCodeLocked) {

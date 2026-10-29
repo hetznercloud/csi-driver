@@ -147,3 +147,38 @@ func TestAll(t *testing.T) {
 		assert.Empty(t, vols)
 	})
 }
+
+func TestAttach(t *testing.T) {
+	t.Run("attach limit reached", func(t *testing.T) {
+		volumeService, cleanup := makeTestVolumeService(t, []mockutil.Request{
+			{
+				Method: "GET", Path: "/volumes/1",
+				Status: 200,
+				JSON: schema.VolumeGetResponse{
+					Volume: schema.Volume{ID: 1, Name: "pvc-123", Size: 10},
+				},
+			},
+			{
+				Method: "GET", Path: "/servers/42",
+				Status: 200,
+				JSON: schema.ServerGetResponse{
+					Server: schema.Server{ID: 42},
+				},
+			},
+			{
+				Method: "POST", Path: "/volumes/1/actions/attach",
+				Status: 403,
+				JSON: schema.ErrorResponse{
+					Error: schema.Error{
+						Code:    string(hcloud.ErrorCodeResourceLimitExceeded),
+						Message: "server has reached the maximum number of attached volumes",
+					},
+				},
+			},
+		})
+		defer cleanup()
+
+		err := volumeService.Attach(context.Background(), &hcloud.Volume{ID: 1}, &hcloud.Server{ID: 42})
+		assert.ErrorIs(t, err, volumes.ErrAttachLimitReached)
+	})
+}
