@@ -139,12 +139,9 @@ func setup(
 			return fmt.Errorf("could not parse extra labels for volumes: %w", err)
 		}
 
-		volumeService := volumes.NewIdempotentService(
-			logger.With("component", "idempotent-volume-service"),
-			volsrv.NewVolumeService(
-				logger.With("component", "api-volume-service"),
-				hcloudClient,
-			),
+		volumeService := volsrv.NewVolumeService(
+			logger.With("component", "api-volume-service"),
+			hcloudClient,
 		)
 
 		controllerService := driver.NewControllerService(

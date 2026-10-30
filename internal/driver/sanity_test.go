@@ -35,10 +35,7 @@ func TestSanity(t *testing.T) {
 	th := slog.NewTextHandler(os.Stdout, nil)
 	logger := slog.New(th)
 
-	volumeService := volumes.NewIdempotentService(
-		logger.With("component", "idempotent-volume-service"),
-		&sanityVolumeService{},
-	)
+	volumeService := &sanityVolumeService{}
 	volumeMountService := &sanityMountService{}
 	volumeResizeService := &sanityResizeService{}
 	volumeStatsService := &sanityStatsService{}
@@ -114,7 +111,10 @@ func (s *sanityVolumeService) Create(_ context.Context, opts volumes.CreateOpts)
 	for e := s.volumes.Front(); e != nil; e = e.Next() {
 		v := e.Value.(*hcloud.Volume)
 		if v.Name == opts.Name {
-			return nil, volumes.ErrVolumeAlreadyExists
+			if v.Size < opts.MinSize || (opts.MaxSize > 0 && v.Size > opts.MaxSize) || v.Location.Name != opts.Location {
+				return nil, volumes.ErrVolumeAlreadyExists
+			}
+			return v, nil
 		}
 	}
 
