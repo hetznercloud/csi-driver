@@ -102,7 +102,7 @@ func TestAll(t *testing.T) {
 							ID: 1, Name: "pvc-123", Size: 10,
 							Location:    schema.Location{Name: "hel1"},
 							LinuxDevice: "/dev/disk/by-id/scsi-0HC_Volume_1",
-							Server:      new(int64(42)),
+							Assignee:    serverAssignee(42),
 						},
 						{
 							ID: 2, Name: "pvc-456", Size: 20,
@@ -121,7 +121,8 @@ func TestAll(t *testing.T) {
 				ID: 1, Name: "pvc-123", Size: 10,
 				Location:    &hcloud.Location{Name: "hel1"},
 				LinuxDevice: "/dev/disk/by-id/scsi-0HC_Volume_1",
-				Server:      &hcloud.Server{ID: 42},
+				Assignee:    &hcloud.VolumeAssignee{Type: "server", ID: 42},
+				Server:      &hcloud.Server{ID: 42}, //nolint:staticcheck
 			},
 			{
 				ID: 2, Name: "pvc-456", Size: 20,
@@ -144,6 +145,10 @@ func TestAll(t *testing.T) {
 		require.NoError(t, err)
 		assert.Empty(t, vols)
 	})
+}
+
+func serverAssignee(id int64) *schema.VolumeAssignee {
+	return &schema.VolumeAssignee{Type: "server", ID: id}
 }
 
 func errorResponse(code hcloud.ErrorCode) schema.ErrorResponse {
@@ -261,7 +266,7 @@ func TestDelete(t *testing.T) {
 				{
 					Method: "GET", Path: "/volumes/1",
 					Status: 200,
-					JSON:   schema.VolumeGetResponse{Volume: schema.Volume{ID: 1, Server: new(int64(42))}},
+					JSON:   schema.VolumeGetResponse{Volume: schema.Volume{ID: 1, Assignee: serverAssignee(42)}},
 				},
 				{
 					Method: "POST", Path: "/volumes/1/actions/detach",
@@ -305,7 +310,7 @@ func TestDelete(t *testing.T) {
 				{
 					Method: "GET", Path: "/volumes/1",
 					Status: 200,
-					JSON:   schema.VolumeGetResponse{Volume: schema.Volume{ID: 1, Server: new(int64(42))}},
+					JSON:   schema.VolumeGetResponse{Volume: schema.Volume{ID: 1, Assignee: serverAssignee(42)}},
 				},
 				{
 					Method: "POST", Path: "/volumes/1/actions/detach",
@@ -362,7 +367,7 @@ func TestAttach(t *testing.T) {
 				{
 					Method: "GET", Path: "/volumes/1",
 					Status: 200,
-					JSON:   schema.VolumeGetResponse{Volume: schema.Volume{ID: 1, Server: new(int64(42))}},
+					JSON:   schema.VolumeGetResponse{Volume: schema.Volume{ID: 1, Assignee: serverAssignee(42)}},
 				},
 				getServer,
 			},
@@ -373,7 +378,19 @@ func TestAttach(t *testing.T) {
 				{
 					Method: "GET", Path: "/volumes/1",
 					Status: 200,
-					JSON:   schema.VolumeGetResponse{Volume: schema.Volume{ID: 1, Server: new(int64(43))}},
+					JSON:   schema.VolumeGetResponse{Volume: schema.Volume{ID: 1, Assignee: serverAssignee(43)}},
+				},
+				getServer,
+			},
+			wantErr: volumes.ErrAttached,
+		},
+		{
+			name: "attached to another resource type",
+			requests: []mockutil.Request{
+				{
+					Method: "GET", Path: "/volumes/1",
+					Status: 200,
+					JSON:   schema.VolumeGetResponse{Volume: schema.Volume{ID: 1, Assignee: &schema.VolumeAssignee{Type: "other", ID: 42}}},
 				},
 				getServer,
 			},
@@ -396,7 +413,7 @@ func TestAttach(t *testing.T) {
 				{
 					Method: "GET", Path: "/volumes/1",
 					Status: 200,
-					JSON:   schema.VolumeGetResponse{Volume: schema.Volume{ID: 1, Server: new(int64(42))}},
+					JSON:   schema.VolumeGetResponse{Volume: schema.Volume{ID: 1, Assignee: serverAssignee(42)}},
 				},
 			},
 		},
@@ -417,7 +434,7 @@ func TestAttach(t *testing.T) {
 				{
 					Method: "GET", Path: "/volumes/1",
 					Status: 200,
-					JSON:   schema.VolumeGetResponse{Volume: schema.Volume{ID: 1, Server: new(int64(43))}},
+					JSON:   schema.VolumeGetResponse{Volume: schema.Volume{ID: 1, Assignee: serverAssignee(43)}},
 				},
 			},
 			wantErr: volumes.ErrAttached,
@@ -469,7 +486,7 @@ func TestDetach(t *testing.T) {
 				{
 					Method: "GET", Path: "/volumes/1",
 					Status: 200,
-					JSON:   schema.VolumeGetResponse{Volume: schema.Volume{ID: 1, Server: new(int64(42))}},
+					JSON:   schema.VolumeGetResponse{Volume: schema.Volume{ID: 1, Assignee: serverAssignee(42)}},
 				},
 				{
 					Method: "POST", Path: "/volumes/1/actions/detach",
@@ -494,7 +511,17 @@ func TestDetach(t *testing.T) {
 				{
 					Method: "GET", Path: "/volumes/1",
 					Status: 200,
-					JSON:   schema.VolumeGetResponse{Volume: schema.Volume{ID: 1, Server: new(int64(43))}},
+					JSON:   schema.VolumeGetResponse{Volume: schema.Volume{ID: 1, Assignee: serverAssignee(43)}},
+				},
+			},
+		},
+		{
+			name: "attached to another resource type",
+			requests: []mockutil.Request{
+				{
+					Method: "GET", Path: "/volumes/1",
+					Status: 200,
+					JSON:   schema.VolumeGetResponse{Volume: schema.Volume{ID: 1, Assignee: &schema.VolumeAssignee{Type: "other", ID: 42}}},
 				},
 			},
 		},
