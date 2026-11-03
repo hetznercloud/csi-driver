@@ -200,6 +200,8 @@ func findDMDevice(name string) (string, error) {
 		return "", err
 	}
 	for _, dmPath := range dmPaths {
+		// Path example: /sys/devices/virtual/block/dm-0/dm/name
+		// Content example: scsi-0HC_Volume_<volume-id>
 		content, err := os.ReadFile(filepath.Join(dmPath, "dm", "name"))
 		// The device may be removed between Glob and ReadFile.
 		if errors.Is(err, fs.ErrNotExist) {
@@ -219,12 +221,15 @@ func findDMDevice(name string) (string, error) {
 // device. The kernel keeps a backing device entry until the mapping is removed,
 // so a hot-unplugged backing device either leaves a dangling entry or none at all.
 func readLUKSDeviceStatus(dmPath string) (LUKSDeviceStatus, error) {
+	// Path example: /sys/devices/virtual/block/dm-0/slaves
+	// Entry example: sdb, a symlink to the backing disk
 	backingPath := filepath.Join(dmPath, sysfsBackingDevicesDir)
 	backingDevices, err := os.ReadDir(backingPath)
 	if err != nil {
 		return LUKSDeviceStatus{}, err
 	}
 
+	// If the backing device disappears the mapper is still seen as active.
 	status := LUKSDeviceStatus{Active: true}
 	// dm-crypt maps exactly one device
 	if len(backingDevices) != 1 {
@@ -232,6 +237,8 @@ func readLUKSDeviceStatus(dmPath string) (LUKSDeviceStatus, error) {
 	}
 	status.Device = backingDevices[0].Name()
 
+	// Read the major:minor number for our backing device.
+	// Path example: /sys/devices/virtual/block/dm-0/slaves/sdb/dev
 	number, err := os.ReadFile(filepath.Join(backingPath, status.Device, "dev"))
 	if errors.Is(err, fs.ErrNotExist) {
 		return status, nil
@@ -250,6 +257,11 @@ func blockDeviceNumber(path string) (string, error) {
 	if err := unix.Stat(path, &stat); err != nil {
 		return "", err
 	}
+	// Reject anything that isn't a block device. The file type lives in the
+	// S_IFMT bits of st_mode and must be compared for equality: type values
+	// overlap (S_IFBLK = S_IFDIR|S_IFCHR), so testing Mode&S_IFBLK != 0 would
+	// wrongly accept directories and character devices.
+	// See https://man7.org/linux/man-pages/man7/inode.7.html
 	if stat.Mode&unix.S_IFMT != unix.S_IFBLK {
 		return "", fmt.Errorf("%s is not a block device", path)
 	}
