@@ -193,6 +193,8 @@ func (s LUKSDeviceStatus) BackedBy(devicePath string) bool {
 // findDMDevice returns the sysfs directory of the device mapper device with the
 // given name, or an empty string if no such device exists.
 func findDMDevice(name string) (string, error) {
+	// sysfs only indexes device mapper devices by kernel name (dm-N), so scan
+	// all of them for a matching mapper name.
 	nameFiles, err := filepath.Glob(filepath.Join(sysVirtualBlockPath, "dm-*", "dm", "name"))
 	if err != nil {
 		return "", err
