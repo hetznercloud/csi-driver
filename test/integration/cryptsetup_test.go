@@ -86,11 +86,11 @@ func TestStaleLUKSMapperIsReplaced(t *testing.T) {
 			t.Fatal(err)
 		}
 
-		status, err := cryptSetup.Status(ctx, luksDeviceName)
+		status, err := cryptSetup.Status(luksDeviceName)
 		if err != nil {
 			t.Fatal(err)
 		}
-		if !status.Active || status.Device != currentDevice {
+		if !status.Active || !status.BackedBy(currentDevice) {
 			t.Fatalf("expected %s to be backed by %s, got %+v", luksDeviceName, currentDevice, status)
 		}
 	}
@@ -136,11 +136,11 @@ func TestStaleLUKSMapperInUseIsKept(t *testing.T) {
 	}
 	t.Log(err)
 
-	status, err := cryptSetup.Status(ctx, luksDeviceName)
+	status, err := cryptSetup.Status(luksDeviceName)
 	if err != nil {
 		t.Fatal(err)
 	}
-	if !status.Active || status.Device != staleDevice {
+	if !status.Active || !status.BackedBy(staleDevice) {
 		t.Fatalf("expected %s to still be backed by %s, got %+v", luksDeviceName, staleDevice, status)
 	}
 }

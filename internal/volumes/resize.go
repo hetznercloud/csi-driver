@@ -46,7 +46,7 @@ func (l *LinuxResizeService) Resize(ctx context.Context, volumePath string, volu
 	)
 
 	luksDeviceName := GenerateLUKSDeviceName(devicePath)
-	status, err := l.cryptSetup.Status(ctx, luksDeviceName)
+	status, err := l.cryptSetup.Status(luksDeviceName)
 	if err != nil {
 		return err
 	}

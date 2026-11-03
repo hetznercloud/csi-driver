@@ -4,14 +4,24 @@ import (
 	"context"
 	"errors"
 	"fmt"
+	"io/fs"
 	"log/slog"
 	"os"
 	"os/exec"
+	"path/filepath"
 	"strings"
-	"syscall"
+
+	"golang.org/x/sys/unix"
 )
 
 const cryptsetupExecutable = "cryptsetup"
+
+// Device mapper devices are always virtual block devices.
+var sysVirtualBlockPath = "/sys/devices/virtual/block"
+
+// Name of the sysfs directory in which the kernel lists the backing devices of
+// a device mapper device, as defined in Documentation/ABI/stable/sysfs-block.
+const sysfsBackingDevicesDir = "slaves"
 
 type CryptSetup struct {
 	logger *slog.Logger
@@ -21,16 +31,20 @@ func NewCryptSetup(logger *slog.Logger) *CryptSetup {
 	return &CryptSetup{logger: logger}
 }
 
-func (cs *CryptSetup) Status(ctx context.Context, luksDeviceName string) (LUKSDeviceStatus, error) {
-	output, code, err := cryptsetup(ctx, "status", luksDeviceName)
+func (cs *CryptSetup) Status(luksDeviceName string) (LUKSDeviceStatus, error) {
+	dmPath, err := findDMDevice(luksDeviceName)
 	if err != nil {
-		if code == 4 {
-			return LUKSDeviceStatus{Active: false}, nil
-		}
-		return LUKSDeviceStatus{Active: false}, fmt.Errorf("unable to check LUKS device %s status: %w", luksDeviceName, err)
+		return LUKSDeviceStatus{}, fmt.Errorf("unable to check LUKS device %s status: %w", luksDeviceName, err)
+	}
+	if dmPath == "" {
+		return LUKSDeviceStatus{Active: false}, nil
 	}
 
-	return NewLUKSDeviceStatus(output), nil
+	status, err := readLUKSDeviceStatus(dmPath)
+	if err != nil {
+		return LUKSDeviceStatus{}, fmt.Errorf("unable to check LUKS device %s status: %w", luksDeviceName, err)
+	}
+	return status, nil
 }
 
 func (cs *CryptSetup) Format(ctx context.Context, devicePath string, passphrase string) error {
@@ -46,12 +60,15 @@ func (cs *CryptSetup) Format(ctx context.Context, devicePath string, passphrase 
 }
 
 func (cs *CryptSetup) Open(ctx context.Context, devicePath string, luksDeviceName string, passphrase string) error {
-	status, err := cs.Status(ctx, luksDeviceName)
+	status, err := cs.Status(luksDeviceName)
 	if err != nil {
 		return err
 	}
 	if status.Active {
-		if sameDevice(status.Device, devicePath) {
+		// Check that devicePath resolves to the block device the device mapper maps
+		// onto, by comparing its major:minor number with the one the kernel reports
+		// for the mapper's backing device in sysfs.
+		if status.BackedBy(devicePath) {
 			cs.logger.Debug(
 				"LUKS device already active",
 				"devicePath", devicePath,
@@ -67,10 +84,11 @@ func (cs *CryptSetup) Open(ctx context.Context, devicePath string, luksDeviceNam
 			"devicePath", devicePath,
 			"luksDeviceName", luksDeviceName,
 			"backingDevice", status.Device,
+			"backingDeviceNumber", status.DeviceNumber,
 		)
 		if err := cs.Close(ctx, luksDeviceName); err != nil {
 			return fmt.Errorf(
-				"LUKS device %s is backed by %s instead of %s: %w",
+				"LUKS device %s is backed by %q instead of %s: %w",
 				luksDeviceName,
 				status.Device,
 				devicePath,
@@ -92,7 +110,7 @@ func (cs *CryptSetup) Open(ctx context.Context, devicePath string, luksDeviceNam
 }
 
 func (cs *CryptSetup) Close(ctx context.Context, luksDeviceName string) error {
-	status, err := cs.Status(ctx, luksDeviceName)
+	status, err := cs.Status(luksDeviceName)
 	if err != nil {
 		return err
 	}
@@ -153,36 +171,84 @@ func cryptsetupWithStdin(ctx context.Context, stdin string, args ...string) (str
 }
 
 type LUKSDeviceStatus struct {
+	// Active reports whether a device mapper device with the LUKS device name
+	// exists. It says nothing about whether its backing device is still present.
 	Active bool
+	// Device is the kernel name, e.g. "sdb".
 	Device string
+	// DeviceNumber is the major:minor of the backing device, e.g. "8:16".
+	// Empty if the backing device is gone.
+	DeviceNumber string
 }
 
-func NewLUKSDeviceStatus(output string) LUKSDeviceStatus {
-	// An inactive device is reported through the exit code, not the output.
-	status := LUKSDeviceStatus{Active: true}
-	for line := range strings.SplitSeq(output, "\n") {
-		key, value, ok := strings.Cut(strings.TrimSpace(line), ":")
-		if ok && key == "device" {
-			status.Device = strings.TrimSpace(value)
+// BackedBy reports whether devicePath is the backing device of the LUKS device.
+func (s LUKSDeviceStatus) BackedBy(devicePath string) bool {
+	if s.DeviceNumber == "" {
+		return false
+	}
+	number, err := blockDeviceNumber(devicePath)
+	return err == nil && number == s.DeviceNumber
+}
+
+// findDMDevice returns the sysfs directory of the device mapper device with the
+// given name, or an empty string if no such device exists.
+func findDMDevice(name string) (string, error) {
+	nameFiles, err := filepath.Glob(filepath.Join(sysVirtualBlockPath, "dm-*", "dm", "name"))
+	if err != nil {
+		return "", err
+	}
+	for _, nameFile := range nameFiles {
+		content, err := os.ReadFile(nameFile)
+		if errors.Is(err, fs.ErrNotExist) {
+			continue
+		}
+		if err != nil {
+			return "", err
+		}
+		if strings.TrimSpace(string(content)) == name {
+			return filepath.Dir(filepath.Dir(nameFile)), nil
 		}
 	}
-	return status
+	return "", nil
 }
 
-// sameDevice reports whether a and b refer to the same device node.
-//
-// os.ModeDevice is set for block and character device files only. Both paths
-// must be device nodes because Rdev (the major:minor device number) is only
-// meaningful for them: for regular files and directories it is 0, so two
-// unrelated non-device paths would otherwise compare as equal.
-func sameDevice(a string, b string) bool {
-	infoA, err := os.Stat(a)
-	if err != nil || infoA.Mode()&os.ModeDevice == 0 {
-		return false
+// readLUKSDeviceStatus reads the backing device of an active device mapper
+// device. The kernel keeps a backing device entry until the mapping is removed,
+// so a hot-unplugged backing device either leaves a dangling entry or none at all.
+func readLUKSDeviceStatus(dmPath string) (LUKSDeviceStatus, error) {
+	backingPath := filepath.Join(dmPath, sysfsBackingDevicesDir)
+	backingDevices, err := os.ReadDir(backingPath)
+	if err != nil {
+		return LUKSDeviceStatus{}, err
 	}
-	infoB, err := os.Stat(b)
-	if err != nil || infoB.Mode()&os.ModeDevice == 0 {
-		return false
+
+	status := LUKSDeviceStatus{Active: true}
+	// dm-crypt maps exactly one device
+	if len(backingDevices) != 1 {
+		return status, nil
 	}
-	return infoA.Sys().(*syscall.Stat_t).Rdev == infoB.Sys().(*syscall.Stat_t).Rdev
+	status.Device = backingDevices[0].Name()
+
+	number, err := os.ReadFile(filepath.Join(backingPath, status.Device, "dev"))
+	if errors.Is(err, fs.ErrNotExist) {
+		return status, nil
+	}
+	if err != nil {
+		return LUKSDeviceStatus{}, err
+	}
+	status.DeviceNumber = strings.TrimSpace(string(number))
+	return status, nil
+}
+
+// blockDeviceNumber returns the major:minor number of a block device, in the
+// format used by the dev attribute in sysfs.
+func blockDeviceNumber(path string) (string, error) {
+	var stat unix.Stat_t
+	if err := unix.Stat(path, &stat); err != nil {
+		return "", err
+	}
+	if stat.Mode&unix.S_IFMT != unix.S_IFBLK {
+		return "", fmt.Errorf("%s is not a block device", path)
+	}
+	return fmt.Sprintf("%d:%d", unix.Major(stat.Rdev), unix.Minor(stat.Rdev)), nil
 }
