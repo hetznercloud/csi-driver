@@ -195,12 +195,13 @@ func (s LUKSDeviceStatus) BackedBy(devicePath string) bool {
 func findDMDevice(name string) (string, error) {
 	// sysfs only indexes device mapper devices by kernel name (dm-N), so scan
 	// all of them for a matching mapper name.
-	nameFiles, err := filepath.Glob(filepath.Join(sysVirtualBlockPath, "dm-*", "dm", "name"))
+	dmPaths, err := filepath.Glob(filepath.Join(sysVirtualBlockPath, "dm-*"))
 	if err != nil {
 		return "", err
 	}
-	for _, nameFile := range nameFiles {
-		content, err := os.ReadFile(nameFile)
+	for _, dmPath := range dmPaths {
+		content, err := os.ReadFile(filepath.Join(dmPath, "dm", "name"))
+		// The device may be removed between Glob and ReadFile.
 		if errors.Is(err, fs.ErrNotExist) {
 			continue
 		}
@@ -208,7 +209,7 @@ func findDMDevice(name string) (string, error) {
 			return "", err
 		}
 		if strings.TrimSpace(string(content)) == name {
-			return filepath.Dir(filepath.Dir(nameFile)), nil
+			return dmPath, nil
 		}
 	}
 	return "", nil
