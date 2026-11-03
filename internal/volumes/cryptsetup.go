@@ -19,8 +19,8 @@ const cryptsetupExecutable = "cryptsetup"
 // Device mapper devices are always virtual block devices.
 var sysVirtualBlockPath = "/sys/devices/virtual/block"
 
-// Name of the sysfs directory in which the kernel lists the backing devices of
-// a device mapper device, as defined in Documentation/ABI/stable/sysfs-block.
+// Name of the sysfs directory in which the kernel links the backing devices of
+// a device mapper device.
 const sysfsBackingDevicesDir = "slaves"
 
 type CryptSetup struct {
