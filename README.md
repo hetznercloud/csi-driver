@@ -91,6 +91,16 @@ Before running the integrations tests, make sure you followed the [Setup a devel
 make -C test/e2e/kubernetes test
 ```
 
+### Run the kubernetes e2e tests with encryption
+
+The kubernetes e2e tests can also be run against LUKS encrypted volumes. This applies the passphrase secret and the `hcloud-volumes-encrypted` storage class from [`encryption.yaml`](test/e2e/kubernetes/encryption.yaml) and runs the suite using that storage class.
+
+1. Run the kubernetes e2e tests with encryption using the following command:
+
+```sh
+make -C test/e2e/kubernetes test ENCRYPTION=true
+```
+
 ## License
 
 MIT license

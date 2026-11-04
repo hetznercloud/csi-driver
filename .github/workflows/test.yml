@@ -55,14 +55,14 @@ jobs:
           token: ${{ secrets.CODECOV_TOKEN }}
 
   kubernetes:
-    name: kubernetes ${{ matrix.k3s }}
+    name: kubernetes ${{ matrix.k3s }}${{ matrix.encryption && ' (encrypted)' || '' }}
     runs-on: ubuntu-latest
 
     permissions:
       id-token: write
 
     concurrency:
-      group: ${{ github.workflow }}-${{ github.ref }}-${{ matrix.k3s }}
+      group: ${{ github.workflow }}-${{ github.ref }}-${{ matrix.k3s }}${{ matrix.encryption && '-encrypted' || '' }}
       cancel-in-progress: true
 
     strategy:
@@ -77,11 +77,15 @@ jobs:
             k8s-test: v1.36.0
           - k3s: v1.37
             k8s-test: v1.37.1
+          - k3s: v1.37
+            k8s-test: v1.37.1
+            encryption: true
 
     env:
       K3S_CHANNEL: ${{ matrix.k3s }}
       K8S_TEST_VERSION: ${{ matrix.k8s-test }}
-      ENV: gha-${{ github.run_id }}-${{ github.run_attempt }}-${{ matrix.k3s }}
+      ENV: gha-${{ github.run_id }}-${{ github.run_attempt }}-${{ matrix.k3s }}${{ matrix.encryption && '-encrypted' || '' }}
+      ENCRYPTION: ${{ matrix.encryption && 'true' || 'false' }}
 
       # These ginkgo flags were only added in 2.17+2.18, which is available in Kubernetes v1.31+
       # Can be simplified once we no longer test <1.31.
