@@ -46,11 +46,20 @@ func (l *LinuxResizeService) Resize(ctx context.Context, volumePath string, volu
 	)
 
 	luksDeviceName := GenerateLUKSDeviceName(devicePath)
-	active, err := l.cryptSetup.IsActive(ctx, luksDeviceName)
+	status, err := l.cryptSetup.Status(luksDeviceName)
 	if err != nil {
 		return err
 	}
-	if active {
+	if status.Active {
+		// devicePath is the mapper itself here, so only check that its backing
+		// device is still there.
+		if status.DeviceNumber == "" {
+			return fmt.Errorf(
+				"LUKS device %s is stale: backing device %q is gone",
+				luksDeviceName,
+				status.Device,
+			)
+		}
 		luksDevicePath := GenerateLUKSDevicePath(luksDeviceName)
 		if err := l.cryptSetup.Resize(ctx, luksDeviceName); err != nil {
 			return err
