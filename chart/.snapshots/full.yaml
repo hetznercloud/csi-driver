@@ -578,6 +578,7 @@ spec:
               memory: 21Mi
           args:
             - --default-fstype=ext4
+            - --timeout=60s
             - --leader-election
             - --leader-election-namespace=namespace-override
           volumeMounts:

@@ -167,6 +167,7 @@ spec:
           {{- end }}
           args:
             - --default-fstype=ext4
+            - --timeout=60s
             {{- if $enableLeaderElection }}
             - --leader-election
             - --leader-election-namespace={{ include "hcloud-csi.names.namespace" . }}
