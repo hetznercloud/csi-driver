@@ -428,6 +428,7 @@ spec:
               memory: 20Mi
           args:
             - --default-fstype=ext4
+            - --timeout=60s
             - --leader-election
             - --leader-election-namespace=kube-system
           volumeMounts:

@@ -362,6 +362,7 @@ spec:
             requests: {}
           args:
             - --default-fstype=ext4
+            - --timeout=60s
           volumeMounts:
           - name: socket-dir
             mountPath: /run/csi
