@@ -1,5 +1,16 @@
 # Changelog
 
+## [v2.24.2](https://github.com/hetznercloud/csi-driver/releases/tag/v2.24.2)
+
+[Compare to previous version](https://github.com/hetznercloud/csi-driver/compare/v2.24.1...v2.24.2)
+
+### Bug Fixes
+
+- remove redundant sleep before polling attach action (#1548) ([694a416](https://github.com/hetznercloud/csi-driver/commit/694a416a6f3d860357ac7e9c1c4ada302b6327d5))
+- report attach limit as resource exhausted (#1550) ([2ed7744](https://github.com/hetznercloud/csi-driver/commit/2ed7744cd801873b8e0af5f3283b94ed3ba3d49d))
+- recover stale luks device mapper (#1364) ([dc76b12](https://github.com/hetznercloud/csi-driver/commit/dc76b1296525e74b65af453fb3d1a34d99f0d7b2))
+- increase csi-attacher timeout to 60s (#1559) ([d1429e9](https://github.com/hetznercloud/csi-driver/commit/d1429e9975a1e7284a50e48f412f09dbb7e5c30f))
+
 ## [v2.24.1](https://github.com/hetznercloud/csi-driver/releases/tag/v2.24.1)
 
 [Compare to previous version](https://github.com/hetznercloud/csi-driver/compare/v2.24.0...v2.24.1)
