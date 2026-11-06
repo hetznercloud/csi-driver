@@ -8,7 +8,7 @@ require (
 	github.com/container-storage-interface/spec v1.13.0
 	github.com/grpc-ecosystem/go-grpc-middleware/providers/prometheus v1.1.1
 	github.com/hashicorp/nomad/api v0.0.0-20261005062230-f09f6df326b4
-	github.com/hetznercloud/hcloud-go/v2 v2.53.0
+	github.com/hetznercloud/hcloud-go/v2 v2.53.1-0.20261028143325-994d0b6d06d6
 	github.com/kubernetes-csi/csi-lib-utils v0.25.0
 	github.com/kubernetes-csi/csi-test/v5 v5.6.0
 	github.com/moby/buildkit v0.34.1

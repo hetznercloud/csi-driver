@@ -8,6 +8,8 @@ import (
 	"github.com/hetznercloud/hcloud-go/v2/hcloud"
 )
 
+const volumeAssigneeTypeServer = "server"
+
 type VolumeService struct {
 	logger *slog.Logger
 	client *hcloud.Client
@@ -173,11 +175,12 @@ func (s *VolumeService) Delete(ctx context.Context, volume *hcloud.Volume) error
 		)
 		return nil
 	}
-	if hcloudVolume.Server != nil {
+	if hcloudVolume.Assignee != nil {
 		s.logger.Info(
 			"detaching volume before deletion",
 			"volume-id", volume.ID,
-			"server-id", hcloudVolume.Server.ID,
+			"assignee-type", hcloudVolume.Assignee.Type,
+			"assignee-id", hcloudVolume.Assignee.ID,
 		)
 		if err := s.detach(ctx, hcloudVolume); err != nil {
 			return err
@@ -250,8 +253,8 @@ func (s *VolumeService) Attach(ctx context.Context, volume *hcloud.Volume, serve
 		return volumes.ErrServerNotFound
 	}
 
-	if hcloudVolume.Server != nil {
-		if hcloudVolume.Server.ID == hcloudServer.ID {
+	if hcloudVolume.Assignee != nil {
+		if isAssignedToServer(hcloudVolume, hcloudServer.ID) {
 			s.logger.Info(
 				"volume is already attached to this server",
 				"volume-id", volume.ID,
@@ -260,9 +263,10 @@ func (s *VolumeService) Attach(ctx context.Context, volume *hcloud.Volume, serve
 			return nil
 		}
 		s.logger.Info(
-			"volume is already attached to another server",
+			"volume is already attached to another resource",
 			"volume-id", volume.ID,
-			"server-id", hcloudVolume.Server.ID,
+			"assignee-type", hcloudVolume.Assignee.Type,
+			"assignee-id", hcloudVolume.Assignee.ID,
 		)
 		return volumes.ErrAttached
 	}
@@ -283,7 +287,9 @@ func (s *VolumeService) Attach(ctx context.Context, volume *hcloud.Volume, serve
 }
 
 func (s *VolumeService) attach(ctx context.Context, volume *hcloud.Volume, server *hcloud.Server) error {
-	action, _, err := s.client.Volume.Attach(ctx, volume, server)
+	action, _, err := s.client.Volume.AttachWithOpts(ctx, volume, hcloud.VolumeAttachOpts{
+		Assignee: &hcloud.VolumeAssignee{Type: volumeAssigneeTypeServer, ID: server.ID},
+	})
 	if err != nil {
 		s.logger.Info(
 			"failed to attach volume",
@@ -324,7 +330,13 @@ func (s *VolumeService) isAttachedTo(ctx context.Context, volumeID int64, server
 		)
 		return false
 	}
-	return hcloudVolume != nil && hcloudVolume.Server != nil && hcloudVolume.Server.ID == serverID
+	return hcloudVolume != nil && isAssignedToServer(hcloudVolume, serverID)
+}
+
+func isAssignedToServer(volume *hcloud.Volume, serverID int64) bool {
+	return volume.Assignee != nil &&
+		volume.Assignee.Type == volumeAssigneeTypeServer &&
+		volume.Assignee.ID == serverID
 }
 
 func (s *VolumeService) Detach(ctx context.Context, volume *hcloud.Volume, server *hcloud.Server) error {
@@ -366,9 +378,9 @@ func (s *VolumeService) Detach(ctx context.Context, volume *hcloud.Volume, serve
 		)
 		return volumes.ErrVolumeNotFound
 	}
-	if hcloudVolume.Server == nil {
+	if hcloudVolume.Assignee == nil {
 		s.logger.Info(
-			"volume not attached to a server",
+			"volume not attached",
 			"volume-id", volume.ID,
 		)
 		return nil
@@ -376,12 +388,13 @@ func (s *VolumeService) Detach(ctx context.Context, volume *hcloud.Volume, serve
 
 	// If a server is provided, only detach if the volume is actually attached
 	// to that server.
-	if server != nil && hcloudVolume.Server.ID != server.ID {
+	if server != nil && !isAssignedToServer(hcloudVolume, server.ID) {
 		s.logger.Info(
 			"volume not attached to provided server",
 			"volume-id", volume.ID,
 			"detach-from-server-id", server.ID,
-			"attached-to-server-id", hcloudVolume.Server.ID,
+			"assignee-type", hcloudVolume.Assignee.Type,
+			"assignee-id", hcloudVolume.Assignee.ID,
 		)
 		return nil
 	}
