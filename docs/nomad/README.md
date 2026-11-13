@@ -21,6 +21,16 @@ Only [Kubernetes](../kubernetes/README.md) is officially supported.
 > [!NOTE]
 > Consider using HashiCorp Vault for secrets management, see https://developer.hashicorp.com/nomad/docs/job-specification/template#vault-kv-api-v2
 
+To reduce I/O latency, the dm-crypt read and write workqueues can be disabled independently. This requires Linux 5.9+ and only takes effect when the Volume is published the next time. See the [Kubernetes guide](../kubernetes/guides/volumes-encrypted-with-luks.md#disabling-dm-crypt-workqueues) for the trade-offs.
+
+```hcl
+secrets {
+  "encryption-passphrase"              = "<your_encryption_value>"
+  "encryption-disable-read-workqueue"  = "true"
+  "encryption-disable-write-workqueue" = "true"
+}
+```
+
 ```sh
 export HCLOUD_TOKEN="..."
 nomad var put secrets/hcloud hcloud_token=$HCLOUD_TOKEN

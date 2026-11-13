@@ -4,6 +4,7 @@ import (
 	"context"
 	"fmt"
 	"log/slog"
+	"strconv"
 
 	proto "github.com/container-storage-interface/spec/lib/go/csi"
 	"google.golang.org/grpc/codes"
@@ -44,7 +45,34 @@ func NewNodeService(
 	}
 }
 
-const encryptionPassphraseKey = "encryption-passphrase"
+const (
+	encryptionPassphraseKey            = "encryption-passphrase"
+	encryptionDisableReadWorkqueueKey  = "encryption-disable-read-workqueue"
+	encryptionDisableWriteWorkqueueKey = "encryption-disable-write-workqueue"
+)
+
+func parseEncryptionOpenOpts(secrets map[string]string) (volumes.LUKSOpenOpts, error) {
+	var opts volumes.LUKSOpenOpts
+	flags := []struct {
+		key    string
+		target *bool
+	}{
+		{encryptionDisableReadWorkqueueKey, &opts.DisableReadWorkqueue},
+		{encryptionDisableWriteWorkqueueKey, &opts.DisableWriteWorkqueue},
+	}
+	for _, flag := range flags {
+		value, ok := secrets[flag.key]
+		if !ok {
+			continue
+		}
+		parsed, err := strconv.ParseBool(value)
+		if err != nil {
+			return volumes.LUKSOpenOpts{}, fmt.Errorf("invalid value %q for secret key %s: must be a boolean", value, flag.key)
+		}
+		*flag.target = parsed
+	}
+	return opts, nil
+}
 
 func (s *NodeService) NodeStageVolume(_ context.Context, _ *proto.NodeStageVolumeRequest) (*proto.NodeStageVolumeResponse, error) {
 	return nil, status.Error(codes.Unimplemented, "not supported")
@@ -67,12 +95,18 @@ func (s *NodeService) NodePublishVolume(ctx context.Context, req *proto.NodePubl
 		return nil, status.Error(codes.InvalidArgument, "missing device path")
 	}
 
+	encryptionOpenOpts, err := parseEncryptionOpenOpts(req.GetSecrets())
+	if err != nil {
+		return nil, status.Error(codes.InvalidArgument, err.Error())
+	}
+
 	var opts volumes.MountOpts
 	switch {
 	case req.GetVolumeCapability().GetBlock() != nil:
 		opts = volumes.MountOpts{
 			BlockVolume:          true,
 			EncryptionPassphrase: req.GetSecrets()[encryptionPassphraseKey],
+			EncryptionOpenOpts:   encryptionOpenOpts,
 		}
 	case req.GetVolumeCapability().GetMount() != nil:
 		mount := req.GetVolumeCapability().GetMount()
@@ -81,6 +115,7 @@ func (s *NodeService) NodePublishVolume(ctx context.Context, req *proto.NodePubl
 			Readonly:             req.GetReadonly(),
 			Additional:           mount.GetMountFlags(),
 			EncryptionPassphrase: req.GetSecrets()[encryptionPassphraseKey],
+			EncryptionOpenOpts:   encryptionOpenOpts,
 			FsFormatOptions:      req.GetVolumeContext()["fsFormatOptions"],
 		}
 	default:
