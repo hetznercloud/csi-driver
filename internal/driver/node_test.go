@@ -120,6 +120,91 @@ func TestNodeServiceNodePublishBlockVolume(t *testing.T) {
 	}
 }
 
+func TestNodeServiceNodePublishEncryptionOpenOpts(t *testing.T) {
+	testCases := []struct {
+		Name    string
+		Secrets map[string]string
+		Want    volumes.LUKSOpenOpts
+		Code    codes.Code
+	}{
+		{
+			Name:    "defaults",
+			Secrets: map[string]string{"encryption-passphrase": "secret"},
+			Want:    volumes.LUKSOpenOpts{},
+		},
+		{
+			Name: "read workqueue disabled",
+			Secrets: map[string]string{
+				"encryption-passphrase":             "secret",
+				"encryption-disable-read-workqueue": "true",
+			},
+			Want: volumes.LUKSOpenOpts{DisableReadWorkqueue: true},
+		},
+		{
+			Name: "write workqueue disabled",
+			Secrets: map[string]string{
+				"encryption-passphrase":              "secret",
+				"encryption-disable-write-workqueue": "true",
+			},
+			Want: volumes.LUKSOpenOpts{DisableWriteWorkqueue: true},
+		},
+		{
+			Name: "both workqueues explicitly enabled",
+			Secrets: map[string]string{
+				"encryption-passphrase":              "secret",
+				"encryption-disable-read-workqueue":  "false",
+				"encryption-disable-write-workqueue": "false",
+			},
+			Want: volumes.LUKSOpenOpts{},
+		},
+		{
+			Name: "invalid value",
+			Secrets: map[string]string{
+				"encryption-passphrase":             "secret",
+				"encryption-disable-read-workqueue": "yes",
+			},
+			Code: codes.InvalidArgument,
+		},
+	}
+
+	for _, testCase := range testCases {
+		t.Run(testCase.Name, func(t *testing.T) {
+			env := newNodeServerTestEnv(t)
+
+			env.volumeMountService.PublishFunc = func(
+				_ context.Context,
+				_ string,
+				_ string,
+				_ string,
+				opts volumes.MountOpts,
+			) error {
+				if opts.EncryptionOpenOpts != testCase.Want {
+					t.Errorf("unexpected encryption open opts: %+v, want %+v", opts.EncryptionOpenOpts, testCase.Want)
+				}
+				return nil
+			}
+
+			_, err := env.service.NodePublishVolume(env.ctx, &proto.NodePublishVolumeRequest{
+				VolumeId:   "1",
+				TargetPath: "target",
+				VolumeCapability: &proto.VolumeCapability{
+					AccessMode: &proto.VolumeCapability_AccessMode{
+						Mode: proto.VolumeCapability_AccessMode_SINGLE_NODE_WRITER,
+					},
+					AccessType: &proto.VolumeCapability_Mount{
+						Mount: &proto.VolumeCapability_MountVolume{FsType: "ext4"},
+					},
+				},
+				PublishContext: map[string]string{"devicePath": "devpath"},
+				Secrets:        testCase.Secrets,
+			})
+			if status.Code(err) != testCase.Code {
+				t.Fatalf("unexpected error: %v", err)
+			}
+		})
+	}
+}
+
 func TestNodeServiceNodePublishPublishError(t *testing.T) {
 	env := newNodeServerTestEnv(t)
 
