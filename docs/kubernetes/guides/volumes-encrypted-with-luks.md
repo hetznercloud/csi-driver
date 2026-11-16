@@ -1,7 +1,7 @@
 <!--
 ---
 date: "2026-09-07"
-date_changed: "2026-11-13"
+date_changed: "2026-11-16"
 title: "Encrypting Volumes with LUKS"
 tags: []
 language: "en"
@@ -61,8 +61,6 @@ stringData:
 
 Please consider the following before enabling these options:
 
+- With `encryption-disable-write-workqueue` enabled, writes are encrypted in the context of the process submitting the I/O instead of in kernel threads. The CPU time is therefore accounted to the Pod's cgroup and counts towards its CPU limit.
 - Requires Linux 5.9+ on the nodes. Publishing the Volume fails on older kernels.
 - The options are applied when the LUKS device is opened. Changing them only affects Volumes after they were unpublished and published again, e.g. by restarting the Pod.
-- Encryption runs in the context of the process submitting the I/O instead of the kernel workqueue. CPU time is accounted to the Pod and may lead to throttling for Pods with tight CPU limits.
-- Throughput for large sequential I/O may decrease, as the work is no longer distributed across CPUs.
-- See [cloudflare/linux#1](https://github.com/cloudflare/linux/issues/1) for background and reported issues.
