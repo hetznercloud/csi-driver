@@ -5,6 +5,7 @@ package integration
 import (
 	"log/slog"
 	"os"
+	"slices"
 	"strings"
 	"testing"
 
@@ -31,7 +32,7 @@ func TestCryptSetup(t *testing.T) {
 	}
 	decryptedName := name + "-decrypted"
 
-	if err := cryptSetup.Open(ctx, device, decryptedName, passphrase); err != nil {
+	if err := cryptSetup.Open(ctx, device, decryptedName, passphrase, volumes.LUKSOpenOpts{}); err != nil {
 		t.Fatal(err)
 	}
 	decryptedDevice := "/dev/mapper/" + decryptedName
@@ -76,13 +77,13 @@ func TestStaleLUKSMapperIsReplaced(t *testing.T) {
 		}
 	}
 
-	if err := cryptSetup.Open(ctx, staleDevice, luksDeviceName, passphrase); err != nil {
+	if err := cryptSetup.Open(ctx, staleDevice, luksDeviceName, passphrase, volumes.LUKSOpenOpts{}); err != nil {
 		t.Fatal(err)
 	}
 	defer runCmd("cryptsetup", "luksClose", luksDeviceName)
 
 	for range 2 {
-		if err := cryptSetup.Open(ctx, currentDevice, luksDeviceName, passphrase); err != nil {
+		if err := cryptSetup.Open(ctx, currentDevice, luksDeviceName, passphrase, volumes.LUKSOpenOpts{}); err != nil {
 			t.Fatal(err)
 		}
 
@@ -115,7 +116,7 @@ func TestStaleLUKSMapperInUseIsKept(t *testing.T) {
 		}
 	}
 
-	if err := cryptSetup.Open(ctx, staleDevice, luksDeviceName, passphrase); err != nil {
+	if err := cryptSetup.Open(ctx, staleDevice, luksDeviceName, passphrase, volumes.LUKSOpenOpts{}); err != nil {
 		t.Fatal(err)
 	}
 	defer runCmd("cryptsetup", "luksClose", luksDeviceName)
@@ -130,7 +131,7 @@ func TestStaleLUKSMapperInUseIsKept(t *testing.T) {
 	}
 	defer runCmd("umount", mountPath)
 
-	err := cryptSetup.Open(ctx, currentDevice, luksDeviceName, passphrase)
+	err := cryptSetup.Open(ctx, currentDevice, luksDeviceName, passphrase, volumes.LUKSOpenOpts{})
 	if err == nil {
 		t.Fatalf("expected opening %s on %s to fail while it is mounted", luksDeviceName, currentDevice)
 	}
@@ -143,6 +144,78 @@ func TestStaleLUKSMapperInUseIsKept(t *testing.T) {
 	if !status.Active || !status.BackedBy(staleDevice) {
 		t.Fatalf("expected %s to still be backed by %s, got %+v", luksDeviceName, staleDevice, status)
 	}
+}
+
+func TestCryptSetupOpenWorkqueueFlags(t *testing.T) {
+	if !runTestInDockerImage(t, true) {
+		return
+	}
+
+	testCases := []struct {
+		name string
+		opts volumes.LUKSOpenOpts
+		want []string
+	}{
+		{
+			name: "default",
+			want: []string{"discards"},
+		},
+		{
+			name: "no-read",
+			opts: volumes.LUKSOpenOpts{DisableReadWorkqueue: true},
+			want: []string{"discards", "no_read_workqueue"},
+		},
+		{
+			name: "no-write",
+			opts: volumes.LUKSOpenOpts{DisableWriteWorkqueue: true},
+			want: []string{"discards", "no_write_workqueue"},
+		},
+		{
+			name: "no-read-write",
+			opts: volumes.LUKSOpenOpts{DisableReadWorkqueue: true, DisableWriteWorkqueue: true},
+			want: []string{"discards", "no_read_workqueue", "no_write_workqueue"},
+		},
+	}
+
+	for _, tc := range testCases {
+		t.Run(tc.name, func(t *testing.T) {
+			ctx := t.Context()
+			cryptSetup := volumes.NewCryptSetup(slog.New(slog.NewTextHandler(os.Stdout, nil)))
+			passphrase := "passphrase"
+			luksDeviceName := "workqueue-" + tc.name
+
+			device := createLoopDevice(t, luksDeviceName)
+			if err := cryptSetup.Format(ctx, device, passphrase); err != nil {
+				t.Fatal(err)
+			}
+			if err := cryptSetup.Open(ctx, device, luksDeviceName, passphrase, tc.opts); err != nil {
+				t.Fatal(err)
+			}
+			defer runCmd("cryptsetup", "luksClose", luksDeviceName)
+
+			output, err := runCmd("cryptsetup", "status", luksDeviceName)
+			if err != nil {
+				t.Fatal(err)
+			}
+			got := activationFlags(output)
+			if !slices.Equal(got, tc.want) {
+				t.Fatalf("expected flags %v, got %v\n%s", tc.want, got, output)
+			}
+		})
+	}
+}
+
+// activationFlags parses the flags line of `cryptsetup status`, e.g.
+// "  flags:   discards no_read_workqueue no_write_workqueue".
+func activationFlags(status string) []string {
+	for line := range strings.Lines(status) {
+		if value, ok := strings.CutPrefix(strings.TrimSpace(line), "flags:"); ok {
+			flags := strings.Fields(value)
+			slices.Sort(flags)
+			return flags
+		}
+	}
+	return nil
 }
 
 func createLoopDevice(t *testing.T, name string) string {

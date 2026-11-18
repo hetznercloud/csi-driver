@@ -59,7 +59,20 @@ func (cs *CryptSetup) Format(ctx context.Context, devicePath string, passphrase 
 	return nil
 }
 
-func (cs *CryptSetup) Open(ctx context.Context, devicePath string, luksDeviceName string, passphrase string) error {
+// LUKSOpenOpts are not persisted in the LUKS header and only apply until the
+// device is closed. Disabling the workqueues requires Linux 5.9+.
+type LUKSOpenOpts struct {
+	DisableReadWorkqueue  bool
+	DisableWriteWorkqueue bool
+}
+
+func (cs *CryptSetup) Open(
+	ctx context.Context,
+	devicePath string,
+	luksDeviceName string,
+	passphrase string,
+	opts LUKSOpenOpts,
+) error {
 	status, err := cs.Status(luksDeviceName)
 	if err != nil {
 		return err
@@ -101,12 +114,25 @@ func (cs *CryptSetup) Open(ctx context.Context, devicePath string, luksDeviceNam
 		"opening LUKS device",
 		"devicePath", devicePath,
 		"luksDeviceName", luksDeviceName,
+		"disableReadWorkqueue", opts.DisableReadWorkqueue,
+		"disableWriteWorkqueue", opts.DisableWriteWorkqueue,
 	)
-	output, _, err := cryptsetupWithStdin(ctx, passphrase, "luksOpen", "--allow-discards", devicePath, luksDeviceName)
+	output, _, err := cryptsetupWithStdin(ctx, passphrase, luksOpenArgs(devicePath, luksDeviceName, opts)...)
 	if err != nil {
 		return fmt.Errorf("unable to open LUKS device %s: %s", devicePath, output)
 	}
 	return nil
+}
+
+func luksOpenArgs(devicePath string, luksDeviceName string, opts LUKSOpenOpts) []string {
+	args := []string{"luksOpen", "--allow-discards"}
+	if opts.DisableReadWorkqueue {
+		args = append(args, "--perf-no_read_workqueue")
+	}
+	if opts.DisableWriteWorkqueue {
+		args = append(args, "--perf-no_write_workqueue")
+	}
+	return append(args, devicePath, luksDeviceName)
 }
 
 func (cs *CryptSetup) Close(ctx context.Context, luksDeviceName string) error {

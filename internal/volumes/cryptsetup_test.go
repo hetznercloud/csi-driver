@@ -4,6 +4,7 @@ import (
 	"log/slog"
 	"os"
 	"path/filepath"
+	"slices"
 	"strings"
 	"testing"
 )
@@ -212,4 +213,48 @@ func TestBlockDeviceNumberMatchesSysfs(t *testing.T) {
 		return
 	}
 	t.Skip("no block device found")
+}
+
+func TestLUKSOpenArgs(t *testing.T) {
+	testCases := []struct {
+		Name string
+		Opts LUKSOpenOpts
+		Want []string
+	}{
+		{
+			Name: "default",
+			Want: []string{"luksOpen", "--allow-discards", "/dev/sdb", "luks-sdb"},
+		},
+		{
+			Name: "read workqueue disabled",
+			Opts: LUKSOpenOpts{DisableReadWorkqueue: true},
+			Want: []string{"luksOpen", "--allow-discards", "--perf-no_read_workqueue", "/dev/sdb", "luks-sdb"},
+		},
+		{
+			Name: "write workqueue disabled",
+			Opts: LUKSOpenOpts{DisableWriteWorkqueue: true},
+			Want: []string{"luksOpen", "--allow-discards", "--perf-no_write_workqueue", "/dev/sdb", "luks-sdb"},
+		},
+		{
+			Name: "both workqueues disabled",
+			Opts: LUKSOpenOpts{DisableReadWorkqueue: true, DisableWriteWorkqueue: true},
+			Want: []string{
+				"luksOpen",
+				"--allow-discards",
+				"--perf-no_read_workqueue",
+				"--perf-no_write_workqueue",
+				"/dev/sdb",
+				"luks-sdb",
+			},
+		},
+	}
+
+	for _, testCase := range testCases {
+		t.Run(testCase.Name, func(t *testing.T) {
+			got := luksOpenArgs("/dev/sdb", "luks-sdb", testCase.Opts)
+			if !slices.Equal(got, testCase.Want) {
+				t.Fatalf("luksOpenArgs() = %v, want %v", got, testCase.Want)
+			}
+		})
+	}
 }

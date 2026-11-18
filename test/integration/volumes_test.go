@@ -81,7 +81,7 @@ func TestVolumePublishUnpublish(t *testing.T) {
 				}
 
 				luksDeviceName := volumes.GenerateLUKSDeviceName(device)
-				if err := cs.Open(ctx, device, luksDeviceName, "passphrase"); err != nil {
+				if err := cs.Open(ctx, device, luksDeviceName, "passphrase", volumes.LUKSOpenOpts{}); err != nil {
 					return err
 				}
 				defer cs.Close(ctx, luksDeviceName)
@@ -246,7 +246,7 @@ func TestVolumeResize(t *testing.T) {
 				if err := cryptSetup.Format(ctx, device, test.passphrase); err != nil {
 					t.Fatal()
 				}
-				if err := cryptSetup.Open(ctx, device, decryptedName, test.passphrase); err != nil {
+				if err := cryptSetup.Open(ctx, device, decryptedName, test.passphrase, volumes.LUKSOpenOpts{}); err != nil {
 					t.Fatal()
 				}
 				defer cryptSetup.Close(ctx, decryptedName)
