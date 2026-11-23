@@ -5,7 +5,7 @@ go 1.26.10
 toolchain go1.27.4
 
 require (
-	github.com/container-storage-interface/spec v1.13.0
+	github.com/container-storage-interface/spec v1.14.0
 	github.com/grpc-ecosystem/go-grpc-middleware/providers/prometheus v1.1.1
 	github.com/hashicorp/nomad/api v0.0.0-20261005062230-f09f6df326b4
 	github.com/hetznercloud/hcloud-go/v2 v2.53.0
