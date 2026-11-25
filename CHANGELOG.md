@@ -1,5 +1,13 @@
 # Changelog
 
+## [v2.24.3](https://github.com/hetznercloud/csi-driver/releases/tag/v2.24.3)
+
+[Compare to previous version](https://github.com/hetznercloud/csi-driver/compare/v2.24.2...v2.24.3)
+
+### Bug Fixes
+
+- Update all sidecars to address Go security fixes: CVE-2026-78663 (CRITICAL), CVE-2026-78659, CVE-2026-78660, CVE-2026-78669, CVE-2026-97032, CVE-2026-78661 and CVE-2026-97045 and CVE-2026-128085. ([a3fc466](https://github.com/hetznercloud/csi-driver/commit/a3fc466a82057a65e0e5a7fc3128571ed578721d))
+
 ## [v2.24.2](https://github.com/hetznercloud/csi-driver/releases/tag/v2.24.2)
 
 [Compare to previous version](https://github.com/hetznercloud/csi-driver/compare/v2.24.1...v2.24.2)
