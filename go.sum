@@ -66,6 +66,8 @@ github.com/mitchellh/go-homedir v1.1.0 h1:lukF9ziXFxDFPkA1vsr5zpc1XuPDn/wFntq5mG
 github.com/mitchellh/go-homedir v1.1.0/go.mod h1:SfyaCUpYCn1Vlf4IUYiD9fPX4A5wJrkLzIz1N1q0pr0=
 github.com/moby/buildkit v0.35.0 h1:5o3kpuDfg6n6vCV9vEIhZ/6rOV4CGiPjt6N8Q7KX6Qo=
 github.com/moby/buildkit v0.35.0/go.mod h1:i872EpyI/+sYyZywXAp+fWr1DK6qFDdWVxhoAMG1B6Q=
+github.com/moby/buildkit v0.35.1 h1:5eMfbpfMFsznXL18kdc8JgxbnHtZsXptuRjzgTvyk3A=
+github.com/moby/buildkit v0.35.1/go.mod h1:i872EpyI/+sYyZywXAp+fWr1DK6qFDdWVxhoAMG1B6Q=
 github.com/moby/sys/mountinfo v0.7.3 h1:e0lin8d05kLgtUES/4cS/F70KlbZX/G3aZjLsV7WAgA=
 github.com/moby/sys/mountinfo v0.7.3/go.mod h1:dEJRr+H+hx0lNG0BE+Smz95u/FDzjJv4/RjA2I456Iw=
 github.com/munnerz/goautoneg v0.0.0-20191010083416-a7dc8b61c822 h1:C3w9PqII01/Oq1c1nUAm88MOHcQC9l5mIlSMApZMrHA=
